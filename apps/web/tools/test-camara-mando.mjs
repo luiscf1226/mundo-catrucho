@@ -204,6 +204,52 @@ const ok = await run('camara-mando', file, { hash: '#go' }, async (t) => {
     3000,
     'Y cambia la radio',
   );
+  await t.ev(`${S}.goLobby()`);
+  await t.waitFor(`${S}.scene.kind==='lobby'`, 5000);
+
+  // la cruceta mueve un deslizador de Ajustes y React se entera (antes cambiaba el número pero no el ajuste)
+  await t.ev(`${S}.openPanel('ajustes')`);
+  await t.waitFor(`!!document.querySelector('[data-testid=set-music]')`, 3000);
+  const m0 = await t.ev(`${S}.profile.settings.music`);
+  await t.ev(`document.querySelector('[data-testid=set-music]').focus()`);
+  await tap(m0 < 1 ? 'RIGHT' : 'LEFT');
+  await t.waitFor(`${S}.profile.settings.music !== ${m0}`, 3000, 'la cruceta cambia el volumen de la música');
+  await tap('B');
+  await t.waitFor(`!${S}.panel`, 3000);
+
+  // alejar fuera del lobby no deja la vista desde arriba «cargada» para cuando se vuelve
+  await t.ev(`${S}.travel('olancho')`);
+  await t.waitFor(`${S}.scene.id==='olancho'`, 10000);
+  await t.ev(wheel(400, 12));
+  await frames();
+  await t.ev(`${S}.goLobby()`);
+  await t.waitFor(`${S}.scene.kind==='lobby'`, 5000);
+  await frames();
+  await frames();
+  if (await t.ev(`${P}.overview`)) throw new Error('la vista desde arriba se activó sola al volver al lobby');
+
+  // en Corte el stick derecho mueve el puntero con el que se apunta
+  await t.ev(`${S}.startMinigame('corte')`);
+  await t.waitFor(`!!document.querySelector('[data-testid=mg-start]')`, 8000);
+  await t.click('mg-start');
+  await t.waitFor(`${S}.mg?.phase==='playing'`, 5000);
+  const px0 = await t.ev(`window.__mc.input.px`);
+  await axis(2, 1);
+  await t.waitFor(`window.__mc.input.px > ${px0} + 0.3`, 5000, 'el stick derecho mueve el puntero en Corte');
+  await axis(2, 0);
+  await t.ev(`${S}.exitMinigame()`);
+  await t.waitFor(`!${S}.mg`, 5000);
+
+  // en Ritmo los botones tocan los cuatro carriles
+  await t.ev(`${S}.startMinigame('ritmo')`);
+  await t.waitFor(`!!document.querySelector('[data-testid=mg-start]')`, 8000);
+  await t.click('mg-start');
+  await t.waitFor(`${S}.mg?.phase==='playing'`, 5000);
+  await t.ev(`window.__teclas=[];window.addEventListener('keydown',e=>window.__teclas.push(e.key))`);
+  for (const b of ['X', 'A', 'Y', 'B']) await tap(b);
+  const teclas = await t.ev(`window.__teclas.join('')`);
+  if (teclas !== 'asdf') throw new Error(`los botones no tocan los carriles de Ritmo: «${teclas}»`);
+  await t.ev(`${S}.exitMinigame()`);
   console.log('fps', await t.fps());
 });
 process.exit(ok ? 0 : 1);

@@ -227,7 +227,24 @@ function padLoop(now: number) {
     input.lookY += ax(3) * dt * 600;
     if (cur[PAD.LB] || cur[PAD.LT]) input.zoom -= dt * 14;
     if (cur[PAD.RB]) input.zoom += dt * 14;
-    if (player.overview && (down(PAD.A) || down(PAD.B) || down(PAD.LB) || down(PAD.LT))) {
+    // en un minijuego, el stick derecho mueve el puntero (Corte y Feria apuntan con él; RT o B disparan ahí)
+    if (g.mg?.phase === 'playing') {
+      input.px = Math.max(-1, Math.min(1, input.px + ax(2) * dt * 1.8));
+      input.py = Math.max(-1, Math.min(1, input.py - ax(3) * dt * 1.8));
+    }
+    // Ritmo: los cuatro carriles, de izquierda a derecha: ← o X, ↓ o A, ↑ o Y, → o B
+    const carriles = g.mg?.phase === 'playing' && g.mg.id === 'ritmo';
+    if (carriles) {
+      const lanes = [
+        [PAD.LEFT, PAD.X],
+        [PAD.DOWN, PAD.A],
+        [PAD.UP, PAD.Y],
+        [PAD.RIGHT, PAD.B],
+      ];
+      lanes.forEach((bs, i) => {
+        if (bs.some(down)) window.dispatchEvent(new KeyboardEvent('keydown', { key: 'asdf'[i] }));
+      });
+    } else if (player.overview && (down(PAD.A) || down(PAD.B) || down(PAD.LB) || down(PAD.LT))) {
       player.setOverview(false);
     } else {
       if (down(PAD.A)) input.press('jump');

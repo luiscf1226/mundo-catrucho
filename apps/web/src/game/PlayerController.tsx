@@ -76,7 +76,7 @@ export function PlayerController() {
         );
         // seguir alejando ya en el tope (un paso de rueda o un ratito de RB) pasa a la vista desde arriba
         const want = player.camDist + input.zoom * 0.8;
-        if (input.zoom < 0) s.over = 0;
+        if (input.zoom < 0 || !canOverview) s.over = 0;
         else if (want > MAX_DIST) s.over += (want - MAX_DIST) / 0.8;
         if (canOverview && s.over >= 0.9) {
           s.over = 0;

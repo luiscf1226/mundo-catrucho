@@ -110,7 +110,9 @@ padUi.nav = (dir) => {
   const list = candidates(root),
     cur = current(root, list);
   if (cur instanceof HTMLInputElement && cur.type === 'range' && (dir === 'left' || dir === 'right')) {
-    cur.value = String(Number(cur.value) + (dir === 'right' ? 1 : -1) * (Number(cur.step) || 1));
+    // con el setter nativo: si se asigna `cur.value` directo, React cree que nada cambió y no llama a onChange
+    const v = String(Number(cur.value) + (dir === 'right' ? 1 : -1) * (Number(cur.step) || 1));
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set?.call(cur, v);
     cur.dispatchEvent(new Event('input', { bubbles: true }));
     cur.dispatchEvent(new Event('change', { bubbles: true }));
     return;
