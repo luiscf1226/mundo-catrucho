@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Group } from 'three';
 import { audio } from '../../core/audio';
 import { phys } from '../../core/phys';
@@ -6,7 +6,7 @@ import { player } from '../../core/player';
 import { useGame } from '../../core/store';
 import type { AvatarState, V3 } from '../../core/types';
 import { art, Ball, Block, Cyl, Ground, Interactable, Label, Spawn, useMgTick } from '../kit';
-import { finish, rulesOf, setHud, starsFor } from './api';
+import { finish, partida, rulesOf, setHud, starsFor } from './api';
 import { Boxes, type Piece } from './feria/inst';
 
 type Item = 'baleada' | 'fresco' | 'pan' | 'churros';
@@ -73,6 +73,7 @@ function Food({ item, pos = [0, 0, 0] }: { item: Item; pos?: V3 }) {
 }
 export function Pulperia() {
   const avatar = useGame((s) => s.profile.avatar);
+  const { dif } = useMemo(partida, []);
   const [, draw] = useState(0);
   const carried = useRef<Group>(null);
   const s = useRef({
@@ -189,7 +190,7 @@ export function Pulperia() {
     }
     if (s.arrival <= 0 && s.customers.filter((c) => c.stage !== 'leave').length < 3) {
       const slot = [0, 1, 2].find((i) => !s.customers.some((c) => c.slot === i && c.stage !== 'leave')) ?? 0;
-      const max = 25 - s.elapsed / 15;
+      const max = (25 - s.elapsed / 15) * (1.15 - 0.3 * dif); // paciencia: más en la etapa 1, menos en la última
       s.customers.push({
         id: s.next,
         slot,
@@ -203,7 +204,7 @@ export function Pulperia() {
         happy: false,
       });
       s.next++;
-      s.arrival = s.elapsed < 35 ? 7 : s.elapsed < 65 ? 5.5 : 4.5;
+      s.arrival = (s.elapsed < 35 ? 7 : s.elapsed < 65 ? 5.5 : 4.5) * (1.1 - 0.2 * dif);
     }
     for (const c of s.customers) {
       const target = -3 + c.slot * 3;

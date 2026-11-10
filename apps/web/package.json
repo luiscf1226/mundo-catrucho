@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "node tools/build.mjs hd --out dist",
     "build:all": "node tools/build.mjs all --out dist",
-    "test": "node tools/smoke.mjs dist/mundo-catrucho-hd.html",
+    "test": "node tools/smoke.mjs dist/mundo-catrucho-hd.html && node tools/test-apodos.mjs dist/mundo-catrucho-hd.html && node tools/test-camara-mando.mjs dist/mundo-catrucho-hd.html",
     "capturas": "node tools/capturas.mjs dist/mundo-catrucho-hd.html ../../capturas",
     "typecheck": "tsc --noEmit"
   },

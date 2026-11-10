@@ -37,6 +37,8 @@ y **mira las imágenes**. Una prueba en verde no prueba que se vea bien.
 Para pruebas propias: `apps/web/tools/test-<algo>.mjs` con `run()` de `harness.mjs`; debe imprimir `PASA` y salir con 0.
 En máquinas sin GPU (GitHub Actions) se corre con `MC_GPU=0`; `CHROME_BIN` elige el navegador. Sin GPU el juego va a
 5–20 cuadros por segundo: en las pruebas **espera por lo que pasa** (`waitFor`, `holdUntil`), no por tiempo fijo.
+Una prueba que anima cuadro a cuadro o saca muchas capturas puede no caber en GitHub (allá va a ~1 cuadro por
+segundo): con `MC_GPU=0` sáltala o recórtala diciendo `SALTA …`, como `test-camara-mando`, y córrela vos con GPU.
 
 Biome tiene apagadas a propósito algunas reglas que chocan con cómo está hecho el juego (`biome.json`): fábricas de
 componentes del paquete de arte, dependencias de efectos de React Three Fiber, asignaciones dentro de expresiones y
@@ -68,6 +70,7 @@ llaves por índice en listas fijas. Código nuevo: sin `any` ni `!` si se puede 
 El trabajo va en olas (`docs/OLAS.md`); cada ola es un hito en GitHub y cada ticket un issue `MC-NN`. La skill
 `.claude/skills/ola/SKILL.md` explica cómo repartir una ola entre agentes, juntarla en la rama `ola-N` y entregarla.
 
-- Una rama por ticket (`ola-N/mc-NN-algo`) que sale de `ola-N`; el pull request de la ola va de `ola-N` a `main`.
-- `main` solo recibe cambios por pull request con la revisión automática en verde.
+- Una rama por ticket (`ola-N-mc-NN-algo`) que sale de `ola-N`; el pull request de la ola va de `ola-N` a `main`.
+- `main` solo recibe cambios por pull request con la revisión automática en verde. Los PR cierran sus issues con
+  `Closes #NN` (GitHub no entiende «Cierra»).
 - **Nunca se une un pull request a `main` sin que el usuario diga «full send»** o lo pida claramente.

@@ -12,8 +12,8 @@ import { player } from '../../../core/player';
 import { useGame } from '../../../core/store';
 import type { AvatarConfig, AvatarState } from '../../../core/types';
 import { art, Block, Cyl, Ground, Label, P, Plate, Spawn, useMgTick } from '../../kit';
-import { finish, rulesOf, setHud } from '../api';
-import { DEF, type Ev, Match } from './sim';
+import { finish, partida, rulesOf, setHud } from '../api';
+import { DEF, type Ev, Match, type Params } from './sim';
 
 const TEAM_A = 'Catrachos',
   TEAM_B = 'Barrio Abajo';
@@ -39,7 +39,7 @@ const SQUAD: ({ name: string; cfg: AvatarConfig } | null)[] = [
   { name: 'ElPulpero', cfg: kit(3, '#ffc93c', '#0d47a1', { hat: 'gorra', hatColor: '#0d47a1' }) },
   { name: 'Olanchano22', cfg: kit(2, '#e63946', '#1d1d1f', { hair: 'pelo_corto', hairColor: '#3b2414' }) },
   { name: 'xX_Tegus_Xx', cfg: kit(4, '#e63946', '#1d1d1f', { hair: 'calvo' }) },
-  { name: 'Motagüense', cfg: kit(0, '#2ea44f', '#1d1d1f', { hat: 'gorra', hatColor: '#1d1d1f' }) },
+  { name: 'Verdolaga504', cfg: kit(0, '#2ea44f', '#1d1d1f', { hat: 'gorra', hatColor: '#1d1d1f' }) },
 ];
 const FANS: { pos: [number, number, number]; rot: number; cfg: AvatarConfig }[] = [
   { pos: [-12.4, 0, -5], rot: Math.PI / 2, cfg: kit(2, '#ff7a3d', '#607d8b', { pants: 'jeans', hair: 'pelo_largo' }) },
@@ -230,9 +230,21 @@ function Fans({ cheer }: { cheer: { until: number } }) {
   );
 }
 
+/** Rivales según la etapa: en la 1 corren, tiran y atajan peor; en la última, mejor que el valor de siempre. */
+const rivalesDe = (dif: number): Partial<Params> => ({
+  rivSpeed: 5.0 + 1.0 * dif,
+  rivErr: 0.16 - 0.08 * dif,
+  rivTackle: 0.28 + 0.12 * dif,
+  gkSave: [DEF.gkSave[0], 0.68 + 0.17 * dif],
+  gkReact: [DEF.gkReact[0], 0.3 - 0.1 * dif],
+});
+
 export function FutbolScene() {
   const rules = rulesOf('futbol');
-  const match = useMemo(() => new Match(rules.duration, (Math.random() * 2 ** 31) | 0), []); // eslint-disable-line react-hooks/exhaustive-deps
+  const match = useMemo(
+    () => new Match(rules.duration, (Math.random() * 2 ** 31) | 0, rivalesDe(partida().dif)),
+    [], // eslint-disable-line react-hooks/exhaustive-deps
+  );
   const states = useMemo(() => match.ents.map(() => ({ anim: 'idle', speed: 0 }) as AvatarState), [match]);
   const groups = useRef<(THREE.Group | null)[]>([]);
   const ball = useRef<THREE.Group>(null),

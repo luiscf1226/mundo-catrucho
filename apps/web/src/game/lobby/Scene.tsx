@@ -11,6 +11,7 @@ import { MapaHonduras } from './Mapa';
 import { MapBoard } from './MapBoard';
 import { Paseo } from './Paseo';
 import { groundAt, LIMIT, SPAWN } from './terrain';
+import { Vista } from './Vista';
 import { World } from './World';
 export function LobbyScene() {
   useLayoutEffect(() => {
@@ -25,9 +26,10 @@ export function LobbyScene() {
   });
   return (
     <>
-      <art.SkyRig time="dia" weather="despejado" fogFar={650} shadowRadius={65} />
+      <art.SkyRig time="auto" weather="despejado" fogFar={650} shadowRadius={65} />
       <Spawn pos={SPAWN} />
       <World />
+      <Vista />
       <MapBoard />
       <MapaHonduras />
       <Forest />

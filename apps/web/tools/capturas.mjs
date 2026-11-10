@@ -42,11 +42,12 @@ const ok = await run('capturas', file, { hash: '#test' }, async (t) => {
   await t.hold('d', 500);
   await t.press(' ');
   await t.hold('w', 800);
-  await t.ev(`window.__mc.player.fixedCam={pos:[0,150,150],target:[0,0,-10],fov:55}`);
-  await t.sleep(1200);
+  await t.click('hud-btn-vista');
+  await t.waitFor(`window.__mc.player.overviewT >= 1`, 15000, 'la vista desde arriba');
+  await t.sleep(600);
   await foto(t, '04-mapa-arriba', 'Honduras vista desde arriba');
-  await t.ev(`window.__mc.player.fixedCam=null`);
-  await t.sleep(400);
+  await t.click('hud-vista-volver');
+  await t.waitFor(`window.__mc.player.overviewT <= 0`, 15000, 'volver al muñeco');
   await t.click('hud-btn-mapa');
   await t.click('map-dept-olancho');
   await t.sleep(400);

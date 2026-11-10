@@ -86,13 +86,32 @@ function text(c: Ctx, t: string, x: number, y: number, size: number, fill: strin
   c.fillStyle = fill;
   c.fillText(t, x, y);
 }
-/** la H de la selección, hecha con rectángulos para que no dependa de ninguna fuente */
-function bigH(c: Ctx, x: number, y: number, w: number, h: number, fill: string) {
-  c.fillStyle = fill;
-  const t = w * 0.3;
-  c.fillRect(x - w / 2, y - h / 2, t, h);
-  c.fillRect(x + w / 2 - t, y - h / 2, t, h);
-  c.fillRect(x - w / 2, y - h * 0.16, w, h * 0.32);
+/** medalla propia de la Bicolor: franjas y cinco estrellas de la bandera, sin letras ni logo oficial */
+function medalla(c: Ctx, x: number, y: number, r: number, ring: string) {
+  c.save();
+  c.beginPath();
+  c.arc(x, y, r, 0, Math.PI * 2);
+  c.fillStyle = '#ffffff';
+  c.fill();
+  c.clip();
+  c.fillStyle = '#00bce4';
+  c.fillRect(x - r, y - r, r * 2, r * 0.68);
+  c.fillRect(x - r, y + r * 0.32, r * 2, r * 0.68);
+  c.restore();
+  c.fillStyle = '#00bce4';
+  for (const [dx, dy] of [
+    [0, 0],
+    [-0.4, -0.18],
+    [0.4, -0.18],
+    [-0.4, 0.18],
+    [0.4, 0.18],
+  ])
+    star(c, x + dx * r, y + dy * r, r * 0.14);
+  c.lineWidth = Math.max(2, r * 0.14);
+  c.strokeStyle = ring;
+  c.beginPath();
+  c.arc(x, y, r, 0, Math.PI * 2);
+  c.stroke();
 }
 
 // ------------------------------------------------------------------ cara
@@ -423,9 +442,7 @@ function drawTorso(c: Ctx, w: number, h: number, cfg: AvatarConfig, back: boolea
     c.fillRect(w - 9, 0, 9, h);
     c.fillRect(0, h - 7, w, 7);
     if (!back) {
-      bigH(c, w / 2, 76, 50, 56, ac);
-      c.fillStyle = ac;
-      for (let i = 0; i < 5; i++) star(c, w / 2 + (i - 2) * 13, 37 - (2 - Math.abs(i - 2)) * 3, 5);
+      medalla(c, w / 2, 70, 28, white ? H_BLUE : '#ffffff');
       c.fillStyle = ac;
       c.beginPath();
       c.moveTo(w / 2 - 22, -1);

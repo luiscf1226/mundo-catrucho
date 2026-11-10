@@ -35,9 +35,10 @@ const normPeces = (t: Record<string, any>): PezT[] =>
 const metasDe = (t: Record<string, any>, dif: number): [number, number, number] => {
   const l = normPeces(t),
     avg = l.reduce((a, p) => a + p[1], 0) / l.length,
-    k = 1 + 0.3 * dif,
+    k = 1 + 0.15 * dif,
     r = (n: number) => Math.max(30, Math.round((avg * n * k) / 5) * 5);
-  return [r(3), r(6), r(9)];
+  // en 85–100 s se sacan unos 7 peces: 9 «promedio» no se alcanzaban ni jugando fino
+  return [r(3), r(5.5), r(7)];
 };
 const BAD = 0.8,
   YEL = 0.62; // tensión: amarillo desde YEL, rojo desde BAD, se rompe en 1

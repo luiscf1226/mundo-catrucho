@@ -139,7 +139,7 @@ export const START = 2.8;
 export function chartDe(p: Partida) {
   const E = ESTILOS[estiloDe(p)],
     step = 60 / E.bpm / 2,
-    L = 48 + 24 * p.dif,
+    L = 60 + 26 * p.dif, // la canción dura de ~64 s (etapa 1) a ~90 s (última)
     steps = Math.floor(L / step),
     rho = 0.55 + 0.3 * p.dif,
     R = rng(p.seed ^ 0x51ed);
@@ -168,7 +168,9 @@ export function chartDe(p: Partida) {
 }
 export const metasDe = (p: Partida): [number, number, number] => {
   const m = chartDe(p).max;
-  return [Math.round((m * 0.3) / 10) * 10, Math.round((m * 0.55) / 10) * 10, Math.round((m * 0.8) / 10) * 10];
+  // `max` supone racha perfecta (×4 desde la nota 30): con unos pocos fallos se saca ~30 % y tocando muy fino ~55 %
+  const f = (k: number) => Math.round((m * k) / 10) * 10;
+  return [f(0.15 + 0.08 * p.dif), f(0.3 + 0.1 * p.dif), f(0.45 + 0.07 * p.dif)];
 };
 
 export interface Evento {

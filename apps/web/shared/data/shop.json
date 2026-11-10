@@ -211,7 +211,7 @@
     {
       "id": "at_h_local",
       "cat": "atuendo",
-      "name": "La H local",
+      "name": "La Bicolor en casa",
       "price": 250,
       "set": {
         "hat": "sin_sombrero",
@@ -220,13 +220,13 @@
         "pants": "short_futbol",
         "pantsColor": "#ffffff"
       },
-      "nota": "Blanca con la H: así sale la Bicolor en casa.",
+      "nota": "Blanca con las cinco estrellas: así sale la Bicolor en casa.",
       "grupo": "seleccion"
     },
     {
       "id": "at_h_visita",
       "cat": "atuendo",
-      "name": "La H de visita",
+      "name": "La Bicolor de visita",
       "price": 250,
       "set": {
         "hat": "sin_sombrero",
@@ -241,7 +241,7 @@
     {
       "id": "at_portero",
       "cat": "atuendo",
-      "name": "Portero de la H",
+      "name": "Portero de la Bicolor",
       "price": 260,
       "set": {
         "hat": "sin_sombrero",
@@ -516,13 +516,13 @@
     {
       "id": "camisa_h",
       "cat": "camisa",
-      "name": "La H (blanca)",
+      "name": "Bicolor blanca",
       "price": 120
     },
     {
       "id": "camisa_h_azul",
       "cat": "camisa",
-      "name": "La H (azul)",
+      "name": "Bicolor azul",
       "price": 120
     },
     {

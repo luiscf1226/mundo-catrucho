@@ -8,6 +8,7 @@ import { Landmark } from './Landmark';
 import { conectados } from './population';
 import { Kit, Static } from './static';
 import { DEPTOS, groundAt } from './terrain';
+import { NearOnly, OverviewLabel } from './Vista';
 
 export { conectados } from './population';
 
@@ -48,6 +49,14 @@ function surface(d: (typeof DEPTOS)[number]) {
   geo.computeVertexNormals();
   return geo;
 }
+/** En la vista de arriba, el occidente queda apretado: estos rótulos se corren un poco (metros [x, z]). */
+const SHIFT: Record<string, [number, number]> = {
+  ocotepeque: [-2, 13],
+  lempira: [4, -3],
+  intibuca: [6, 6],
+  copan: [-4, -4],
+  santabarbara: [4, -4],
+};
 function DeptSign({ d }: { d: (typeof DEPTOS)[number] }) {
   const [n, setN] = useState(() => conectados(d.id));
   let elapsed = 0;
@@ -63,14 +72,18 @@ function DeptSign({ d }: { d: (typeof DEPTOS)[number] }) {
     cat = catDe(d.id);
   return (
     <>
-      <Label pos={[x, y + 11, z]} text={d.name} h={1.9} bg="#183b36" />
-      <Label
-        pos={[x, y + 9.4, z]}
-        text={`${cat.tipos}${cat.juegos.length ? ` · ${cat.juegos.length} juegos` : ''}`}
-        h={0.8}
-      />
-      <Label pos={[x, y + 8.3, z]} text={`🟢 ${n} conectados · simulados`} h={0.65} bg="#214e45" />
-      <Label pos={[x - 3, y + 0.65, z + 4]} text="ENTRÁ" h={0.5} />
+      <OverviewLabel pos={[x, y + 11, z]} h={1.9} id={d.id} shift={SHIFT[d.id]}>
+        <Label pos={[0, 0, 0]} text={d.name} h={1.9} bg="#183b36" />
+      </OverviewLabel>
+      <NearOnly>
+        <Label
+          pos={[x, y + 9.4, z]}
+          text={`${cat.tipos}${cat.juegos.length ? ` · ${cat.juegos.length} juegos` : ''}`}
+          h={0.8}
+        />
+        <Label pos={[x, y + 8.3, z]} text={`🟢 ${n} conectados · simulados`} h={0.65} bg="#214e45" />
+        <Label pos={[x - 3, y + 0.65, z + 4]} text="ENTRÁ" h={0.5} />
+      </NearOnly>
       <Interactable
         pos={[x - 3, groundAt(x - 3, z + 4), z + 4]}
         radius={2.5}

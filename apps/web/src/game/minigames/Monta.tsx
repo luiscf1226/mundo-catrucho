@@ -25,8 +25,9 @@ import { AGUA, ASIENTO, Corral, Gente, type Montura, Mount, Scroll } from './mon
 const MONTURAS: Montura[] = ['toro', 'caballo', 'burro', 'mula', 'tabla', 'balsa', 'cayuco', 'tirolesa'];
 const durOf = (p: Partida) => Math.round(60 + 30 * p.dif);
 const styleMetas = (p: Partida): [number, number] => {
+  // el estilo máximo es ~60 pts por segundo con la aguja al centro (más 150 por brinco)
   const d = durOf(p);
-  return [Math.round((d * 60 * 0.3) / 10) * 10, Math.round((d * 60 * 0.55) / 10) * 10];
+  return [Math.round((d * 60 * (0.35 + 0.1 * p.dif)) / 10) * 10, Math.round((d * 60 * (0.7 + 0.1 * p.dif)) / 10) * 10];
 };
 export const guia: Guia = {
   goal: 'Aguantá el tiempo de la etapa: mantené la aguja de equilibrio al centro y saltá en los brincos grandes.',
@@ -137,8 +138,8 @@ export function Monta() {
         t = Math.max(t, nextBig - 7);
         continue;
       }
-      out.push({ t, dir: R() < 0.5 ? -1 : 1, mag: (0.75 + 0.5 * dif) * (0.75 + 0.5 * R()), big: false, fired: false });
-      t += (2.7 - 1.4 * dif) * (0.8 + 0.5 * R());
+      out.push({ t, dir: R() < 0.5 ? -1 : 1, mag: (0.75 + 0.2 * dif) * (0.75 + 0.5 * R()), big: false, fired: false });
+      t += (2.7 - 0.9 * dif) * (0.8 + 0.5 * R());
     }
     return out.sort((a, b) => a.t - b.t);
   }, [P_]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -207,7 +208,7 @@ export function Monta() {
             e.ok = true;
           } else {
             e.ok = false;
-            s.V += e.dir * 3.6;
+            s.V += e.dir * (1.0 + 2.6 * dif); // en la etapa 1 un brinco perdido se aguanta; en la última no
             s.L += e.dir * 0.35;
             audio.sfx('miss');
             useGame.getState().toast('¡Te sacudió fuerte!', '💥');
@@ -215,7 +216,7 @@ export function Monta() {
           }
         } else {
           const k = s.help > 0 ? 0.45 : 1;
-          s.V += e.dir * e.mag * (1.5 + 0.6 * dif) * k;
+          s.V += e.dir * e.mag * (1.4 + 0.2 * dif) * k;
           audio.sfx('hit');
           fx.emit(0, 0.2 + alto, 0.3, agua ? '#dff3ff' : '#d9bb86', 8, 3, 2.2);
         }
@@ -242,7 +243,7 @@ export function Monta() {
       }
       // dinámica de la aguja
       const ctl = input.mx;
-      s.V += (s.L * (0.9 + 0.8 * dif) + Math.sin(t * 1.3) * 0.25 + Math.sin(t * 2.9 + 1) * 0.15 - ctl * 7.5) * dt;
+      s.V += (s.L * (0.8 + 0.3 * dif) + Math.sin(t * 1.3) * 0.25 + Math.sin(t * 2.9 + 1) * 0.15 - ctl * 7.5) * dt;
       s.V *= Math.max(0, 1 - 1.5 * dt);
       s.L += s.V * dt;
       s.L = clamp(s.L, -1.25, 1.25);
