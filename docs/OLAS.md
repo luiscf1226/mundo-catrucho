@@ -2,54 +2,65 @@
 
 Una ola = varios tickets en paralelo, una rama `ola-N`, una vista previa y una aprobación.
 
-1. **Decís la ola.** Por ejemplo: «haz la ola 1 de Tuerce».
+1. **Decís la ola.** Por ejemplo: «haz la ola 0 de Tuerce».
 2. **Se reparte.** Un agente por ticket, todos al mismo tiempo, cada uno en su copia del proyecto. Antes reviso tus límites.
 3. **Se junta.** Todo entra a una rama `ola-N`; se corren las pruebas del juego completo.
 4. **Lo ves.** Vista previa para jugarlo, capturas o video de lo nuevo y un pull request con el resumen.
 5. **Aprobás.** Con «full send» se une a la rama principal y los issues de la ola se cierran. Si algo no te gusta, lo decís con tus palabras y se corrige dentro de la misma ola.
 
+## Ola 0 · Preparar el repo y las herramientas
+
+**Vas a ver:** Un pull request de prueba con la revisión automática en verde, su vista previa en tu Cloudflare y capturas del juego tomadas solas; Convex creado. _(necesita tus cuentas)_
+
+- MC-60 · Estructura y comandos
+- MC-61 · Reglas de código
+- MC-62 · Guía para los agentes
+- MC-63 · Capturas y video automáticos
+- MC-64 · Plantillas y protección de main
+- MC-65 · Entornos y secretos
+- MC-01 · Primer commit, GitHub y revisión automática
+- MC-06 · Crear el proyecto de Convex y subir el esquema
+- MC-11 · Publicar en Cloudflare con tu cuenta
+
 ## Ola 1 · Pulido que se ve
 
 **Vas a ver:** El mapa con zoom hasta verlo todo desde arriba, atardecer y noche, mando y clubes con apodos.
 
-- MC-01 · Primer commit, GitHub y revisión automática
 - MC-02 · Vista desde arriba del mapa gigante
 - MC-03 · Afinar la dificultad de las etapas
 - MC-05 · Atardecer y noche que se vean bien
 - MC-57 · Mando
 - MC-59 · Clubes, Selección y marcas con apodos
 
-## Ola 2 · Cimientos
+## Ola 2 · Cuentas y kit de motores
 
-**Vas a ver:** El juego publicado en tu Cloudflare, Convex conectado y el primer motor nuevo hecho con el kit. _(necesita tus cuentas)_
+**Vas a ver:** Entrar con Clerk, el catálogo en Convex y el primer motor nuevo hecho con el kit.
 
-- MC-06 · Crear el proyecto de Convex y subir el esquema
-- MC-11 · Publicar en Cloudflare con tu cuenta
+- MC-07 · Cuentas con Clerk
+- MC-10 · Catálogo en Convex
 - MC-32 · Kit de motores
 - MC-34 · Revisión cultural
 - MC-55 · Cargar por departamento
 
-## Ola 3 · Cuentas y tres departamentos
+## Ola 3 · Tres departamentos
 
-**Vas a ver:** Entrar con Clerk, y Francisco Morazán, Olancho y Cortés con sus juegos exclusivos.
+**Vas a ver:** Francisco Morazán, Olancho y Cortés con sus juegos exclusivos; jugar sin cuenta y el personaje en la nube.
 
-- MC-07 · Cuentas con Clerk
-- MC-10 · Catálogo en Convex
 - MC-36 · Departamento: Francisco Morazán
 - MC-50 · Departamento: Olancho
 - MC-39 · Departamento: Cortés
+- MC-08 · Jugar sin cuenta y crearla después
+- MC-09 · Perfil y personaje en la nube
+- MC-18 · Pase firmado de sala
 
 ## Ola 4 · Viajes reales
 
-**Vas a ver:** Un video del viaje en rapidito, bus, ferry y avioneta con sus paradas y eventos; jugar sin cuenta y guardar el personaje.
+**Vas a ver:** Un video del viaje en rapidito, bus, ferry y avioneta con sus paradas y eventos.
 
 - MC-27 · Rutas reales entre departamentos
 - MC-28 · Paradas y vendedores en el camino
 - MC-29 · Eventos de carretera
 - MC-30 · Vehículos nuevos
-- MC-08 · Jugar sin cuenta y crearla después
-- MC-09 · Perfil y personaje en la nube
-- MC-18 · Pase firmado de sala
 
 ## Ola 5 · Verse en el mapa
 

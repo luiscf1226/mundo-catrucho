@@ -48,12 +48,12 @@ pnpm salas:test     # levanta la sala en local y conecta dos jugadores; debe imp
 
 ## Cómo se trabaja: por olas
 
-El trabajo va en **10 olas** (`docs/OLAS.md`, y un hito por ola en los
+El trabajo va en **11 olas, de la 0 a la 10** (`docs/OLAS.md`, y un hito por ola en los
 [issues](https://github.com/luiscf1226/mundo-catrucho/milestones)). Cada ola junta varios tickets que se hacen al
 mismo tiempo, cada uno con su agente; se juntan en una rama `ola-N`, se prueban y se entregan con vista previa,
 capturas y un pull request. Con «full send» se une a `main`. La fase de cada ticket queda como etiqueta.
 
 `node docs/generador/issues.mjs luiscf1226/mundo-catrucho catrucho` deja GitHub igual que `olas.mjs`.
 
-La ola 1 (pulido y vista desde arriba del mapa) no necesita cuentas. La ola 2 necesita tus cuentas de Convex, Clerk y
-Cloudflare (`wrangler login`).
+La ola 0 prepara el repo y las herramientas: comandos, revisión automática, guía para los agentes, capturas
+automáticas, vistas previas por rama y entornos. Necesita tus cuentas de Convex, Clerk y Cloudflare (`wrangler login`).

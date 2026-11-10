@@ -25,7 +25,7 @@ export const ESFUERZO = (() => {
 let n = 0; const id = () => `MC-${String(++n).padStart(2, '0')}`;
 const fase = (titulo, nota, items) => [titulo, nota, items.map(([t, ok, tam, dep, cuerpo]) => [id(), t, ok, tam, dep ?? '', cuerpo])];
 const F = {};
-export const TICKETS = [
+const RESTO = [
   F[0] = fase('Fase 0 · Pulido del prototipo', 'Se puede hacer ya, sin cuentas.', [
     ['Primer commit, GitHub y revisión automática', 'Cada cambio compila el juego y corre la prueba de punta a punta en GitHub Actions.', 'C'],
     ['Vista desde arriba del mapa gigante', 'En el lobby se aleja la cámara con la rueda, pellizco o un botón hasta ver toda Honduras desde arriba, con los rótulos de los 18 departamentos legibles; se vuelve al muñeco con un toque.', 'M'],
@@ -85,6 +85,16 @@ export const TICKETS = [
     ['Clubes, Selección y marcas con apodos', 'Escudos y nombres propios para todo lo que es marca de otros. Si algún día hay permiso escrito, se cambia por el real.', 'C'],
   ]),
 ];
+// Va primero en el plan, pero se numera al final para no cambiar los números de los issues que ya existen.
+const PREP = fase('Preparación · Repo y herramientas', 'Antes de programar: estructura, revisión automática, guía para agentes, capturas y entornos.', [
+    ['Estructura y comandos', 'Un `pnpm install` en la raíz instala todo; `pnpm dev`, `pnpm test`, `pnpm build` y `pnpm check` funcionan para todo el proyecto.', 'C'],
+    ['Reglas de código', 'TypeScript estricto y Biome para lint y formato; `pnpm check` pasa limpio y corre en cada pull request.', 'C'],
+    ['Guía para los agentes', '`CLAUDE.md` y `AGENTS.md` explican el proyecto, cómo probar y qué no tocar; una skill `ola` reparte una ola en paralelo, junta la rama `ola-N` y entrega vista previa, capturas y el pull request.', 'M'],
+    ['Capturas y video automáticos', '`pnpm capturas` abre el juego en Chromium sin ventana, recorre las escenas clave y guarda imágenes y un video corto; el pull request de cada ola los muestra.', 'M'],
+    ['Plantillas y protección de main', 'Plantilla de pull request (qué cambió, cómo se probó, capturas) y de issue; `main` solo acepta cambios por pull request con la revisión automática en verde.', 'C'],
+    ['Entornos y secretos', 'Desarrollo, vista previa y producción separados en Convex, Clerk y Cloudflare; las llaves viven en los secretos de GitHub y Cloudflare, nunca en el código.', 'C', 'tus cuentas'],
+  ]);
+export const TICKETS = [PREP, ...RESTO];
 // dependencias que se leen mejor por título
 const porTitulo = Object.fromEntries(TICKETS.flatMap(f => f[2]).map(t => [t[1], t[0]]));
 const dep = (t, ...de) => { const x = TICKETS.flatMap(f => f[2]).find(y => y[1] === t); x[4] = [x[4], ...de.map(d => porTitulo[d])].filter(Boolean).join(', '); };
