@@ -1,0 +1,9 @@
+packages:
+  - apps/*
+  - workers/*
+  - packages/*
+
+# pnpm 12 no corre scripts de instalación sin permiso: estos bajan los binarios de esbuild (Vite, wrangler) y workerd.
+allowBuilds:
+  esbuild: true
+  workerd: true

@@ -27,7 +27,7 @@ Las reglas, los datos y los niveles son los mismos. Cambia el **paquete de arte*
    interactivo sin serlo.
 6. **Rendimiento**: menos de ~350 llamadas de dibujo por escena (`t.calls()` en el arnés) y 60 fps en la prueba.
    Repite piezas con `InstancedMesh` o fusiona geometría estática si te pasas. Una sola luz con sombras (la del SkyRig).
-7. No hay git aquí. No hagas commits. No toques nada fuera de `catrucho/`.
+7. Trabaja en tu rama de ticket y solo en lo que pide tu ticket (ver `AGENTS.md` en la raíz).
 
 ## Mapa del código
 
@@ -138,10 +138,10 @@ Los `data-testid` de `src/ui/UIRoot.tsx` son contrato: `menu`, `btn-jugar|explor
 `emote-<id>`, `touch-joy|jump|use|fire`.
 
 ```bash
-cd catrucho
-npx tsc --noEmit                                         # tipos (si falla un archivo ajeno, ignóralo e infórmalo)
-node tools/build.mjs roblox --out /tmp/claude-1000/mc-<tu-nombre>    # o hd | all. SIEMPRE con tu propio --out
-node tools/smoke.mjs /tmp/claude-1000/mc-<tu-nombre>/mundo-catrucho-roblox.html [carpeta-capturas]
+cd apps/web
+pnpm typecheck                                           # tipos
+node tools/build.mjs hd --out <carpeta-propia>          # o roblox | all. Con varios agentes, cada uno con su --out
+node tools/smoke.mjs <carpeta-propia>/mundo-catrucho-hd.html [carpeta-capturas]
 node tools/gallery.mjs <html> <carpeta> [noche|tarde|lluvia|auto]     # hojas de la galería de arte
 ```
 `tools/harness.mjs` (léelo, es corto): `launch(file, { hash, width, height, touch })` o `run(nombre, file, opts, fn)`.

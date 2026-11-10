@@ -372,7 +372,7 @@ function PortalIcon({ icon }: { icon: string }) {
   </>;
 }
 function SignBoard({ text, w, color, a }: { text: string; w?: number; color: string; a: any }) {
-  const hh = 0.6, ww = w ?? Math.min(4, 0.6 * useAspect(text)), th = w ? Math.min(0.6, w / useAspect(text)) : hh;
+  const hh = 0.6, ww = w ?? Math.min(4, 0.6 * aspectOf(text)), th = w ? Math.min(0.6, w / aspectOf(text)) : hh;
   const bh = th + 0.16;
   const g = geo(`sign|${ww.toFixed(2)}|${bh.toFixed(2)}|${color}`, b => {
     const two = ww > 1.8, ph = 2.2 - bh / 2;
@@ -385,4 +385,4 @@ function SignBoard({ text, w, color, a }: { text: string; w?: number; color: str
     <TextPlane text={text} pos={[0, 2.2, -0.056]} h={th} maxW={ww} bg={color} radius={0} rotY={PI} />
   </Placed>;
 }
-const useAspect = (text: string) => (textTexture(text, {}) as any).aspect as number;
+const aspectOf = (text: string) => (textTexture(text, {}) as any).aspect as number;

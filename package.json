@@ -2,13 +2,21 @@
   "name": "mundo-catrucho",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@12.11.2",
+  "engines": { "node": ">=22" },
   "scripts": {
-    "web:dev": "pnpm --dir apps/web dev",
-    "web:build": "pnpm --dir apps/web exec node tools/build.mjs hd --out dist",
-    "web:test": "pnpm --dir apps/web exec node tools/smoke.mjs dist/mundo-catrucho-hd.html",
-    "convex:check": "tsc --noEmit -p convex",
-    "salas:dev": "pnpm --dir workers/salas dev",
-    "salas:test": "pnpm --dir workers/salas test"
+    "dev": "pnpm --parallel --filter @mundo-catrucho/web --filter @mundo-catrucho/salas dev",
+    "build": "pnpm -r build",
+    "test": "pnpm build && pnpm -r --workspace-concurrency=1 test",
+    "check": "biome check . && pnpm -r typecheck && tsc --noEmit -p convex && node docs/generador/validar-contenido.mjs",
+    "fix": "biome check --write .",
+    "capturas": "pnpm --filter @mundo-catrucho/web build && pnpm --filter @mundo-catrucho/web capturas",
+    "web:dev": "pnpm --filter @mundo-catrucho/web dev",
+    "salas:dev": "pnpm --filter @mundo-catrucho/salas dev"
   },
-  "devDependencies": { "convex": "^1.17.0", "typescript": "^5.6.0" }
+  "devDependencies": {
+    "@biomejs/biome": "2.6.6",
+    "convex": "^1.17.0",
+    "typescript": "^5.6.0"
+  }
 }

@@ -1,12 +1,15 @@
 {
-  "name": "mundo-catrucho",
+  "name": "@mundo-catrucho/web",
   "private": true,
   "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "typecheck": "tsc --noEmit",
-    "build": "node tools/build.mjs"
+    "build": "node tools/build.mjs hd --out dist",
+    "build:all": "node tools/build.mjs all --out dist",
+    "test": "node tools/smoke.mjs dist/mundo-catrucho-hd.html",
+    "capturas": "node tools/capturas.mjs dist/mundo-catrucho-hd.html ../../capturas",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.9",
