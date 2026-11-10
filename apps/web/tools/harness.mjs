@@ -8,7 +8,8 @@
 //   t.ev('window.__mc.player.pos')         // evaluar JS en la página (window.__mc = { store, player, phys, input, audio, ... })
 //   await t.grabar(); …; await t.parar('/tmp/x.mp4')  // video de lo que pasa entre las dos llamadas (necesita ffmpeg)
 //   await t.close();                       // SIEMPRE cerrar (mata Chromium)
-// Variables: CHROME_BIN (por defecto `chromium`), MC_GPU=0 para dibujar sin GPU (en GitHub Actions no hay).
+// Variables: CHROME_BIN (por defecto `chromium`), MC_GPU=0 para dibujar sin GPU (en GitHub Actions no hay),
+// MC_LENTO=N multiplica por N el tiempo máximo de cada espera (sin GPU el juego puede ir a menos de 1 cuadro por segundo).
 // t.errors acumula excepciones, console.error y peticiones de red no permitidas.
 import { execFileSync, spawn } from 'node:child_process';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
@@ -16,6 +17,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const LENTO = Math.max(1, Number(process.env.MC_LENTO) || 1);
 const KEY = {
   ' ': ['Space', 32],
   w: ['KeyW', 87],
@@ -162,7 +164,7 @@ export async function launch(
       for (;;) {
         const v = await ev(expr).catch(() => false);
         if (v) return v;
-        if (Date.now() - s > timeout) throw new Error(`tiempo agotado esperando: ${label}`);
+        if (Date.now() - s > timeout * LENTO) throw new Error(`tiempo agotado esperando: ${label}`);
         await sleep(100);
       }
     },
