@@ -4,8 +4,8 @@
 //  - luz de relleno hemisférica + mapa de entorno generado del mismo cielo (reflejos en metal, agua, oro)
 //  - niebla con el color del horizonte (perspectiva aérea)
 //  - time="auto": ciclo completo de día y noche;  weather="auto": despejado → nublado → lluvia → escampa
-// Escribe env.hour y env.weather en cada cuadro. Para pruebas: #hora=18 fija la hora inicial del ciclo y
-// #ciclo=rapido acelera el día (48 s) y el clima.
+// Escribe env.hour y env.weather en cada cuadro. Para pruebas: #hora=18 fija la hora del ciclo (también si se
+// cambia el hash sin recargar) y #ciclo=rapido acelera el día (48 s) y el clima.
 
 import { useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useMemo, useRef } from 'react';
@@ -66,20 +66,37 @@ const K = (
   cd: hex(cd),
 });
 // hora, cenit, horizonte, luz, intensidad, hemisferio cielo/suelo, int. hemisferio, int. entorno, exposición, estrellas, nube clara/oscura
+// La noche es de luna: azulada pero clara (relleno fuerte y exposición alta) para que el muñeco, los caminos y los
+// rótulos se lean. Hacia las 18:10 el sol se va y entra la luna; el relleno sube para que no haya un bache oscuro.
+// De las 18:15 a las 5:45 la «luz» de la tabla es la de la luna.
+const NOCHE = [
+  '#0c1a42',
+  '#2e4a82',
+  '#aac4ff',
+  1.45,
+  '#7c94d4',
+  '#3e4a6e',
+  1.6,
+  1.7,
+  1.17,
+  1,
+  '#56648f',
+  '#1f2848',
+] as const;
 const KEYS: Key[] = [
-  K(0, '#070c22', '#1b2a52', '#9db8ff', 0.85, '#5066a8', '#232a44', 1.25, 0.55, 1.12, 1, '#3a4670', '#141a33'),
-  K(4.6, '#0a1130', '#22335e', '#9db8ff', 0.8, '#5066a8', '#232a44', 1.25, 0.55, 1.12, 1, '#3d4a74', '#161c36'),
-  K(5.6, '#27407e', '#e0876a', '#ffb48a', 0.5, '#8d90c0', '#4a4250', 1.1, 0.6, 1.06, 0.25, '#f0a58c', '#5a4a6e'),
-  K(6.4, '#3d78c4', '#ffc38d', '#ffb877', 1.9, '#b9c6e6', '#7a6a58', 0.95, 0.7, 1, 0, '#ffe1c2', '#b98a86'),
+  K(0, ...NOCHE),
+  K(4.8, '#0e1d48', '#33508a', '#aac4ff', 1.4, '#7c94d4', '#3e4a6e', 1.6, 1.7, 1.16, 1, '#5a6894', '#21294a'),
+  K(5.5, '#1f3672', '#8a74a6', '#b8c2ff', 1.2, '#8c94cc', '#4a4a6e', 1.6, 1.4, 1.16, 0.5, '#c79aaa', '#4a4470'),
+  K(6.3, '#3d78c4', '#ffc08a', '#ffb877', 2, '#bcc6e6', '#7a6a58', 1.15, 0.75, 1.05, 0, '#ffe1c2', '#b98a86'),
   K(8, '#3388e2', '#c4e3f8', '#ffe9c8', 2.9, '#cfe2ff', '#8c8266', 0.9, 0.8, 1, 0, '#ffffff', '#b7c4d6'),
   K(11, '#2a7be0', '#b4dcfb', '#fff4de', 3.3, '#d4e6ff', '#94896a', 0.9, 0.85, 1, 0, '#ffffff', '#b9c6d8'),
   K(15, '#2a7be0', '#b6dcf8', '#fff1d6', 3.2, '#d4e6ff', '#94896a', 0.9, 0.85, 1, 0, '#ffffff', '#b9c6d8'),
-  K(16.8, '#3478cf', '#ffe0ad', '#ffcf94', 2.9, '#d9d6e6', '#96825e', 0.9, 0.8, 1, 0, '#fff0d6', '#c8a998'),
-  K(17.8, '#3a5aa8', '#ff9a55', '#ff9450', 2.2, '#c9aecd', '#8a6a52', 0.95, 0.75, 1.02, 0, '#ffc79a', '#a86a78'),
-  K(18.6, '#28306e', '#e0647a', '#ff7a55', 0.7, '#9a86c0', '#544660', 1.05, 0.65, 1.06, 0.3, '#f08a8e', '#5e4474'),
-  K(19.4, '#0d1436', '#3a3a70', '#9db8ff', 0.35, '#5a6aa8', '#262c48', 1.2, 0.55, 1.1, 0.85, '#4e4a7c', '#1a1d3a'),
-  K(20.2, '#070c22', '#1b2a52', '#9db8ff', 0.85, '#5066a8', '#232a44', 1.25, 0.55, 1.12, 1, '#3a4670', '#141a33'),
-  K(24, '#070c22', '#1b2a52', '#9db8ff', 0.85, '#5066a8', '#232a44', 1.25, 0.55, 1.12, 1, '#3a4670', '#141a33'),
+  K(16.8, '#3478cf', '#ffe0ad', '#ffcf94', 2.9, '#d9d6e6', '#96825e', 0.95, 0.8, 1, 0, '#fff0d6', '#c8a998'),
+  K(17.6, '#4064b0', '#ffaa62', '#ffa864', 2.6, '#dcc4c4', '#9a7a52', 1.1, 0.8, 1.03, 0, '#ffc89a', '#b07a80'),
+  K(18.2, '#34407e', '#ff8a5c', '#ff9a5c', 1.3, '#bca4c0', '#6e5a62', 1.5, 1, 1.1, 0.1, '#f8948a', '#6a4a78'),
+  K(18.8, '#1c2b64', '#9a6c94', '#b4bcff', 1.25, '#8e90cc', '#4a4a6c', 1.65, 1.4, 1.16, 0.5, '#9a7aa8', '#2c2c58'),
+  K(19.6, ...NOCHE),
+  K(24, ...NOCHE),
 ];
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 const lerp3 = (o: RGB, a: RGB, b: RGB, t: number) => {
@@ -130,11 +147,41 @@ const hashNum = (k: string) => {
 };
 const FAST = typeof location !== 'undefined' && location.hash.includes('ciclo=rapido');
 export const world = { hour: hashNum('hora') ?? 9, wt: 0, cover: 0.3, rain: 0, fog: 0, wet: 0 };
-/** duración real de un día completo en segundos; la noche pasa más rápido que el día */
-const DAY_SECONDS = FAST ? 48 : 420;
+// en pruebas, cambiar #hora=N sin recargar mueve el reloj
+if (typeof window !== 'undefined')
+  window.addEventListener('hashchange', () => {
+    const h = hashNum('hora');
+    if (h !== null) world.hour = h % 24;
+  });
+/** segundos reales por hora del juego: el día dura unos 6 min, la tarde y el atardecer 2.5 min (se disfrutan),
+ * la noche 2.5 min y el amanecer 1 min. Un día completo dura unos 12 min; con #ciclo=rapido, 48 s. */
+const RITMO: [number, number][] = [
+  [0, 16],
+  [4.8, 16],
+  [5.4, 30],
+  [7, 30],
+  [7.4, 38],
+  [16.4, 38],
+  [16.8, 50],
+  [19.4, 50],
+  [19.8, 16],
+  [24, 16],
+];
+const DIA_REAL = (() => {
+  let s = 0;
+  for (let h = 0; h < 24; h += 0.01) s += secPerHour(h) * 0.01;
+  return s;
+})();
+function secPerHour(h: number) {
+  let i = 0;
+  while (i < RITMO.length - 2 && RITMO[i + 1][0] <= h) i++;
+  const [h0, s0] = RITMO[i],
+    [h1, s1] = RITMO[i + 1];
+  return lerp(s0, s1, (h - h0) / (h1 - h0));
+}
 function advance(dt: number) {
-  const night = world.hour < 5 || world.hour > 19.5;
-  world.hour = (world.hour + ((dt * 24) / DAY_SECONDS) * (night ? 1.7 : 0.82)) % 24;
+  const k = FAST ? 48 / DIA_REAL : 1;
+  world.hour = (world.hour + dt / (secPerHour(world.hour) * k)) % 24;
   world.wt += dt * (FAST ? 12 : 1);
 }
 // línea de tiempo del clima automático (segundos): [duración, nubes, lluvia]
@@ -468,7 +515,8 @@ export function SkyRig({
     // --- astros
     const ang = ((hour - 6) / 12) * Math.PI;
     sunDir.set(Math.cos(ang) * 0.86, Math.sin(ang), 0.42 * Math.cos(ang * 0.5 - 0.6) + 0.18).normalize();
-    moonDir.set(-Math.cos(ang) * 0.8, -Math.sin(ang), -0.45).normalize();
+    // la luna va por el sur como el sol: alumbra lo que mira la cámara (hacia −Z) y no lo deja a contraluz
+    moonDir.set(-Math.cos(ang) * 0.8, -Math.sin(ang), 0.4).normalize();
     if (moonDir.y < 0.25 && sunDir.y < 0) {
       moonDir.y = Math.max(moonDir.y, 0.25 * sstep(0, -0.2, sunDir.y) + moonDir.y * (1 - sstep(0, -0.2, sunDir.y)));
       moonDir.normalize();
@@ -550,7 +598,8 @@ export function SkyRig({
         lightDir.copy(useSun ? sunDir : moonDir);
         lightDir.y = Math.max(lightDir.y, 0.24);
         lightDir.normalize();
-        const fade = useSun ? sstep(-0.06, 0.1, sunDir.y) : sstep(0.06, 0.2, -sunDir.y);
+        // cambio corto de sol a luna (pocos segundos reales) para que las sombras no salten a plena luz
+        const fade = useSun ? sstep(-0.06, -0.01, sunDir.y) : sstep(0.06, 0.12, -sunDir.y);
         L.color.setRGB(c.sun[0], c.sun[1], c.sun[2], THREE.SRGBColorSpace);
         L.intensity = c.sunI * fade * (1 - ov * 0.78);
         H.color.setRGB(
@@ -562,7 +611,8 @@ export function SkyRig({
         H.groundColor.setRGB(c.hg[0], c.hg[1], c.hg[2], THREE.SRGBColorSpace);
         H.intensity = c.hemiI * (1 + ov * 0.25);
         L.shadow.radius = 2.2 + ov * 4;
-        L.shadow.intensity = 1 - ov * 0.45;
+        // de noche las sombras son más suaves: la luna no deja nada negro
+        L.shadow.intensity = (1 - ov * 0.45) * (1 - 0.22 * Math.max(sstep(18.2, 19.4, hour), 1 - sstep(4.8, 6, hour)));
       }
       // la luz sigue al jugador; el centro se ajusta a la rejilla del mapa de sombras para que no tiemblen
       const p = player.pos,
@@ -608,7 +658,7 @@ export function SkyRig({
         e.uGround.value.setRGB(c.hg[0], c.hg[1], c.hg[2], THREE.SRGBColorSpace).multiplyScalar(0.9);
         e.uSunCol.value
           .setRGB(c.sun[0], c.sun[1], c.sun[2], THREE.SRGBColorSpace)
-          .multiplyScalar((useSun ? sunVis : moonVis * 0.25) * (1 - ov * 0.85));
+          .multiplyScalar((useSun ? sunVis : moonVis * 0.6) * (1 - ov * 0.85));
         e.uSunDir.value.copy(useSun ? sunDir : moonDir);
       }
       const rt = gl.getRenderTarget();
