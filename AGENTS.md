@@ -68,6 +68,7 @@ llaves por índice en listas fijas. Código nuevo: sin `any` ni `!` si se puede 
 El trabajo va en olas (`docs/OLAS.md`); cada ola es un hito en GitHub y cada ticket un issue `MC-NN`. La skill
 `.claude/skills/ola/SKILL.md` explica cómo repartir una ola entre agentes, juntarla en la rama `ola-N` y entregarla.
 
-- Una rama por ticket (`ola-N/mc-NN-algo`) que sale de `ola-N`; el pull request de la ola va de `ola-N` a `main`.
-- `main` solo recibe cambios por pull request con la revisión automática en verde.
+- Una rama por ticket (`ola-N-mc-NN-algo`) que sale de `ola-N`; el pull request de la ola va de `ola-N` a `main`.
+- `main` solo recibe cambios por pull request con la revisión automática en verde. Los PR cierran sus issues con
+  `Closes #NN` (GitHub no entiende «Cierra»).
 - **Nunca se une un pull request a `main` sin que el usuario diga «full send»** o lo pida claramente.

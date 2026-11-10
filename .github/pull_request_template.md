@@ -15,4 +15,4 @@
 
 ## Tickets
 
-<!-- Una línea por ticket terminado: Cierra #NN -->
+<!-- Una línea por ticket terminado: Closes #NN (en inglés, si no GitHub no cierra el issue) -->

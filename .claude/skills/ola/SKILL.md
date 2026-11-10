@@ -21,14 +21,14 @@ tickets está en `docs/OLAS.md`; cada ticket es un issue `MC-NN` en el hito «Ol
 ## 2. Repartir
 
 Un agente por ticket, todos a la vez, cada uno en su propia copia (`isolation: "worktree"`) y en su rama
-`ola-N/mc-NN-<algo>` que sale de `ola-N`. Si dos tickets tocan los mismos archivos, júntalos en un solo agente o hazlos
+`ola-N-mc-NN-<algo>` que sale de `ola-N` (con guion: git no deja crear `ola-N/…` si existe la rama `ola-N`). Si dos tickets tocan los mismos archivos, júntalos en un solo agente o hazlos
 uno después del otro.
 
 El encargo de cada agente lleva:
 - el texto completo del issue y su criterio de «Listo cuando»;
 - que lea `AGENTS.md` y, si toca el juego, `apps/web/docs/CONTRATO.md`;
 - qué archivos son suyos y cuáles no puede tocar;
-- que termine con `pnpm check` y `pnpm test` en verde, un commit en español que diga `Cierra #NN`, y
+- que termine con `pnpm check` y `pnpm test` en verde, un commit en español que diga `Closes #NN`, y
   capturas propias si cambia algo que se ve;
 - que su informe diga qué hizo, cómo lo probó y qué quedó pendiente.
 
@@ -42,11 +42,12 @@ El encargo de cada agente lleva:
 
 ## 4. Entregar
 
-1. Sube `ola-N`. La revisión automática de GitHub corre `check`, `test` y `capturas` y deja las capturas como artefacto.
+1. Sube `ola-N`. La revisión automática (sin GPU, corre 20–25 min) de GitHub corre `check`, `test` y `capturas` y deja las capturas como artefacto.
 2. **Vista previa:** con Cloudflare listo (MC-11), `pnpm --filter @mundo-catrucho/web exec wrangler versions upload`
    da la dirección de la rama. Mientras no exista, publica `apps/web/dist/mundo-catrucho-hd.html` como Artifact privado.
 3. Abre el pull request de `ola-N` a `main` con la plantilla: lo nuevo en palabras simples, cómo se probó, la vista
-   previa, capturas, video y `Cierra #NN` por cada ticket terminado.
+   previa, capturas, video y `Closes #NN` por cada ticket terminado (GitHub solo entiende las palabras en
+   inglés: `Closes`, `Fixes`; «Cierra» no cierra nada).
 4. Al usuario le das: el enlace del PR, la vista previa, lo que «Vas a ver» según `docs/OLAS.md` y lo que quedó
    pendiente y por qué.
 
@@ -54,4 +55,4 @@ El encargo de cada agente lleva:
 
 - **No unas el PR a `main` hasta que el usuario diga «full send»** (o lo pida claramente).
 - Si pide cambios, se corrigen dentro de la misma ola, en la misma rama, y se vuelve a probar y a mostrar.
-- Con «full send»: se une con merge, los issues se cierran solos por el `Cierra #NN` y se borra `ola-N`.
+- Con «full send»: se une con merge, los issues se cierran solos por el `Closes #NN` y se borra `ola-N`.
