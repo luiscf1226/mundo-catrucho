@@ -41,7 +41,7 @@ export const TH = 0.8;
 export function generar(p: Partida) {
   const R = rng(p.seed ^ 0x9e37),
     d = p.dif,
-    n = 12 + Math.round(14 * d),
+    n = 12 + Math.round(4 * d), // la última etapa ya tiene saltos más largos: con más piezas no se llegaba a tiempo
     gapMax = 2.3 + 1.2 * d;
   const plats: Pieza[] = [],
     segs: Seg[] = [],

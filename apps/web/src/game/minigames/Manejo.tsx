@@ -50,9 +50,10 @@ export function Manejo() {
         hud.current += dt;
         phrase.current += dt;
         const limit = 95 - P.dif * 15,
-          target = 850 + P.dif * 180;
+          target = 850 + P.dif * 180,
+          choque = Math.round(15 + 20 * P.dif); // en la última etapa cada choque pesa más
         const next = s.stops.find((a) => !a.taken && a.distance > s.distance - 13);
-        const score = Math.max(0, s.collected * 120 + (s.distance >= target ? 120 : 0) - s.hits * 15);
+        const score = Math.max(0, s.collected * 120 + (s.distance >= target ? 120 : 0) - s.hits * choque);
         if (hud.current > 0.15) {
           hud.current = 0;
           setHud({

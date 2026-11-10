@@ -13,8 +13,10 @@ import { finish, type Guia, partida, rng, setHud, starsFor } from './api';
 import { armar, cuantas, type Pregunta } from './trivia/preguntas';
 
 const metas = (dif: number) => {
-  const n = cuantas(dif);
-  return [n * 55, n * 85, n * 115] as const;
+  // por pregunta: acertar vale 100 + 8 × segundos que sobran; en la última etapa sobran menos (6 s por pregunta)
+  const n = cuantas(dif),
+    r = (v: number) => Math.round((n * v) / 10) * 10;
+  return [r(50 + 10 * dif), r(80 + 5 * dif), r(108)] as const;
 };
 export const guia: Guia = {
   goal: 'Caminá a la plataforma con la respuesta correcta antes de que se acabe el tiempo. Las otras se hunden.',

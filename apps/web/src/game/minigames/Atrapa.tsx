@@ -28,9 +28,10 @@ const EVITA: Cosa[] = [
 const FX = { x: 8.6, z: 5.6 }; // media cancha
 const DURACION = (dif: number) => Math.round(70 + 20 * dif);
 const metas = (dif: number): [number, number, number] => [
-  Math.round((120 + 80 * dif) / 10) * 10,
-  Math.round((300 + 150 * dif) / 10) * 10,
-  Math.round((500 + 250 * dif) / 10) * 10,
+  // la última etapa trae más cosas y más rápido: la racha (×3) sube el puntaje de quien no las deja caer
+  Math.round((120 + 180 * dif) / 10) * 10,
+  Math.round((300 + 300 * dif) / 10) * 10,
+  Math.round((500 + 400 * dif) / 10) * 10,
 ];
 
 export const guia: Guia = {
