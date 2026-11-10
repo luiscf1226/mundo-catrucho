@@ -10,7 +10,7 @@ import { playEmote } from '../../game/PlayerController';
 import { IS_HD } from '../../variant';
 import { Coin, Icon, type IconName } from '../components/Icon';
 import { Bar, Btn, Coins, Note, Panel, Tabs, Tag } from '../components/kit';
-import { act, copyText, cx, EMOTE_ICON, g, roomLabel, useTouch } from '../lib';
+import { act, copyText, cx, EMOTE_ICON, g, roomLabel, usePad, useTouch } from '../lib';
 
 // ------------------------------------------------------------------ misiones del día
 export function MissionsPanel() {
@@ -544,20 +544,64 @@ const Line = ({ keys, children }: { keys: ReactNode; children: ReactNode }) => (
 );
 export function ControlsPanel() {
   const touch = useTouch(),
-    [tab, setTab] = useState<'teclado' | 'tactil'>(touch ? 'tactil' : 'teclado');
+    pad = usePad(),
+    [tab, setTab] = useState<'teclado' | 'tactil' | 'mando'>(pad ? 'mando' : touch ? 'tactil' : 'teclado');
   return (
     <Panel id="controles" title="Controles" icon="controls" size="md">
       <Tabs
         items={[
           { id: 'teclado', label: 'Teclado y mouse', icon: 'controls' },
           { id: 'tactil', label: 'Pantalla táctil', icon: 'hand' },
+          { id: 'mando', label: 'Mando', icon: 'gamepad' },
         ]}
         value={tab}
         onChange={setTab}
         testid={(t) => `ctl-tab-${t}`}
         cls="mb-3"
       />
-      {tab === 'teclado' ? (
+      {tab === 'mando' ? (
+        <div className="grid gap-3" data-testid="ctl-mando">
+          {pad && <Note>🎮 Mando conectado</Note>}
+          <ul className="mc-card divide-y divide-line px-3 py-1">
+            <Line keys={<span className="mc-label">Stick izq.</span>}>Moverte (a fondo: correr)</Line>
+            <Line keys={<span className="mc-label">Stick der.</span>}>Girar la cámara</Line>
+            <Line keys={<K>A</K>}>Saltar · en menús, pulsar</Line>
+            <Line keys={<K>X</K>}>Hablar, usar, subirte a un vehículo</Line>
+            <Line
+              keys={
+                <>
+                  <K>RT</K>
+                  <K>B</K>
+                </>
+              }
+            >
+              Patear o lanzar · en menús, B vuelve
+            </Line>
+            <Line
+              keys={
+                <>
+                  <K>LB</K>
+                  <K>RB</K>
+                </>
+              }
+            >
+              Acercar · alejar (en el mapa gigante, RB lleva a la vista de toda Honduras)
+            </Line>
+            <Line keys={<K>Y</K>}>Acción alterna · en el viaje, cambiar la radio</Line>
+            <Line
+              keys={
+                <>
+                  <K wide>Start</K>
+                  <K wide>Select</K>
+                </>
+              }
+            >
+              Pausa · Mapa
+            </Line>
+            <Line keys={<span className="mc-label">Cruceta</span>}>Moverte entre botones en menús y ventanas</Line>
+          </ul>
+        </div>
+      ) : tab === 'teclado' ? (
         <div className="grid gap-3 sm:grid-cols-[auto_1fr]" data-testid="ctl-teclado">
           <div className="mc-card flex flex-col items-center justify-center gap-1 p-3" aria-hidden>
             <K>W</K>

@@ -4,11 +4,12 @@ import { useEffect, useRef, useState } from 'react';
 import { audio } from '../../core/audio';
 import { ACHIEVEMENTS, deptById, MISSIONS, minigameById, xpForLevel } from '../../core/data';
 import { input } from '../../core/input';
+import { player } from '../../core/player';
 import { mgTitulo, useGame } from '../../core/store';
 import type { PanelId } from '../../core/types';
 import { Coin, Icon, type IconName, Star } from '../components/Icon';
 import { Bar, Confetti, IBtn } from '../components/kit';
-import { act, cx, fmt, fmtTime, g, roomLabel, useCountUp, useTouch } from '../lib';
+import { act, cx, fmt, fmtTime, g, roomLabel, useCountUp, useOverview, usePad, useTouch } from '../lib';
 
 const SIDE: [PanelId, IconName, string][] = [
   ['mapa', 'map', 'Mapa'],
@@ -228,9 +229,46 @@ function MgHud() {
   );
 }
 
+/** En la vista desde arriba: cartel abajo con el botón para volver al muñeco. */
+function OverviewBar() {
+  const touch = useTouch(),
+    pad = usePad();
+  return (
+    <div
+      data-testid="hud-vista"
+      className="anim-up pointer-events-auto absolute bottom-[max(1rem,env(safe-area-inset-bottom))] left-[max(1rem,env(safe-area-inset-left))] flex flex-col items-start gap-1.5"
+    >
+      <button
+        type="button"
+        data-testid="hud-vista-volver"
+        onClick={act(() => player.setOverview(false))}
+        className="mc-prompt whitespace-nowrap"
+        style={{ position: 'static', translate: 'none' }}
+      >
+        {pad ? (
+          <kbd className="mc-key" data-gold="true">
+            A
+          </kbd>
+        ) : (
+          <Icon name="user" size={22} />
+        )}
+        <span>Volver al muñeco</span>
+      </button>
+      <span className="mc-hud mc-chip !text-[12px]">
+        {pad
+          ? 'A, B o LB vuelven'
+          : touch
+            ? 'Tocá la pantalla o juntá los dedos'
+            : 'Clic en el mapa o rueda hacia adelante'}
+      </span>
+    </div>
+  );
+}
+
 function Prompt() {
   const prompt = useGame((s) => s.prompt),
-    touch = useTouch();
+    touch = useTouch(),
+    pad = usePad();
   if (!prompt) return null;
   return (
     <button
@@ -242,11 +280,11 @@ function Prompt() {
       }}
       className={cx('mc-prompt anim-up pointer-events-auto', touch && 'is-touch')}
     >
-      {touch ? (
+      {touch && !pad ? (
         <Icon name="hand" size={24} />
       ) : (
         <kbd className="mc-key" data-gold="true">
-          E
+          {pad ? 'X' : 'E'}
         </kbd>
       )}
       <span className="flex items-center gap-1.5">
@@ -347,18 +385,28 @@ export function Toasts() {
 export function Hud() {
   const mg = useGame((s) => s.mg),
     panel = useGame((s) => s.panel),
-    playing = mg?.phase === 'playing';
+    playing = mg?.phase === 'playing',
+    lobby = useGame((s) => s.scene.kind === 'lobby'),
+    overview = useOverview();
   const side = SIDE.filter(([id]) => !mg || id === 'pausa' || id === 'emotes');
   return (
     <div data-testid="hud" className="pad-safe pointer-events-none absolute inset-0 text-hudfg">
       <div className="flex items-start justify-between gap-2">
         <div className="flex min-w-0 flex-col items-start gap-1.5">
           <Wallet />
-          {!mg && <Tracker />}
+          {!mg && !overview && <Tracker />}
         </div>
         <div
           className={cx('pointer-events-auto flex flex-none gap-1.5', mg ? 'flex-row' : 'flex-col-reverse sm:flex-row')}
         >
+          {lobby && !mg && (
+            <IBtn
+              id="hud-btn-vista"
+              icon="eye"
+              label={overview ? 'Volver al muñeco' : 'Ver toda Honduras'}
+              onClick={() => player.setOverview(!player.overview)}
+            />
+          )}
           {side.map(([id, icon, label]) => (
             <IBtn key={id} id={`hud-btn-${id}`} icon={icon} label={label} onClick={() => g().openPanel(id)} />
           ))}
@@ -368,7 +416,8 @@ export function Hud() {
         {playing && <MgHud />}
         {!panel && (!mg || mg.phase === 'intro') && <LocationBanner />}
       </div>
-      {!panel && (!mg || playing) && <Prompt />}
+      {!panel && (!mg || playing) && !overview && <Prompt />}
+      {!panel && lobby && !mg && overview && <OverviewBar />}
       <Celebrations />
     </div>
   );

@@ -19,6 +19,16 @@ export const player = {
   camYaw: 0,
   camPitch: 0.35,
   camDist: 8,
+  /** vista desde arriba del mapa gigante (solo en el lobby). La cambia setOverview; la cámara la suaviza. */
+  overview: false,
+  /** 0 = siguiendo al muñeco, 1 = vista de arriba completa (lo anima PlayerController) */
+  overviewT: 0,
+  overviewSubs: new Set<() => void>(),
+  setOverview(v: boolean) {
+    if (this.overview === v) return;
+    this.overview = v;
+    for (const f of this.overviewSubs) f();
+  },
   /** el estado de animación que lee el avatar */ state: { anim: 'idle', speed: 0 } as AvatarState,
   /** false = el jugador no responde a la entrada (cinemáticas, puestos de feria) */ control: true,
   speedMul: 1,
@@ -70,6 +80,8 @@ export const player = {
     this.vehicle = null;
     this.camPitch = 0.35;
     this.camDist = 8;
+    this.setOverview(false);
+    this.overviewT = 0;
     this.body.radius = 0.42;
   },
   distTo(x: number, z: number) {
