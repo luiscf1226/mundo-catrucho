@@ -6,7 +6,10 @@ import { useGame } from '../core/store';
 import type { PanelId } from '../core/types';
 import { VARIANT } from '../variant';
 import { Btn } from './components/kit';
-import { g, TEST, useTouch } from './lib';
+import { g, TEST, useOverview, usePad, useTouch } from './lib';
+
+let padHinted = false;
+
 import { MapPanel } from './panels/Map';
 import {
   AchievementsPanel,
@@ -26,6 +29,7 @@ import { MainMenu } from './screens/Menu';
 import { MgIntro, MgResults } from './screens/Minigame';
 import { TouchControls } from './screens/Touch';
 import { ViajeHud } from './screens/Viaje';
+import './pad';
 
 const PANELS: Record<PanelId, () => ReactNode> = {
   mapa: MapPanel,
@@ -100,6 +104,15 @@ export function GameUI() {
       }),
     [],
   );
+  // la primera vez que se usa un mando, una pista de sus botones
+  const pad = usePad(),
+    overview = useOverview();
+  useEffect(() => {
+    if (pad && !padHinted) {
+      padHinted = true;
+      g().toast('Mando listo · A salta · X usa · Start pausa · Controles tiene el resto', '🎮');
+    }
+  }, [pad]);
   // la creación de personaje es obligatoria la primera vez: si se cierra con Esc, vuelve a abrirse
   const created = useGame((s) => s.profile.created);
   useEffect(() => {
@@ -113,11 +126,14 @@ export function GameUI() {
       data-screen={screen}
       data-mg={!!mg}
       data-touch={touch}
+      data-pad={pad}
     >
       {screen === 'menu' && <MainMenu />}
       {screen === 'world' && <Hud />}
       {screen === 'world' && viaje && !panel && <ViajeHud />}
-      {screen === 'world' && touch && !panel && !dialog && (!mg || mg.phase === 'playing') && <TouchControls />}
+      {screen === 'world' && touch && !panel && !dialog && !overview && (!mg || mg.phase === 'playing') && (
+        <TouchControls />
+      )}
       {screen === 'world' && mg?.phase === 'intro' && !panel && <MgIntro />}
       {screen === 'world' && mg?.phase === 'ended' && !panel && <MgResults />}
       {ActivePanel && <ActivePanel key={panel} />}

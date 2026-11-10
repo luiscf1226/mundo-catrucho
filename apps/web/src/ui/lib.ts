@@ -1,6 +1,8 @@
 // Utilidades compartidas de la interfaz: acceso al estado, sonido de clic, detección táctil, contadores animados.
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { audio, type Sfx } from '../core/audio';
+import { input } from '../core/input';
+import { player } from '../core/player';
 import { type Profile, useGame } from '../core/store';
 import type { Anim, PanelId } from '../core/types';
 
@@ -145,3 +147,26 @@ export async function copyText(text: string): Promise<boolean> {
     return false;
   }
 }
+
+/** true mientras se está jugando con mando (se apaga al tocar el teclado). */
+export const usePad = () =>
+  useSyncExternalStore(
+    (cb) => {
+      input.padSubs.add(cb);
+      return () => {
+        input.padSubs.delete(cb);
+      };
+    },
+    () => input.pad,
+  );
+/** true en la vista desde arriba del mapa gigante. */
+export const useOverview = () =>
+  useSyncExternalStore(
+    (cb) => {
+      player.overviewSubs.add(cb);
+      return () => {
+        player.overviewSubs.delete(cb);
+      };
+    },
+    () => player.overview,
+  );

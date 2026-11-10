@@ -15,6 +15,19 @@ import { art } from './kit/art';
 
 const tmp = new THREE.Vector3(),
   look = new THREE.Vector3();
+const MAX_DIST = 16;
+/** Vista desde arriba del mapa gigante: centro del mapa e inclinación (casi cenital, para que los rótulos se lean). */
+const OVERVIEW = { x: -6, z: 20, pitch: 1.18, w: 350, d: 268 };
+/** Distancia de cámara para que quepa todo el mapa (y cuál eje del mapa va a lo ancho de la pantalla). */
+function overviewFit(cam: THREE.PerspectiveCamera) {
+  const tv = Math.tan(THREE.MathUtils.degToRad(60) / 2),
+    th = tv * cam.aspect,
+    portrait = cam.aspect < 1;
+  const across = portrait ? OVERVIEW.d : OVERVIEW.w,
+    along = (portrait ? OVERVIEW.w : OVERVIEW.d) * Math.sin(OVERVIEW.pitch);
+  return { dist: Math.max(across / 2 / th, along / 2 / tv), yaw: portrait ? -Math.PI / 2 : 0 };
+}
+const angLerp = (a: number, b: number, k: number) => a + Math.atan2(Math.sin(b - a), Math.cos(b - a)) * k;
 const EMOTE_ANIM: Record<string, Anim> = {
   emote_saludar: 'wave',
   emote_punta: 'dance',
@@ -36,7 +49,7 @@ export function PlayerController() {
   const avatar = useGame((s) => s.profile.avatar),
     name = useGame((s) => s.profile.name);
   const camera = useThree((s) => s.camera) as THREE.PerspectiveCamera;
-  const st = useRef({ coyote: 0, buffer: 0, stepT: 0, wasGround: true, camPos: new THREE.Vector3(0, 6, 10) });
+  const st = useRef({ over: 0, coyote: 0, buffer: 0, stepT: 0, wasGround: true, camPos: new THREE.Vector3(0, 6, 10) });
   const [vehicleKind, setVehicleKind] = useState('');
   const Vehicle = (art.props as any)[vehicleKind] as undefined | ((p: any) => any);
 
@@ -48,16 +61,36 @@ export function PlayerController() {
       paused = isPaused();
     const sens = useGame.getState().profile.settings,
       g = group.current;
-    // --- cámara: giro con arrastre, zoom con rueda
+    // --- cámara: giro con arrastre, zoom con rueda. En el lobby, alejar del todo lleva a la vista desde arriba.
+    const gs = useGame.getState(),
+      canOverview = gs.scene.kind === 'lobby' && !gs.mg && !player.fixedCam;
+    if (player.overview && !canOverview) player.setOverview(false);
     if (!player.fixedCam) {
-      player.camYaw -= input.lookX * 0.005 * sens.sens;
-      player.camPitch = Math.max(
-        -0.15,
-        Math.min(1.25, player.camPitch + input.lookY * 0.004 * sens.sens * (sens.invertY ? -1 : 1)),
-      );
-      player.camDist = Math.max(3.5, Math.min(16, player.camDist + input.zoom * 0.8));
+      if (player.overview) {
+        if (input.zoom < 0) player.setOverview(false);
+      } else {
+        player.camYaw -= input.lookX * 0.005 * sens.sens;
+        player.camPitch = Math.max(
+          -0.15,
+          Math.min(1.25, player.camPitch + input.lookY * 0.004 * sens.sens * (sens.invertY ? -1 : 1)),
+        );
+        // seguir alejando ya en el tope (un paso de rueda o un ratito de RB) pasa a la vista desde arriba
+        const want = player.camDist + input.zoom * 0.8;
+        if (input.zoom < 0) s.over = 0;
+        else if (want > MAX_DIST) s.over += (want - MAX_DIST) / 0.8;
+        if (canOverview && s.over >= 0.9) {
+          s.over = 0;
+          player.setOverview(true);
+        }
+        player.camDist = Math.max(3.5, Math.min(MAX_DIST, want));
+      }
     }
     input.lookX = input.lookY = input.zoom = 0;
+    // la animación va con el tiempo real (no con el dt recortado de la física) para que no se arrastre en equipos lentos
+    const camDt = Math.min(rawDt, 0.25);
+    player.overviewT = player.overview
+      ? Math.min(1, player.overviewT + camDt * 1.4)
+      : Math.max(0, player.overviewT - camDt * 1.8);
 
     if (!paused) {
       const v = player.vehicle;
@@ -179,18 +212,25 @@ export function PlayerController() {
         camera.updateProjectionMatrix();
       }
     } else {
-      const dist = player.camDist * (player.vehicle ? 1.35 : 1),
-        cp = Math.cos(player.camPitch),
-        sp = Math.sin(player.camPitch);
-      const tx = b.pos[0],
-        ty = b.pos[1] + 1.5,
-        tz = b.pos[2];
+      // e: 0 = detrás del muñeco, 1 = vista desde arriba; se interpolan centro, distancia, inclinación y giro
+      const e = player.overviewT * player.overviewT * (3 - 2 * player.overviewT),
+        fit = e > 0 ? overviewFit(camera) : null,
+        near = player.camDist * (player.vehicle ? 1.35 : 1);
+      const dist = fit ? Math.exp(THREE.MathUtils.lerp(Math.log(near), Math.log(fit.dist), e)) : near,
+        pitch = fit ? THREE.MathUtils.lerp(player.camPitch, OVERVIEW.pitch, e) : player.camPitch,
+        yaw = fit ? angLerp(player.camYaw, fit.yaw, e) : player.camYaw,
+        cp = Math.cos(pitch),
+        sp = Math.sin(pitch);
+      const tx = THREE.MathUtils.lerp(b.pos[0], OVERVIEW.x, e),
+        ty = THREE.MathUtils.lerp(b.pos[1] + 1.5, 0, e),
+        tz = THREE.MathUtils.lerp(b.pos[2], OVERVIEW.z, e);
       tmp.set(
-        tx + Math.sin(player.camYaw) * cp * dist,
+        tx + Math.sin(yaw) * cp * dist,
         Math.max(phys.ground(tx, tz) + 0.4, ty + sp * dist),
-        tz + Math.cos(player.camYaw) * cp * dist,
+        tz + Math.cos(yaw) * cp * dist,
       );
-      s.camPos.lerp(tmp, Math.min(1, dt * 12));
+      if (e > 0) s.camPos.copy(tmp);
+      else s.camPos.lerp(tmp, Math.min(1, dt * 12));
       camera.position.copy(s.camPos);
       look.set(tx, ty, tz);
       camera.lookAt(look);
