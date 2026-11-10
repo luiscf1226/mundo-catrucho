@@ -249,6 +249,8 @@ const ok = await run('camara-mando', file, { hash: '#go' }, async (t) => {
   for (const b of ['X', 'A', 'Y', 'B']) await tap(b);
   const teclas = await t.ev(`window.__teclas.join('')`);
   if (teclas !== 'asdf') throw new Error(`los botones no tocan los carriles de Ritmo: «${teclas}»`);
+  const quieto = await t.ev(`window.__mc.input.kx === 0 && window.__mc.input.kz === 0`);
+  if (!quieto) throw new Error('los carriles de Ritmo dejaron una tecla de caminar pulsada');
   await t.ev(`${S}.exitMinigame()`);
   console.log('fps', await t.fps());
 });

@@ -242,7 +242,10 @@ function padLoop(now: number) {
         [PAD.RIGHT, PAD.B],
       ];
       lanes.forEach((bs, i) => {
-        if (bs.some(down)) window.dispatchEvent(new KeyboardEvent('keydown', { key: 'asdf'[i] }));
+        if (!bs.some(down)) return;
+        // con su keyup: a y d también son teclas de caminar y si no se sueltan el muñeco sigue solo al salir
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'asdf'[i] }));
+        window.dispatchEvent(new KeyboardEvent('keyup', { key: 'asdf'[i] }));
       });
     } else if (player.overview && (down(PAD.A) || down(PAD.B) || down(PAD.LB) || down(PAD.LT))) {
       player.setOverview(false);
