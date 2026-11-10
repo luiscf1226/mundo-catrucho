@@ -1,0 +1,244 @@
+{
+  "_nota": "Clubes, Selección y marcas de otros van con apodo y escudo propio. «real» es solo referencia interna: nunca se muestra. Si algún día hay permiso escrito, se cambia aquí. «busca» es lo que tools/test-apodos.mjs no debe encontrar en el juego. Los ids de artículos (at_*, camisa_*) se quedan como estaban porque viven en partidas guardadas y en los data-testid; la prueba los ignora.",
+  "equipos": [
+    {
+      "id": "seleccion",
+      "tipo": "seleccion",
+      "apodo": "La Bicolor",
+      "colores": [
+        "#f7f9fc",
+        "#0b57c4",
+        "#4fc3f7"
+      ],
+      "escudo": "bicolor",
+      "atuendos": [
+        "at_h_local",
+        "at_h_visita",
+        "at_portero"
+      ],
+      "camisas": [
+        "camisa_h",
+        "camisa_h_azul",
+        "camisa_portero"
+      ],
+      "real": "Selección Nacional de Honduras",
+      "busca": "selecci[oó]n nacional|fenafuth"
+    },
+    {
+      "id": "leones",
+      "tipo": "club",
+      "apodo": "Los Leones",
+      "camiseta": "Camiseta del León",
+      "ciudad": "Tegucigalpa",
+      "colores": [
+        "#ffffff",
+        "#0b3d91",
+        "#d62828"
+      ],
+      "patron": "band",
+      "numero": "7",
+      "escudo": "leon",
+      "atuendos": [
+        "at_olimpia"
+      ],
+      "camisas": [
+        "camisa_olimpia"
+      ],
+      "real": "Olimpia",
+      "busca": "olimpia"
+    },
+    {
+      "id": "aguilas",
+      "tipo": "club",
+      "apodo": "Las Águilas",
+      "camiseta": "Camiseta del Águila",
+      "ciudad": "Tegucigalpa",
+      "colores": [
+        "#0a2a6b",
+        "#ffffff",
+        "#4fc3f7"
+      ],
+      "patron": "sides",
+      "numero": "10",
+      "escudo": "aguila",
+      "atuendos": [
+        "at_motagua"
+      ],
+      "camisas": [
+        "camisa_motagua"
+      ],
+      "real": "Motagua",
+      "busca": "motag[uü]"
+    },
+    {
+      "id": "maquina",
+      "tipo": "club",
+      "apodo": "La Máquina",
+      "camiseta": "Camiseta de La Máquina",
+      "ciudad": "San Pedro Sula",
+      "colores": [
+        "#ffd400",
+        "#111111",
+        "#111111"
+      ],
+      "patron": "pin",
+      "numero": "9",
+      "escudo": "engrane",
+      "atuendos": [
+        "at_realespana"
+      ],
+      "camisas": [
+        "camisa_realespana"
+      ],
+      "real": "Real España",
+      "busca": "real ?espa[nñ]a",
+      "alias": [
+        "Aurinegros"
+      ]
+    },
+    {
+      "id": "verdolagas",
+      "tipo": "club",
+      "apodo": "Los Verdolagas",
+      "camiseta": "Camiseta Verdolaga",
+      "ciudad": "San Pedro Sula",
+      "colores": [
+        "#138a3c",
+        "#ffffff",
+        "#ffffff"
+      ],
+      "patron": "vstripes",
+      "numero": "11",
+      "escudo": "picos",
+      "atuendos": [
+        "at_marathon"
+      ],
+      "camisas": [
+        "camisa_marathon"
+      ],
+      "real": "Marathón",
+      "busca": "marath|marat[oó]n"
+    },
+    {
+      "id": "cocoteros",
+      "tipo": "club",
+      "apodo": "Los Cocoteros",
+      "camiseta": "Camiseta Cocotera",
+      "ciudad": "La Ceiba",
+      "colores": [
+        "#c1121f",
+        "#ffffff",
+        "#ffffff"
+      ],
+      "patron": "chevron",
+      "numero": "8",
+      "escudo": "palma",
+      "atuendos": [
+        "at_vida"
+      ],
+      "camisas": [
+        "camisa_vida"
+      ],
+      "real": "C. D. Vida",
+      "busca": "c\\.? ?d\\.? vida\\b|club vida\\b|\\bel vida\\b|\\bdel vida\\b"
+    },
+    {
+      "id": "jaibos",
+      "tipo": "club",
+      "apodo": "Los Jaibos",
+      "camiseta": "Camiseta Jaiba",
+      "ciudad": "La Ceiba",
+      "colores": [
+        "#ffffff",
+        "#1565c0",
+        "#1565c0"
+      ],
+      "patron": "halves",
+      "numero": "5",
+      "escudo": "jaiba",
+      "atuendos": [
+        "at_victoria"
+      ],
+      "camisas": [
+        "camisa_victoria"
+      ],
+      "real": "C. D. Victoria",
+      "busca": "c\\.? ?d\\.? victoria\\b|club victoria\\b|\\bel victoria\\b|\\bdel victoria\\b"
+    },
+    {
+      "id": "potros",
+      "tipo": "club",
+      "apodo": "Los Potros",
+      "ciudad": "Juticalpa",
+      "colores": [
+        "#c0392b",
+        "#ffffff",
+        "#ffffff"
+      ],
+      "atuendos": [],
+      "camisas": [],
+      "real": "Olancho F. C.",
+      "busca": "olancho f\\.? ?c"
+    }
+  ],
+  "vigilar": {
+    "_nota": "Clubes y marcas que hoy no salen en el juego. Si alguno hace falta, se le pone apodo arriba antes de usarlo.",
+    "clubes": [
+      "\\bplatense\\b",
+      "\\bupn\\b",
+      "lobos de la upn",
+      "honduras progreso",
+      "real sociedad",
+      "juticalpa f\\.? ?c",
+      "parrillas one",
+      "génesis comayagua|genesis comayagua",
+      "\\bconcacaf\\b",
+      "\\bfifa\\b"
+    ],
+    "marcas": [
+      "coca[- ]?cola",
+      "\\bpepsi\\b",
+      "\\bfanta\\b",
+      "big ?cola",
+      "salva vida\\b",
+      "port royal",
+      "cerveza imperial",
+      "\\bbarena\\b",
+      "\\btigo\\b",
+      "claro (m[oó]vil|hn)",
+      "\\bhondutel\\b",
+      "\\bficohsa\\b",
+      "\\bbac\\b",
+      "banco atl[aá]ntida",
+      "\\bbanpa[ií]s\\b",
+      "pollo campero",
+      "espresso americano",
+      "\\bdiunsa\\b",
+      "\\bjetstereo\\b",
+      "\\bkielsa\\b",
+      "despensa familiar",
+      "maxi ?despensa",
+      "\\bwalmart\\b",
+      "\\bhedman\\b",
+      "\\bkamaldy\\b",
+      "\\bavianca\\b",
+      "\\btaca\\b",
+      "copa airlines",
+      "\\byummies\\b",
+      "boquitas diana|churritos diana",
+      "leche sula",
+      "dos pinos",
+      "\\bbimbo\\b",
+      "\\bjoma\\b",
+      "\\bnike\\b",
+      "\\badidas\\b",
+      "\\bumbro\\b",
+      "\\bkelme\\b",
+      "\\bmcdonald",
+      "burger king",
+      "pizza hut",
+      "\\bkfc\\b",
+      "\\bwendy'?s\\b"
+    ]
+  }
+}

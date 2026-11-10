@@ -1,6 +1,7 @@
 // Editor de personaje y tienda (Pulpería Doña Toña). Comparten la vista 3D del avatar, las pestañas por
 // categoría y las tarjetas de artículo. Todo cambio pasa por la tienda de estado (setAvatar / equip / buy).
 import { useEffect, useMemo, useRef, useState } from 'react';
+import apodos from '../../../shared/data/apodos.json';
 import { audio } from '../../core/audio';
 import { itemById, SHOP } from '../../core/data';
 import { useGame } from '../../core/store';
@@ -80,11 +81,23 @@ const EMOJI: Record<string, string> = {
   ...EMOTE_ICON,
 };
 type Grupo = NonNullable<ShopItem['grupo']>;
+// Clubes y Selección van con apodo (shared/data/apodos.json); el nombre oficial nunca se muestra.
+const EQUIPOS: { id: string; apodo: string; camiseta?: string; atuendos: string[]; camisas: string[] }[] =
+  apodos.equipos;
+const SELECCION = EQUIPOS.find((e) => e.id === 'seleccion')?.apodo ?? 'La Bicolor';
+const APODO: Record<string, string> = Object.fromEntries(
+  EQUIPOS.filter((e) => e.id !== 'seleccion').flatMap((e) => [
+    ...e.atuendos.map((id) => [id, e.apodo]),
+    ...(e.camiseta ? e.camisas.map((id) => [id, e.camiseta]) : []),
+  ]),
+);
+/** nombre que ve el jugador: el apodo si es de un club, si no el de la tienda */
+const nombre = (i: ShopItem) => APODO[i.id] ?? i.name;
 const GRUPOS: { id: Grupo | 'todos'; label: string; e: string }[] = [
   { id: 'todos', label: 'Todos', e: '✨' },
   { id: 'folclor', label: 'Folclor', e: '🪇' },
   { id: 'maya', label: 'Maya', e: '🗿' },
-  { id: 'seleccion', label: 'Selección', e: '⚽' },
+  { id: 'seleccion', label: SELECCION, e: '⚽' },
   { id: 'club', label: 'Clubes', e: '🏟️' },
   { id: 'honduras', label: 'Honduras', e: '🦜' },
 ];
@@ -409,7 +422,7 @@ export function CharacterPanel() {
                   >
                     <Thumb item={i} />
                     <span className="min-w-0 flex-1 leading-tight">
-                      <b className="block text-[13.5px] leading-tight">{i.name}</b>
+                      <b className="block text-[13.5px] leading-tight">{nombre(i)}</b>
                       <span className="flex items-center gap-1 text-xs font-bold text-muted">
                         {on ? (
                           <>
@@ -527,7 +540,7 @@ export function ShopPanel() {
     if (r === 'ok') {
       audio.sfx('buy');
       g().equip(i.id);
-      g().toast(`¡Compraste ${i.name}!`, '🛍️');
+      g().toast(`¡Compraste ${nombre(i)}!`, '🛍️');
       setTryId(null);
       setShort(null);
       play(i.cat === 'emote' ? (EMOTE_ANIM[i.id] ?? 'dance') : 'celebrate', 2200);
@@ -572,7 +585,7 @@ export function ShopPanel() {
                 className="mc-trying anim-drop absolute inset-x-2 top-2 flex items-center gap-2 px-2.5 py-1.5 text-sm"
               >
                 <Icon name="eye" size={17} />
-                <span className="min-w-0 flex-1 truncate font-bold">Probándote: {triedNew.name}</span>
+                <span className="min-w-0 flex-1 truncate font-bold">Probándote: {nombre(triedNew)}</span>
                 <button
                   type="button"
                   data-testid="shop-try-clear"
@@ -618,7 +631,7 @@ export function ShopPanel() {
                     <Coin size={16} />
                     <b data-testid="shop-missing">{short.missing}</b>
                   </span>{' '}
-                  para {shortItem.name}. Gana más en los minijuegos.
+                  para {nombre(shortItem)}. Gana más en los minijuegos.
                 </span>
               </span>
               <Btn id="shop-earn" tone="gold" size="sm" icon="gamepad" onClick={() => g().openPanel('mapa')}>
@@ -660,7 +673,7 @@ export function ShopPanel() {
                     <div data-testid={`shop-try-${i.id}`} className="flex min-h-[44px] items-center gap-2">
                       <Thumb item={i} />
                       <span className="min-w-0 flex-1 leading-tight">
-                        <b className="block text-[13.5px] leading-tight">{i.name}</b>
+                        <b className="block text-[13.5px] leading-tight">{nombre(i)}</b>
                         {i.trad && <Tag cls="mt-0.5">Típico</Tag>}
                       </span>
                     </div>
@@ -670,10 +683,10 @@ export function ShopPanel() {
                       data-state={on ? 'puesto' : mine ? 'tuyo' : poor ? 'caro' : 'venta'}
                       aria-label={
                         on
-                          ? `${i.name}, puesto`
+                          ? `${nombre(i)}, puesto`
                           : mine
-                            ? `${i.cat === 'emote' ? 'Ver' : 'Ponerte'} ${i.name}`
-                            : `Comprar ${i.name} por ${i.price} Lempiritas`
+                            ? `${i.cat === 'emote' ? 'Ver' : 'Ponerte'} ${nombre(i)}`
+                            : `Comprar ${nombre(i)} por ${i.price} Lempiritas`
                       }
                       onClick={(e) => {
                         e.stopPropagation();

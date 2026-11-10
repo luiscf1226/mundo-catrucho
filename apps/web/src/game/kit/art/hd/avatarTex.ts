@@ -1,6 +1,7 @@
 // Atlas del avatar HD (1024×512, un lienzo por configuración): cara, torso, mangas, piernas, falda, capa,
 // estampados y una rejilla de colores lisos. Todo se dibuja con Canvas 2D; nada se descarga.
 import * as THREE from 'three';
+import apodos from '../../../../../shared/data/apodos.json';
 import type { AvatarConfig } from '../../../../core/types';
 import { cut, R, SWATCH, type SwatchName, swatchCell } from './avatarGeo';
 import { AH, AW, type Rect } from './skin';
@@ -385,7 +386,7 @@ function folds(c: Ctx) {
 
 // --- atuendos: escudos originales, camisetas de club, estampados
 type Crest = (c: Ctx, x: number, y: number, s: number) => void;
-function shield(c: Ctx, x: number, y: number, s: number, fill: string, line: string) {
+function shieldPath(c: Ctx, x: number, y: number, s: number) {
   c.beginPath();
   c.moveTo(x - s, y - s);
   c.lineTo(x + s, y - s);
@@ -393,6 +394,9 @@ function shield(c: Ctx, x: number, y: number, s: number, fill: string, line: str
   c.quadraticCurveTo(x + s, y + s * 0.95, x, y + s * 1.35);
   c.quadraticCurveTo(x - s, y + s * 0.95, x - s, y + s * 0.2);
   c.closePath();
+}
+function shield(c: Ctx, x: number, y: number, s: number, fill: string, line: string) {
+  shieldPath(c, x, y, s);
   c.fillStyle = fill;
   c.fill();
   c.lineWidth = Math.max(2, s * 0.16);
@@ -463,15 +467,35 @@ const CRESTS: Record<string, Crest> = {
   },
   picos: (c, x, y, s) => {
     shield(c, x, y, s, '#ffffff', '#138a3c');
-    c.fillStyle = '#138a3c';
+    // la sierra detrás de la ciudad: tres cerros de distinto alto y un sol, nada que parezca letra
+    c.save();
+    shieldPath(c, x, y, s);
+    c.clip();
+    c.fillStyle = '#ffc93c';
     c.beginPath();
-    c.moveTo(x - s * 0.75, y + s * 0.75);
-    c.lineTo(x - s * 0.35, y - s * 0.4);
-    c.lineTo(x, y + s * 0.2);
-    c.lineTo(x + s * 0.35, y - s * 0.4);
-    c.lineTo(x + s * 0.75, y + s * 0.75);
+    c.arc(x + s * 0.42, y - s * 0.42, s * 0.22, 0, 7);
+    c.fill();
+    c.fillStyle = '#0d6b2e';
+    c.beginPath();
+    c.moveTo(x - s * 0.85, y + s * 0.8);
+    c.lineTo(x - s * 0.5, y + s * 0.05);
+    c.lineTo(x - s * 0.25, y + s * 0.35);
+    c.lineTo(x + s * 0.05, y - s * 0.55);
+    c.lineTo(x + s * 0.85, y + s * 0.8);
     c.closePath();
     c.fill();
+    c.fillStyle = '#2ea44f';
+    c.beginPath();
+    c.moveTo(x - s * 0.2, y + s * 0.95);
+    c.lineTo(x + s * 0.4, y + s * 0.15);
+    c.lineTo(x + s * 0.9, y + s * 0.95);
+    c.closePath();
+    c.fill();
+    c.restore();
+    c.lineWidth = Math.max(2, s * 0.16);
+    c.strokeStyle = '#138a3c';
+    shieldPath(c, x, y, s);
+    c.stroke();
   },
   palma: (c, x, y, s) => {
     shield(c, x, y, s, '#ffffff', '#c1121f');
@@ -492,8 +516,19 @@ const CRESTS: Record<string, Crest> = {
   },
   jaiba: (c, x, y, s) => {
     shield(c, x, y, s, '#ffffff', '#1565c0');
+    // olas del muelle abajo y una jaiba naranja encima
+    c.save();
+    shieldPath(c, x, y, s);
+    c.clip();
     c.fillStyle = '#1565c0';
-    c.fillRect(x - s, y - s, s, s * 2.4);
+    c.beginPath();
+    c.moveTo(x - s, y + s * 0.75);
+    for (let i = 0; i <= 4; i++)
+      c.quadraticCurveTo(x - s + (i - 0.5) * s * 0.5, y + s * 0.5, x - s + i * s * 0.5, y + s * 0.75);
+    c.lineTo(x + s, y + s * 1.4);
+    c.lineTo(x - s, y + s * 1.4);
+    c.fill();
+    c.restore();
     c.fillStyle = '#ff7a3d';
     ell(c, x, y + s * 0.25, s * 0.45, s * 0.3);
     c.fill();
@@ -508,18 +543,44 @@ const CRESTS: Record<string, Crest> = {
       c.stroke();
     }
   },
-  h: (c, x, y, s) => {
-    shield(c, x, y, s, '#ffffff', HBLUE);
-    c.fillStyle = HBLUE;
-    c.font = FONT(s * 1.5);
-    c.textAlign = 'center';
-    c.textBaseline = 'middle';
-    c.fillText('H', x, y + s * 0.2);
+  // la Bicolor: medalla redonda propia con las franjas y las cinco estrellas de la bandera (sin letras ni logo oficial)
+  bicolor: (c, x, y, s) => {
+    c.save();
+    c.beginPath();
+    c.arc(x, y, s, 0, Math.PI * 2);
+    c.fillStyle = '#ffffff';
+    c.fill();
+    c.clip();
+    c.fillStyle = BLUE;
+    c.fillRect(x - s, y - s, s * 2, s * 0.68);
+    c.fillRect(x - s, y + s * 0.32, s * 2, s * 0.68);
+    c.restore();
+    c.fillStyle = BLUE;
+    for (const [dx, dy] of [
+      [0, 0],
+      [-0.4, -0.18],
+      [0.4, -0.18],
+      [-0.4, 0.18],
+      [0.4, 0.18],
+    ])
+      star(c, x + dx * s, y + dy * s, s * 0.15);
+    c.lineWidth = Math.max(2, s * 0.14);
+    c.strokeStyle = HBLUE;
+    c.beginPath();
+    c.arc(x, y, s, 0, Math.PI * 2);
+    c.stroke();
+    c.lineWidth = Math.max(1, s * 0.05);
+    c.strokeStyle = '#ffffff';
+    c.beginPath();
+    c.arc(x, y, s * 0.86, 0, Math.PI * 2);
+    c.stroke();
   },
 };
 interface Kit {
   bg: string;
   fg: string;
+  /** tercer color: filete de la franja, de los costados o de las mitades */
+  acc: string;
   kind: 'band' | 'sides' | 'pin' | 'vstripes' | 'chevron' | 'halves' | 'shards';
   crest: string;
   num: string;
@@ -532,11 +593,11 @@ function jersey(c: Ctx, skin: string, o: Kit): Sleeve {
     a.fillStyle = o.fg;
     if (o.kind === 'band') {
       a.fillRect(0, 62, w, 18);
-      a.fillStyle = '#d62828';
+      a.fillStyle = o.acc;
       a.fillRect(0, 82, w, 9);
     } else if (o.kind === 'sides') {
       for (const x of [128, 384]) a.fillRect(x - 20 - off, 0, 40, h);
-      a.fillStyle = '#4fc3f7';
+      a.fillStyle = o.acc;
       for (const x of [128, 384]) a.fillRect(x - 6 - off, 0, 12, h);
     } else if (o.kind === 'pin') {
       for (let x = 4; x < w; x += 26) a.fillRect(x, 0, 5, h);
@@ -554,7 +615,7 @@ function jersey(c: Ctx, skin: string, o: Kit): Sleeve {
       a.fill();
     } else if (o.kind === 'halves') {
       a.fillRect(0, 0, w / 2, h);
-      a.fillStyle = o.bg === '#ffffff' ? '#1565c0' : '#ffffff';
+      a.fillStyle = o.acc;
       for (let y = 0; y < h; y += 34) a.fillRect(w / 2, y, w / 2, 14);
     } else if (o.kind === 'shards') {
       a.fillStyle = 'rgba(0,0,0,0.32)';
@@ -711,15 +772,30 @@ const tiers = (a: Ctx, w: number, y0: number, h: number, cols: string[]) => {
   });
 };
 const PUNTA = ['#00b4c6', '#ffd21f', '#ff7a1a', '#ff3d7f'];
+// Camisetas de club: colores, patrón y escudo salen de shared/data/apodos.json (escudos propios, ver CRESTS).
+type Equipo = { colores: string[]; patron?: string; numero?: string; escudo?: string; camisas: string[] };
 const CLUB: Record<string, Kit> = {
-  camisa_olimpia: { bg: '#ffffff', fg: '#0b3d91', kind: 'band', crest: 'leon', num: '7' },
-  camisa_motagua: { bg: '#0a2a6b', fg: '#ffffff', kind: 'sides', crest: 'aguila', num: '10' },
-  camisa_realespana: { bg: '#ffd400', fg: '#111111', kind: 'pin', crest: 'engrane', num: '9' },
-  camisa_marathon: { bg: '#138a3c', fg: '#ffffff', kind: 'vstripes', crest: 'picos', num: '11' },
-  camisa_vida: { bg: '#c1121f', fg: '#ffffff', kind: 'chevron', crest: 'palma', num: '8' },
-  camisa_victoria: { bg: '#ffffff', fg: '#1565c0', kind: 'halves', crest: 'jaiba', num: '5' },
-  camisa_portero: { bg: '#25c46b', fg: '#111111', kind: 'shards', crest: 'h', num: '1', long: true },
+  camisa_portero: {
+    bg: '#25c46b',
+    fg: '#111111',
+    acc: '#111111',
+    kind: 'shards',
+    crest: 'bicolor',
+    num: '1',
+    long: true,
+  },
 };
+for (const e of apodos.equipos as Equipo[])
+  if (e.patron)
+    for (const id of e.camisas)
+      CLUB[id] = {
+        bg: e.colores[0],
+        fg: e.colores[1],
+        acc: e.colores[2] ?? e.colores[1],
+        kind: e.patron as Kit['kind'],
+        crest: e.escudo ?? '',
+        num: e.numero ?? '10',
+      };
 function trajes(c: Ctx, cfg: AvatarConfig): Sleeve | null {
   const t = cfg.shirtColor,
     skin = cfg.skin,
@@ -1103,11 +1179,7 @@ function shirt(c: Ctx, cfg: AvatarConfig): Sleeve {
       neck(c, skin, 'v', fg);
       c.textAlign = 'center';
       c.textBaseline = 'middle';
-      c.fillStyle = fg;
-      c.font = FONT(98);
-      c.fillText('H', 256, 118);
-      c.fillStyle = blue ? '#ffffff' : BLUE;
-      for (let i = 0; i < 5; i++) star(c, 256 + (i - 2) * 22, 60 - (2 - Math.abs(i - 2)) * 4, 7);
+      CRESTS.bicolor(c, 256, 92, 34);
       c.fillStyle = fg;
       c.font = FONT(84);
       for (const x of [0, 512]) c.fillText(blue ? '9' : '10', x, 106);

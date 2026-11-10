@@ -28,5 +28,5 @@
     { "id": "m_pulperia", "text": "Atiende un turno en La Pulpería", "type": "play", "target": "pulperia", "count": 1, "coins": 40, "xp": 40 }
   ],
   "dailyCount": 3,
-  "bots": ["Baleadero", "CatrachoPro", "xX_Tegus_Xx", "CeibaKid", "Lempira504", "LaGuara", "Marathonista", "DoñaToña", "ElPulpero", "Olanchano22", "RoatánDiver", "PuntaMaster", "Motagüense", "CopánExplorer", "SiqueQueen"]
+  "bots": ["Baleadero", "CatrachoPro", "xX_Tegus_Xx", "CeibaKid", "Lempira504", "LaGuara", "Verdolaga504", "DoñaToña", "ElPulpero", "Olanchano22", "RoatánDiver", "PuntaMaster", "AguilaAzul", "CopánExplorer", "SiqueQueen"]
 }

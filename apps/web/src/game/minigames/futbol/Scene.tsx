@@ -39,7 +39,7 @@ const SQUAD: ({ name: string; cfg: AvatarConfig } | null)[] = [
   { name: 'ElPulpero', cfg: kit(3, '#ffc93c', '#0d47a1', { hat: 'gorra', hatColor: '#0d47a1' }) },
   { name: 'Olanchano22', cfg: kit(2, '#e63946', '#1d1d1f', { hair: 'pelo_corto', hairColor: '#3b2414' }) },
   { name: 'xX_Tegus_Xx', cfg: kit(4, '#e63946', '#1d1d1f', { hair: 'calvo' }) },
-  { name: 'Motagüense', cfg: kit(0, '#2ea44f', '#1d1d1f', { hat: 'gorra', hatColor: '#1d1d1f' }) },
+  { name: 'Verdolaga504', cfg: kit(0, '#2ea44f', '#1d1d1f', { hat: 'gorra', hatColor: '#1d1d1f' }) },
 ];
 const FANS: { pos: [number, number, number]; rot: number; cfg: AvatarConfig }[] = [
   { pos: [-12.4, 0, -5], rot: Math.PI / 2, cfg: kit(2, '#ff7a3d', '#607d8b', { pants: 'jeans', hair: 'pelo_largo' }) },
