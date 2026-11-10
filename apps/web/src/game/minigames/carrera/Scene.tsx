@@ -22,7 +22,7 @@ import {
   useMgTick,
   Wall,
 } from '../../kit';
-import { finish, fmtTime, rulesOf, setHud, starsFor } from '../api';
+import { finish, fmtTime, partida, rulesOf, setHud, starsFor } from '../api';
 
 const CPS: V3[] = [
   [0, 0, -48],
@@ -67,12 +67,14 @@ function Ferry({ z, bus = false, phase }: { z: number; bus?: boolean; phase: num
   );
 }
 function Hazard({ z, tire = false }: { z: number; tire?: boolean }) {
+  // etapas: mototaxis, llantas y la barrera van más lentas en la etapa 1 y más rápidas en la última
+  const ritmo = useMemo(() => 0.85 + 0.35 * partida().dif, []);
   const g = useRef<Group>(null),
     cooldown = useRef(0);
   useMgTick((dt, t) => {
     cooldown.current -= dt;
-    const x = tire ? Math.sin(z) * 2.8 : Math.sin(t * 1.15 + z) * 4.8;
-    const zz = tire ? z + ((t * 4) % 14) : z;
+    const x = tire ? Math.sin(z) * 2.8 : Math.sin(t * 1.15 * ritmo + z) * 4.8;
+    const zz = tire ? z + ((t * 4 * ritmo) % 14) : z;
     const y = height(zz);
     if (g.current) {
       g.current.position.set(x, y, zz);
@@ -100,11 +102,12 @@ function Hazard({ z, tire = false }: { z: number; tire?: boolean }) {
   );
 }
 function Barrier() {
+  const ritmo = useMemo(() => 0.85 + 0.35 * partida().dif, []);
   const g = useRef<Group>(null),
     cd = useRef(0);
   useMgTick((dt, t) => {
     cd.current -= dt;
-    const x = Math.sin(t * 1.4) * 3;
+    const x = Math.sin(t * 1.4 * ritmo) * 3;
     if (g.current) g.current.position.x = x;
     if (
       cd.current < 0 &&

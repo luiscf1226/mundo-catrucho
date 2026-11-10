@@ -25,10 +25,11 @@ import { type Shape, ShapeMesh, shapeOf } from './corte/shapes';
 
 type Arma = 'machete' | 'cuchillo' | 'hacha';
 const durOf = (p: Partida) => Math.round(70 + 30 * p.dif);
+// En la última etapa salen ~3 veces más cosas y el combo (hasta ×5) dispara el puntaje: las metas suben con eso.
 const metasOf = (p: Partida): [number, number, number] => [
-  Math.round(200 + 200 * p.dif),
-  Math.round(450 + 350 * p.dif),
-  Math.round(750 + 550 * p.dif),
+  Math.round((200 + 800 * p.dif) / 10) * 10,
+  Math.round((450 + 1950 * p.dif) / 10) * 10,
+  Math.round((800 + 3700 * p.dif) / 10) * 10,
 ];
 export const guia: Guia = {
   goal: 'Cortá todo lo que sale volando, ¡pero no toqués lo que dice «evitá»!',

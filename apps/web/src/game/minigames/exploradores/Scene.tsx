@@ -117,12 +117,13 @@ export function ExploradoresScene() {
       sc = (v: number) => Math.min(tot, Math.max(1, Math.round(v * k)));
     return {
       ...R0,
-      timeLimit: Math.max(90, Math.round(R0.timeLimit * k)),
+      // etapa 1 con un poco más de tiempo; la última con menos (la meta de objetos no cambia)
+      timeLimit: Math.round(Math.max(90, R0.timeLimit * k) * (1.1 - 0.2 * P.dif)),
       bronze: sc(R0.bronze),
       silver: Math.max(sc(R0.bronze) + 1, sc(R0.silver)),
       gold: tot,
     } as Record<string, any>;
-  }, [sites, R0]);
+  }, [sites, R0, P]);
   const total = sites.length * R.objectsPerSite;
   const specs = useMemo(() => sites.map((id) => zoneOf(deptById(id))), [sites]);
   const [site, setSite] = useState(0),

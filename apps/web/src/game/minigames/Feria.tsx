@@ -1,5 +1,5 @@
 import { useThree } from '@react-three/fiber';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { audio } from '../../core/audio';
 import { input } from '../../core/input';
@@ -8,7 +8,7 @@ import { player } from '../../core/player';
 import { useGame } from '../../core/store';
 import type { V3 } from '../../core/types';
 import { art, Ball, Block, Cyl, Ground, Interactable, Label, Spawn, useMgTick } from '../kit';
-import { finish, rulesOf, setHud, starsFor } from './api';
+import { finish, partida, rulesOf, setHud, starsFor } from './api';
 import { Fx, FxLayer } from './feria/fx';
 import { Scenery } from './feria/Scenery';
 
@@ -77,6 +77,10 @@ function targets(booth: number): Target[] {
 }
 export function Feria() {
   const { camera, size } = useThree();
+  // etapas: los blancos y el aro se mueven más rápido y más lejos (las metas de puntos no cambian)
+  const { dif } = useMemo(partida, []),
+    mov = 1 + 0.6 * dif,
+    amp = 1 + 0.4 * dif;
   const [, render] = useState(0);
   const fx = useRef(new Fx()).current;
   const s = useRef({
@@ -163,7 +167,7 @@ export function Feria() {
           .filter((t) => !t.down)
           .map((t) => {
             const p = new THREE.Vector3(...t.p);
-            if (s.booth === 1) p.z -= Math.sin(s.time * 2.5) * 0.65;
+            if (s.booth === 1) p.z -= Math.sin(s.time * 2.5 * mov) * 0.65 * amp;
             p.project(camera);
             return {
               x: ((p.x + 1) * size.width) / 2,
@@ -180,7 +184,7 @@ export function Feria() {
       player.visible = true;
       player.fixedCam = null;
     };
-  }, [camera, size, s]);
+  }, [camera, size, s, mov, amp]);
   useMgTick((dt) => {
     s.time += dt;
     s.refresh += dt;
@@ -208,11 +212,11 @@ export function Feria() {
       );
       if (ray.ray.intersectPlane(plane, hit)) {
         s.aim = [hit.x, hit.y, hit.z];
-        if (s.booth === 1) s.aim[2] += Math.sin(s.time * 2.5) * 0.65;
+        if (s.booth === 1) s.aim[2] += Math.sin(s.time * 2.5 * mov) * 0.65 * amp;
       }
       for (const t of s.targets) {
         if (t.moving && !t.down) {
-          t.p[0] = t.base[0] + Math.sin(s.time * 1.5) * 0.7;
+          t.p[0] = t.base[0] + Math.sin(s.time * 1.5 * mov) * 0.7 * amp;
         }
         if (t.down && s.booth === 2) {
           t.v[1] -= 12 * dt;
