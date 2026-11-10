@@ -1,0 +1,150 @@
+[
+ {
+  "id": "carrera",
+  "name": "Carrera Catrucha",
+  "place": "Tegucigalpa",
+  "icon": "🏃",
+  "desc": "Carrera de obstáculos por las calles de Tegucigalpa. Corre, salta y llega a la meta antes de que se acabe el tiempo.",
+  "rules": {
+   "timeLimit": 120,
+   "gold": 50,
+   "silver": 70,
+   "bronze": 95,
+   "checkpoints": 4
+  }
+ },
+ {
+  "id": "futbol",
+  "name": "Fútbol de Barrio",
+  "place": "Cancha del barrio",
+  "icon": "⚽",
+  "desc": "Potra de barrio de 2 minutos. Patea la pelota a la portería rival y mete más goles que el otro equipo.",
+  "rules": {
+   "duration": 120,
+   "goldGoals": 3
+  }
+ },
+ {
+  "id": "feria",
+  "name": "Feria Catracha",
+  "place": "Feria patronal",
+  "icon": "🎯",
+  "desc": "Tres puestos de feria: tiro con hulera, argollas y tumbalatas. Junta puntos para ganar premios.",
+  "rules": {
+   "booths": [
+    "hulera",
+    "argollas",
+    "latas"
+   ],
+   "shotsPerBooth": 6,
+   "bronze": 150,
+   "silver": 280,
+   "gold": 400
+  }
+ },
+ {
+  "id": "exploradores",
+  "name": "Exploradores de Honduras",
+  "place": "Copán · Yojoa · Roatán",
+  "icon": "🧭",
+  "desc": "Encuentra los objetos escondidos en Copán Ruinas, el Lago de Yojoa y Roatán, y desbloquea datos culturales.",
+  "rules": {
+   "sites": [
+    "copan",
+    "cortes",
+    "islas"
+   ],
+   "objectsPerSite": 5,
+   "timeLimit": 240,
+   "bronze": 8,
+   "silver": 12,
+   "gold": 15
+  }
+ },
+ {
+  "id": "pulperia",
+  "name": "La Pulpería",
+  "place": "Pulpería Doña Toña",
+  "icon": "🏪",
+  "bonus": true,
+  "desc": "Atiende la pulpería: lleva a cada cliente lo que pide antes de que se vaya.",
+  "rules": {
+   "duration": 90,
+   "bronze": 100,
+   "silver": 180,
+   "gold": 260
+  }
+ },
+ {
+  "id": "corte",
+  "name": "A puro machete",
+  "place": "Honduras",
+  "icon": "🔪",
+  "desc": "Cortá lo que te tiren sin tocar lo que no es.",
+  "rules": {}
+ },
+ {
+  "id": "monta",
+  "name": "La monta",
+  "place": "Honduras",
+  "icon": "🐂",
+  "desc": "Aguantá arriba sin que te boten.",
+  "rules": {}
+ },
+ {
+  "id": "ritmo",
+  "name": "Al ritmo",
+  "place": "Honduras",
+  "icon": "🥁",
+  "desc": "Seguí el ritmo sin perder el paso.",
+  "rules": {}
+ },
+ {
+  "id": "ruta",
+  "name": "La ruta",
+  "place": "Honduras",
+  "icon": "⛰️",
+  "desc": "Llegá a la meta saltando obstáculos.",
+  "rules": {}
+ },
+ {
+  "id": "pesca",
+  "name": "La pesca",
+  "place": "Honduras",
+  "icon": "🎣",
+  "desc": "Tirá el anzuelo y sacá el mejor pescado.",
+  "rules": {}
+ },
+ {
+  "id": "atrapa",
+  "name": "Atrapalo",
+  "place": "Honduras",
+  "icon": "🧺",
+  "desc": "Atrapá lo bueno y dejá pasar lo malo.",
+  "rules": {}
+ },
+ {
+  "id": "cocina",
+  "name": "La cocina",
+  "place": "Honduras",
+  "icon": "🍳",
+  "desc": "Armá cada pedido en el orden correcto.",
+  "rules": {}
+ },
+ {
+  "id": "trivia",
+  "name": "¿Cómo se dice?",
+  "place": "Honduras",
+  "icon": "💬",
+  "desc": "Caminá a la respuesta correcta.",
+  "rules": {}
+ },
+ {
+  "id": "manejo",
+  "name": "Al volante",
+  "place": "Honduras",
+  "icon": "🚐",
+  "desc": "Manejá, recogé y llegá sin chocar.",
+  "rules": {}
+ }
+]

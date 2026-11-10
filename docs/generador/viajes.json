@@ -1,0 +1,913 @@
+{
+  "rutas": [
+    {
+      "de": "franciscomorazan",
+      "a": "comayagua",
+      "salida": "Tegucigalpa",
+      "llegada": "Comayagua",
+      "carretera": "CA-5 norte",
+      "medio": "carretera",
+      "kilometrosReales": 85.6,
+      "horasReales": 1.27,
+      "minutosEnJuego": 1.5,
+      "paisaje": [
+        "pinos de Zambrano",
+        "valle de Amarateca",
+        "descenso al valle"
+      ],
+      "paradas": [
+        {
+          "nombre": "Desvío de Zambrano",
+          "queHay": "comedor y pinos",
+          "evento": "Podés parar por café; al seguir, cambia la vegetación."
+        }
+      ],
+      "fuente": "https://www.rome2rio.com/s/Tegucigalpa/Comayagua",
+      "bidireccional": true,
+      "sePuedeSaltar": true,
+      "notaTiempo": "Aproximación de conducción en condiciones normales, sin esperas ni paradas; el bus puede tardar más. Las paradas son propuestas de diseño, no servicios garantizados."
+    },
+    {
+      "de": "franciscomorazan",
+      "a": "olancho",
+      "salida": "Tegucigalpa",
+      "llegada": "Juticalpa",
+      "carretera": "Ruta 15, carretera a Olancho",
+      "medio": "carretera",
+      "kilometrosReales": 172.9,
+      "horasReales": 2.48,
+      "minutosEnJuego": 3,
+      "paisaje": [
+        "valles de Talanga",
+        "llanuras ganaderas",
+        "pinos"
+      ],
+      "paradas": [
+        {
+          "nombre": "Campamento",
+          "queHay": "puestos de comida y acceso a pueblos",
+          "evento": "Un anfitrión ofrece una parada opcional para conocer el camino rural."
+        }
+      ],
+      "fuente": "https://www.rome2rio.com/s/Tegucigalpa/Juticalpa",
+      "bidireccional": true,
+      "sePuedeSaltar": true,
+      "notaTiempo": "Aproximación de conducción en condiciones normales, sin esperas ni paradas; el bus puede tardar más. Las paradas son propuestas de diseño, no servicios garantizados."
+    },
+    {
+      "de": "franciscomorazan",
+      "a": "elparaiso",
+      "salida": "Tegucigalpa",
+      "llegada": "Danlí",
+      "carretera": "CA-6 por Zamorano",
+      "medio": "carretera",
+      "kilometrosReales": 97.6,
+      "horasReales": 1.43,
+      "minutosEnJuego": 1.8,
+      "paisaje": [
+        "valle del Zamorano",
+        "laderas",
+        "cultivos de maíz"
+      ],
+      "paradas": [
+        {
+          "nombre": "Zamorano",
+          "queHay": "cultivos y puestos de comida",
+          "evento": "Se abre una postal agrícola y el bus permite subir a un vendedor ficticio."
+        }
+      ],
+      "fuente": "https://www.rome2rio.com/s/Tegucigalpa/Danl%C3%AD",
+      "bidireccional": true,
+      "sePuedeSaltar": true,
+      "notaTiempo": "Aproximación de conducción en condiciones normales, sin esperas ni paradas; el bus puede tardar más. Las paradas son propuestas de diseño, no servicios garantizados."
+    },
+    {
+      "de": "franciscomorazan",
+      "a": "valle",
+      "salida": "Tegucigalpa",
+      "llegada": "Nacaome",
+      "carretera": "CA-5 sur / CA-1 y acceso a Nacaome",
+      "medio": "carretera",
+      "kilometrosReales": 101.2,
+      "horasReales": 1.48,
+      "minutosEnJuego": 2,
+      "paisaje": [
+        "Sabanagrande",
+        "bosque seco",
+        "descenso hacia el sur"
+      ],
+      "paradas": [
+        {
+          "nombre": "Sabanagrande",
+          "queHay": "rosquillas y tustacas",
+          "evento": "La compra opcional aparece en la mochila; la temperatura del paisaje sube."
+        }
+      ],
+      "fuente": "https://www.rome2rio.com/s/Tegucigalpa/Nacaome",
+      "bidireccional": true,
+      "sePuedeSaltar": true,
+      "notaTiempo": "Aproximación de conducción en condiciones normales, sin esperas ni paradas; el bus puede tardar más. Las paradas son propuestas de diseño, no servicios garantizados."
+    },
+    {
+      "de": "valle",
+      "a": "choluteca",
+      "salida": "Nacaome",
+      "llegada": "Choluteca",
+      "carretera": "Acceso de Nacaome / CA-1",
+      "medio": "carretera",
+      "kilometrosReales": 52,
+      "horasReales": 0.75,
+      "minutosEnJuego": 1,
+      "paisaje": [
+        "valle seco",
+        "puentes",
+        "cultivos sureños"
+      ],
+      "paradas": [
+        {
+          "nombre": "Desvío de San Lorenzo",
+          "queHay": "empalme vial y vendedores",
+          "evento": "Elegís seguir hacia Choluteca o guardar el desvío al golfo para después."
+        }
+      ],
+      "fuente": "https://www.rome2rio.com/s/Nacaome/Choluteca",
+      "bidireccional": true,
+      "sePuedeSaltar": true,
+      "notaTiempo": "Aproximación de conducción en condiciones normales, sin esperas ni paradas; el bus puede tardar más. Las paradas son propuestas de diseño, no servicios garantizados."
+    },
+    {
+      "de": "comayagua",
+      "a": "lapaz",
+      "salida": "Comayagua",
+      "llegada": "La Paz",
+      "carretera": "CA-5 / CA-7",
+      "medio": "carretera",
+      "kilometrosReales": 23.7,
+      "horasReales": 0.37,
+      "minutosEnJuego": 0.67,
+      "paisaje": [
+        "valle agrícola",
+        "desvíos",
+        "cabecera de La Paz"
+      ],
+      "paradas": [
+        {
+          "nombre": "Empalme de La Paz",
+          "queHay": "cruce de carretera y comercio",
+          "evento": "El cobrador anuncia el desvío y baja pasajeros con el bus detenido."
+        }
+      ],
+      "fuente": "https://www.rome2rio.com/s/Comayagua/La-Paz-Honduras",
+      "bidireccional": true,
+      "sePuedeSaltar": true,
+      "notaTiempo": "Aproximación de conducción en condiciones normales, sin esperas ni paradas; el bus puede tardar más. Las paradas son propuestas de diseño, no servicios garantizados."
+    },
+    {
+      "de": "lapaz",
+      "a": "intibuca",
+      "salida": "Marcala",
+      "llegada": "La Esperanza",
+      "carretera": "CA-11A",
+      "medio": "carretera",
+      "kilometrosReales": 31.3,
+      "horasReales": 0.47,
+      "minutosEnJuego": 0.8,
+      "paisaje": [
+        "cafetales",
+        "altiplano",
+        "laderas frías"
+      ],
+      "paradas": [
+        {
+          "nombre": "Salida de Marcala",
+          "queHay": "café de origen y mirador del camino",
+          "evento": "Cambia el vestuario ambiental del avatar al entrar al altiplano."
+        }
+      ],
+      "fuente": "https://www.rome2rio.com/s/La-Esperanza/Marcala",
+      "bidireccional": true,
+      "sePuedeSaltar": true,
+      "notaTiempo": "Aproximación de conducción en condiciones normales, sin esperas ni paradas; el bus puede tardar más. Las paradas son propuestas de diseño, no servicios garantizados."
+    },
+    {
+      "de": "intibuca",
+      "a": "lempira",
+      "salida": "La Esperanza",
+      "llegada": "Gracias",
+      "carretera": "CA-11A por San Juan",
+      "medio": "carretera",
+      "kilometrosReales": 79.9,
+      "horasReales": 1.27,
+      "minutosEnJuego": 1.6,
+      "paisaje": [
+        "pueblos de montaña",
+        "pinares",
+        "aproximación a Celaque"
+      ],
+      "paradas": [
+        {
+          "nombre": "San Juan",
+          "queHay": "pueblo y parada de comida",
+          "evento": "Podés fotografiar la montaña desde un punto señalizado."
+        }
+      ],
+      "fuente": "https://www.rome2rio.com/s/La-Esperanza/Gracias",
+      "bidireccional": true,
+      "sePuedeSaltar": true,
+      "notaTiempo": "Aproximación de conducción en condiciones normales, sin esperas ni paradas; el bus puede tardar más. Las paradas son propuestas de diseño, no servicios garantizados."
+    },
+    {
+      "de": "lempira",
+      "a": "copan",
+      "salida": "Gracias",
+      "llegada": "Santa Rosa de Copán",
+      "carretera": "CA-11A",
+      "medio": "carretera",
+      "kilometrosReales": 47,
+      "horasReales": 0.77,
+      "minutosEnJuego": 1.1,
+      "paisaje": [
+        "laderas de occidente",
+        "cafetales",
+        "entrada a Santa Rosa"
+      ],
+      "paradas": [
+        {
+          "nombre": "Salida de Gracias",
+          "queHay": "vista de montaña y empalme",
+          "evento": "Un letrero permite guardar la ruta de regreso."
+        }
+      ],
+      "fuente": "https://www.rome2rio.com/s/Santa-Rosa-de-Cop%C3%A1n/Gracias",
+      "bidireccional": true,
+      "sePuedeSaltar": true,
+      "notaTiempo": "Aproximación de conducción en condiciones normales, sin esperas ni paradas; el bus puede tardar más. Las paradas son propuestas de diseño, no servicios garantizados."
+    },
+    {
+      "de": "copan",
+      "a": "ocotepeque",
+      "salida": "Santa Rosa de Copán",
+      "llegada": "Nueva Ocotepeque",
+      "carretera": "CA-4 por San Marcos y Güisayote",
+      "medio": "carretera",
+      "kilometrosReales": 91.1,
+      "horasReales": 1.23,
+      "minutosEnJuego": 1.8,
+      "paisaje": [
+        "cafetales",
+        "bosque nublado",
+        "descenso hacia Nueva Ocotepeque"
+      ],
+      "paradas": [
+        {
+          "nombre": "Paso de Güisayote",
+          "queHay": "neblina y vegetación montana",
+          "evento": "Se reduce la visibilidad; podés activar conducción asistida."
+        }
+      ],
+      "fuente": "https://www.rome2rio.com/s/Santa-Rosa-de-Cop%C3%A1n/Nueva-Ocotepeque",
+      "bidireccional": true,
+      "sePuedeSaltar": true,
+      "notaTiempo": "Fuente consultada con destino Nueva Ocotepeque: 91,1 km y 1 h 14 min. No usar la búsqueda Ocotepeque, que devuelve San Marcos y unos 64 km. Tiempo aproximado de auto, sin paradas."
+    },
+    {
+      "de": "santabarbara",
+      "a": "cortes",
+      "salida": "Santa Bárbara",
+      "llegada": "San Pedro Sula",
+      "carretera": "Ruta 20 hacia Pito Solo / CA-5",
+      "medio": "carretera",
+      "kilometrosReales": 101.5,
+      "horasReales": 1.65,
+      "minutosEnJuego": 2,
+      "paisaje": [
+        "laderas",
+        "orilla de Yojoa",
+        "valle de Sula"
+      ],
+      "paradas": [
+        {
+          "nombre": "Pito Solo",
+          "queHay": "empalme de la Ruta 20 con CA-5",
+          "evento": "El jugador ve el rótulo al lago antes de entrar al valle."
+        }
+      ],
+      "fuente": "https://www.rome2rio.com/s/Santa-Barbara-Honduras/San-Pedro-Sula",
+      "bidireccional": true,
+      "sePuedeSaltar": true,
+      "notaTiempo": "Aproximación de conducción en condiciones normales, sin esperas ni paradas; el bus puede tardar más. Las paradas son propuestas de diseño, no servicios garantizados."
+    },
+    {
+      "de": "comayagua",
+      "a": "cortes",
+      "salida": "Comayagua",
+      "llegada": "San Pedro Sula",
+      "carretera": "CA-5 norte",
+      "medio": "carretera",
+      "kilometrosReales": 159.2,
+      "horasReales": 2.45,
+      "minutosEnJuego": 3,
+      "paisaje": [
+        "Siguatepeque",
+        "Taulabé",
+        "Lago de Yojoa",
+        "valle de Sula"
+      ],
+      "paradas": [
+        {
+          "nombre": "Orilla de Yojoa",
+          "queHay": "comedores de pescado y miradores",
+          "evento": "Podés parar a comer o seguir; el lago se ve desde la ruta."
+        }
+      ],
+      "fuente": "https://www.rome2rio.com/s/Comayagua/San-Pedro-Sula",
+      "bidireccional": true,
+      "sePuedeSaltar": true,
+      "notaTiempo": "Aproximación de conducción en condiciones normales, sin esperas ni paradas; el bus puede tardar más. Las paradas son propuestas de diseño, no servicios garantizados."
+    },
+    {
+      "de": "cortes",
+      "a": "yoro",
+      "salida": "San Pedro Sula",
+      "llegada": "El Progreso",
+      "carretera": "CA-13 por La Lima",
+      "medio": "carretera",
+      "kilometrosReales": 34.2,
+      "horasReales": 0.58,
+      "minutosEnJuego": 0.75,
+      "paisaje": [
+        "valle de Sula",
+        "cultivos",
+        "cruce del Ulúa"
+      ],
+      "paradas": [
+        {
+          "nombre": "Entrada de El Progreso",
+          "queHay": "puente y movimiento urbano",
+          "evento": "El bus reduce velocidad y el cobrador anuncia conexión a Tela."
+        }
+      ],
+      "fuente": "https://www.rome2rio.com/es/s/San-Pedro-Sula/El-Progreso-Yoro-Honduras",
+      "bidireccional": true,
+      "sePuedeSaltar": true,
+      "notaTiempo": "Aproximación de conducción en condiciones normales, sin esperas ni paradas; el bus puede tardar más. Las paradas son propuestas de diseño, no servicios garantizados."
+    },
+    {
+      "de": "yoro",
+      "a": "atlantida",
+      "salida": "El Progreso",
+      "llegada": "Tela",
+      "carretera": "CA-13",
+      "medio": "carretera",
+      "kilometrosReales": 65.1,
+      "horasReales": 0.93,
+      "minutosEnJuego": 1.25,
+      "paisaje": [
+        "cultivos",
+        "llanura húmeda",
+        "aproximación al Caribe"
+      ],
+      "paradas": [
+        {
+          "nombre": "Acceso a Tela",
+          "queHay": "puestos de pan y conexión urbana",
+          "evento": "Aparece el desvío a Lancetilla como descubrimiento opcional."
+        }
+      ],
+      "fuente": "https://www.rome2rio.com/es/s/El-Progreso/Tela",
+      "bidireccional": true,
+      "sePuedeSaltar": true,
+      "notaTiempo": "Aproximación de conducción en condiciones normales, sin esperas ni paradas; el bus puede tardar más. Las paradas son propuestas de diseño, no servicios garantizados."
+    },
+    {
+      "de": "atlantida",
+      "a": "colon",
+      "salida": "La Ceiba",
+      "llegada": "Tocoa",
+      "carretera": "CA-13 por Jutiapa y Sabá",
+      "medio": "carretera",
+      "kilometrosReales": 109.2,
+      "horasReales": 1.7,
+      "minutosEnJuego": 2.1,
+      "paisaje": [
+        "costa",
+        "plantaciones del Aguán",
+        "puentes"
+      ],
+      "paradas": [
+        {
+          "nombre": "Sabá",
+          "queHay": "cruce hacia Olanchito y ventas de comida",
+          "evento": "El mapa muestra el ramal interior sin teletransportar al jugador a Trujillo."
+        }
+      ],
+      "fuente": "https://www.rome2rio.com/s/La-Ceiba/Tocoa",
+      "bidireccional": true,
+      "sePuedeSaltar": true,
+      "notaTiempo": "Aproximación de conducción en condiciones normales, sin esperas ni paradas; el bus puede tardar más. Las paradas son propuestas de diseño, no servicios garantizados."
+    },
+    {
+      "de": "atlantida",
+      "a": "islas",
+      "salida": "Muelle de cabotaje de La Ceiba",
+      "llegada": "Muelle de Roatán",
+      "carretera": "Mar Caribe: ferry de pasajeros, sin carretera",
+      "medio": "ferry",
+      "kilometrosReales": 65,
+      "horasReales": 1.5,
+      "minutosEnJuego": 2.2,
+      "paisaje": [
+        "muelle",
+        "mar abierto",
+        "costa de Roatán"
+      ],
+      "paradas": [
+        {
+          "nombre": "Terminal de embarque",
+          "queHay": "boleto, equipaje y chalecos",
+          "evento": "Se embarca con vehículo terrestre estacionado; el oleaje puede suspender la salida."
+        }
+      ],
+      "fuente": "https://hondurasferry.com/horarios-y-precios/",
+      "bidireccional": true,
+      "sePuedeSaltar": true,
+      "notaTiempo": "El operador publica 1 h 30 min de navegación. Distancia marítima aproximada de 65 km; la cola y el embarque se contabilizan aparte. No es un ferry para manejar el rapidito a bordo; confirmación operativa real no incluida."
+    },
+    {
+      "de": "atlantida",
+      "a": "graciasadios",
+      "salida": "Aeropuerto de La Ceiba",
+      "llegada": "Aeropuerto de Puerto Lempira",
+      "carretera": "Ruta aérea LCE–PEU: no hay carretera de enlace continuo",
+      "medio": "avioneta",
+      "kilometrosReales": 332,
+      "horasReales": 1.5,
+      "minutosEnJuego": 2.5,
+      "paisaje": [
+        "litoral caribeño",
+        "ríos",
+        "lagunas de La Mosquitia"
+      ],
+      "paradas": [
+        {
+          "nombre": "Terminal aérea de La Ceiba",
+          "queHay": "registro, pesaje de equipaje y sala de espera",
+          "evento": "Dejás el vehículo y subís a una avioneta ficticia; en destino continuás por laguna con transporte local."
+        }
+      ],
+      "fuente": "https://www.flightconnections.com/flights-from-lce-to-peu",
+      "bidireccional": true,
+      "sePuedeSaltar": true,
+      "notaTiempo": "La fuente registra 332 km de vuelo y un promedio de 1 h 30 min. No incluye registro ni espera; el avión de juego es ficticio y no reproduce una aerolínea."
+    },
+    {
+      "de": "cortes",
+      "a": "copan",
+      "salida": "San Pedro Sula",
+      "llegada": "Santa Rosa de Copán",
+      "carretera": "CA-4 por Quimistán y La Entrada",
+      "medio": "carretera",
+      "kilometrosReales": 158,
+      "horasReales": 2.42,
+      "minutosEnJuego": 2.8,
+      "paisaje": [
+        "valle de Sula",
+        "Quimistán",
+        "laderas occidentales"
+      ],
+      "paradas": [
+        {
+          "nombre": "La Entrada",
+          "queHay": "terminales y cruce hacia Copán Ruinas",
+          "evento": "Podés marcar la carretera CA-11 a Copán Ruinas para una visita posterior."
+        }
+      ],
+      "fuente": "https://www.rome2rio.com/s/San-Pedro-Sula/Santa-Rosa-de-Cop%C3%A1n",
+      "bidireccional": true,
+      "sePuedeSaltar": true,
+      "notaTiempo": "Aproximación de conducción en condiciones normales, sin esperas ni paradas; el bus puede tardar más. Las paradas son propuestas de diseño, no servicios garantizados."
+    },
+    {
+      "de": "yoro",
+      "a": "colon",
+      "salida": "Olanchito",
+      "llegada": "Tocoa",
+      "carretera": "Corredor de Olanchito hacia Sabá / CA-13",
+      "medio": "carretera",
+      "kilometrosReales": 73.5,
+      "horasReales": 1.17,
+      "minutosEnJuego": 1.4,
+      "paisaje": [
+        "valle del Aguán",
+        "cultivos",
+        "ríos"
+      ],
+      "paradas": [
+        {
+          "nombre": "Empalme de Sabá",
+          "queHay": "conexiones hacia La Ceiba y Tocoa",
+          "evento": "El cobrador confirma Tocoa antes del giro para evitar un desvío equivocado."
+        }
+      ],
+      "fuente": "https://www.rome2rio.com/s/Olanchito/Tocoa",
+      "bidireccional": true,
+      "sePuedeSaltar": true,
+      "notaTiempo": "Aproximación de conducción en condiciones normales, sin esperas ni paradas; el bus puede tardar más. Las paradas son propuestas de diseño, no servicios garantizados."
+    },
+    {
+      "de": "atlantida",
+      "a": "islas",
+      "salida": "Muelle de La Ceiba",
+      "llegada": "Muelle de Utila",
+      "carretera": "Mar Caribe: ferry a Utila",
+      "medio": "ferry",
+      "kilometrosReales": null,
+      "horasReales": 1,
+      "minutosEnJuego": 1.5,
+      "paisaje": [
+        "costa",
+        "mar abierto",
+        "perfil bajo de Utila"
+      ],
+      "paradas": [
+        {
+          "nombre": "Terminal de Utila",
+          "queHay": "muelle y equipaje",
+          "evento": "Desembarcás a pie; el transporte terrestre no cruza en este servicio."
+        }
+      ],
+      "fuente": "https://hondurasferry.com/horarios-y-precios/",
+      "bidireccional": true,
+      "sePuedeSaltar": true,
+      "notaTiempo": "El operador consultado publica 1 hora, no 45 minutos. Distancia de navegación no confirmada con el operador; kilometrosReales queda null para no inventarla."
+    },
+    {
+      "de": "atlantida",
+      "a": "islas",
+      "salida": "Sambo Creek",
+      "llegada": "Cochino Menor, Cayos Cochinos",
+      "carretera": "Mar Caribe: lancha de excursión con capitán",
+      "medio": "lancha",
+      "kilometrosReales": 25,
+      "horasReales": 0.75,
+      "minutosEnJuego": 1.1,
+      "paisaje": [
+        "costa de Sambo Creek",
+        "mar abierto",
+        "cayos y arrecife"
+      ],
+      "paradas": [
+        {
+          "nombre": "Estación de investigación de Cochino Menor",
+          "queHay": "orientación sobre el área protegida",
+          "evento": "El capitán da la charla y habilita un punto de observación autorizado; no hay desembarco libre."
+        }
+      ],
+      "fuente": "https://visitatlantida.com/destino/atlantida/la-ceiba/cayos-cochinos/",
+      "bidireccional": true,
+      "sePuedeSaltar": true,
+      "notaTiempo": "La fuente turística describe unos 25 km y 45 minutos desde Sambo Creek. Sujeto a mar y guía; Cayos Cochinos pertenece a Islas de la Bahía aunque se accede desde Atlántida."
+    }
+  ],
+  "eventosDeCarretera": [
+    {
+      "nombre": "Derrumbe preventivo",
+      "queEs": "Una cuadrilla cierra un carril por material en la vía.",
+      "donde": [
+        "comayagua",
+        "lapaz",
+        "intibuca",
+        "lempira",
+        "ocotepeque",
+        "copan",
+        "santabarbara",
+        "olancho"
+      ],
+      "efecto": "Reduce velocidad, activa paso alternado y ofrece salto del tramo sin penalización."
+    },
+    {
+      "nombre": "Ganado cruzando",
+      "queEs": "Un pequeño hato pasa entre dos fincas.",
+      "donde": [
+        "olancho",
+        "elparaiso",
+        "yoro",
+        "copan",
+        "santabarbara",
+        "choluteca"
+      ],
+      "efecto": "Detiene el vehículo hasta que el guía confirme paso libre."
+    },
+    {
+      "nombre": "Vendedor del bus",
+      "queEs": "Un vendedor ficticio ofrece rosquillas durante una parada.",
+      "donde": "todas",
+      "efecto": "Abre una compra opcional; el bus retoma marcha cuando baja."
+    },
+    {
+      "nombre": "Túmulo de entrada",
+      "queEs": "Un reductor marca la llegada a un pueblo.",
+      "donde": "todas",
+      "efecto": "Pide frenar; pasar lento conserva comodidad y equipaje."
+    },
+    {
+      "nombre": "Lluvia fuerte",
+      "queEs": "El agua reduce visibilidad y adherencia.",
+      "donde": "todas",
+      "efecto": "Alarga frenado y habilita asistencia; la duración total sigue limitada a cuatro minutos."
+    },
+    {
+      "nombre": "Neblina de altura",
+      "queEs": "La nube cubre la carretera de montaña.",
+      "donde": [
+        "comayagua",
+        "lapaz",
+        "intibuca",
+        "lempira",
+        "ocotepeque",
+        "copan",
+        "santabarbara",
+        "olancho"
+      ],
+      "efecto": "Reduce alcance visual y habilita luces bajas y conducción asistida."
+    },
+    {
+      "nombre": "Control de tránsito",
+      "queEs": "Un agente ficticio revisa documentos en un punto señalizado.",
+      "donde": "todas",
+      "efecto": "Detiene la marcha por una interacción breve y devuelve los documentos, sin pagos informales."
+    },
+    {
+      "nombre": "Peaje",
+      "queEs": "Una caseta ordena la entrada a un tramo concesionado.",
+      "donde": [
+        "cortes",
+        "comayagua",
+        "franciscomorazan"
+      ],
+      "efecto": "Cambia a carriles lentos y descuenta una tarifa ficticia visible antes de elegir vehículo."
+    },
+    {
+      "nombre": "Parada a mano",
+      "queEs": "Un pasajero hace seña en un sitio seguro habilitado.",
+      "donde": "todas",
+      "efecto": "El bus se orilla antes de abrir; sube alguien con destino anunciado."
+    },
+    {
+      "nombre": "Radio del camino",
+      "queEs": "Suena música original inspirada en ambientes locales, sin usar grabaciones licenciadas ajenas.",
+      "donde": "todas",
+      "efecto": "Podés cambiar volumen o apagarla; subtítulos muestran avisos de parada."
+    },
+    {
+      "nombre": "Bache marcado",
+      "queEs": "Un parche roto aparece con señal de advertencia.",
+      "donde": "todas",
+      "efecto": "Desviás suavemente o frenás; pasar encima reduce comodidad."
+    },
+    {
+      "nombre": "Puente de un carril",
+      "queEs": "Vehículos esperan un turno de paso.",
+      "donde": [
+        "olancho",
+        "elparaiso",
+        "yoro",
+        "copan",
+        "santabarbara",
+        "choluteca"
+      ],
+      "efecto": "Alterna prioridades y muestra quién sigue sin convertirlo en carrera."
+    },
+    {
+      "nombre": "Comedor de carretera",
+      "queEs": "El conductor ofrece una parada de descanso.",
+      "donde": "todas",
+      "efecto": "Podés comprar comida virtual y retomar el viaje desde el mismo punto."
+    },
+    {
+      "nombre": "Alto por obras",
+      "queEs": "Una persona de la cuadrilla indica alto y siga.",
+      "donde": "todas",
+      "efecto": "Espera breve y paso guiado sin adelantar maquinaria."
+    },
+    {
+      "nombre": "Cargamento que se acomoda",
+      "queEs": "Sacos ficticios se desplazan por una frenada.",
+      "donde": [
+        "olancho",
+        "elparaiso",
+        "yoro",
+        "copan",
+        "santabarbara",
+        "choluteca"
+      ],
+      "efecto": "En una bahía detenida reajustás amarres antes de continuar."
+    },
+    {
+      "nombre": "Desvío al mirador",
+      "queEs": "Un letrero anuncia un punto para fotografiar.",
+      "donde": [
+        "comayagua",
+        "lapaz",
+        "intibuca",
+        "lempira",
+        "ocotepeque",
+        "copan",
+        "santabarbara",
+        "olancho"
+      ],
+      "efecto": "Habilita parada opcional sin frenar en mitad de la vía."
+    },
+    {
+      "nombre": "Calor sureño",
+      "queEs": "La cabina acumula calor en el descenso al sur.",
+      "donde": [
+        "valle",
+        "choluteca"
+      ],
+      "efecto": "Podés ventilar o parar por agua; no afecta la salud real ni obliga a compra."
+    },
+    {
+      "nombre": "Oleaje y espera",
+      "queEs": "El capitán aplaza una salida marítima por condiciones simuladas.",
+      "donde": [
+        "atlantida",
+        "islas",
+        "colon",
+        "valle"
+      ],
+      "efecto": "Muestra espera o viaje saltado; nunca obliga a navegar mal tiempo."
+    },
+    {
+      "nombre": "Equipaje pesado",
+      "queEs": "El operador pesa bultos antes de un vuelo o lancha.",
+      "donde": [
+        "atlantida",
+        "graciasadios"
+      ],
+      "efecto": "Redistribuye la carga en tierra y deja excedentes en depósito antes de embarcar."
+    },
+    {
+      "nombre": "Destino cantado",
+      "queEs": "El cobrador anuncia la siguiente conexión.",
+      "donde": "todas",
+      "efecto": "Actualiza subtítulos y permite pedir bajada en la próxima parada segura."
+    }
+  ],
+  "vehiculos": [
+    {
+      "id": "rapidito",
+      "nombre": "Rapidito",
+      "comoSeManeja": "Con WASD manejás y frenás en paradas; pasajeros siempre sentados en la versión jugable.",
+      "donde": [
+        "franciscomorazan",
+        "cortes"
+      ]
+    },
+    {
+      "id": "interurbano",
+      "nombre": "Bus interurbano",
+      "comoSeManeja": "Volante, freno y marchas asistidas; anunciás destino y paradas antes de abrir.",
+      "donde": [
+        "franciscomorazan",
+        "comayagua",
+        "cortes",
+        "copan",
+        "ocotepeque",
+        "santabarbara",
+        "atlantida",
+        "colon",
+        "yoro",
+        "olancho",
+        "elparaiso",
+        "choluteca",
+        "valle",
+        "lapaz",
+        "intibuca",
+        "lempira"
+      ]
+    },
+    {
+      "id": "amarillo",
+      "nombre": "Bus amarillo de ruta",
+      "comoSeManeja": "Recorrido corto con paradas numeradas, giro amplio y frenado anticipado.",
+      "donde": [
+        "franciscomorazan",
+        "cortes",
+        "yoro"
+      ]
+    },
+    {
+      "id": "taxi",
+      "nombre": "Taxi",
+      "comoSeManeja": "Conducís por calles; fijás destino y tarifa ficticia antes de salir.",
+      "donde": [
+        "franciscomorazan",
+        "cortes",
+        "comayagua",
+        "atlantida",
+        "choluteca"
+      ]
+    },
+    {
+      "id": "mototaxi",
+      "nombre": "Mototaxi",
+      "comoSeManeja": "Aceleración suave y curvas amplias con tres ruedas; el pasajero cambia el balance.",
+      "donde": [
+        "copan",
+        "ocotepeque",
+        "santabarbara",
+        "yoro",
+        "colon"
+      ]
+    },
+    {
+      "id": "pickup",
+      "nombre": "Pickup rural compartido",
+      "comoSeManeja": "Volante y marchas cortas en pendiente; la llegada muestra gente bajando atrás. Durante la conducción jugable, los pasajeros van en bancos asegurados con cinturón en una adaptación ficticia.",
+      "donde": [
+        "olancho",
+        "lapaz",
+        "intibuca",
+        "lempira",
+        "elparaiso"
+      ]
+    },
+    {
+      "id": "lancha",
+      "nombre": "Lancha con capitán",
+      "comoSeManeja": "Controlás rumbo y empuje en tramos delimitados; chalecos y carga se comprueban antes de salir.",
+      "donde": [
+        "atlantida",
+        "islas",
+        "colon",
+        "valle",
+        "graciasadios"
+      ]
+    },
+    {
+      "id": "ferry",
+      "nombre": "Ferry a las Islas",
+      "comoSeManeja": "Viajás de pasajero; elegís asiento, mirás el mar o saltás el viaje.",
+      "donde": [
+        "atlantida",
+        "islas"
+      ]
+    },
+    {
+      "id": "avioneta",
+      "nombre": "Avioneta a Puerto Lempira",
+      "comoSeManeja": "Viajás de pasajero con capitán ficticio; preparás equipaje, observás la costa o saltás el vuelo.",
+      "donde": [
+        "atlantida",
+        "graciasadios"
+      ]
+    },
+    {
+      "id": "cayuco",
+      "nombre": "Cayuco o pipante de río",
+      "comoSeManeja": "Alternás paladas y giro de proa; seguís canales autorizados con guía virtual.",
+      "donde": [
+        "graciasadios",
+        "colon",
+        "valle",
+        "atlantida"
+      ]
+    },
+    {
+      "id": "bicitaxi",
+      "nombre": "Bicitaxi de Amapala",
+      "comoSeManeja": "Pedaleás con esfuerzo variable y frenás antes de doblar; carga limitada a los asientos.",
+      "donde": [
+        "valle"
+      ]
+    },
+    {
+      "id": "burra",
+      "nombre": "Vagón turístico a Cuero y Salado",
+      "comoSeManeja": "Vas de pasajero y elegís paradas autorizadas; en el taller podés resolver apartaderos.",
+      "donde": [
+        "atlantida"
+      ]
+    }
+  ],
+  "reglasDeViaje": {
+    "saltoDisponibleDesdeElInicio": true,
+    "segundosMinimos": 40,
+    "segundosMaximos": 240,
+    "eventosNoAlarganElLimite": true,
+    "aplicacionEventos": "Los eventos de carretera solo se sortean para rutas de medio carretera; oleaje se usa en lancha y ferry; pesaje se usa antes de embarques. Nunca aparecen peajes ni retenes en pleno vuelo.",
+    "tiempos": "Las cifras son aproximaciones de los terminales indicados; no son tiempos entre límites departamentales ni garantizan horarios actuales.",
+    "transferencias": "Cambiar de medio exige llegar al terminal a pie; el vehículo terrestre queda en estacionamiento. La red enlaza departamentos, no promete rutas de bus directas.",
+    "fuentesComplementarias": [
+      {
+        "uso": "Códigos viales oficiales, CA-11A y conexiones del sur",
+        "url": "https://datosabiertos.oncae.gob.hn/cpc/upload2/DOCUMENTOS%20SOPORTE%20PARA%20SUBIR%20BASES.pdf"
+      },
+      {
+        "uso": "Distancia marítima aproximada La Ceiba–Roatán",
+        "url": "https://ferryconnect.co/routes/la-ceiba-to-roatan/"
+      }
+    ]
+  }
+}

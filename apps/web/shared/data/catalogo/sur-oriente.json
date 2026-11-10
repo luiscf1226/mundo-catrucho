@@ -1,0 +1,164 @@
+{
+  "olancho": {
+    "tipos": "🐂🔪🧀🦇",
+    "lugares": [
+      ["juticalpa", "Juticalpa", "ciudad", "Cabecera del departamento más grande: «ancho para entrar, angosto para salir»."],
+      ["catacamas", "Catacamas", "ciudad", "Ganado, queso y vaqueros."],
+      ["talgua", "Cuevas de Talgua", "cueva", "Las Calaveras Luminosas: huesos de 3,000 años que brillan."],
+      ["agalta", "Sierra de Agalta", "montana", "Bosque enano en la cumbre."],
+      ["guayape", "Río Guayape", "rio", "Todavía se lava oro en batea."],
+      ["campamento", "Campamento", "pueblo", "Pinos y aserraderos."],
+      ["lepaguare", "Valle de Lepaguare", "finca", "Haciendas ganaderas hasta donde alcanza la vista."],
+      ["boqueron", "El Boquerón", "rio", "Un cañón entre Juticalpa y Catacamas."]
+    ],
+    "comidas": [
+      ["Tapado olanchano", "juticalpa", "Carne salada, costilla, plátano y yuca en leche de coco."],
+      ["Queso y cuajada", "catacamas", "El queso olanchano viaja a todo el país."],
+      ["Vino de coyol", "lepaguare", "La savia del coyol se fermenta dentro del mismo tronco."],
+      ["Carne asada con chismol", "catacamas", "Aquí la res se respeta."]
+    ],
+    "palabras": [
+      ["macizo", "muy bueno"],
+      ["corvo", "machete largo"],
+      ["cuaco", "caballo"],
+      ["riata", "lazo de vaquero"],
+      ["jaripeo", "fiesta de montar toros"],
+      ["coyol", "palma de la que sale el vino"],
+      ["olanchano", "de Olancho, y a mucha honra"]
+    ],
+    "juegos": [
+      ["pastel", "El pastel a machete", "corte", "juticalpa", "🎂", "Partí el pastel de cumpleaños como se debe: a puro machete.", "En Olancho el cuchillo es para los de fuera.", {"arma": "machete", "cosas": [["Pastel", "pastel", "#ffd1dc"], ["Tres leches", "pastel", "#fff3d6"], ["Piñata", "pinata", "#e63946"]], "evita": [["Florero", "piedra"]], "frases": ["¡Que lo parta, que lo parta!", "¡Macizo!"]}, 5],
+      ["jaripeo", "Jaripeo olanchano", "monta", "catacamas", "🐂", "Aguantá arriba del toro más bravo.", "Ocho segundos arriba y ya sos alguien.", {"montura": "toro", "nombre": "El Diablo", "fondo": "feria", "frases": ["¡Agarrate, cuñado!"]}, 6],
+      ["coyoles", "Coyoles", "atrapa", "lepaguare", "🌴", "Juntá coyoles sin que te caiga la penca.", "El vino sale del tronco tumbado, tapado con un trapo.", {"con": "saco", "fondo": "finca", "cae": [["Coyol", "coyol", "#c9a227"]], "evita": [["Penca", "rama"]]}, 4],
+      ["tapado", "Tapado olanchano", "cocina", "juticalpa", "🍲", "Armá la olla del tapado.", "Olancho no tiene mar, pero su sopa lleva coco.", {"plato": "Tapado olanchano", "sirve": "olla", "pasos": [["Carne salada", "#8e3b2e"], ["Costilla", "#b5651d"], ["Plátano", "#e0a43a"], ["Yuca", "#f5ecd7"], ["Leche de coco", "#ffffff"]]}, 5],
+      ["talgua", "Calaveras Luminosas", "ruta", "talgua", "💀", "Entrá a la cueva hasta la cámara que brilla.", "Los huesos brillan por la calcita que los cubrió.", {"estilo": "cueva", "meta": "La cámara de las calaveras"}, 6],
+      ["oro", "Oro del Guayape", "atrapa", "guayape", "✨", "Atrapá las pepitas que trae el río.", "Dicen que el Guayape arrastra oro desde la Colonia.", {"con": "canasta", "fondo": "rio", "cae": [["Pepita de oro", "moneda", "#f6c744"]], "evita": [["Piedra", "piedra"]]}, 4],
+      ["arreo", "Arreo en Lepaguare", "monta", "lepaguare", "🐎", "Aguantá sobre el cuaco arreando el ganado.", "Aquí se aprende a montar antes que a leer.", {"montura": "caballo", "nombre": "El Macho", "fondo": "finca"}, 5],
+      ["queso", "Queso olanchano", "cocina", "catacamas", "🧀", "Hacé el queso desde la leche.", "Todo carro que sale de Olancho lleva queso de encargo.", {"plato": "Queso olanchano", "sirve": "plato", "pasos": [["Leche", "#ffffff"], ["Cuajo", "#f7f2d0"], ["Cortar la cuajada", "#fbf5dc"], ["Prensar", "#f0e6b8"], ["Sal", "#eeeeee"]]}, 4],
+      ["agalta", "Sierra de Agalta", "ruta", "agalta", "⛰️", "Subí hasta el bosque enano.", "Arriba los árboles no pasan de dos metros.", {"estilo": "selva", "meta": "La Picucha"}, 6],
+      ["aserradero", "El aserradero", "corte", "campamento", "🪓", "Rajá la madera de pino.", "Huele a pino desde la carretera.", {"arma": "hacha", "cosas": [["Troza de pino", "lena", "#b07a45"], ["Tabla", "lena", "#d9b382"]], "evita": [["Nudo", "piedra"]]}, 4],
+      ["ancho", "Ancho para entrar", "manejo", "juticalpa", "🛻", "Sacá el queso de encargo hasta la capital.", "«Olancho: ancho para entrar, angosto para salir.»", {"veh": "pickup", "via": "carretera", "recoge": ["quesos"], "destino": "Tegucigalpa"}, 5],
+      ["feriajuti", "Feria de Juticalpa", "feria", "juticalpa", "🎯", "Los puestos de la feria de diciembre.", "Aquí la hulera se usa de verdad.", {}, 3],
+      ["macizo", "¿Macizo?", "trivia", "juticalpa", "💬", "Hablá como olanchano.", "«Macizo» sirve para casi todo lo bueno.", {"de": "palabras"}, 4],
+      ["boqueron", "Poza de El Boquerón", "pesca", "boqueron", "🎣", "Pescá en la poza del cañón.", "El cuyamel es el pez más buscado de los ríos hondureños.", {"agua": "rio", "desde": "orilla", "peces": [["Guapote", 30, "#5b7f4a"], ["Tepemechín", 45, "#8fa3ad"], ["Cuyamel", 70, "#c7d3db"]], "basura": ["Bota"]}, 4],
+      ["potros", "Potra de vaqueros", "futbol", "catacamas", "⚽", "Los Potros contra los del valle.", "Aquí hasta el portero llega con sombrero.", {"equipo": ["Potros", "#c0392b"], "rival": ["Los del valle", "#27ae60"]}, 3]
+    ]
+  },
+  "elparaiso": {
+    "tipos": "🌽🍂⛏️🐂",
+    "lugares": [
+      ["yuscaran", "Yuscarán", "pueblo", "Pueblo minero colonial de calles empedradas."],
+      ["danli", "Danlí", "ciudad", "La ciudad de las colinas: maíz y puros."],
+      ["paraiso", "El Paraíso", "ciudad", "Café cerca de la frontera."],
+      ["manos", "Las Manos", "pueblo", "Frontera con Nicaragua."],
+      ["monserrat", "Cerro Monserrat", "montana", "La montaña sobre Yuscarán."],
+      ["jamastran", "Valle de Jamastrán", "finca", "Tabaco, granos y ganado."]
+    ],
+    "comidas": [
+      ["Montucas", "danli", "Tamales de elote rellenos."],
+      ["Riguas", "danli", "Tortillas gruesas de elote, con mantequilla."],
+      ["Atol de elote", "danli", "La estrella del Festival del Maíz."],
+      ["Rosquillas", "yuscaran", "Con café, a media tarde."]
+    ],
+    "palabras": [
+      ["rigua", "tortilla gruesa de elote"],
+      ["montuca", "tamal de elote relleno"],
+      ["tapiscar", "cosechar el maíz"],
+      ["tusa", "hoja que envuelve el elote"],
+      ["puro", "cigarro hecho a mano"],
+      ["chagüite", "plática larga"]
+    ],
+    "juegos": [
+      ["tapisca", "La tapisca", "atrapa", "jamastran", "🌽", "Llená el saco de mazorcas.", "Tapiscar es cosechar el maíz; en agosto Danlí lo celebra.", {"con": "saco", "fondo": "finca", "cae": [["Mazorca", "maiz", "#f6d55c"], ["Elote tierno", "maiz", "#cfe39a"]], "evita": [["Piedra", "piedra"]]}, 5],
+      ["montucas", "Montucas", "cocina", "danli", "🫔", "Envolvé las montucas en su tusa.", "Dulces o saladas: en Danlí se discute en serio.", {"plato": "Montuca", "sirve": "hoja", "pasos": [["Masa de elote", "#f6d55c"], ["Relleno", "#a0522d"], ["Tusa", "#cfe39a"], ["Amarrar", "#c9b27a"], ["Olla", "#555555"]]}, 4],
+      ["tabaco", "Corte de tabaco", "corte", "jamastran", "🍂", "Cortá las hojas de tabaco enteras.", "Se cuelgan a secar en galeras enormes.", {"arma": "cuchillo", "cosas": [["Hoja de tabaco", "tabaco", "#6b8e23"], ["Hoja madura", "tabaco", "#a8a03a"]], "evita": [["Avispero", "avispa"]]}, 4],
+      ["minas", "Minas de Yuscarán", "ruta", "yuscaran", "⛏️", "Bajá por los túneles hasta la veta.", "El pueblo se hizo rico con plata y oro.", {"estilo": "mina", "meta": "La veta de plata"}, 5],
+      ["calles", "Calles de Yuscarán", "exploradores", "yuscaran", "🏘️", "Buscá los tesoros del pueblo colonial.", "Más de 200 casas coloniales de teja.", {"sitios": ["elparaiso"]}, 3],
+      ["furgones", "Furgones en Las Manos", "manejo", "manos", "🚛", "Llevá la carga hasta la aduana.", "La fila de furgones no se acaba nunca.", {"veh": "camion", "via": "montana", "recoge": ["cargas"], "destino": "La aduana"}, 4],
+      ["jaripeo", "Jaripeo de Danlí", "monta", "danli", "🐂", "Aguantá sobre el toro en la feria.", "El público grita más que el toro.", {"montura": "toro", "nombre": "El Huracán", "fondo": "feria"}, 5],
+      ["carnaval", "Carnaval del Maíz", "ritmo", "danli", "🎺", "Marcá el paso de la banda.", "El último fin de semana de agosto.", {"estilo": "banda", "toca": "baila"}, 4],
+      ["rigua", "¿Rigua o montuca?", "trivia", "danli", "💬", "Todo lo que sale del maíz.", "Del elote sale medio menú.", {"de": "palabras"}, 4],
+      ["feriadanli", "Feria del maíz", "feria", "danli", "🎯", "Los puestos del festival.", "El premio: una docena de elotes.", {}, 3],
+      ["monserrat", "Cerro Monserrat", "ruta", "monserrat", "⛰️", "Subí hasta la cruz del cerro.", "Desde arriba el pueblo parece maqueta.", {"estilo": "cerro", "meta": "La cruz del cerro"}, 5],
+      ["pulperia", "Pulpería de la frontera", "pulperia", "manos", "🏪", "Atendé a los que van de paso.", "Aquí se paga en lempiras o en córdobas.", {}, 3]
+    ]
+  },
+  "choluteca": {
+    "tipos": "☀️🍉🦐🌉",
+    "lugares": [
+      ["cholu", "Choluteca", "ciudad", "La Sultana del Sur. Calor de verdad."],
+      ["puente", "Puentes de Choluteca", "rio", "El viejo puente colgante es el símbolo del sur."],
+      ["cedeno", "Cedeño", "playa", "La playa del sur, de arena oscura."],
+      ["corpus", "El Corpus", "pueblo", "Pueblo minero de oro."],
+      ["sanmarcos", "San Marcos de Colón", "pueblo", "Clima fresco, quesillo y monturas de cuero."],
+      ["marcovia", "Marcovia", "finca", "Melones, sandías y camaroneras."],
+      ["puntaraton", "Punta Ratón", "playa", "Aquí desovan las tortugas golfinas."]
+    ],
+    "comidas": [
+      ["Sopa marinera", "cedeno", "Camarón, pescado y cangrejo en un solo plato."],
+      ["Rosquillas en miel", "cholu", "Postre de Semana Santa."],
+      ["Sandía y melón", "marcovia", "Lo único que quita este calor."],
+      ["Quesillo", "sanmarcos", "Fresco, con tortilla caliente."]
+    ],
+    "palabras": [
+      ["chigüín", "niño (así se dice en el sur)"],
+      ["ideay", "¿y entonces? (del sur)"],
+      ["canícula", "los días más secos y calientes"],
+      ["marañón", "fruta de la que sale la semilla tostada"],
+      ["cuzuco", "armadillo"],
+      ["sofoco", "calor que ahoga"]
+    ],
+    "juegos": [
+      ["puente", "El puente sin río", "ruta", "puente", "🌉", "Cruzá el puente saltando lo que el río dejó.", "Tras el huracán Mitch, el río cambió de cauce y dejó un puente nuevo sobre tierra seca.", {"estilo": "rio", "meta": "El otro lado"}, 5],
+      ["maranon", "Marañones", "atrapa", "marcovia", "🥜", "Atrapá los marañones con el sombrero.", "La semilla tostada vale más que la fruta.", {"con": "sombrero", "fondo": "finca", "cae": [["Marañón", "maranon", "#e67e22"], ["Marañón rojo", "maranon", "#c0392b"]], "evita": [["Rama", "rama"]]}, 4],
+      ["sandias", "Sandías de Marcovia", "corte", "marcovia", "🍉", "Partí sandías y melones de un tajo.", "De aquí salen barcos llenos de melón.", {"arma": "machete", "cosas": [["Sandía", "sandia", "#2e7d32"], ["Melón", "melon", "#e6c36a"]], "evita": [["Piedra", "piedra"]]}, 5],
+      ["camaron", "Camaroneras", "pesca", "marcovia", "🦐", "Sacá el camarón más grande del estanque.", "El camarón del sur viaja medio mundo.", {"agua": "laguna", "desde": "orilla", "peces": [["Camarón", 15, "#f5a38a"], ["Jaiba", 30, "#c0392b"], ["Camarón jumbo", 45, "#f28b6a"]], "basura": ["Red vieja"]}, 4],
+      ["tortugas", "Tortugas de Punta Ratón", "ruta", "puntaraton", "🐢", "Abrí camino por la playa hasta el mar.", "En la veda, los huevos se cuidan en viveros.", {"estilo": "playa", "meta": "El mar"}, 4],
+      ["corpus", "Minas de El Corpus", "ruta", "corpus", "⛏️", "Bajá por la mina hasta la veta.", "Aquí se saca oro desde la Colonia.", {"estilo": "mina", "meta": "La veta de oro"}, 5],
+      ["rosquillas", "Rosquillas en miel", "cocina", "cholu", "🍯", "Cocé las rosquillas en dulce.", "Sin esto no es Semana Santa.", {"plato": "Rosquillas en miel", "sirve": "plato", "pasos": [["Rosquillas", "#d9a441"], ["Dulce de rapadura", "#7b3f00"], ["Canela", "#8d5524"], ["Hervir", "#a0522d"]]}, 4],
+      ["marinera", "Sopa marinera", "cocina", "cedeno", "🦀", "Armá la sopa con todo el mar adentro.", "Se suda comiéndola, y se pide otra.", {"plato": "Sopa marinera", "sirve": "olla", "pasos": [["Caldo", "#e0a43a"], ["Camarón", "#f5a38a"], ["Pescado", "#c9d3d8"], ["Cangrejo", "#c0392b"], ["Culantro", "#2e7d32"]]}, 4],
+      ["doma", "Doma en San Marcos", "monta", "sanmarcos", "🐎", "Aguantá sobre el potro sin domar.", "Las mejores monturas de cuero salen de aquí.", {"montura": "caballo", "nombre": "El Colorado", "fondo": "montana"}, 4],
+      ["ideay", "¿Ideay, chigüín?", "trivia", "cholu", "💬", "Hablá como en el sur.", "En el sur al niño le dicen chigüín.", {"de": "palabras"}, 4],
+      ["feriasur", "Feria patronal del sur", "feria", "cholu", "🎯", "Los puestos de la feria de diciembre.", "De noche, porque de día nadie aguanta.", {}, 3],
+      ["bus", "Bus al sur", "manejo", "cholu", "🚌", "Llevá el bus lleno por la carretera del sur.", "Sin aire, con las ventanas abajo y un vendedor de pastillas.", {"veh": "bus", "via": "carretera", "recoge": ["pasajeros"], "destino": "Choluteca"}, 4]
+    ]
+  },
+  "valle": {
+    "tipos": "🌋🚤🦀🚲",
+    "lugares": [
+      ["nacaome", "Nacaome", "ciudad", "Cabecera caliente a la orilla del río."],
+      ["amapala", "Amapala", "puerto", "Fue el puerto del Pacífico: casas de madera y bicitaxis."],
+      ["tigre", "Isla del Tigre", "isla", "Un volcán dormido en medio del golfo."],
+      ["sanlorenzo", "San Lorenzo", "puerto", "Mariscos frente a los manglares."],
+      ["golfo", "Golfo de Fonseca", "playa", "Tres países comparten sus aguas."],
+      ["coyolito", "Coyolito", "puerto", "De aquí salen las lanchas a la isla."]
+    ],
+    "comidas": [
+      ["Curiles", "sanlorenzo", "Conchas negras con limón y chile. Solo para valientes."],
+      ["Pescado frito", "amapala", "Entero, con tajadas, frente al mar."],
+      ["Jocotes y mangos", "nacaome", "Con sal, en bolsita."]
+    ],
+    "palabras": [
+      ["curil", "concha negra del manglar"],
+      ["punche", "cangrejo del manglar"],
+      ["bicitaxi", "triciclo que lleva pasajeros"],
+      ["chigüín", "niño"],
+      ["playón", "playa ancha de arena negra"],
+      ["sofoco", "calor que ahoga"]
+    ],
+    "juegos": [
+      ["curiles", "Coctel de curiles", "cocina", "sanlorenzo", "🐚", "Prepará el coctel más atrevido del sur.", "La concha suelta un jugo rojo: por eso asusta.", {"plato": "Coctel de curiles", "sirve": "vaso", "pasos": [["Curiles", "#3a2a2a"], ["Limón", "#b5d334"], ["Cebolla", "#e8d5f0"], ["Chile", "#c0392b"], ["Salsa", "#5a2d1a"]]}, 4],
+      ["lancha", "Lancha a Amapala", "manejo", "coyolito", "🚤", "Cruzá el golfo con la lancha llena.", "Sale cuando se llena.", {"veh": "lancha", "via": "mar", "recoge": ["pasajeros"], "destino": "El muelle de Amapala"}, 5],
+      ["volcan", "Cima de la Isla del Tigre", "ruta", "tigre", "🌋", "Subí el volcán hasta la cumbre.", "Desde arriba se ven El Salvador y Nicaragua.", {"estilo": "cerro", "meta": "La cumbre del volcán"}, 6],
+      ["bicitaxi", "Bicitaxi de Amapala", "manejo", "amapala", "🚲", "Pedaleá con turistas alrededor de la isla.", "En Amapala el taxi es de pedal.", {"veh": "bici", "via": "costa", "recoge": ["turistas"], "destino": "Playa Grande"}, 4],
+      ["golfo", "Pesca en el golfo", "pesca", "golfo", "🎣", "Pescá mar adentro en el Pacífico.", "Al atardecer el golfo se pone anaranjado.", {"agua": "mar", "desde": "lancha", "peces": [["Corvina", 35, "#c7d3db"], ["Pargo", 45, "#d9534f"], ["Róbalo", 55, "#b8c4c9"]], "basura": ["Red vieja"]}, 5],
+      ["jocotes", "Jocotes y mangos", "atrapa", "nacaome", "🥭", "Atrapá la fruta antes de que toque el suelo.", "Con sal y en bolsita, se vende en cada semáforo.", {"con": "canasta", "fondo": "finca", "cae": [["Jocote", "jocote", "#c0392b"], ["Mango", "mango", "#f6a623"]], "evita": [["Rama", "rama"]]}, 4],
+      ["arenanegra", "Potra en la arena negra", "futbol", "tigre", "⚽", "Fútbol de playa sobre arena volcánica.", "La arena quema: se juega corriendo.", {"equipo": ["Los de la isla", "#2c3e50"], "rival": ["Los de tierra firme", "#e67e22"]}, 3],
+      ["punche", "¿Punche o curil?", "trivia", "sanlorenzo", "💬", "Palabras del manglar.", "El punche camina de lado y muerde de frente.", {"de": "palabras"}, 4],
+      ["manglar", "Cayuco en el manglar", "monta", "sanlorenzo", "🛶", "Mantené el cayuco derecho entre las raíces.", "El manglar es la sala cuna del golfo.", {"montura": "cayuco", "nombre": "El manglar", "fondo": "rio"}, 4],
+      ["marimba", "Marimba en el muelle", "ritmo", "amapala", "🎶", "Tocá la marimba al atardecer.", "El muelle viejo todavía cruje.", {"estilo": "marimba", "toca": "marimba"}, 4],
+      ["sirena", "La Cueva de la Sirena", "exploradores", "tigre", "🧜", "Buscá lo que guardan las rocas.", "Dicen que un pirata escondió aquí su botín.", {"sitios": ["valle"]}, 3],
+      ["punches", "Punches del manglar", "atrapa", "sanlorenzo", "🦀", "Atrapá punches sin embarrarte… tanto.", "Salen con las primeras lluvias de mayo.", {"con": "saco", "fondo": "rio", "cae": [["Punche", "cangrejo", "#7a4a2a"], ["Punche rojo", "cangrejo", "#c0392b"]], "evita": [["Raíz", "rama"]]}, 4]
+    ]
+  }
+}

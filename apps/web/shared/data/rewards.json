@@ -1,0 +1,11 @@
+{
+  "currency": "Lempiritas",
+  "level": { "base": 100, "perLevel": 50, "max": 50 },
+  "minigame": {
+    "lose": { "coins": 10, "xp": 20 },
+    "win": { "coins": 40, "xp": 60 },
+    "perStar": { "coins": 20, "xp": 20 }
+  },
+  "world": { "coinPickup": 1, "collectible": { "coins": 25, "xp": 40 }, "firstVisit": { "coins": 15, "xp": 30 } },
+  "levelUp": { "coins": 50 }
+}

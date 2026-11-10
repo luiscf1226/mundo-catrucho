@@ -1,0 +1,234 @@
+# Mundo Catrucho — contrato interno del proyecto web
+
+Un solo código (React + TypeScript + React Three Fiber + Tailwind + Zustand) produce **dos versiones**:
+
+| Versión | `VITE_VARIANT` | Arte | Archivo |
+|---|---|---|---|
+| Mundo Catrucho Roblox | `roblox` | bloques, studs, avatar clásico de piezas | `mundo-catrucho-roblox.html` |
+| Mundo Catrucho 3D | `hd` | 3D estilizado: formas suaves, texturas, sombras, día y noche, clima | `mundo-catrucho-hd.html` |
+
+Las reglas, los datos y los niveles son los mismos. Cambia el **paquete de arte** (`src/game/kit/art/roblox` o `hd`).
+`import { IS_HD, VARIANT } from 'src/variant'` si de verdad necesitas distinguir.
+
+## Reglas duras
+
+1. **Todo el texto que ve el jugador va en español** (hondureño, corto).
+2. **Cero red en tiempo de ejecución.** Nada de `fetch`, imágenes, modelos, fuentes ni HDRI externos. No uses de drei:
+   `Text`, `Text3D`, `Environment` con preset, `useGLTF`, `useTexture` con URL, `Cloud` (verifica) ni nada que descargue.
+   Texto 3D = `Label` / `Plate` / `textTexture` del kit. Texturas = lienzo (`CanvasTexture`). La prueba falla si hay
+   peticiones de red fuera de Google Fonts.
+3. **Solo editas tus archivos** (ver "Dueños"). Si necesitas algo de otro módulo, resuélvelo en tu carpeta y avísalo
+   en tu informe. Nunca reescribas `core/`, `kit/index.tsx`, `kit/core.ts`, `GameCanvas`, `PlayerController`,
+   `minigames/api.ts`, `minigames/index.ts`, `tools/`, `shared/data/`.
+4. **Las escenas no crean materiales ni personajes a mano.** Usan `Block`/`Cyl`/`Ball`/`Ground` con `mat` + `color`,
+   la utilería `P.*` y `art.Avatar`. Así se ven bien en las dos versiones. (Excepción: efectos puntuales como
+   partículas o un `meshBasicMaterial` para un brillo.)
+5. **Jugable de verdad**: cada botón hace algo, cada minijuego tiene victoria y derrota, nada decorativo que parezca
+   interactivo sin serlo.
+6. **Rendimiento**: menos de ~350 llamadas de dibujo por escena (`t.calls()` en el arnés) y 60 fps en la prueba.
+   Repite piezas con `InstancedMesh` o fusiona geometría estática si te pasas. Una sola luz con sombras (la del SkyRig).
+7. No hay git aquí. No hagas commits. No toques nada fuera de `catrucho/`.
+
+## Mapa del código
+
+```
+shared/data/*.json        datos compartidos con el proyecto de Roblox (departamentos, minijuegos, tienda, premios, logros)
+src/variant.ts            VARIANT, IS_HD, TITLE
+src/core/                 lógica sin 3D (portátil a Luau / C#)
+  store.ts                useGame (Zustand): pantallas, paneles, perfil, monedas, XP, compras, misiones, logros, minijuego
+  data.ts types.ts        datos tipados
+  input.ts                `input`: teclado + mouse + táctil unificados
+  phys.ts                 `phys` (mundo de colisiones), stepBody, bounceSphere
+  player.ts               `player`: posición, cámara, animación, vehículo, cámara fija
+  interact.ts env.ts audio.ts net.ts leaderboard.ts
+src/game/
+  GameCanvas.tsx          <Canvas>, escena activa, jugador
+  PlayerController.tsx    control en tercera persona, cámara, vehículos; playEmote(), enterVehicle()
+  kit/index.tsx core.ts   piezas para construir escenas (abajo)
+  kit/art/types.ts        contrato del paquete de arte;  kit/art/base.tsx  versión sencilla de todo
+  kit/art/roblox/  hd/    los dos paquetes de arte
+  lobby/  dept/  minigames/  dev/Gallery.tsx
+src/ui/                   interfaz (Tailwind)
+tools/build.mjs harness.mjs smoke.mjs gallery.mjs
+```
+
+## Convenciones del mundo
+
+- Unidades en metros. **Y hacia arriba.** El jugador mide 1.75 m, radio 0.42. Camina a 5.2 m/s, corre a 8.2 m/s
+  (Shift o palanca a fondo), salta ~1.7 m de alto y ~5 m de largo corriendo.
+- `yaw = 0` mira hacia **−Z**. La cámara por defecto queda detrás, en +Z.
+- El suelo es `y = 0` salvo que la escena ponga `phys.ground = (x, z) => altura`.
+- `pos` de `Block`/`Cyl`/`Ball` es el **centro**. `pos` de la utilería `P.*` es el **punto de apoyo en el suelo**.
+- La física no tiene rampas: usa escalones de hasta 0.35 m (se suben solos), plataformas y `phys.ground`.
+- `phys.limit = { r }` o `{ minX, maxX, minZ, maxZ }` encierra al jugador. `phys.killY` = altura de caída y reaparición.
+
+## Kit (`import { ... } from '../kit'`)
+
+```tsx
+<art.SkyRig time="dia|tarde|noche|auto" weather="despejado|lluvia|neblina|auto" shadowRadius={45} indoor fogFar />
+<Spawn pos={[0,0,8]} yaw={0} />                       // dónde aparece (y reaparece) el jugador
+<Ground size={200} color="#58a845" mat="grass" />      // plano visual en y=0
+<Block pos size={[w,h,d]} color mat rot solid cast />  // caja con colisión (solid por defecto)
+<Cyl pos r h color mat solid rTop sides />  <Ball pos r color mat />
+<Wall pos size />                                      // colisión invisible
+<Interactable pos radius label icon onUse enabled marker />   // "E · etiqueta"
+<Trigger pos size onEnter onExit />
+<CoinPickup pos value onPick />                        // suma al monedero salvo que pases onPick
+<Label pos text h fg bg />  <Plate pos text h rot fg bg />    // texto en 3D sin descargar fuentes
+<P.Tree pos rot scale color seed solid />              // utilería del arte activo; lista completa en kit/art/types.ts:
+//   Tree Palm Pine Bush Flowers Rock House Lamp Bench Fence Flag Stall Kiosk Fountain Statue Sign PortalArch
+//   Bus Mototaxi Car Boat Cone Barrel Crate Tire SoccerBall Goal Coin Gem Macaw
+<art.Avatar config={AvatarConfig} state={{ anim, speed }} name="Nombre" />   // NPC y bots; `state` es mutable
+useTick((dt, t) => {})        // bucle de juego; se pausa con paneles y diálogos; dt ≤ 0.05
+useMgTick((dt, t) => {})      // igual, pero solo corre con el minijuego en fase 'playing'
+useCollider(() => boxCol(pos, size) | cylCol(pos, r, h), deps)   // colisionador propio; moveBox(c, pos, size, dt) para plataformas móviles
+textTexture(texto, { fg, bg, size })
+```
+
+Materiales (`mat`): `plastic grass dirt sand stone cobble brick wood metal tile stucco roof water neon glass cloth
+asphalt concrete leaf gold`. El color lo eliges tú; la textura la pone el arte.
+
+Animaciones (`Anim`): `idle walk run jump fall dance dance2 celebrate wave clap kick throw carry drive sit`.
+
+## Jugador (`import { player } from 'core/player'`)
+
+```ts
+player.pos                      // [x, y, z] de los pies (mutable)
+player.body.vel                 // velocidad
+player.teleport(x, y, z, yaw?)  player.setSpawn(pos, yaw)  player.respawn()
+player.control = false          // el jugador deja de responder (puestos de feria, cinemáticas)
+player.speedMul / jumpMul       // multiplicadores temporales
+player.fixedCam = { pos, target, fov }   // cámara fija; null = vuelve a seguir al jugador
+player.play('kick', 0.4)        // animación forzada por unos segundos
+player.visible = false
+```
+Todo esto se restablece solo al cambiar de escena.
+
+Entrada (`import { input } from 'core/input'`): `input.mx`, `input.mz` (−1..1), `input.take('fire' | 'use' | 'alt' | 'jump')`
+(true una vez por pulsación; `fire` = clic, tecla F o botón táctil 🎯), `input.px`, `input.py` (puntero −1..1 para
+apuntar), `input.pointerDown`. Ojo: `use` (E) lo consume el `Interactable` más cercano si hay uno.
+
+## Estado (`import { useGame } from 'core/store'`)
+
+`useGame.getState()`: `openPanel(id)`, `closePanel()`, `showDialog({ title, text, icon })` (pausa el juego),
+`toast(texto, icono)`, `travel(deptId)`, `goLobby()`, `startMinigame(id)`, `pickupCoin()`, `collect(deptId)`,
+`addCoins(n)`, `bump(tipo, n)` (misiones), `profile` (monedas, nivel, avatar, visitados, sala…).
+Paneles: `mapa minijuegos personaje tienda pausa ajustes misiones logros clasificacion salas controles emotes proyecto`.
+
+## Minijuegos (`src/game/minigames/<Nombre>.tsx` exporta el componente de escena)
+
+Ciclo: `intro` (la UI muestra la tarjeta y el botón Empezar) → `playing` → `ended` (la UI muestra resultados).
+La escena se monta desde `intro`; "Otra vez" la vuelve a montar desde cero.
+
+```ts
+import { finish, setHud, starsFor, fmtTime, rulesOf, useMgPhase } from './api';
+useMgTick((dt) => { ... setHud({ timer: segundos, score: '2 - 1', objective: 'texto corto', lines: [] }); });
+finish({ won, stars: 0|1|2|3, score /* mayor es mejor */, label: '1:02' | '3 - 1' | '320 pts', stats: { goals } });
+```
+Las recompensas (monedas, XP, logros, misiones, tabla) las calcula `store.finishMinigame`; el minijuego no las toca.
+Reglas y umbrales: `rulesOf('carrera')` lee `shared/data/minigames.json`.
+
+## Interfaz y pruebas
+
+Los `data-testid` de `src/ui/UIRoot.tsx` son contrato: `menu`, `btn-jugar|explorar|minijuegos|personaje|tienda`,
+`hud`, `hud-coins`, `hud-level`, `hud-xp`, `hud-btn-<panel>`, `panel-<id>`, `panel-close`, `map-dept-<id>`, `map-go`,
+`map-lobby`, `mg-card-<id>`, `mg-intro`, `mg-start`, `mg-back`, `mg-hud`, `mg-timer`, `mg-score`, `mg-result`
+(con `data-won`), `mg-result-label`, `mg-replay`, `mg-exit`, `shop-tab-<cat>`, `shop-item-<id>`, `ed-name`,
+`ed-skin-<i>`, `ed-done`, `prompt`, `dialog`, `dialog-close`, `toast`, `pause-*`, `set-*`, `mission-*`, `room-*`,
+`emote-<id>`, `touch-joy|jump|use|fire`.
+
+```bash
+cd catrucho
+npx tsc --noEmit                                         # tipos (si falla un archivo ajeno, ignóralo e infórmalo)
+node tools/build.mjs roblox --out /tmp/claude-1000/mc-<tu-nombre>    # o hd | all. SIEMPRE con tu propio --out
+node tools/smoke.mjs /tmp/claude-1000/mc-<tu-nombre>/mundo-catrucho-roblox.html [carpeta-capturas]
+node tools/gallery.mjs <html> <carpeta> [noche|tarde|lluvia|auto]     # hojas de la galería de arte
+```
+`tools/harness.mjs` (léelo, es corto): `launch(file, { hash, width, height, touch })` o `run(nombre, file, opts, fn)`.
+Usa Chromium sin ventana **con GPU real (60 fps)**. Hashes útiles: `#test` (resolución baja, sin sombras, para pruebas
+de lógica), `#go` (salta menú y creación), `#go,galeria`, `#nohud`. En la página: `window.__mc = { store, player, phys,
+input, audio, interactions, env, gl }`.
+Para ver tu trabajo: `t.shot(ruta)` y abre el PNG. Mira tus capturas con ojo crítico en cada vuelta.
+Escribe tu prueba en `tools/test-<algo>.mjs`; debe terminar con código 0 e imprimir PASA.
+
+---
+
+# Segunda vuelta: Mundo Catrucho 3D (solo la versión `hd`)
+
+El usuario eligió la versión 3D. **Solo se construye y se prueba `hd`** (`node tools/build.mjs hd --out …`). La versión
+`roblox` ya no importa: no la rompas a propósito, pero no gastes tiempo en ella.
+
+## Qué cambia
+
+- **No hay menú de minijuegos.** A un minijuego solo se entra caminando hasta su puesto dentro de un departamento.
+- **Lobby = mapa gigante de Honduras** que se camina. Cada departamento se ve según lo que tiene. Alrededor, lo más
+  conocido del país y la terminal de buses.
+- **Tres formas de viajar**: caminando sobre el mapa gigante, con el mapa 2D (panel `mapa`, viaje directo) y desde la
+  terminal (panel `transporte` → viaje simulado en rapidito, taxi o bus amarillo → `store.startViaje(veh, deptId)`).
+- **Catálogo**: cada departamento tiene de 10 a 20 juegos. Cada juego = un **motor** + un **tema** del departamento.
+- **Etapas**: los juegos son largos. Cada juego tiene `etapas` (3 a 6); cada partida es una etapa y el avance se guarda.
+- **Modos**: `solo` (contra bots), `duo` (vos + un compa bot contra parejas), `abierto` (sala que se llena con bots).
+  No hay servidor: los demás siempre son bots y se muestran como bots (🤖).
+
+## Catálogo (`shared/data/catalogo/*.json`, lo escribe el coordinador)
+
+```ts
+import { CATALOGO, catDe, JUEGOS, juegoById, PALABRAS, TRANSPORTES } from 'core/data';
+catDe('olancho') // DeptCat { tipos: '🐂🔪…', lugares: Lugar[], comidas: Comida[], palabras: Palabra[], juegos: Juego[] }
+// Lugar   { id, name, kind: 'ciudad'|'pueblo'|'playa'|'montana'|'lago'|'rio'|'ruinas'|'parque'|'isla'|'mercado'|'iglesia'|'estadio'|'cueva'|'finca'|'selva'|'puerto'|'fuerte', nota }
+// Comida  { name, lugar, nota }      Palabra { dice, es }   (hondureñismos de la zona)
+// Juego   { id: 'depto.juego', dept, lugar, name, motor: MinigameId, icon, desc, guino, tema, etapas }
+useGame.getState().startJuego('lapaz.cortecafe')   // así se entra a un juego (desde un puesto). Al salir vuelve al mismo punto.
+```
+Hoy están completos `franciscomorazan`, `comayagua` y `lapaz` (archivo `centro.json`); los demás llegan durante la
+tarea con la misma forma. **Todo código debe aguantar un departamento sin catálogo** (`catDe` devuelve listas vacías).
+
+## Motores (`src/game/minigames/<Motor>.tsx`)
+
+Motores: los cinco de antes (`carrera futbol feria exploradores pulperia`) y nueve nuevos:
+`corte monta ritmo ruta pesca atrapa cocina trivia manejo`. Cada archivo nuevo exporta **el componente** y **`guia`**:
+
+```ts
+import { finish, setHud, starsFor, fmtTime, partida, rng, useMgPhase, type Guia } from './api';
+export const guia: Guia = { goal: 'una frase', keys: [['WASD','moverte']], touch: [['Palanca','moverte']], metas: p => ['150 pts','250 pts','350 pts'] };
+export function Corte() { const P = useMemo(partida, []); … }
+// P = { juego, tema, etapa, etapas, dif /*0..1 según etapa*/, modo, dept, seed }   rng(P.seed) → () => 0..1
+```
+Reglas de un motor:
+- **El tema manda la apariencia y los nombres; el motor pone el juego.** Todos los campos del tema son opcionales:
+  poné valores por defecto para todo. Un juego abierto con `startMinigame('corte')` (sin catálogo) debe funcionar.
+- **Etapas**: `P.dif` sube la dificultad (más rápido, más cosas, menos margen). Una etapa dura de 60 a 120 s.
+  Que la etapa 1 sea fácil de ganar y la última cueste.
+- **Puntaje en puntos**: `finish({ won, stars, score, label: '320 pts' })`. `won` = llegó a la meta de 1 estrella.
+- **Modos**: `P.modo === 'duo'` → mostrá un compa bot que ayuda (un avatar con nombre «🤖 …»); `abierto` → dos o tres
+  bots alrededor haciendo lo mismo. Con que se vean y sumen ambiente basta; el ranking lo calcula la tienda.
+- **Formas**: cuando el tema nombra cosas (`[nombre, forma, color?]`), dibujá las formas que conocés con piezas del
+  kit y para una forma desconocida usá una bola del color dado con su `Label`. Nunca falles por un tema raro.
+- **Guiños**: mostrá `tema.frases` (si hay) como `toast` de vez en cuando. Texto corto, español de Honduras, voseo.
+- Sonido: `audio.sfx(nombre)`; para ritmo y campanas `audio.tone(freq, dur, { type, gain, at })`, `audio.drum(f, dur, gain, at)`, `audio.now`.
+
+### Tema de cada motor
+```
+comunes   fondo?: 'costa'|'montana'|'valle'|'pueblo'|'ciudad'|'lago'|'selva'|'cueva'|'estadio'|'mar'|'rio'|'finca'|'mercado'|'ruinas'|'feria'
+          frases?: string[]
+corte     cosas: [nombre, forma, color?][]   evita?: [nombre, forma][]   arma?: 'machete'|'cuchillo'|'hacha'
+          formas: pastel cana coco pina sandia lena queso platano ayote pan tabaco elote pescado melon papa mango jocote pepino · evita: avispa piedra
+monta     montura: 'toro'|'caballo'|'burro'|'mula'|'tabla'|'balsa'|'cayuco'|'tirolesa'   nombre?: string
+ritmo     estilo: 'punta'|'marimba'|'banda'|'tambor'|'campanas'|'sique'|'dembow'   toca?: 'baila'|'marimba'|'tambor'|'campana'
+ruta      estilo: 'cerro'|'cueva'|'ciudad'|'selva'|'ruinas'|'playa'|'canopy'|'rio'|'pueblo'|'mina'   meta: string   junta?: [nombre, forma]
+pesca     agua: 'lago'|'mar'|'rio'|'laguna'   desde: 'muelle'|'lancha'|'cayuco'|'orilla'   peces: [nombre, puntos, color?][]   basura?: string[]
+atrapa    cae: [nombre, forma, color?][]   evita?: [nombre, forma][]   con: 'canasta'|'balde'|'sombrero'|'red'|'saco'|'huacal'
+          formas: pez mango coco cafe fresa papa maiz naranja camaron pan hoja moneda jocote durazno platano curil cangrejo pina zanahoria repollo · evita: piedra rama zapato avispa
+cocina    plato: string   pasos: [nombre, color][]   extras?: [nombre, color][]   sirve?: 'plato'|'tortilla'|'hoja'|'bolsa'|'olla'|'vaso'|'calle'
+trivia    de: 'palabras'   preguntas?: [pregunta, correcta, mala1, mala2][]      (sin preguntas: se arman con catDe(dept).palabras y PALABRAS)
+manejo    veh: 'rapidito'|'taxi'|'bus'|'mototaxi'|'lancha'|'pickup'|'bici'|'cayuco'|'moto'|'camion'   via: 'ciudad'|'carretera'|'montana'|'mar'|'rio'|'costa'
+          recoge?: [nombre en plural]   destino?: string
+futbol    equipo: [nombre, color]   rival: [nombre, color]            exploradores  sitios: [deptId]
+```
+
+## Pruebas de la segunda vuelta
+`__mc.store.getState().startJuego('comayagua.mangos')` abre un juego del catálogo en su tarjeta de inicio;
+`[data-testid=mg-start]` lo empieza. `mg-modo-solo|duo|abierto` cambian el modo. Tu prueba (`tools/test-<algo>.mjs`)
+debe jugar de verdad al menos una etapa hasta `mg-result`, probar un tema del catálogo y el motor sin tema, y mirar
+capturas con ojo crítico. Construí siempre con tu propio `--out`. **Tiempo: unos 40 minutos; no pulas de más.**
+Al terminar, matá tus Chromium (el arnés lo hace solo si usás `run`).

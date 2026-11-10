@@ -1,0 +1,950 @@
+{
+  "skin": [
+    "#f6d3b3",
+    "#e8b98a",
+    "#c98f5f",
+    "#a56b43",
+    "#7a4a2b",
+    "#4f2f1c"
+  ],
+  "palette": [
+    "#ffffff",
+    "#1d1d1f",
+    "#00a3d7",
+    "#0d47a1",
+    "#e63946",
+    "#ff7a3d",
+    "#ffc93c",
+    "#2ea44f",
+    "#7b5cff",
+    "#ff5d9e",
+    "#8d6e63",
+    "#607d8b"
+  ],
+  "hairColors": [
+    "#1b1b1b",
+    "#3b2414",
+    "#6b3a1a",
+    "#b5651d",
+    "#d9b36a",
+    "#9e9e9e",
+    "#e63946",
+    "#00a3d7"
+  ],
+  "items": [
+    {
+      "id": "at_diario",
+      "cat": "atuendo",
+      "name": "De diario",
+      "price": 0,
+      "set": {
+        "hat": "sin_sombrero",
+        "acc": "sin_accesorio",
+        "shirt": "camisa_basica",
+        "shirtColor": "#00a3d7",
+        "pants": "jeans",
+        "pantsColor": "#0d47a1"
+      },
+      "nota": "Camiseta y jeans: para andar por todo el país."
+    },
+    {
+      "id": "at_cancha",
+      "cat": "atuendo",
+      "name": "De la cancha",
+      "price": 0,
+      "set": {
+        "hat": "gorra",
+        "acc": "sin_accesorio",
+        "shirt": "camisa_basica",
+        "shirtColor": "#ff7a3d",
+        "pants": "short_futbol",
+        "pantsColor": "#1d1d1f",
+        "hatColor": "#1d1d1f"
+      },
+      "nota": "Camiseta, short y gorra para la mejenga del barrio."
+    },
+    {
+      "id": "at_cuadros",
+      "cat": "atuendo",
+      "name": "De cuadros",
+      "price": 0,
+      "set": {
+        "hat": "sin_sombrero",
+        "acc": "sin_accesorio",
+        "shirt": "camisa_cuadros",
+        "shirtColor": "#e63946",
+        "pants": "pantalon_basico",
+        "pantsColor": "#8d6e63"
+      },
+      "nota": "Camisa de cuadros de domingo en el pueblo."
+    },
+    {
+      "id": "at_rayas",
+      "cat": "atuendo",
+      "name": "De rayas",
+      "price": 0,
+      "set": {
+        "hat": "sin_sombrero",
+        "acc": "sin_accesorio",
+        "shirt": "camisa_rayas",
+        "shirtColor": "#2ea44f",
+        "pants": "jeans",
+        "pantsColor": "#0d47a1"
+      },
+      "nota": "Rayas y jeans, fresco para la feria."
+    },
+    {
+      "id": "at_campesina",
+      "cat": "atuendo",
+      "name": "Campesina",
+      "price": 220,
+      "set": {
+        "hat": "flores_pelo",
+        "acc": "sin_accesorio",
+        "shirt": "blusa_tipica",
+        "pants": "falda_tipica"
+      },
+      "nota": "Blusa de vuelos con cintas y falda amplia: el traje de los bailes folclóricos.",
+      "grupo": "folclor"
+    },
+    {
+      "id": "at_campesino",
+      "cat": "atuendo",
+      "name": "Campesino",
+      "price": 220,
+      "set": {
+        "hat": "sombrero_junco",
+        "acc": "panuelo_cuello",
+        "shirt": "camisa_manta",
+        "pants": "pantalon_manta"
+      },
+      "nota": "Camisa y pantalón de manta, pañuelo rojo, sombrero de junco y caites.",
+      "grupo": "folclor"
+    },
+    {
+      "id": "at_lenca",
+      "cat": "atuendo",
+      "name": "Lenca de Intibucá",
+      "price": 260,
+      "set": {
+        "hat": "panuelo_lenca",
+        "acc": "sin_accesorio",
+        "shirt": "vestido_lenca",
+        "shirtColor": "#d81b60",
+        "pants": "falda_lenca",
+        "pantsColor": "#1e88e5"
+      },
+      "nota": "Las lencas de Intibucá visten colores vivos y el pañuelo en la cabeza.",
+      "grupo": "folclor"
+    },
+    {
+      "id": "at_garifuna",
+      "cat": "atuendo",
+      "name": "Garífuna",
+      "price": 260,
+      "set": {
+        "hat": "panuelo_garifuna",
+        "acc": "sin_accesorio",
+        "shirt": "blusa_garifuna",
+        "pants": "falda_garifuna"
+      },
+      "nota": "Amarillo, negro y blanco: los colores del pueblo garífuna de la costa norte.",
+      "grupo": "folclor"
+    },
+    {
+      "id": "at_punta",
+      "cat": "atuendo",
+      "name": "Bailador de punta",
+      "price": 240,
+      "set": {
+        "hat": "panuelo_punta",
+        "acc": "sin_accesorio",
+        "shirt": "blusa_punta",
+        "pants": "falda_punta"
+      },
+      "nota": "La punta garífuna se baila con la cadera y faldas de vuelo.",
+      "grupo": "folclor"
+    },
+    {
+      "id": "at_gobernante",
+      "cat": "atuendo",
+      "name": "Gobernante de Copán",
+      "price": 400,
+      "set": {
+        "hat": "tocado_plumas",
+        "acc": "pectoral_jade",
+        "shirt": "pecho_maya",
+        "pants": "faldellin_maya"
+      },
+      "nota": "Los reyes de Copán usaban plumas de quetzal y pectorales de jade.",
+      "grupo": "maya"
+    },
+    {
+      "id": "at_escriba",
+      "cat": "atuendo",
+      "name": "Escriba maya",
+      "price": 300,
+      "set": {
+        "hat": "tocado_escriba",
+        "acc": "codice",
+        "shirt": "tunica_escriba",
+        "pants": "faldellin_escriba"
+      },
+      "nota": "Los escribas pintaban la historia de Copán en códices y estelas.",
+      "grupo": "maya"
+    },
+    {
+      "id": "at_pelota",
+      "cat": "atuendo",
+      "name": "Jugador de pelota",
+      "price": 320,
+      "set": {
+        "hat": "tocado_pelota",
+        "acc": "sin_accesorio",
+        "shirt": "pecho_pelota",
+        "pants": "yugo_pelota",
+        "hatColor": "#b3261e"
+      },
+      "nota": "En la cancha de Copán la pelota se pegaba con la cadera, protegida por un yugo.",
+      "grupo": "maya"
+    },
+    {
+      "id": "at_h_local",
+      "cat": "atuendo",
+      "name": "La H local",
+      "price": 250,
+      "set": {
+        "hat": "sin_sombrero",
+        "acc": "sin_accesorio",
+        "shirt": "camisa_h",
+        "pants": "short_futbol",
+        "pantsColor": "#ffffff"
+      },
+      "nota": "Blanca con la H: así sale la Bicolor en casa.",
+      "grupo": "seleccion"
+    },
+    {
+      "id": "at_h_visita",
+      "cat": "atuendo",
+      "name": "La H de visita",
+      "price": 250,
+      "set": {
+        "hat": "sin_sombrero",
+        "acc": "sin_accesorio",
+        "shirt": "camisa_h_azul",
+        "pants": "short_futbol",
+        "pantsColor": "#0b57c4"
+      },
+      "nota": "Azul para jugar de visita con la Bicolor.",
+      "grupo": "seleccion"
+    },
+    {
+      "id": "at_portero",
+      "cat": "atuendo",
+      "name": "Portero de la H",
+      "price": 260,
+      "set": {
+        "hat": "sin_sombrero",
+        "acc": "guantes_portero",
+        "shirt": "camisa_portero",
+        "pants": "short_futbol",
+        "pantsColor": "#1d1d1f",
+        "accColor": "#ffc93c"
+      },
+      "nota": "Buzo verde y guantes para tapar penales.",
+      "grupo": "seleccion"
+    },
+    {
+      "id": "at_olimpia",
+      "cat": "atuendo",
+      "name": "Los Leones",
+      "price": 230,
+      "set": {
+        "hat": "sin_sombrero",
+        "acc": "sin_accesorio",
+        "shirt": "camisa_olimpia",
+        "pants": "short_futbol",
+        "pantsColor": "#0b3d91"
+      },
+      "nota": "Blanco con rojo y azul: el equipo más ganador de la capital.",
+      "grupo": "club"
+    },
+    {
+      "id": "at_motagua",
+      "cat": "atuendo",
+      "name": "Las Águilas",
+      "price": 230,
+      "set": {
+        "hat": "sin_sombrero",
+        "acc": "sin_accesorio",
+        "shirt": "camisa_motagua",
+        "pants": "short_futbol",
+        "pantsColor": "#0a2a6b"
+      },
+      "nota": "Azul profundo: el ciclón azul de Tegucigalpa.",
+      "grupo": "club"
+    },
+    {
+      "id": "at_realespana",
+      "cat": "atuendo",
+      "name": "La Máquina",
+      "price": 230,
+      "set": {
+        "hat": "sin_sombrero",
+        "acc": "sin_accesorio",
+        "shirt": "camisa_realespana",
+        "pants": "short_futbol",
+        "pantsColor": "#111111"
+      },
+      "nota": "Amarillo y negro, orgullo de San Pedro Sula.",
+      "grupo": "club"
+    },
+    {
+      "id": "at_marathon",
+      "cat": "atuendo",
+      "name": "Los Verdolagas",
+      "price": 230,
+      "set": {
+        "hat": "sin_sombrero",
+        "acc": "sin_accesorio",
+        "shirt": "camisa_marathon",
+        "pants": "short_futbol",
+        "pantsColor": "#ffffff"
+      },
+      "nota": "El verde de San Pedro Sula.",
+      "grupo": "club"
+    },
+    {
+      "id": "at_vida",
+      "cat": "atuendo",
+      "name": "Los Cocoteros",
+      "price": 210,
+      "set": {
+        "hat": "sin_sombrero",
+        "acc": "sin_accesorio",
+        "shirt": "camisa_vida",
+        "pants": "short_futbol",
+        "pantsColor": "#ffffff"
+      },
+      "nota": "Rojo como el atardecer de La Ceiba.",
+      "grupo": "club"
+    },
+    {
+      "id": "at_victoria",
+      "cat": "atuendo",
+      "name": "Los Jaibos",
+      "price": 210,
+      "set": {
+        "hat": "sin_sombrero",
+        "acc": "sin_accesorio",
+        "shirt": "camisa_victoria",
+        "pants": "short_futbol",
+        "pantsColor": "#1565c0"
+      },
+      "nota": "Azul y blanco del puerto de La Ceiba.",
+      "grupo": "club"
+    },
+    {
+      "id": "at_guacamaya",
+      "cat": "atuendo",
+      "name": "Camisa de guacamayas",
+      "price": 200,
+      "set": {
+        "hat": "sin_sombrero",
+        "acc": "sin_accesorio",
+        "shirt": "camisa_guacamaya",
+        "shirtColor": "#0e6e6a",
+        "pants": "pantalon_basico",
+        "pantsColor": "#e8dcc0"
+      },
+      "nota": "La guacamaya roja es el ave nacional de Honduras.",
+      "grupo": "honduras"
+    },
+    {
+      "id": "at_504",
+      "cat": "atuendo",
+      "name": "Catracho 504",
+      "price": 180,
+      "set": {
+        "hat": "gorra",
+        "acc": "sin_accesorio",
+        "shirt": "camisa_504",
+        "shirtColor": "#1d1d1f",
+        "pants": "jeans",
+        "hatColor": "#00a3d7"
+      },
+      "nota": "504 es el código telefónico de Honduras.",
+      "grupo": "honduras"
+    },
+    {
+      "id": "at_estrellas",
+      "cat": "atuendo",
+      "name": "Cinco estrellas",
+      "price": 180,
+      "set": {
+        "hat": "sin_sombrero",
+        "acc": "sin_accesorio",
+        "shirt": "camisa_estrellas",
+        "pants": "pantalon_basico",
+        "pantsColor": "#ffffff"
+      },
+      "nota": "Las cinco estrellas de la bandera son los cinco países de Centroamérica.",
+      "grupo": "honduras"
+    },
+    {
+      "id": "at_catracho",
+      "cat": "atuendo",
+      "name": "Catracho de calle",
+      "price": 190,
+      "set": {
+        "hat": "gorra",
+        "acc": "sin_accesorio",
+        "shirt": "camisa_catracho",
+        "pants": "jeans",
+        "hatColor": "#00a3d7",
+        "accColor": "#1d1d1f"
+      },
+      "nota": "Camiseta gráfica bien catracha, estilo de las marcas hondureñas.",
+      "grupo": "honduras"
+    },
+    {
+      "id": "pelo_corto",
+      "cat": "cabello",
+      "name": "Corto",
+      "price": 0
+    },
+    {
+      "id": "pelo_largo",
+      "cat": "cabello",
+      "name": "Largo",
+      "price": 0
+    },
+    {
+      "id": "pelo_rizado",
+      "cat": "cabello",
+      "name": "Rizado",
+      "price": 0
+    },
+    {
+      "id": "calvo",
+      "cat": "cabello",
+      "name": "Rapado",
+      "price": 0
+    },
+    {
+      "id": "pelo_coleta",
+      "cat": "cabello",
+      "name": "Coleta",
+      "price": 60
+    },
+    {
+      "id": "pelo_trenzas",
+      "cat": "cabello",
+      "name": "Trenzas",
+      "price": 80
+    },
+    {
+      "id": "pelo_afro",
+      "cat": "cabello",
+      "name": "Afro",
+      "price": 80
+    },
+    {
+      "id": "cara_sonrisa",
+      "cat": "rostro",
+      "name": "Sonrisa",
+      "price": 0
+    },
+    {
+      "id": "cara_feliz",
+      "cat": "rostro",
+      "name": "Feliz",
+      "price": 0
+    },
+    {
+      "id": "cara_guino",
+      "cat": "rostro",
+      "name": "Guiño",
+      "price": 40
+    },
+    {
+      "id": "cara_pecas",
+      "cat": "rostro",
+      "name": "Pecas",
+      "price": 40
+    },
+    {
+      "id": "cara_bigote",
+      "cat": "rostro",
+      "name": "Bigote",
+      "price": 50
+    },
+    {
+      "id": "cara_lentes",
+      "cat": "rostro",
+      "name": "Lentes de sol",
+      "price": 60
+    },
+    {
+      "id": "camisa_basica",
+      "cat": "camisa",
+      "name": "Camiseta",
+      "price": 0,
+      "tint": true
+    },
+    {
+      "id": "camisa_rayas",
+      "cat": "camisa",
+      "name": "De rayas",
+      "price": 60,
+      "tint": true
+    },
+    {
+      "id": "camisa_cuadros",
+      "cat": "camisa",
+      "name": "De cuadros",
+      "price": 70,
+      "tint": true
+    },
+    {
+      "id": "camisa_504",
+      "cat": "camisa",
+      "name": "Catracho 504",
+      "price": 90,
+      "tint": true
+    },
+    {
+      "id": "camisa_h",
+      "cat": "camisa",
+      "name": "La H (blanca)",
+      "price": 120
+    },
+    {
+      "id": "camisa_h_azul",
+      "cat": "camisa",
+      "name": "La H (azul)",
+      "price": 120
+    },
+    {
+      "id": "guayabera",
+      "cat": "camisa",
+      "name": "Guayabera",
+      "price": 150,
+      "trad": true
+    },
+    {
+      "id": "camisa_manta",
+      "cat": "camisa",
+      "name": "Camisa de manta",
+      "price": 150,
+      "trad": true
+    },
+    {
+      "id": "blusa_tipica",
+      "cat": "camisa",
+      "name": "Blusa típica",
+      "price": 160,
+      "trad": true
+    },
+    {
+      "id": "pantalon_basico",
+      "cat": "pantalon",
+      "name": "Pantalón",
+      "price": 0,
+      "tint": true
+    },
+    {
+      "id": "jeans",
+      "cat": "pantalon",
+      "name": "Jeans",
+      "price": 0
+    },
+    {
+      "id": "short_futbol",
+      "cat": "pantalon",
+      "name": "Short de fútbol",
+      "price": 60,
+      "tint": true
+    },
+    {
+      "id": "pantalon_manta",
+      "cat": "pantalon",
+      "name": "Pantalón de manta",
+      "price": 120,
+      "trad": true
+    },
+    {
+      "id": "falda_tipica",
+      "cat": "pantalon",
+      "name": "Falda típica de colores",
+      "price": 160,
+      "trad": true
+    },
+    {
+      "id": "sin_sombrero",
+      "cat": "sombrero",
+      "name": "Ninguno",
+      "price": 0
+    },
+    {
+      "id": "gorra",
+      "cat": "sombrero",
+      "name": "Gorra",
+      "price": 50,
+      "tint": true
+    },
+    {
+      "id": "sombrero_junco",
+      "cat": "sombrero",
+      "name": "Sombrero de junco",
+      "price": 100,
+      "trad": true
+    },
+    {
+      "id": "panuelo_lenca",
+      "cat": "sombrero",
+      "name": "Pañuelo lenca",
+      "price": 110,
+      "trad": true
+    },
+    {
+      "id": "sombrero_vaquero",
+      "cat": "sombrero",
+      "name": "Sombrero olanchano",
+      "price": 120,
+      "trad": true
+    },
+    {
+      "id": "casco_explorador",
+      "cat": "sombrero",
+      "name": "Casco de explorador",
+      "price": 140
+    },
+    {
+      "id": "corona_carnaval",
+      "cat": "sombrero",
+      "name": "Corona de carnaval",
+      "price": 200
+    },
+    {
+      "id": "sin_accesorio",
+      "cat": "accesorio",
+      "name": "Ninguno",
+      "price": 0
+    },
+    {
+      "id": "mochila",
+      "cat": "accesorio",
+      "name": "Mochila",
+      "price": 80,
+      "tint": true
+    },
+    {
+      "id": "banda_bandera",
+      "cat": "accesorio",
+      "name": "Banda de la bandera",
+      "price": 100
+    },
+    {
+      "id": "collar_jade",
+      "cat": "accesorio",
+      "name": "Collar de jade",
+      "price": 150,
+      "trad": true
+    },
+    {
+      "id": "guitarra",
+      "cat": "accesorio",
+      "name": "Guitarra",
+      "price": 160
+    },
+    {
+      "id": "tambor_garifuna",
+      "cat": "accesorio",
+      "name": "Tambor garífuna",
+      "price": 180,
+      "trad": true
+    },
+    {
+      "id": "capa_bandera",
+      "cat": "accesorio",
+      "name": "Capa de la bandera",
+      "price": 200
+    },
+    {
+      "id": "emote_saludar",
+      "cat": "emote",
+      "name": "Saludar",
+      "price": 0
+    },
+    {
+      "id": "emote_punta",
+      "cat": "emote",
+      "name": "Bailar punta",
+      "price": 0
+    },
+    {
+      "id": "emote_celebrar",
+      "cat": "emote",
+      "name": "Celebrar",
+      "price": 0
+    },
+    {
+      "id": "emote_aplaudir",
+      "cat": "emote",
+      "name": "Aplaudir",
+      "price": 40
+    },
+    {
+      "id": "emote_gol",
+      "cat": "emote",
+      "name": "¡Gooool!",
+      "price": 100
+    },
+    {
+      "id": "emote_sique",
+      "cat": "emote",
+      "name": "Bailar sique",
+      "price": 120,
+      "trad": true
+    },
+    {
+      "id": "camisa_olimpia",
+      "cat": "camisa",
+      "name": "Camiseta del León",
+      "price": 0,
+      "soloSet": true
+    },
+    {
+      "id": "camisa_motagua",
+      "cat": "camisa",
+      "name": "Camiseta del Águila",
+      "price": 0,
+      "soloSet": true
+    },
+    {
+      "id": "camisa_realespana",
+      "cat": "camisa",
+      "name": "Camiseta de La Máquina",
+      "price": 0,
+      "soloSet": true
+    },
+    {
+      "id": "camisa_marathon",
+      "cat": "camisa",
+      "name": "Camiseta Verdolaga",
+      "price": 0,
+      "soloSet": true
+    },
+    {
+      "id": "camisa_vida",
+      "cat": "camisa",
+      "name": "Camiseta Cocotera",
+      "price": 0,
+      "soloSet": true
+    },
+    {
+      "id": "camisa_victoria",
+      "cat": "camisa",
+      "name": "Camiseta Jaiba",
+      "price": 0,
+      "soloSet": true
+    },
+    {
+      "id": "camisa_portero",
+      "cat": "camisa",
+      "name": "Buzo de portero",
+      "price": 0,
+      "soloSet": true
+    },
+    {
+      "id": "camisa_guacamaya",
+      "cat": "camisa",
+      "name": "Camisa de guacamayas",
+      "price": 0,
+      "soloSet": true
+    },
+    {
+      "id": "camisa_estrellas",
+      "cat": "camisa",
+      "name": "Cinco estrellas",
+      "price": 0,
+      "soloSet": true
+    },
+    {
+      "id": "camisa_catracho",
+      "cat": "camisa",
+      "name": "Catracho HN",
+      "price": 0,
+      "soloSet": true
+    },
+    {
+      "id": "vestido_lenca",
+      "cat": "camisa",
+      "name": "Blusa lenca",
+      "price": 0,
+      "soloSet": true
+    },
+    {
+      "id": "blusa_garifuna",
+      "cat": "camisa",
+      "name": "Blusa garífuna",
+      "price": 0,
+      "soloSet": true
+    },
+    {
+      "id": "blusa_punta",
+      "cat": "camisa",
+      "name": "Blusa de punta",
+      "price": 0,
+      "soloSet": true
+    },
+    {
+      "id": "pecho_maya",
+      "cat": "camisa",
+      "name": "Pecho de gobernante",
+      "price": 0,
+      "soloSet": true
+    },
+    {
+      "id": "tunica_escriba",
+      "cat": "camisa",
+      "name": "Túnica de escriba",
+      "price": 0,
+      "soloSet": true
+    },
+    {
+      "id": "pecho_pelota",
+      "cat": "camisa",
+      "name": "Pecho de jugador",
+      "price": 0,
+      "soloSet": true
+    },
+    {
+      "id": "falda_lenca",
+      "cat": "pantalon",
+      "name": "Falda lenca",
+      "price": 0,
+      "soloSet": true
+    },
+    {
+      "id": "falda_garifuna",
+      "cat": "pantalon",
+      "name": "Falda garífuna",
+      "price": 0,
+      "soloSet": true
+    },
+    {
+      "id": "falda_punta",
+      "cat": "pantalon",
+      "name": "Falda de punta",
+      "price": 0,
+      "soloSet": true
+    },
+    {
+      "id": "faldellin_maya",
+      "cat": "pantalon",
+      "name": "Faldellín de jade",
+      "price": 0,
+      "soloSet": true
+    },
+    {
+      "id": "faldellin_escriba",
+      "cat": "pantalon",
+      "name": "Faldellín de algodón",
+      "price": 0,
+      "soloSet": true
+    },
+    {
+      "id": "yugo_pelota",
+      "cat": "pantalon",
+      "name": "Yugo de pelota",
+      "price": 0,
+      "soloSet": true
+    },
+    {
+      "id": "flores_pelo",
+      "cat": "sombrero",
+      "name": "Flores en el pelo",
+      "price": 0,
+      "soloSet": true
+    },
+    {
+      "id": "panuelo_garifuna",
+      "cat": "sombrero",
+      "name": "Pañuelo garífuna",
+      "price": 0,
+      "soloSet": true
+    },
+    {
+      "id": "panuelo_punta",
+      "cat": "sombrero",
+      "name": "Pañuelo de punta",
+      "price": 0,
+      "soloSet": true
+    },
+    {
+      "id": "tocado_plumas",
+      "cat": "sombrero",
+      "name": "Tocado de plumas",
+      "price": 0,
+      "soloSet": true
+    },
+    {
+      "id": "tocado_escriba",
+      "cat": "sombrero",
+      "name": "Cinta de escriba",
+      "price": 0,
+      "soloSet": true
+    },
+    {
+      "id": "tocado_pelota",
+      "cat": "sombrero",
+      "name": "Cinta de jugador",
+      "price": 0,
+      "soloSet": true
+    },
+    {
+      "id": "panuelo_cuello",
+      "cat": "accesorio",
+      "name": "Pañuelo rojo",
+      "price": 0,
+      "soloSet": true
+    },
+    {
+      "id": "guantes_portero",
+      "cat": "accesorio",
+      "name": "Guantes de portero",
+      "price": 0,
+      "soloSet": true
+    },
+    {
+      "id": "pectoral_jade",
+      "cat": "accesorio",
+      "name": "Pectoral de jade",
+      "price": 0,
+      "soloSet": true
+    },
+    {
+      "id": "codice",
+      "cat": "accesorio",
+      "name": "Códice",
+      "price": 0,
+      "soloSet": true
+    }
+  ],
+  "defaultAvatar": {
+    "skin": "#c98f5f",
+    "hair": "pelo_corto",
+    "hairColor": "#1b1b1b",
+    "face": "cara_sonrisa",
+    "shirt": "camisa_basica",
+    "shirtColor": "#00a3d7",
+    "pants": "jeans",
+    "pantsColor": "#0d47a1",
+    "hat": "sin_sombrero",
+    "hatColor": "#e63946",
+    "acc": "sin_accesorio",
+    "accColor": "#ff7a3d"
+  }
+}

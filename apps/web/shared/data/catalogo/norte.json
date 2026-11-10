@@ -1,0 +1,246 @@
+{
+  "cortes": {
+    "tipos": "🍗🎣🎡⚽",
+    "lugares": [
+      ["sps", "San Pedro Sula", "ciudad", "La capital industrial. Aquí el calor no perdona."],
+      ["yojoa", "Lago de Yojoa", "lago", "El lago natural más grande del país."],
+      ["pulhapanzak", "Cataratas de Pulhapanzak", "rio", "43 metros de caída de agua."],
+      ["omoa", "Fortaleza de Omoa", "fuerte", "La levantaron para frenar a los piratas."],
+      ["puertocortes", "Puerto Cortés", "puerto", "El puerto más grande del país."],
+      ["cusuco", "Parque Cusuco", "parque", "Bosque nublado en la sierra del Merendón."],
+      ["merendon", "El Merendón", "montana", "La montaña que cuida la ciudad, con su rótulo gigante."],
+      ["olimpico", "Estadio Olímpico", "estadio", "El estadio más grande de Honduras."]
+    ],
+    "comidas": [
+      ["Pollo chuco", "sps", "Pollo frito con tajadas, repollo, chismol y aderezo. Si no chorrea, no es chuco."],
+      ["Pescado frito de Yojoa", "yojoa", "Con tajadas y encurtido, a la orilla del lago."],
+      ["Topogigio", "sps", "Fresco congelado en bolsita. En Tegus le dicen charamusca."],
+      ["Agua de coco", "puertocortes", "El coquero la abre de tres machetazos."]
+    ],
+    "palabras": [
+      ["topogigio", "fresco congelado en bolsita"],
+      ["güirro", "niño"],
+      ["chuco", "sucio (de ahí el pollo chuco)"],
+      ["sampedrano", "de San Pedro Sula"],
+      ["potra", "partido de fútbol de barrio"],
+      ["pijinear", "andar de fiesta"],
+      ["catrín", "bien vestido"]
+    ],
+    "juegos": [
+      ["pollochuco", "Pollo chuco", "cocina", "sps", "🍗", "Armá el plato callejero más famoso del norte.", "Si no chorrea aderezo, no es chuco.", {"plato": "Pollo chuco", "sirve": "plato", "pasos": [["Tajadas de guineo", "#f2d16b"], ["Pollo frito", "#c8782a"], ["Repollo", "#dff0c2"], ["Chismol", "#e74c3c"], ["Aderezo", "#fff0c9"]], "extras": [["Encurtido", "#e8b4d0"]]}, 5],
+      ["pescayojoa", "Pesca en Yojoa", "pesca", "yojoa", "🎣", "Sacá el pescado más grande del lago.", "El bass llegó de fuera y se adueñó del lago.", {"agua": "lago", "desde": "lancha", "peces": [["Tilapia", 20, "#9aa7ad"], ["Guapote", 35, "#5b7f4a"], ["Bass", 55, "#3c5a3a"]], "basura": ["Bota", "Llanta"]}, 5],
+      ["pescadofrito", "Pescado frito del lago", "cocina", "yojoa", "🐟", "Freí y serví como en los comedores de la orilla.", "Decenas de comedores, todos con el mismo menú y todos llenos.", {"plato": "Pescado frito", "sirve": "plato", "pasos": [["Pescado", "#9aa7ad"], ["Sal y limón", "#f7f2b0"], ["Freír", "#c8782a"], ["Tajadas", "#f2d16b"], ["Encurtido", "#e8b4d0"]]}, 4],
+      ["pulhapanzak", "Detrás de la catarata", "ruta", "pulhapanzak", "💦", "Cruzá las piedras mojadas hasta la cueva tras la caída.", "El guía dice «tranquilo» justo antes de que te empapés.", {"estilo": "rio", "meta": "La cueva tras la catarata"}, 5],
+      ["omoa", "Tesoro de la fortaleza", "exploradores", "omoa", "🏴‍☠️", "Buscá lo que dejaron los piratas.", "Tardaron tanto en construirla que los piratas ya casi no venían.", {"sitios": ["cortes"]}, 3],
+      ["contenedores", "Furgón al puerto", "manejo", "puertocortes", "🚛", "Llevá los contenedores al muelle a tiempo.", "La fila de furgones se ve desde lejos.", {"veh": "camion", "via": "costa", "recoge": ["contenedores"], "destino": "El muelle"}, 4],
+      ["juniana", "Feria Juniana", "feria", "sps", "🎡", "Los puestos de la feria más grande del norte.", "En junio, San Pedro entero es feria.", {}, 3],
+      ["clasicosps", "Clásico sampedrano", "futbol", "olimpico", "⚽", "Aurinegros contra Verdolagas en el Olímpico.", "La ciudad se parte en dos colores.", {"equipo": ["Aurinegros", "#f4c20d"], "rival": ["Verdolagas", "#1e8449"]}, 3],
+      ["desfile", "Desfile de carrozas", "ritmo", "sps", "🎺", "Marcá el paso de la banda en el desfile.", "Las palillonas ensayan todo el año.", {"estilo": "banda", "toca": "baila"}, 4],
+      ["topogigio", "¿Topogigio o charamusca?", "trivia", "sps", "🧊", "Caminá a la palabra que se usa en el norte.", "Es lo mismo, pero según donde lo pidás.", {"de": "palabras"}, 4],
+      ["cocos", "Agua de coco helada", "corte", "puertocortes", "🥥", "Abrí los cocos de un machetazo.", "A 38 grados, el coquero es héroe nacional.", {"arma": "machete", "cosas": [["Coco verde", "coco", "#6aa84f"], ["Coco seco", "coco", "#8d6e4a"]], "evita": [["Piedra", "piedra"]]}, 4],
+      ["merendon", "Subida al Merendón", "ruta", "merendon", "⛰️", "Subí hasta el rótulo gigante.", "De noche se ve encendido desde toda la ciudad.", {"estilo": "cerro", "meta": "El rótulo del Merendón"}, 5],
+      ["cusuco", "Sendero de Cusuco", "ruta", "cusuco", "🌿", "Cruzá el bosque nublado hasta el mirador.", "Cusuco es armadillo: el parque lleva su nombre.", {"estilo": "selva", "meta": "El mirador"}, 4]
+    ]
+  },
+  "atlantida": {
+    "tipos": "🎭🥁🚣🥥",
+    "lugares": [
+      ["ceiba", "La Ceiba", "ciudad", "La novia de Honduras."],
+      ["tela", "Tela", "playa", "Playas largas y pan de coco."],
+      ["picobonito", "Pico Bonito", "montana", "El cerro que se ve desde toda La Ceiba."],
+      ["cangrejal", "Río Cangrejal", "rio", "Rápidos entre piedras gigantes."],
+      ["lancetilla", "Jardín Lancetilla", "parque", "Un jardín botánico tropical enorme, con frutas de todo el mundo."],
+      ["cuero", "Cuero y Salado", "selva", "Refugio de manatíes entre manglares."],
+      ["sambo", "Sambo Creek", "pueblo", "Comunidad garífuna de tambores y pescado."]
+    ],
+    "comidas": [
+      ["Baleada ceibeña", "ceiba", "En La Ceiba juran que aquí nació la baleada."],
+      ["Pan de coco", "tela", "Las vendedoras lo llevan en la cabeza por la playa."],
+      ["Sopa de caracol", "ceiba", "Con leche de coco, yuca y guineo verde."],
+      ["Machuca", "sambo", "Plátano machacado con sopa de pescado y coco."]
+    ],
+    "palabras": [
+      ["buiti binafi", "buenos días, en garífuna"],
+      ["machuca", "plátano machacado con sopa de coco"],
+      ["guifiti", "bebida garífuna de raíces"],
+      ["cayuco", "canoa de un solo tronco"],
+      ["jaiba", "cangrejo de mar"],
+      ["ceibeño", "de La Ceiba"],
+      ["chele", "persona de piel clara"]
+    ],
+    "juegos": [
+      ["carnaval", "Carnaval de la Amistad", "ritmo", "ceiba", "🎭", "Bailá punta en el desfile sin perder el paso.", "El tercer sábado de mayo nadie duerme en La Ceiba.", {"estilo": "punta", "toca": "baila"}, 5],
+      ["rafting", "Rápidos del Cangrejal", "monta", "cangrejal", "🚣", "Aguantá en la balsa entre las piedras.", "«¡Remen, remen!»… y el guía muerto de risa.", {"montura": "balsa", "nombre": "El Cangrejal", "fondo": "rio"}, 5],
+      ["tambores", "Tambores de Sambo Creek", "ritmo", "sambo", "🥁", "Tocá el tambor garífuna: primera y segunda.", "La punta se baila con la cadera, no con los pies.", {"estilo": "tambor", "toca": "tambor"}, 4],
+      ["pandecoco", "Pan de coco", "cocina", "tela", "🥥", "Amasá y horneá antes de que se acabe la tanda.", "«¡Pan de coco, pan de coco!» se oye en toda la playa.", {"plato": "Pan de coco", "sirve": "bolsa", "pasos": [["Harina", "#f5ecd7"], ["Leche de coco", "#ffffff"], ["Amasar", "#ecd9b0"], ["Horno", "#a0522d"], ["Canasta", "#c9a66b"]]}, 4],
+      ["sopacaracol", "Sopa de caracol", "cocina", "ceiba", "🐚", "Prepará la sopa que le dio la vuelta al mundo.", "«Watanegui consup»: todos la cantan, casi nadie se sabe la letra.", {"plato": "Sopa de caracol", "sirve": "olla", "pasos": [["Caracol", "#f3c6b5"], ["Leche de coco", "#ffffff"], ["Yuca", "#f5ecd7"], ["Guineo verde", "#9ccc65"], ["Culantro", "#2e7d32"]]}, 4],
+      ["cocostela", "Cocos de Tela", "atrapa", "tela", "🌴", "Atrapá los cocos que caen de las palmeras.", "El que duerme bajo la palmera, se arriesga.", {"con": "saco", "fondo": "costa", "cae": [["Coco", "coco", "#8d6e4a"], ["Coco verde", "coco", "#6aa84f"]], "evita": [["Palma seca", "rama"]]}, 4],
+      ["picobonito", "Cumbre de Pico Bonito", "ruta", "picobonito", "⛰️", "Subí por la selva hasta la cascada.", "Se ve cerquita, pero la subida es de días.", {"estilo": "selva", "meta": "Cascada El Bejuco"}, 5],
+      ["canopy", "Canopy del Cangrejal", "ruta", "cangrejal", "🪢", "Saltá de plataforma en plataforma sobre el río.", "No mirés para abajo.", {"estilo": "canopy", "meta": "La última plataforma"}, 4],
+      ["manaties", "Cayuco entre manatíes", "manejo", "cuero", "🛶", "Remá por los canales sin asustar a los manatíes.", "Si ves uno, apagá la bulla.", {"veh": "cayuco", "via": "rio", "recoge": ["turistas"], "destino": "La laguna"}, 4],
+      ["muelle", "Pesca en el muelle de Tela", "pesca", "tela", "🎣", "Tirá el anzuelo desde el muelle viejo.", "Del muelle salían los barcos bananeros.", {"agua": "mar", "desde": "muelle", "peces": [["Jurel", 25, "#8fa3ad"], ["Pargo", 40, "#d9534f"], ["Róbalo", 55, "#b8c4c9"]], "basura": ["Chancleta"]}, 4],
+      ["clasicoceiba", "Clásico ceibeño", "futbol", "ceiba", "⚽", "Cocoteros contra Jaibos.", "La Ceiba tiene dos equipos y un solo estadio.", {"equipo": ["Cocoteros", "#c0392b"], "rival": ["Jaibos", "#1f5fa8"]}, 3],
+      ["lancetilla", "Frutas raras de Lancetilla", "corte", "lancetilla", "🍈", "Cortá las frutas que casi nadie conoce.", "Aquí llegaron el mangostán y el rambután.", {"arma": "cuchillo", "cosas": [["Rambután", "rambutan", "#c0392b"], ["Carambola", "carambola", "#f1c40f"], ["Mangostán", "mangostan", "#5b2a86"]], "evita": [["Avispa", "avispa"]]}, 4],
+      ["isidra", "Feria Isidra", "feria", "ceiba", "🎯", "Los puestos de la feria de San Isidro.", "Empieza con feria y termina en carnaval.", {}, 3],
+      ["buiti", "¿Buiti binafi?", "trivia", "sambo", "💬", "Aprendé palabras garífunas y ceibeñas.", "«Buiti binafi» es buenos días.", {"de": "palabras"}, 4]
+    ]
+  },
+  "colon": {
+    "tipos": "⚓🥁🍊🏰",
+    "lugares": [
+      ["trujillo", "Trujillo", "ciudad", "Aquí Colón pisó tierra firme en 1502."],
+      ["fortaleza", "Fortaleza de Santa Bárbara", "fuerte", "Cañones mirando la bahía."],
+      ["santafe", "Santa Fe", "pueblo", "Pueblo garífuna de pescadores."],
+      ["guaimoreto", "Laguna de Guaimoreto", "lago", "Manglares, aves y cocodrilos."],
+      ["tocoa", "Tocoa", "ciudad", "Palma africana y ganado en el valle del Aguán."],
+      ["calentura", "Cerro Calentura", "montana", "La montaña detrás de Trujillo."],
+      ["sonaguera", "Sonaguera", "finca", "La capital de la naranja."]
+    ],
+    "comidas": [
+      ["Pescado frito con tajadas", "santafe", "Recién sacado, frente al mar."],
+      ["Casabe", "santafe", "Tortilla tostada de yuca, herencia garífuna."],
+      ["Arroz con frijoles y coco", "trujillo", "El «rice and beans» de la costa."],
+      ["Naranjas de Sonaguera", "sonaguera", "Dulces y por saco."]
+    ],
+    "palabras": [
+      ["ereba", "casabe, en garífuna"],
+      ["mínimo", "banano"],
+      ["tunco", "cerdo"],
+      ["cumiche", "el hijo menor"],
+      ["goma", "resaca"],
+      ["chabacán", "bromista"]
+    ],
+    "juegos": [
+      ["desembarco", "Desembarco de 1502", "manejo", "trujillo", "⛵", "Llevá la lancha hasta la playa entre las olas.", "Dicen que Colón dio gracias a Dios por salir de estas honduras.", {"veh": "lancha", "via": "mar", "recoge": ["barriles"], "destino": "Punta Caxinas"}, 4],
+      ["canones", "Cañones contra piratas", "feria", "fortaleza", "🏴‍☠️", "Puntería desde la fortaleza.", "Los cañones siguen ahí, apuntando a la bahía.", {}, 3],
+      ["casabe", "Casabe", "cocina", "santafe", "🫓", "Rallá, exprimí y tostá la yuca.", "La ruguma exprime la yuca como una serpiente tejida.", {"plato": "Casabe", "sirve": "plato", "pasos": [["Yuca", "#f5ecd7"], ["Rallar", "#efe2c2"], ["Exprimir", "#d8c39a"], ["Colar", "#f8f1dc"], ["Tostar", "#c9a66b"]]}, 5],
+      ["guaimoreto", "Pesca en la laguna", "pesca", "guaimoreto", "🎣", "Pescá desde el cayuco, cerca del manglar.", "Ojo: ese tronco tiene ojos.", {"agua": "laguna", "desde": "cayuco", "peces": [["Mojarra", 20, "#9aa7ad"], ["Róbalo", 40, "#b8c4c9"], ["Sábalo", 60, "#7f97a6"]], "basura": ["Rama"]}, 4],
+      ["naranjas", "Naranjas de Sonaguera", "atrapa", "sonaguera", "🍊", "Llená el saco de naranjas maduras.", "En temporada, la carretera huele a naranja.", {"con": "saco", "fondo": "finca", "cae": [["Naranja", "naranja", "#f39c12"], ["Mandarina", "naranja", "#e67e22"]], "evita": [["Rama", "rama"]]}, 4],
+      ["palma", "Corte de palma", "corte", "tocoa", "🌴", "Bajá los racimos de palma africana.", "El valle del Aguán es un mar de palmas.", {"arma": "machete", "cosas": [["Racimo de palma", "racimo", "#b03a2e"], ["Coco", "coco", "#8d6e4a"]], "evita": [["Avispero", "avispa"]]}, 4],
+      ["santafe", "Tambores de Santa Fe", "ritmo", "santafe", "🥁", "Seguí el tambor en la fiesta garífuna.", "Aquí la punta se aprende antes de caminar.", {"estilo": "punta", "toca": "tambor"}, 4],
+      ["filibustero", "El tesoro del filibustero", "exploradores", "trujillo", "🗝️", "Buscá las pistas por el pueblo viejo.", "William Walker quiso adueñarse de Centroamérica y terminó enterrado en Trujillo.", {"sitios": ["colon"]}, 3],
+      ["calentura", "Cerro Calentura", "ruta", "calentura", "🌿", "Subí hasta el mirador de la bahía.", "La bahía de Trujillo parece un plato de agua.", {"estilo": "selva", "meta": "El mirador de la bahía"}, 5],
+      ["arreo", "Arreo en el Aguán", "monta", "tocoa", "🐎", "Aguantá sobre el caballo arreando el ganado.", "El vaquero silba y el ganado entiende.", {"montura": "caballo", "nombre": "El Tornado", "fondo": "finca"}, 4],
+      ["sanjuan", "Feria de San Juan", "feria", "trujillo", "🎯", "Los puestos de la feria de junio.", "Feria con olor a mar.", {}, 3],
+      ["minimo", "¿Mínimo o banano?", "trivia", "tocoa", "🍌", "Caminá a la palabra correcta.", "Aquí el banano se llama mínimo.", {"de": "palabras"}, 4]
+    ]
+  },
+  "islas": {
+    "tipos": "🤿🎣🏝️🦀",
+    "lugares": [
+      ["roatan", "Roatán", "isla", "La isla más grande, rodeada de arrecife."],
+      ["westbay", "West Bay", "playa", "Arena blanca y agua transparente."],
+      ["utila", "Utila", "isla", "Uno de los mejores lugares del mundo para ver al tiburón ballena."],
+      ["guanaja", "Guanaja", "isla", "La isla de los pinos; Bonacca es un pueblo sobre el agua."],
+      ["arrecife", "Arrecife Mesoamericano", "playa", "El segundo arrecife de coral más grande del mundo."],
+      ["puntagorda", "Punta Gorda", "pueblo", "El primer pueblo garífuna de Honduras, de 1797."],
+      ["coxen", "Coxen Hole", "puerto", "Aquí atracan los cruceros."]
+    ],
+    "comidas": [
+      ["Arroz con frijoles y coco", "coxen", "Rice and beans, la base de todo plato isleño."],
+      ["Johnny cake", "coxen", "Pan isleño para el viaje en lancha."],
+      ["Cangrejo azul", "puntagorda", "Sale con las primeras lluvias."],
+      ["Pan de coco isleño", "roatan", "Más dulce que el de tierra firme."]
+    ],
+    "palabras": [
+      ["wha' happen?", "¿qué pasó? (inglés isleño)"],
+      ["likkle", "poquito (inglés isleño)"],
+      ["cay", "cayo, islita"],
+      ["dory", "lancha pequeña"],
+      ["breadkind", "yuca, plátano y otros para acompañar"],
+      ["isleño", "de las Islas de la Bahía"]
+    ],
+    "juegos": [
+      ["buceo", "Buceo en el arrecife", "exploradores", "arrecife", "🤿", "Encontrá los tesoros entre el coral.", "No se toca el coral: tarda siglos en crecer.", {"sitios": ["islas"]}, 3],
+      ["ballena", "El tiburón ballena", "manejo", "utila", "🦈", "Llevá a los buzos hasta donde anda el gigante.", "Mide como un bus y solo come plancton.", {"veh": "lancha", "via": "mar", "recoge": ["buzos"], "destino": "El banco de Utila"}, 5],
+      ["altura", "Pesca de altura", "pesca", "roatan", "🎣", "Peleá con los grandes mar adentro.", "El marlin se pelea por horas.", {"agua": "mar", "desde": "lancha", "peces": [["Barracuda", 35, "#9fb3bd"], ["Dorado", 45, "#e2c044"], ["Marlin azul", 80, "#2d5fa5"]], "basura": ["Sargazo"]}, 5],
+      ["cangrejo", "Cangrejo azul", "atrapa", "puntagorda", "🦀", "Atrapá cangrejos antes de que se metan al hoyo.", "Con las primeras lluvias salen por montones.", {"con": "saco", "fondo": "costa", "cae": [["Cangrejo azul", "cangrejo", "#2e6fd9"], ["Jaiba", "cangrejo", "#c0392b"]], "evita": [["Erizo", "piedra"]]}, 4],
+      ["cocoswb", "Cocos de West Bay", "corte", "westbay", "🥥", "Abrí cocos para los turistas.", "Tres machetazos y pajilla.", {"arma": "machete", "cosas": [["Coco verde", "coco", "#6aa84f"], ["Piña", "pina", "#e0b422"]], "evita": [["Piedra", "piedra"]]}, 4],
+      ["ricebeans", "Rice and beans", "cocina", "coxen", "🍛", "Serví el plato isleño completo.", "Todo lleva coco. Todo.", {"plato": "Rice and beans", "sirve": "plato", "pasos": [["Arroz", "#f8f4e3"], ["Frijoles rojos", "#7b2d26"], ["Leche de coco", "#ffffff"], ["Plátano frito", "#e0a43a"], ["Pescado", "#c8782a"]]}, 4],
+      ["puntagorda", "Fiesta en Punta Gorda", "ritmo", "puntagorda", "🥁", "Bailá punta en la fiesta de la llegada.", "Cada 12 de abril se celebra la llegada garífuna.", {"estilo": "punta", "toca": "baila"}, 5],
+      ["paddle", "Tabla en West Bay", "monta", "westbay", "🏄", "Mantené el equilibrio sobre la tabla.", "El agua es tan clara que se ve la sombra de la tabla en el fondo.", {"montura": "tabla", "nombre": "La ola", "fondo": "mar"}, 4],
+      ["watertaxi", "Water taxi", "manejo", "roatan", "🚤", "Recogé pasajeros de muelle en muelle.", "Sale cuando se llena, no cuando dice.", {"veh": "lancha", "via": "mar", "recoge": ["turistas"], "destino": "West End"}, 4],
+      ["bonacca", "Bonacca sobre el agua", "ruta", "guanaja", "🌉", "Cruzá el pueblo por pasarelas y puentes.", "En Bonacca no hay carros: solo pasarelas y lanchas.", {"estilo": "pueblo", "meta": "El último muelle"}, 5],
+      ["morgan", "El tesoro de Morgan", "ruta", "roatan", "🏴‍☠️", "Entrá a la cueva de los piratas.", "Dicen que Henry Morgan escondió oro en Roatán.", {"estilo": "cueva", "meta": "El cofre"}, 4],
+      ["whahappen", "Wha' happen?", "trivia", "coxen", "💬", "Aprendé inglés isleño.", "En las islas se saluda con «wha' happen?».", {"de": "palabras"}, 4],
+      ["potraplaya", "Potra en la playa", "futbol", "westbay", "⚽", "Fútbol descalzo sobre arena blanca.", "La pelota al agua vale saque.", {"equipo": ["Isleños", "#1abc9c"], "rival": ["Turistas", "#e67e22"]}, 3]
+    ]
+  },
+  "yoro": {
+    "tipos": "🐟🍌🦎🚂",
+    "lugares": [
+      ["yoroc", "Yoro", "ciudad", "Donde llueven peces."],
+      ["progreso", "El Progreso", "ciudad", "La Perla del Ulúa, ciudad bananera."],
+      ["olanchito", "Olanchito", "ciudad", "La Ciudad Cívica, tierra de escritores y bananos."],
+      ["pijol", "Pico Pijol", "parque", "Bosque nublado y cascadas."],
+      ["ulua", "Río Ulúa", "rio", "Uno de los ríos más grandes del país."],
+      ["tolupan", "Montañas tolupanes", "pueblo", "Aquí vive el pueblo tolupán."],
+      ["bananeras", "Campos bananeros", "finca", "Por aquí rodó el tren bananero."]
+    ],
+    "comidas": [
+      ["Sardinitas de la lluvia", "yoroc", "Pescaditos fritos, recién caídos del cielo."],
+      ["Mínimos", "progreso", "Aquí al banano se le dice mínimo."],
+      ["Coyoles en miel", "olanchito", "Dulce de Semana Santa: se chupan, no se muerden."]
+    ],
+    "palabras": [
+      ["jamo", "garrobo, iguana negra"],
+      ["mínimo", "banano"],
+      ["campeño", "trabajador de los campos bananeros"],
+      ["cususa", "aguardiente casero"],
+      ["zancudo", "mosquito"],
+      ["aguacero", "lluvia fuerte"]
+    ],
+    "juegos": [
+      ["lluvia", "La Lluvia de Peces", "atrapa", "yoroc", "🐟", "Corré con el balde: ¡están cayendo peces!", "Entre mayo y julio, tras el aguacero, el llano amanece lleno de peces.", {"con": "balde", "fondo": "valle", "cae": [["Sardina", "pez", "#b0c4de"], ["Sardina plateada", "pez", "#e3edf5"]], "evita": [["Granizo", "piedra"], ["Rama", "rama"]], "frases": ["¡Llueven peces!", "¡Traé otro balde!"]}, 6],
+      ["sardinas", "Sardinitas fritas", "cocina", "yoroc", "🍤", "Freí lo que cayó del cielo.", "El festival de la lluvia de peces termina en freidera.", {"plato": "Sardinitas fritas", "sirve": "plato", "pasos": [["Sardinas", "#b0c4de"], ["Sal", "#ffffff"], ["Freír", "#c8782a"], ["Tortilla", "#f2d680"], ["Limón", "#b5d334"]]}, 4],
+      ["camionbananero", "Camión bananero", "manejo", "bananeras", "🚚", "Llevá los racimos sin que se golpeen.", "Antes los llevaba el tren; ahora, el camión.", {"veh": "camion", "via": "carretera", "recoge": ["racimos"], "destino": "El Progreso"}, 4],
+      ["cortebanano", "Corte de banano", "corte", "bananeras", "🍌", "Cortá los racimos en su punto.", "Los campeños cargaban racimos enormes al hombro.", {"arma": "machete", "cosas": [["Racimo de mínimos", "platano", "#f4d03f"], ["Racimo verde", "platano", "#9ccc65"]], "evita": [["Avispero", "avispa"]]}, 4],
+      ["jamo", "Carnaval del Jamo", "ritmo", "olanchito", "🦎", "Bailá en el carnaval del garrobo.", "En Olanchito al jamo le hacen carnaval.", {"estilo": "banda", "toca": "baila"}, 4],
+      ["pijol", "Cascadas de Pico Pijol", "ruta", "pijol", "💦", "Bajá de poza en poza.", "El agua baja helada de la montaña.", {"estilo": "rio", "meta": "La poza grande"}, 5],
+      ["ulua", "Pesca en el Ulúa", "pesca", "ulua", "🎣", "Pescá desde la orilla del río grande.", "Cuando el Ulúa crece, manda él.", {"agua": "rio", "desde": "orilla", "peces": [["Guapote", 30, "#5b7f4a"], ["Bagre", 40, "#6d6d6d"], ["Róbalo", 55, "#b8c4c9"]], "basura": ["Llanta"]}, 4],
+      ["huelga", "La huelga del 54", "trivia", "progreso", "📜", "¿Qué tanto sabés de la historia bananera?", "La gran huelga de 1954 empezó aquí y cambió el país.", {"preguntas": [["¿En qué año fue la gran huelga bananera?", "1954", "1821", "1998"], ["¿Cómo le dicen a El Progreso?", "La Perla del Ulúa", "La Sultana del Sur", "La Novia de Honduras"], ["¿Qué es un campeño?", "Trabajador bananero", "Un tipo de banano", "Un sombrero"], ["¿Qué cae del cielo en Yoro?", "Peces", "Ranas", "Mangos"]]}, 4],
+      ["santiago", "Feria de Santiago", "feria", "yoroc", "🎯", "Los puestos de la feria de julio.", "Feria con aguacero incluido.", {}, 3],
+      ["riberenos", "Potra en El Progreso", "futbol", "progreso", "⚽", "Los Ribereños contra los del llano.", "Aquí se juega aunque el campo sea un charco.", {"equipo": ["Ribereños", "#1e5aa8"], "rival": ["Los del llano", "#e67e22"]}, 3],
+      ["tolupan", "Montaña tolupán", "exploradores", "tolupan", "🌲", "Encontrá los objetos del pueblo tolupán.", "Uno de los pueblos más antiguos de Honduras.", {"sitios": ["yoro"]}, 3],
+      ["coyoles", "Coyoles en miel", "cocina", "olanchito", "🍯", "Cocé los coyoles en dulce.", "Se chupan por horas.", {"plato": "Coyoles en miel", "sirve": "olla", "pasos": [["Coyoles", "#c9a227"], ["Pelar", "#e6d08a"], ["Dulce de rapadura", "#7b3f00"], ["Canela", "#8d5524"], ["Hervir", "#a0522d"]]}, 4]
+    ]
+  },
+  "graciasadios": {
+    "tipos": "🛶🌴🐆🗿",
+    "lugares": [
+      ["puertolempira", "Puerto Lempira", "puerto", "Capital de La Mosquitia, a la orilla de la laguna."],
+      ["caratasca", "Laguna de Caratasca", "lago", "La laguna más grande de Honduras."],
+      ["rioplatano", "Biosfera del Río Plátano", "selva", "Patrimonio de la Humanidad."],
+      ["ciudadblanca", "Ciudad Blanca", "ruinas", "La ciudad perdida del Dios Mono."],
+      ["patuca", "Río Patuca", "rio", "Uno de los ríos más largos de Centroamérica."],
+      ["brus", "Brus Laguna", "pueblo", "Pueblo miskito entre sabana y laguna."]
+    ],
+    "comidas": [
+      ["Wabul", "puertolempira", "Bebida espesa de guineo cocido con leche de coco."],
+      ["Tapado de pescado", "brus", "Pescado con yuca, plátano y coco."],
+      ["Casabe", "brus", "Tortilla de yuca para el viaje largo."]
+    ],
+    "palabras": [
+      ["naksa", "hola, en miskito"],
+      ["tingki pali", "muchas gracias, en miskito"],
+      ["aisabe", "adiós, en miskito"],
+      ["yamni", "bueno, en miskito"],
+      ["pipante", "canoa larga de río"],
+      ["wabul", "bebida de guineo y coco"]
+    ],
+    "juegos": [
+      ["pipante", "Pipante por el Patuca", "manejo", "patuca", "🛶", "Llevá los encargos río arriba esquivando troncos.", "Aquí la carretera es el río.", {"veh": "cayuco", "via": "rio", "recoge": ["encargos"], "destino": "Wampusirpi"}, 5],
+      ["ciudadblanca", "La Ciudad Blanca", "ruta", "ciudadblanca", "🗿", "Abrite paso por la selva hasta la ciudad perdida.", "La buscaron cien años y la encontraron con láser desde un avión.", {"estilo": "ruinas", "meta": "El Dios Mono"}, 6],
+      ["rioplatano", "Río Plátano", "exploradores", "rioplatano", "🐆", "Buscá las huellas de la selva.", "Aquí todavía viven el jaguar y el danto.", {"sitios": ["graciasadios"]}, 3],
+      ["caratasca", "Pesca en Caratasca", "pesca", "caratasca", "🎣", "Pescá desde el cayuco en la laguna.", "El sábalo real salta como si volara.", {"agua": "laguna", "desde": "cayuco", "peces": [["Róbalo", 40, "#b8c4c9"], ["Cubera", 55, "#b5483a"], ["Sábalo real", 75, "#c7d3db"]], "basura": ["Rama"]}, 5],
+      ["wabul", "Wabul", "cocina", "puertolempira", "🥣", "Prepará la bebida miskita del desayuno.", "Llena más que un almuerzo.", {"plato": "Wabul", "sirve": "vaso", "pasos": [["Guineo cocido", "#f1e0a0"], ["Machacar", "#ecd98a"], ["Leche de coco", "#ffffff"], ["Canela", "#8d5524"]]}, 4],
+      ["baile", "Baile miskito", "ritmo", "brus", "🥁", "Seguí el tambor en la fiesta del pueblo.", "«Tingki pali» es muchas gracias.", {"estilo": "tambor", "toca": "baila"}, 4],
+      ["cacao", "Cacao de La Mosquitia", "atrapa", "rioplatano", "🍫", "Juntá las mazorcas de cacao maduras.", "El cacao ya se tomaba aquí antes de que llegara Colón.", {"con": "canasta", "fondo": "selva", "cae": [["Mazorca de cacao", "cacao", "#a0522d"], ["Mazorca amarilla", "cacao", "#e0a526"]], "evita": [["Rama", "rama"]]}, 4],
+      ["naksa", "¿Naksa?", "trivia", "puertolempira", "💬", "Aprendé a saludar en miskito.", "«Naksa» es hola.", {"de": "palabras"}, 4],
+      ["jaguar", "Huellas del jaguar", "ruta", "rioplatano", "🐾", "Seguí el rastro por la selva hasta el salto.", "Si lo ves, él ya te vio hace rato.", {"estilo": "selva", "meta": "El salto del río"}, 5],
+      ["regata", "Regata de cayucos", "monta", "caratasca", "🚣", "Mantené el cayuco derecho con el oleaje.", "Los niños reman antes de aprender a andar en bicicleta.", {"montura": "cayuco", "nombre": "El Wangki", "fondo": "lago"}, 4],
+      ["mototaxi", "Mototaxi en la arena", "manejo", "puertolempira", "🛺", "Llevá pasajeros por las calles de arena.", "Aquí no hay semáforos; hay charcos.", {"veh": "mototaxi", "via": "costa", "recoge": ["pasajeros"], "destino": "El muelle"}, 4],
+      ["sabana", "Potra en la sabana", "futbol", "brus", "⚽", "Fútbol descalzo entre los pinos.", "Los marcos son dos palos y mucha fe.", {"equipo": ["Los de la laguna", "#16a085"], "rival": ["Los del río", "#8e44ad"]}, 3]
+    ]
+  }
+}

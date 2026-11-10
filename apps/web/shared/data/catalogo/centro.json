@@ -1,0 +1,126 @@
+{
+  "franciscomorazan": {
+    "tipos": "🚐⚽🫓⛰️",
+    "lugares": [
+      ["centro", "Centro de Tegus", "ciudad", "Parque Central, la Catedral y el Paseo Liquidámbar."],
+      ["picacho", "El Picacho", "montana", "El Cristo mira toda la capital."],
+      ["suyapa", "Basílica de Suyapa", "iglesia", "La Virgen de Suyapa mide apenas 6 centímetros."],
+      ["comayaguela", "Mercados de Comayagüela", "mercado", "Aquí se consigue de todo, y regateando."],
+      ["estadio", "Estadio Nacional", "estadio", "La casa del clásico capitalino."],
+      ["valle", "Valle de Ángeles", "pueblo", "Artesanías de madera y pupusas de domingo."],
+      ["tigra", "La Tigra", "parque", "El primer parque nacional de Honduras."],
+      ["sabanagrande", "Sabanagrande", "pueblo", "La capital de la rosquilla."]
+    ],
+    "comidas": [
+      ["Baleada sencilla", "comayaguela", "Tortilla de harina, frijoles, mantequilla y queso. Con todo ya es 'especial'."],
+      ["Pupusas de quesillo", "valle", "Con encurtido y salsa roja. Se comen con la mano."],
+      ["Paleta", "centro", "En Tegus se dice paleta. En Comayagua le dicen pilón."],
+      ["Charamusca", "centro", "Fresco congelado en bolsita. En el norte le dicen topogigio."],
+      ["Rosquillas con café", "sabanagrande", "De maíz y cuajada, salidas del horno de barro."]
+    ],
+    "palabras": [
+      ["paleta", "helado de palito"],
+      ["charamusca", "fresco congelado en bolsita"],
+      ["rapidito", "microbús de ruta"],
+      ["cheque", "todo bien"],
+      ["pisto", "dinero"],
+      ["alero", "amigo de confianza"],
+      ["burra", "almuerzo para llevar"],
+      ["trancazo", "tráfico parado"]
+    ],
+    "juegos": [
+      ["rapidito", "Rapidito al Centro", "manejo", "comayaguela", "🚐", "Llevá el rapidito lleno hasta el Parque Central sin chocar.", "El cobrador grita: «¡Centro, Centro, va vacío!» con el bus repleto.", {"veh": "rapidito", "via": "ciudad", "recoge": ["pasajeros"], "destino": "Parque Central"}, 5],
+      ["picacho", "Subida al Picacho", "ruta", "picacho", "⛰️", "Subí saltando hasta los pies del Cristo.", "Arriba se ve toda Tegus, hasta el trancazo del bulevar.", {"estilo": "cerro", "meta": "Cristo del Picacho"}, 5],
+      ["clasico", "Clásico capitalino", "futbol", "estadio", "⚽", "Leones contra Águilas. El que pierde aguanta la burla el lunes.", "El lunes nadie del equipo perdedor llega temprano al trabajo.", {"equipo": ["Leones", "#f4f4f4"], "rival": ["Águilas", "#12306b"]}, 3],
+      ["baleadas", "Baleadas de la esquina", "cocina", "comayaguela", "🫓", "Armá las baleadas como las pide cada cliente.", "«¿Sencilla o con todo?» es la pregunta más importante del día.", {"plato": "Baleada", "sirve": "tortilla", "pasos": [["Tortilla de harina", "#f1dcb4"], ["Frijoles fritos", "#5a2d1a"], ["Mantequilla", "#fff6d8"], ["Queso seco", "#f5f0e0"]], "extras": [["Huevo", "#ffd23f"], ["Aguacate", "#6aa84f"], ["Chorizo", "#b5412a"]]}, 5],
+      ["pupusas", "Pupusas de domingo", "cocina", "valle", "🫔", "Palmeá, rellená y dales vuelta en el comal.", "Nadie come solo dos.", {"plato": "Pupusa", "sirve": "plato", "pasos": [["Masa de maíz", "#f2d680"], ["Quesillo", "#fff3c4"], ["Chicharrón", "#a0522d"], ["Comal caliente", "#444444"], ["Encurtido", "#e8b4d0"]]}, 4],
+      ["ultimahora", "Última hora", "ruta", "centro", "🎤", "Corré con el micrófono y llegá primero a la noticia.", "El reportero del canal HCH siempre llega antes que la ambulancia.", {"estilo": "ciudad", "meta": "La noticia"}, 4],
+      ["pulperia", "Pulpería del barrio", "pulperia", "comayaguela", "🏪", "Atendé la pulpería: cada vecino pide lo suyo.", "«Me lo apunta, doña, que el sábado le pago.»", {}, 3],
+      ["campanas", "Campanas de Suyapa", "ritmo", "suyapa", "🔔", "Tocá las campanas al ritmo de la alborada.", "Cada 3 de febrero llegan peregrinos de todo el país.", {"estilo": "campanas", "toca": "campana"}, 4],
+      ["paletapilon", "¿Paleta o pilón?", "trivia", "centro", "🍦", "Caminá a la respuesta correcta antes de que se acabe el tiempo.", "Pedí un «pilón» en Tegus y te quedan viendo raro.", {"de": "palabras"}, 4],
+      ["tigra", "Sendero de La Tigra", "exploradores", "tigra", "🌿", "Buscá los tesoros escondidos en el bosque nublado.", "Si ves un quetzal, es tu día de suerte.", {"sitios": ["franciscomorazan"]}, 3],
+      ["sanmiguel", "Feria de San Miguel", "feria", "centro", "🎯", "Hulera, argollas y latas en la feria de la capital.", "El peluche grande nunca sale a la primera.", {}, 3],
+      ["rosquillas", "Rosquillas de Sabanagrande", "cocina", "sabanagrande", "🥨", "Amasá, formá y horneá en horno de barro.", "Se venden por bolsa en la carretera al sur.", {"plato": "Rosquillas", "sirve": "bolsa", "pasos": [["Masa de maíz", "#f2d680"], ["Cuajada", "#fff6e0"], ["Manteca", "#f7efc9"], ["Forma de rosquita", "#d9a441"], ["Horno de barro", "#a0522d"]]}, 4],
+      ["carrera", "Carrera Catrucha", "carrera", "centro", "🏃", "Carrera de obstáculos por las calles de Tegus.", "Ni los baches te detienen.", {}, 3],
+      ["colectivo", "Taxi colectivo", "manejo", "centro", "🚕", "Llená el taxi y dejá a cada quien en su punto.", "«Colectivo, colectivo, falta uno»… y siempre falta uno.", {"veh": "taxi", "via": "ciudad", "recoge": ["pasajeros"], "destino": "El Hatillo"}, 4],
+      ["mangoverde", "Mango verde con chile", "corte", "centro", "🥭", "Cortá los mangos en tajadas parejas.", "Con sal, chile y limón, en bolsita.", {"arma": "cuchillo", "cosas": [["Mango verde", "mango", "#8bc34a"], ["Jocote", "jocote", "#c0392b"], ["Pepino", "pepino", "#3d8b40"]], "evita": [["Avispa", "avispa"]]}, 4]
+    ]
+  },
+  "comayagua": {
+    "tipos": "⛪🍦🥭🐎",
+    "lugares": [
+      ["catedral", "Catedral de Comayagua", "iglesia", "Su reloj es de los más antiguos de América y todavía da la hora."],
+      ["colonial", "Centro colonial", "ciudad", "La antigua capital de Honduras."],
+      ["siguatepeque", "Siguatepeque", "ciudad", "Pinos, clima fresco y parada obligada en la carretera."],
+      ["taulabe", "Cuevas de Taulabé", "cueva", "Estalactitas a la orilla de la carretera."],
+      ["vallec", "Valle de Comayagua", "finca", "Mangos, tomates y calor del bueno."],
+      ["tenampua", "Tenampúa", "ruinas", "Fortaleza lenca en lo alto de un cerro."]
+    ],
+    "comidas": [
+      ["Pilón", "colonial", "Lo que en Tegus llaman paleta, aquí es pilón."],
+      ["Atol de elote", "siguatepeque", "Calientito, con canela, en los puestos de la carretera."],
+      ["Mango en bolsa", "vallec", "Verde, con sal y chile."],
+      ["Miel y dulces de Taulabé", "taulabe", "Alcitrones, cocadas y miel de abeja."]
+    ],
+    "palabras": [
+      ["pilón", "helado de palito (la paleta de Tegus)"],
+      ["cipote", "niño"],
+      ["chunche", "cosa cualquiera"],
+      ["vaya pues", "de acuerdo"],
+      ["mercar", "ir a comprar"],
+      ["jalón", "aventón, viaje gratis"]
+    ],
+    "juegos": [
+      ["alfombras", "Alfombras de aserrín", "cocina", "colonial", "🎨", "Armá la alfombra de Semana Santa capa por capa.", "Toda la noche trabajando y la procesión la borra en minutos.", {"plato": "Alfombra", "sirve": "calle", "pasos": [["Aserrín morado", "#7b3fa0"], ["Aserrín amarillo", "#f6c744"], ["Molde de paloma", "#ffffff"], ["Aserrín verde", "#3d8b40"], ["Flores", "#e63946"]]}, 5],
+      ["reloj", "El reloj más viejo", "ritmo", "catedral", "🕰️", "Tocá las campanas justo a la hora.", "Lo trajeron de España y sigue caminando.", {"estilo": "campanas", "toca": "campana"}, 4],
+      ["pilones", "Carrito de pilones", "manejo", "colonial", "🍦", "Pedaleá el carrito y vendé pilones por el centro.", "La campanita se oye desde dos cuadras.", {"veh": "bici", "via": "ciudad", "recoge": ["clientes"], "destino": "Parque Central"}, 4],
+      ["taulabe", "Cuevas de Taulabé", "ruta", "taulabe", "🦇", "Cruzá la cueva saltando entre estalagmitas.", "Dicen que nadie le ha encontrado el final.", {"estilo": "cueva", "meta": "El salón escondido"}, 5],
+      ["mangos", "Mangos del valle", "atrapa", "vallec", "🥭", "Atrapá los mangos maduros antes de que toquen el suelo.", "En abril los palos se doblan de tanto mango.", {"con": "canasta", "fondo": "finca", "cae": [["Mango maduro", "mango", "#f6a623"], ["Mango verde", "mango", "#8bc34a"]], "evita": [["Rama seca", "rama"], ["Avispero", "avispa"]]}, 4],
+      ["lena", "Leña de pino", "corte", "siguatepeque", "🪓", "Rajá la leña para el fogón.", "El ocote prende hasta mojado.", {"arma": "hacha", "cosas": [["Leño de pino", "lena", "#b07a45"], ["Ocote", "lena", "#d98e32"]], "evita": [["Nudo duro", "piedra"]]}, 4],
+      ["tenampua", "Fortaleza de Tenampúa", "exploradores", "tenampua", "🏺", "Encontrá las piezas lencas entre las murallas.", "Los lencas la defendieron desde arriba.", {"sitios": ["comayagua"]}, 3],
+      ["pilonpaleta", "¿Cómo se dice aquí?", "trivia", "colonial", "💬", "Caminá a la palabra correcta.", "Aquí nadie pide paleta: pide pilón.", {"de": "palabras"}, 4],
+      ["inmaculada", "Feria de la Inmaculada", "feria", "colonial", "🎯", "Los tres puestos de la feria de diciembre.", "Huele a churros y pólvora.", {}, 3],
+      ["cintas", "Carrera de cintas", "monta", "vallec", "🐎", "Aguantá arriba del caballo y ensartá la argolla.", "La madrina le pone la cinta al ganador.", {"montura": "caballo", "nombre": "El Palomo", "fondo": "feria"}, 4],
+      ["atol", "Atol de elote", "cocina", "siguatepeque", "🌽", "Prepará el atol para los viajeros.", "Parar a comer elote es parte del viaje.", {"plato": "Atol de elote", "sirve": "vaso", "pasos": [["Elote tierno", "#f6d55c"], ["Moler", "#e9c46a"], ["Leche", "#ffffff"], ["Canela", "#8d5524"]]}, 4],
+      ["potra", "Potra en el parque", "futbol", "colonial", "⚽", "Potra de barrio frente a la catedral.", "El que la bota va a traerla.", {"equipo": ["Los del parque", "#c0392b"], "rival": ["Los de abajo", "#2c3e50"]}, 3]
+    ]
+  },
+  "lapaz": {
+    "tipos": "☕🌄🥁🛻",
+    "lugares": [
+      ["marcala", "Marcala", "ciudad", "Café con denominación de origen."],
+      ["lapazc", "La Paz", "ciudad", "Cabecera tranquila al pie de la montaña."],
+      ["estanzuela", "Cascada La Estanzuela", "rio", "Una caída de agua entre cafetales."],
+      ["guajiquiro", "Guajiquiro", "pueblo", "Pueblo lenca de montaña, de los más fríos del país."],
+      ["santaelena", "Cuevas pintadas de Santa Elena", "cueva", "Pinturas rupestres muy antiguas."],
+      ["tutule", "San Pedro de Tutule", "finca", "Hortalizas frescas todo el año."]
+    ],
+    "comidas": [
+      ["Café de Marcala", "marcala", "Colado en manta, sin prisa."],
+      ["Ticucos", "guajiquiro", "Tamalitos lencas con frijoles, envueltos en hoja."],
+      ["Pan de casa", "lapazc", "De horno de leña, para chopear en el café."]
+    ],
+    "palabras": [
+      ["chopear", "mojar el pan en el café"],
+      ["guacal", "recipiente hecho de jícaro"],
+      ["cumbo", "bote o tarro"],
+      ["hornilla", "fogón de barro"],
+      ["corte", "cosecha del café"],
+      ["helado", "frío (hace helado)"]
+    ],
+    "juegos": [
+      ["cortecafe", "Corte de café", "atrapa", "marcala", "☕", "Juntá solo los granos rojos en la canasta.", "El verde no se corta: amarga la taza.", {"con": "canasta", "fondo": "finca", "cae": [["Grano rojo", "cafe", "#c0392b"], ["Grano maduro", "cafe", "#8e1b1b"]], "evita": [["Grano verde", "cafe", "#5aa02c"], ["Hoja", "hoja"]]}, 5],
+      ["tostado", "Del grano a la taza", "cocina", "marcala", "🫘", "Tostá, molé y colá el café en su punto.", "Aquí el café se toma hasta para el calor.", {"plato": "Café de Marcala", "sirve": "vaso", "pasos": [["Café oro", "#c9b27a"], ["Tostar", "#5a3620"], ["Moler", "#3e2313"], ["Colador de manta", "#efe6d0"], ["Taza", "#ffffff"]]}, 4],
+      ["catacion", "Catación", "trivia", "marcala", "👃", "¿Qué tanto sabés de café y de palabras de montaña?", "El catador sorbe duro, y no es mala educación.", {"de": "palabras"}, 4],
+      ["estanzuela", "Sendero a La Estanzuela", "ruta", "estanzuela", "💦", "Bajá por las piedras hasta la cascada.", "El agua está helada todo el año.", {"estilo": "rio", "meta": "Cascada La Estanzuela"}, 5],
+      ["pintadas", "Cuevas pintadas", "exploradores", "santaelena", "🖐️", "Encontrá las pinturas escondidas.", "Manos y venados pintados hace miles de años.", {"sitios": ["lapaz"]}, 3],
+      ["pickup", "Pick-up cafetalero", "manejo", "marcala", "🛻", "Bajá los sacos de café al beneficio por la calle de tierra.", "En la paila siempre cabe uno más.", {"veh": "pickup", "via": "montana", "recoge": ["sacos de café"], "destino": "El beneficio"}, 4],
+      ["guancasco", "Guancasco", "ritmo", "guajiquiro", "🥁", "Seguí el tambor del encuentro entre pueblos.", "Dos pueblos se visitan con sus santos para sellar la paz.", {"estilo": "tambor", "toca": "tambor"}, 4],
+      ["hornilla", "Leña para la hornilla", "corte", "guajiquiro", "🪓", "Rajá la leña antes de que apriete el frío.", "Sin hornilla no hay café ni tortillas.", {"arma": "hacha", "cosas": [["Leño de roble", "lena", "#8d6e4a"], ["Ocote", "lena", "#d98e32"]], "evita": [["Piedra", "piedra"]]}, 3],
+      ["mula", "Mula cafetalera", "monta", "tutule", "🫏", "Aguantá sobre la mula cargada cuesta abajo.", "La mula conoce el camino mejor que vos.", {"montura": "mula", "nombre": "La Canela", "fondo": "montana"}, 4],
+      ["ticucos", "Ticucos lencas", "cocina", "guajiquiro", "🫔", "Envolvé y cocé los ticucos.", "Se comen con café, cómo no.", {"plato": "Ticuco", "sirve": "hoja", "pasos": [["Masa de maíz", "#f2d680"], ["Frijoles", "#5a2d1a"], ["Hoja de milpa", "#6aa84f"], ["Amarrar", "#c9b27a"], ["Olla", "#555555"]]}, 4],
+      ["hortalizas", "Hortalizas de Tutule", "atrapa", "tutule", "🥕", "Llená el huacal con verdura fresca.", "De aquí sale la ensalada de medio país.", {"con": "huacal", "fondo": "finca", "cae": [["Zanahoria", "zanahoria", "#f28c28"], ["Repollo", "repollo", "#a8d08d"], ["Papa", "papa", "#c9a66b"]], "evita": [["Piedra", "piedra"]]}, 4],
+      ["feriamarcala", "Feria del café", "feria", "marcala", "🎯", "Los puestos de la feria de Marcala.", "El premio mayor: una libra de café.", {}, 3]
+    ]
+  }
+}

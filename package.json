@@ -1,0 +1,14 @@
+{
+  "name": "mundo-catrucho",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "web:dev": "pnpm --dir apps/web dev",
+    "web:build": "pnpm --dir apps/web exec node tools/build.mjs hd --out dist",
+    "web:test": "pnpm --dir apps/web exec node tools/smoke.mjs dist/mundo-catrucho-hd.html",
+    "convex:check": "tsc --noEmit -p convex",
+    "salas:dev": "pnpm --dir workers/salas dev",
+    "salas:test": "pnpm --dir workers/salas test"
+  },
+  "devDependencies": { "convex": "^1.17.0", "typescript": "^5.6.0" }
+}

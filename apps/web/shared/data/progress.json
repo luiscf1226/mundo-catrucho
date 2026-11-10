@@ -1,0 +1,32 @@
+{
+  "achievements": [
+    { "id": "primer_paso", "name": "Primeros pasos", "desc": "Entra al lobby por primera vez.", "icon": "👟", "coins": 20 },
+    { "id": "primera_victoria", "name": "Primera victoria", "desc": "Gana cualquier minijuego.", "icon": "🏆", "coins": 30 },
+    { "id": "rayo", "name": "Rayo catracho", "desc": "Gana oro en Carrera Catrucha.", "icon": "⚡", "coins": 60 },
+    { "id": "goleador", "name": "Goleador del barrio", "desc": "Mete 3 goles en un partido.", "icon": "⚽", "coins": 60 },
+    { "id": "punteria", "name": "Buena puntería", "desc": "Gana oro en la Feria Catracha.", "icon": "🎯", "coins": 60 },
+    { "id": "explorador", "name": "Explorador", "desc": "Completa Exploradores de Honduras.", "icon": "🧭", "coins": 60 },
+    { "id": "pulpero", "name": "Pulpero del mes", "desc": "Gana oro en La Pulpería.", "icon": "🏪", "coins": 60 },
+    { "id": "viajero", "name": "Viajero", "desc": "Visita 5 departamentos.", "icon": "🚌", "coins": 40 },
+    { "id": "catracho_de_corazon", "name": "Catracho de corazón", "desc": "Visita los 18 departamentos.", "icon": "💙", "coins": 200 },
+    { "id": "coleccionista", "name": "Coleccionista", "desc": "Encuentra 9 recuerdos de departamentos.", "icon": "💎", "coins": 100 },
+    { "id": "a_la_moda", "name": "A la moda", "desc": "Compra 5 artículos en la pulpería.", "icon": "🛍️", "coins": 40 },
+    { "id": "traje_tipico", "name": "Traje típico", "desc": "Ponte 3 prendas tradicionales a la vez.", "icon": "🪇", "coins": 60 },
+    { "id": "nivel_5", "name": "Nivel 5", "desc": "Llega al nivel 5.", "icon": "⭐", "coins": 80 },
+    { "id": "bailarin", "name": "Bailarín", "desc": "Usa emotes 10 veces.", "icon": "💃", "coins": 30 }
+  ],
+  "missions": [
+    { "id": "m_jugar2", "text": "Juega 2 minijuegos", "type": "play", "count": 2, "coins": 40, "xp": 40 },
+    { "id": "m_ganar1", "text": "Gana 1 minijuego", "type": "win", "count": 1, "coins": 50, "xp": 50 },
+    { "id": "m_carrera", "text": "Termina la Carrera Catrucha", "type": "win", "target": "carrera", "count": 1, "coins": 50, "xp": 50 },
+    { "id": "m_goles", "text": "Mete 2 goles", "type": "goals", "count": 2, "coins": 50, "xp": 50 },
+    { "id": "m_feria", "text": "Haz 200 puntos en la feria", "type": "score", "target": "feria", "count": 200, "coins": 50, "xp": 50 },
+    { "id": "m_visitar2", "text": "Visita 2 departamentos", "type": "visit", "count": 2, "coins": 40, "xp": 40 },
+    { "id": "m_monedas", "text": "Recoge 20 monedas en el mundo", "type": "pickup", "count": 20, "coins": 30, "xp": 30 },
+    { "id": "m_emote", "text": "Usa 3 emotes", "type": "emote", "count": 3, "coins": 20, "xp": 20 },
+    { "id": "m_recuerdo", "text": "Encuentra 1 recuerdo de un departamento", "type": "collect", "count": 1, "coins": 50, "xp": 50 },
+    { "id": "m_pulperia", "text": "Atiende un turno en La Pulpería", "type": "play", "target": "pulperia", "count": 1, "coins": 40, "xp": 40 }
+  ],
+  "dailyCount": 3,
+  "bots": ["Baleadero", "CatrachoPro", "xX_Tegus_Xx", "CeibaKid", "Lempira504", "LaGuara", "Marathonista", "DoñaToña", "ElPulpero", "Olanchano22", "RoatánDiver", "PuntaMaster", "Motagüense", "CopánExplorer", "SiqueQueen"]
+}
