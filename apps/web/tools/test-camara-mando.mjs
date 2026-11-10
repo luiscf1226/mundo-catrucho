@@ -8,6 +8,11 @@ if (!file) {
   console.error('uso: node tools/test-camara-mando.mjs <html> [capturas]');
   process.exit(2);
 }
+// Anima la cámara cuadro a cuadro: sin GPU (GitHub Actions, ~1 cuadro por segundo) tarda más de media hora.
+if (process.env.MC_GPU === '0') {
+  console.log('SALTA camara-mando: necesita GPU; corrélo en una máquina con GPU');
+  process.exit(0);
+}
 const S = `window.__mc.store.getState()`,
   P = `window.__mc.player`;
 const wheel = (dy, n) =>

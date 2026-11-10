@@ -79,95 +79,104 @@ const S = 'window.__mc.store.getState()';
 const real = (txt) => prohibidos.filter(([, re]) => re.test(txt)).map(([r]) => r);
 const textoVisible = () =>
   `(()=>{const p=document.querySelector('[data-testid=panel-tienda]');return p.innerText+'\\n'+[...p.querySelectorAll('[aria-label]')].map(e=>e.getAttribute('aria-label')).join('\\n')})()`;
-const pasa = await run('apodos', resolve(file), { hash: '#test', width: 1920, height: 1080 }, async (t) => {
-  await t.waitFor(`!!document.querySelector('[data-testid=btn-jugar]')`);
-  await t.click('btn-jugar');
-  await t.waitFor(`!!document.querySelector('[data-testid=ed-done]')`);
-  await t.click('ed-done');
-  await t.waitFor(`${S}.profile.created && !${S}.panel`, 15000, 'terminar creación');
-  await t.ev(`${S}.addCoins(5000)`);
-  await t.ev(`${S}.openPanel('tienda')`);
-  await t.click('shop-tab-atuendo');
-  const seleccion = APODOS.equipos.find((e) => e.id === 'seleccion');
-  const etiqueta = await t.ev(`document.querySelector('[data-testid=filter-grupo-seleccion]').innerText`);
-  ok(etiqueta.includes(seleccion.apodo), `el filtro de la Selección dice «${etiqueta}»`);
-  const clip = JSON.parse(
-    await t.ev(
-      `(()=>{const b=document.querySelector('[data-testid=avatar-view]').getBoundingClientRect();return JSON.stringify([{x:b.left+b.width*0.3,y:b.top+b.height*0.14,width:b.width*0.4,height:b.height*0.72},{x:b.left+b.width*0.38,y:b.top+b.height*0.4,width:b.width*0.24,height:b.height*0.16}])})()`,
-    ),
-  );
-  const pecho = [];
-  const celdas = [],
-    tmp = join(out, '_celda.png');
-  for (const grupo of ['club', 'seleccion']) {
-    await t.click(`filter-grupo-${grupo}`);
-    await t.sleep(300);
-    const lista = JSON.parse(
+// Sin GPU (GitHub Actions) cada captura tarda minutos: ahí solo se revisa el texto visible, sin hojas de camisetas.
+const fotos = process.env.MC_GPU !== '0';
+const pasa = await run(
+  'apodos',
+  resolve(file),
+  { hash: '#test', ...(fotos ? { width: 1920, height: 1080 } : {}) },
+  async (t) => {
+    await t.waitFor(`!!document.querySelector('[data-testid=btn-jugar]')`);
+    await t.click('btn-jugar');
+    await t.waitFor(`!!document.querySelector('[data-testid=ed-done]')`);
+    await t.click('ed-done');
+    await t.waitFor(`${S}.profile.created && !${S}.panel`, 15000, 'terminar creación');
+    await t.ev(`${S}.addCoins(5000)`);
+    await t.ev(`${S}.openPanel('tienda')`);
+    await t.click('shop-tab-atuendo');
+    const seleccion = APODOS.equipos.find((e) => e.id === 'seleccion');
+    const etiqueta = await t.ev(`document.querySelector('[data-testid=filter-grupo-seleccion]').innerText`);
+    ok(etiqueta.includes(seleccion.apodo), `el filtro de la Selección dice «${etiqueta}»`);
+    const clip = JSON.parse(
       await t.ev(
-        `JSON.stringify([...document.querySelectorAll('[data-testid^=shop-card-at_]')].map(e=>[e.dataset.testid.slice(10),e.querySelector('b').innerText]))`,
+        `(()=>{const b=document.querySelector('[data-testid=avatar-view]').getBoundingClientRect();return JSON.stringify([{x:b.left+b.width*0.3,y:b.top+b.height*0.14,width:b.width*0.4,height:b.height*0.72},{x:b.left+b.width*0.38,y:b.top+b.height*0.4,width:b.width*0.24,height:b.height*0.16}])})()`,
       ),
     );
-    ok(lista.length >= (grupo === 'club' ? 6 : 3), `pocos atuendos en ${grupo}: ${lista.length}`);
-    for (const [id, nombre] of lista) {
-      await t.click(`shop-try-${id}`);
-      await t.waitFor(`!!document.querySelector('[data-testid=shop-trying]')`, 4000, `probarse ${id}`);
-      const malos = real(await t.ev(textoVisible()));
-      ok(!malos.length, `al probarse ${id} se ve: ${malos.join(', ')}`);
-      const vistas = [];
-      for (const yaw of [0, Math.PI]) {
-        await t.ev(`window.__mcAvView={yaw:${yaw},anim:'idle'};1`);
-        await t.sleep(400);
-        await t.shot(tmp, clip[0]);
-        vistas.push(readFileSync(tmp).toString('base64'));
-        if (yaw === 0) {
-          await t.shot(tmp, clip[1]);
-          pecho.push([nombre, readFileSync(tmp).toString('base64')]);
-        }
+    const pecho = [];
+    const celdas = [],
+      tmp = join(out, '_celda.png');
+    for (const grupo of ['club', 'seleccion']) {
+      await t.click(`filter-grupo-${grupo}`);
+      await t.sleep(300);
+      const lista = JSON.parse(
+        await t.ev(
+          `JSON.stringify([...document.querySelectorAll('[data-testid^=shop-card-at_]')].map(e=>[e.dataset.testid.slice(10),e.querySelector('b').innerText]))`,
+        ),
+      );
+      ok(lista.length >= (grupo === 'club' ? 6 : 3), `pocos atuendos en ${grupo}: ${lista.length}`);
+      for (const [id, nombre] of lista) {
+        await t.click(`shop-try-${id}`);
+        await t.waitFor(`!!document.querySelector('[data-testid=shop-trying]')`, 4000, `probarse ${id}`);
+        const malos = real(await t.ev(textoVisible()));
+        ok(!malos.length, `al probarse ${id} se ve: ${malos.join(', ')}`);
+        const vistas = [];
+        if (fotos)
+          for (const yaw of [0, Math.PI]) {
+            await t.ev(`window.__mcAvView={yaw:${yaw},anim:'idle'};1`);
+            await t.sleep(400);
+            await t.shot(tmp, clip[0]);
+            vistas.push(readFileSync(tmp).toString('base64'));
+            if (yaw === 0) {
+              await t.shot(tmp, clip[1]);
+              pecho.push([nombre, readFileSync(tmp).toString('base64')]);
+            }
+          }
+        celdas.push([nombre, vistas]);
       }
-      celdas.push([nombre, vistas]);
+      await t.ev(`window.__mcAvView={yaw:-0.35,anim:'idle'};1`);
+      await t.click(`shop-try-${lista[0][0]}`);
+      await t.sleep(400);
+      if (fotos) await t.shot(join(out, `tienda-${grupo}.png`));
+      const malos = real(await t.ev(textoVisible()));
+      ok(!malos.length, `en la tienda (${grupo}) se ve: ${malos.join(', ')}`);
     }
-    await t.ev(`window.__mcAvView={yaw:-0.35,anim:'idle'};1`);
-    await t.click(`shop-try-${lista[0][0]}`);
+    // camisetas sueltas de la Bicolor (pestaña Camisa)
+    await t.click('shop-tab-camisa');
+    await t.click('shop-try-camisa_h');
     await t.sleep(400);
-    await t.shot(join(out, `tienda-${grupo}.png`));
-    const malos = real(await t.ev(textoVisible()));
-    ok(!malos.length, `en la tienda (${grupo}) se ve: ${malos.join(', ')}`);
-  }
-  // camisetas sueltas de la Bicolor (pestaña Camisa)
-  await t.click('shop-tab-camisa');
-  await t.click('shop-try-camisa_h');
-  await t.sleep(400);
-  await t.shot(join(out, 'tienda-camisas.png'));
-  ok(!real(await t.ev(textoVisible())).length, 'nombres reales en la pestaña Camisa');
-  ok(!t.errors.length, `errores: ${t.errors.join(' | ')}`);
-  // hojas con todas las camisetas (frente y espalda) y los escudos de cerca, rotuladas con el nombre que ve el jugador
-  const hoja = async (html, png) => {
-    await t.ev(`(()=>{document.open();document.write(${JSON.stringify(html)});document.close();return 1})()`);
-    await t.sleep(500);
-    await t.shot(join(out, png));
-  };
-  await hoja(
-    `<body style="margin:0;background:#20303c;font:bold 18px sans-serif;color:#fff;display:grid;grid-template-columns:repeat(5,1fr);gap:4px">` +
-      pecho
+    if (fotos) await t.shot(join(out, 'tienda-camisas.png'));
+    ok(!real(await t.ev(textoVisible())).length, 'nombres reales en la pestaña Camisa');
+    ok(!t.errors.length, `errores: ${t.errors.join(' | ')}`);
+    if (!fotos) return;
+    // hojas con todas las camisetas (frente y espalda) y los escudos de cerca, rotuladas con el nombre que ve el jugador
+    const hoja = async (html, png) => {
+      await t.ev(`(()=>{document.open();document.write(${JSON.stringify(html)});document.close();return 1})()`);
+      await t.sleep(500);
+      await t.shot(join(out, png));
+    };
+    await hoja(
+      `<body style="margin:0;background:#20303c;font:bold 18px sans-serif;color:#fff;display:grid;grid-template-columns:repeat(5,1fr);gap:4px">` +
+        pecho
+          .map(
+            ([n, b]) =>
+              `<div style="background:#2b3f4e;text-align:center"><img src="data:image/png;base64,${b}" style="height:455px"><div>${n}</div></div>`,
+          )
+          .join('') +
+        '</body>',
+      'escudos.png',
+    );
+    const html =
+      `<body style="margin:0;background:#20303c;font:bold 15px sans-serif;color:#fff;display:grid;grid-template-columns:repeat(5,1fr);gap:4px">` +
+      celdas
         .map(
-          ([n, b]) =>
-            `<div style="background:#2b3f4e;text-align:center"><img src="data:image/png;base64,${b}" style="height:455px"><div>${n}</div></div>`,
+          ([n, v]) =>
+            `<div style="background:#2b3f4e;text-align:center">${v.map((b) => `<img src="data:image/png;base64,${b}" style="height:380px">`).join('')}<div style="height:20px">${n}</div></div>`,
         )
         .join('') +
-      '</body>',
-    'escudos.png',
-  );
-  const html =
-    `<body style="margin:0;background:#20303c;font:bold 15px sans-serif;color:#fff;display:grid;grid-template-columns:repeat(5,1fr);gap:4px">` +
-    celdas
-      .map(
-        ([n, v]) =>
-          `<div style="background:#2b3f4e;text-align:center">${v.map((b) => `<img src="data:image/png;base64,${b}" style="height:380px">`).join('')}<div style="height:20px">${n}</div></div>`,
-      )
-      .join('') +
-    '</body>';
-  await hoja(html, 'hoja-camisetas.png');
-  rmSync(tmp, { force: true });
-  console.log(`Capturas en ${out}`);
-});
+      '</body>';
+    await hoja(html, 'hoja-camisetas.png');
+    rmSync(tmp, { force: true });
+    console.log(`Capturas en ${out}`);
+  },
+);
 process.exit(pasa ? 0 : 1);
