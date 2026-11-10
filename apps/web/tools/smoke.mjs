@@ -46,15 +46,16 @@ const ok = await run('smoke', file, { hash: '#test' }, async (t) => {
   await t.waitFor(`!!document.querySelector('canvas')`);
   await t.sleep(1500);
   if (await t.exists('hud-btn-minijuegos')) throw new Error('el HUD todavía tiene el botón de minijuegos');
+  // Se espera por lo que pasa y no por tiempo fijo: sin GPU (GitHub Actions) el juego corre a pocos cuadros por segundo.
+  const P = 'window.__mc.player.pos';
   const p0 = (await t.state()).pos;
-  await t.hold('w', 900);
-  const p1 = (await t.state()).pos;
-  if (Math.hypot(p1[0] - p0[0], p1[2] - p0[2]) < 1.5) throw new Error(`el personaje no se movió con W: ${p0} → ${p1}`);
-  await t.press(' ');
-  await t.sleep(150);
-  const y0 = p1[1],
-    y = (await t.state()).pos[1];
-  if (y - y0 < 0.25) throw new Error(`el salto no levantó al personaje: y=${y}`);
+  await t.holdUntil('w', `Math.hypot(${P}[0] - (${p0[0]}), ${P}[2] - (${p0[2]})) >= 1.5`, 30000).catch(async () => {
+    throw new Error(`el personaje no se movió con W: ${p0} → ${(await t.state()).pos}`);
+  });
+  const y0 = (await t.state()).pos[1];
+  await t.holdUntil(' ', `${P}[1] - (${y0}) >= 0.25`, 15000).catch(async () => {
+    throw new Error(`el salto no levantó al personaje: y=${(await t.state()).pos[1]}`);
+  });
   if (shots) await t.shot(`${shots}/03-lobby.png`);
   console.log('lobby fps', await t.fps());
   // mapa 2D: ficha con juegos y viaje directo

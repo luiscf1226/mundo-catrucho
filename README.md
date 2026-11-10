@@ -13,7 +13,7 @@ se juegan minijuegos hechos con cosas de ahí.
 | `apps/web/` | El juego: React, TypeScript, React Three Fiber, Zustand, Tailwind, Vite | Prototipo completo; todo vive en el navegador |
 | `convex/` | Modelo de datos (`schema.ts`) | Solo el esquema; faltan las funciones y conectar un proyecto de Convex |
 | `workers/salas/` | Sala en vivo (Cloudflare Durable Object con WebSocket) | Reparte posiciones y emotes en local; sin pase firmado todavía |
-| `packages/reglas/` | Reglas compartidas (premios, niveles, validación) | Vacío: se llena en la fase 2 |
+| `packages/reglas/` | Reglas compartidas (premios, niveles, validación) | Vacío: se llena en la ola 5 |
 | `docs/` | Plan, tickets y su generador | `docs/generador/catrucho.mjs` regenera el plan; `contenido.json` y `viajes.json` son el contenido nuevo |
 
 El contenido del prototipo (departamentos, lugares, juegos, comidas, palabras, ropa) está en `apps/web/shared/data/`.
@@ -28,14 +28,17 @@ comprueba que nada se repita. Los viajes reales (rutas, vehículos, eventos de c
 ## Cómo se corre
 
 ```bash
-pnpm install && pnpm --dir apps/web install && pnpm --dir workers/salas install
+pnpm install       # instala todo el espacio de trabajo (Node 22+, pnpm 12)
 
-pnpm web:dev        # el juego en http://localhost:5173
-pnpm web:build      # compila apps/web/dist/mundo-catrucho-hd.html (un solo archivo)
-pnpm web:test       # juega solo de punta a punta en Chromium sin ventana; debe imprimir PASA
-pnpm convex:check   # revisa los tipos del esquema
-pnpm salas:test     # levanta la sala en local y conecta dos jugadores; debe imprimir PASA
+pnpm dev           # el juego en http://localhost:5173 y la sala en ws://localhost:8799
+pnpm check         # Biome (lint y formato), tipos del juego, la sala y Convex, y que el contenido no se repita
+pnpm test          # compila, juega solo de punta a punta en Chromium y conecta dos jugadores a la sala; imprime PASA
+pnpm build         # apps/web/dist/mundo-catrucho-hd.html (un solo archivo) y el empaquetado de la sala
+pnpm capturas      # ./capturas: imágenes de las escenas clave, un video corto e INDICE.md
 ```
+
+Cada pull request corre `check`, `test` y `capturas` en GitHub Actions (`.github/workflows/revision.yml`) y deja las
+capturas como artefacto. `AGENTS.md` es la guía para los agentes.
 
 `apps/web/docs/CONTRATO.md` explica cómo está hecho el juego por dentro (kit de escenas, motores, catálogo, pruebas).
 

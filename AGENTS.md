@@ -15,6 +15,7 @@ también van en español.
 | `workers/salas/` | Sala en vivo (`@mundo-catrucho/salas`): Cloudflare Durable Object con WebSocket. |
 | `convex/` | Modelo de datos (`schema.ts`). Las funciones llegan en la ola 2. |
 | `packages/reglas/` | Reglas compartidas (premios, niveles, topes). Vacío hasta la ola 5. |
+| `.github/` | Revisión automática (`workflows/revision.yml`) y plantillas de pull request e issues. |
 | `docs/` | Plan, olas (`OLAS.md`), tickets (`TICKETS.md`) y el generador que los produce. |
 
 ## Comandos (siempre desde la raíz)
@@ -27,13 +28,19 @@ pnpm test          # compila y juega solo de punta a punta en Chromium; la sala 
 pnpm build         # apps/web/dist/mundo-catrucho-hd.html y el empaquetado de la sala
 pnpm capturas      # compila y deja ./capturas/*.png, ./capturas/recorrido.mp4 e INDICE.md
 pnpm fix           # arregla el formato y lo que Biome sabe arreglar solo
+pnpm avisos        # avisos de Biome que no bloquean: `any`, `!`, accesibilidad, variables sin usar
 ```
 
 Antes de dar algo por terminado: `pnpm check` y `pnpm test` en verde. Si tocaste algo que se ve, corre `pnpm capturas`
 y **mira las imágenes**. Una prueba en verde no prueba que se vea bien.
 
 Para pruebas propias: `apps/web/tools/test-<algo>.mjs` con `run()` de `harness.mjs`; debe imprimir `PASA` y salir con 0.
-En máquinas sin GPU (GitHub Actions) se corre con `MC_GPU=0`; `CHROME_BIN` elige el navegador.
+En máquinas sin GPU (GitHub Actions) se corre con `MC_GPU=0`; `CHROME_BIN` elige el navegador. Sin GPU el juego va a
+5–20 cuadros por segundo: en las pruebas **espera por lo que pasa** (`waitFor`, `holdUntil`), no por tiempo fijo.
+
+Biome tiene apagadas a propósito algunas reglas que chocan con cómo está hecho el juego (`biome.json`): fábricas de
+componentes del paquete de arte, dependencias de efectos de React Three Fiber, asignaciones dentro de expresiones y
+llaves por índice en listas fijas. Código nuevo: sin `any` ni `!` si se puede evitar.
 
 ## Reglas duras
 
