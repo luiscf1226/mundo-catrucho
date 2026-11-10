@@ -117,6 +117,7 @@ const ok = await run('smoke', file, { hash: '#test' }, async (t) => {
   console.log('compra', bought);
   await t.ev(`location.reload()`);
   await t.sleep(1500);
+  await t.waitFor(`!!window.__mc?.store`, 15000, 'el juego después de recargar');
   const saved = await t.ev(`${S}.profile.visited.includes('copan') && ${S}.profile.visited.includes('olancho')`);
   if (!saved) throw new Error('el progreso no se guardó tras recargar');
 });
