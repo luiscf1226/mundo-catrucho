@@ -46,12 +46,14 @@ pnpm salas:test     # levanta la sala en local y conecta dos jugadores; debe imp
 - **Chat:** sí, moderado (filtro, límite de mensajes, reportar, silenciar, bloquear; se puede apagar).
 - **Marcas y clubes:** con apodos, sin logotipos oficiales.
 
-## Cómo se trabaja
+## Cómo se trabaja: por olas
 
-El trabajo está en los [issues](https://github.com/luiscf1226/mundo-catrucho/issues), un hito por fase.
-Cada issue dice cuándo está listo, su tamaño y de qué depende; los de departamento traen la lista de motores,
-juegos, lugares y locuras. `node docs/generador/issues.mjs luiscf1226/mundo-catrucho catrucho` los vuelve a crear
-si faltan (no repite los que ya existen).
+El trabajo va en **10 olas** (`docs/OLAS.md`, y un hito por ola en los
+[issues](https://github.com/luiscf1226/mundo-catrucho/milestones)). Cada ola junta varios tickets que se hacen al
+mismo tiempo, cada uno con su agente; se juntan en una rama `ola-N`, se prueban y se entregan con vista previa,
+capturas y un pull request. Con «full send» se une a `main`. La fase de cada ticket queda como etiqueta.
 
-Lo primero es la fase 0 (pulido y vista desde arriba del mapa). Para la fase 1 hacen falta tus cuentas de Convex,
-Clerk y Cloudflare (`wrangler login`).
+`node docs/generador/issues.mjs luiscf1226/mundo-catrucho catrucho` deja GitHub igual que `olas.mjs`.
+
+La ola 1 (pulido y vista desde arriba del mapa) no necesita cuentas. La ola 2 necesita tus cuentas de Convex, Clerk y
+Cloudflare (`wrangler login`).

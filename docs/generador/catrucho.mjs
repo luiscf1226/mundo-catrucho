@@ -2,7 +2,8 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { chip, contar, esc, mermaid, page, reqs, section, table, tickets, ticketsMd, tree } from './lib.mjs';
+import { chip, contar, esc, mermaid, olas, olasMd, page, reqs, section, table, tickets, ticketsMd, tree } from './lib.mjs';
+import { OLAS, revisarOlas } from './olas.mjs';
 import { TICKETS, CONTENIDO, VIAJES, TOTALES, ESFUERZO, PRIMER_DEPTO, ULTIMO_DEPTO } from './tickets-catrucho.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url)), data = join(here, '../../apps/web/shared/data');
@@ -269,8 +270,9 @@ mundo-catrucho/
   contenido/         el catálogo en JSON y el script que lo sube a Convex
   docs/              arquitectura, requerimientos y este plan`)}
     <p>La carpeta ya está creada en <code>~/Work/personal/mundo-catrucho</code> y agregada a T3 Code.</p>`),
+  section('olas', 'Se trabaja por olas', 'Olas', `<p>Son ${OLAS.catrucho.length} olas. Cada una junta varios tickets que se hacen al mismo tiempo y termina con algo que podés ver y jugar.</p>${olas(OLAS.catrucho, TICKETS)}`),
   section('tickets', 'El trabajo, ticket por ticket', 'Tickets', `
-    <div class="aprobar"><h3>Issues en GitHub</h3><p>Son ${contar(TICKETS)} tickets en ${TICKETS.length} fases. Cada uno es un issue y cada fase un hito en el repositorio. Los de departamento (${PRIMER_DEPTO} a ${ULTIMO_DEPTO}) traen adentro la lista de sus motores, juegos, lugares y locuras.</p></div>
+    <div class="aprobar"><h3>Issues en GitHub</h3><p>Son ${contar(TICKETS)} tickets. Cada uno es un issue y cada ola un hito en el repositorio; la fase queda como etiqueta. Los de departamento (${PRIMER_DEPTO} a ${ULTIMO_DEPTO}) traen adentro la lista de sus motores, juegos, lugares y locuras.</p></div>
     ${tickets(TICKETS)}`),
   section('fases', 'En qué orden', 'Fases', table(['Fase', 'Nombre', 'Qué se entrega', 'Tickets', 'Tiempo estimado'], FASES) + `<p class="nota">Los tiempos son estimados para una persona con ayuda de agentes; no son un compromiso.</p>`),
   section('riesgos', 'Lo que hay que decidir', 'Riesgos y decisiones', `<div class="cols">${RIESGOS.map(([t, x]) => `<div><h3>${esc(t)}</h3><p>${esc(x)}</p></div>`).join('')}</div>`),
@@ -280,9 +282,11 @@ const html = page({
   title: 'Plan Mundo Catrucho', accent: '#0a7c8c', accentDark: '#4fd0de', accent2: '#c2571a', accent2Dark: '#f0a070',
   lead: 'Lo que el juego tiene que hacer, cómo se arma con Cloudflare, Convex y Clerk, y los 18 departamentos con sus motores, juegos, lugares y locuras que no se repiten en ningún otro.',
   facts: [[String(total), 'juegos'], [String(TOTALES.motores), 'motores exclusivos'], [String(TOTALES.turismo), 'lugares para explorar'], [String(TOTALES.locuras), 'locuras'], [String(VIAJES.rutas.length), 'rutas reales'], [String(lugares), 'lugares'], [String(atuendos.length), 'atuendos'], [`${RF.reduce((n, g) => n + g[1].length, 0) + RNF.reduce((n, g) => n + g[1].length, 0)}`, 'requerimientos'], [String(contar(TICKETS)), 'tickets']],
-  nav: [['resumen', 'Dónde estamos'], ['funcionales', 'Requerimientos'], ['calidad', 'Calidad'], ['arquitectura', 'Arquitectura'], ['datos', 'Datos'], ['motores', 'Motores'], ['viajes', 'Viajes'], ['departamentos', 'Departamentos'], ...D.map(d => [`d-${d.id}`, '· ' + d.name]), ['ropero', 'Ropero'], ['repositorio', 'Repositorio'], ['tickets', 'Tickets'], ['fases', 'Fases'], ['riesgos', 'Decisiones']],
+  nav: [['resumen', 'Dónde estamos'], ['funcionales', 'Requerimientos'], ['calidad', 'Calidad'], ['arquitectura', 'Arquitectura'], ['datos', 'Datos'], ['motores', 'Motores'], ['viajes', 'Viajes'], ['departamentos', 'Departamentos'], ...D.map(d => [`d-${d.id}`, '· ' + d.name]), ['ropero', 'Ropero'], ['repositorio', 'Repositorio'], ['olas', 'Olas'], ['tickets', 'Tickets'], ['fases', 'Fases'], ['riesgos', 'Decisiones']],
   body,
 });
 writeFileSync(join(here, 'plan-mundo-catrucho.html'), html);
 writeFileSync(join(here, 'TICKETS-mundo-catrucho.md'), ticketsMd('Mundo Catrucho', TICKETS));
+writeFileSync(join(here, 'OLAS-mundo-catrucho.md'), olasMd('Mundo Catrucho', OLAS.catrucho, TICKETS));
+const errOlas = revisarOlas(OLAS.catrucho, TICKETS); if (errOlas.length) { console.error(errOlas.join('\n')); process.exit(1); }
 console.log('plan-mundo-catrucho.html', (html.length / 1024).toFixed(0) + ' KB', total, 'juegos');
