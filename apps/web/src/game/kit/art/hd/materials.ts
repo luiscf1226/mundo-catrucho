@@ -2,7 +2,7 @@
 // espacio del objeto sin su giro, de modo que la textura mantiene su escala en cualquier tamaño de bloque.
 import * as THREE from 'three';
 import type { MatKind } from '../types';
-import { LAYERS, TILE, layerIndex, layerTextures, type LayerName } from './tex';
+import { LAYERS, type LayerName, layerIndex, layerTextures, TILE } from './tex';
 
 /** Uniformes globales que actualiza el SkyRig en cada cuadro. */
 export const G = {
@@ -13,25 +13,42 @@ export const G = {
 };
 
 const KIND: Record<MatKind, { l: LayerName; r: number; m: number }> = {
-  plastic: { l: 'plastic', r: 0.42, m: 0 }, grass: { l: 'grass', r: 0.95, m: 0 }, dirt: { l: 'dirt', r: 0.96, m: 0 }, sand: { l: 'sand', r: 0.92, m: 0 },
-  stone: { l: 'stone', r: 0.85, m: 0 }, cobble: { l: 'cobble', r: 0.8, m: 0 }, brick: { l: 'brick', r: 0.88, m: 0 }, wood: { l: 'wood', r: 0.72, m: 0 },
-  metal: { l: 'metal', r: 0.36, m: 0.9 }, tile: { l: 'tile', r: 0.3, m: 0 }, stucco: { l: 'stucco', r: 0.93, m: 0 }, roof: { l: 'roof', r: 0.8, m: 0 },
-  water: { l: 'water', r: 0.08, m: 0 }, neon: { l: 'plastic', r: 0.4, m: 0 }, glass: { l: 'plastic', r: 0.06, m: 0 }, cloth: { l: 'cloth', r: 0.96, m: 0 },
-  asphalt: { l: 'asphalt', r: 0.9, m: 0 }, concrete: { l: 'concrete', r: 0.9, m: 0 }, leaf: { l: 'leaf', r: 0.72, m: 0 }, gold: { l: 'gold', r: 0.24, m: 1 },
+  plastic: { l: 'plastic', r: 0.42, m: 0 },
+  grass: { l: 'grass', r: 0.95, m: 0 },
+  dirt: { l: 'dirt', r: 0.96, m: 0 },
+  sand: { l: 'sand', r: 0.92, m: 0 },
+  stone: { l: 'stone', r: 0.85, m: 0 },
+  cobble: { l: 'cobble', r: 0.8, m: 0 },
+  brick: { l: 'brick', r: 0.88, m: 0 },
+  wood: { l: 'wood', r: 0.72, m: 0 },
+  metal: { l: 'metal', r: 0.36, m: 0.9 },
+  tile: { l: 'tile', r: 0.3, m: 0 },
+  stucco: { l: 'stucco', r: 0.93, m: 0 },
+  roof: { l: 'roof', r: 0.8, m: 0 },
+  water: { l: 'water', r: 0.08, m: 0 },
+  neon: { l: 'plastic', r: 0.4, m: 0 },
+  glass: { l: 'plastic', r: 0.06, m: 0 },
+  cloth: { l: 'cloth', r: 0.96, m: 0 },
+  asphalt: { l: 'asphalt', r: 0.9, m: 0 },
+  concrete: { l: 'concrete', r: 0.9, m: 0 },
+  leaf: { l: 'leaf', r: 0.72, m: 0 },
+  gold: { l: 'gold', r: 0.24, m: 1 },
 };
 /** capa + rugosidad + metal de cada tipo, para la utilería fusionada */
-export const kindInfo = (k: MatKind | LayerName) => (KIND as any)[k] as { l: LayerName; r: number; m: number } | undefined;
+export const kindInfo = (k: MatKind | LayerName) =>
+  (KIND as any)[k] as { l: LayerName; r: number; m: number } | undefined;
 
-const NL = LAYERS.length, MACRO = layerIndex('macro');
-const tileArr = `const float TRI_TILE[${NL}] = float[${NL}](${LAYERS.map(l => TILE[l].toFixed(2)).join(', ')});`;
+const NL = LAYERS.length,
+  MACRO = layerIndex('macro');
+const tileArr = `const float TRI_TILE[${NL}] = float[${NL}](${LAYERS.map((l) => TILE[l].toFixed(2)).join(', ')});`;
 
-const VERT_PARS = /* glsl */`
+const VERT_PARS = /* glsl */ `
 varying vec3 vTriPos; varying vec3 vTriN; varying mat3 vTriM;
 #ifdef TRI_ATTR
 attribute vec4 aMat; attribute vec3 aCol; varying vec4 vMat; varying vec3 vCol; varying vec2 vTriUv;
 #endif
 `;
-const VERT_MAIN = /* glsl */`
+const VERT_MAIN = /* glsl */ `
 {
   vec4 triW = vec4( transformed, 1.0 ); mat3 triR = mat3( modelMatrix ); mat3 triNM = normalMatrix;
   #ifdef USE_INSTANCING
@@ -46,7 +63,7 @@ const VERT_MAIN = /* glsl */`
   #endif
 }
 `;
-const FRAG_PARS = /* glsl */`
+const FRAG_PARS = /* glsl */ `
 uniform sampler2DArray tAlb; uniform sampler2DArray tNrm;
 uniform float uWet; uniform float uTime; uniform float uNight; uniform vec3 uSky;
 varying vec3 vTriPos; varying vec3 vTriN; varying mat3 vTriM;
@@ -66,7 +83,7 @@ mat3 triTBN( vec3 eye_pos, vec3 surf_norm, vec2 uv ) {
 }
 vec3 triUnpack( vec4 s, float k ) { vec2 xy = ( s.xy * 2.0 - 1.0 ) * k; return vec3( xy, sqrt( max( 0.05, 1.0 - dot( xy, xy ) ) ) ); }
 `;
-const FRAG_MAP = /* glsl */`
+const FRAG_MAP = /* glsl */ `
 {
   #ifdef TRI_ATTR
     float tl = vMat.x; triUvMode = tl > 99.5; if ( triUvMode ) tl -= 100.0; tl = floor( tl + 0.5 );
@@ -107,33 +124,33 @@ const FRAG_MAP = /* glsl */`
   diffuseColor.rgb = alb;
 }
 `;
-const FRAG_ROUGH = /* glsl */`
+const FRAG_ROUGH = /* glsl */ `
 #ifdef TRI_ATTR
   float roughnessFactor = clamp( vMat.y * ( 0.5 + triRough ) * triRoughMul, 0.045, 1.0 );
 #else
   float roughnessFactor = clamp( roughness * ( 0.5 + triRough ) * triRoughMul, 0.045, 1.0 );
 #endif
 `;
-const FRAG_METAL = /* glsl */`
+const FRAG_METAL = /* glsl */ `
 #ifdef TRI_ATTR
   float metalnessFactor = vMat.z;
 #else
   float metalnessFactor = metalness;
 #endif
 `;
-const FRAG_NORMAL = /* glsl */`
+const FRAG_NORMAL = /* glsl */ `
 #ifdef TRI_ATTR
   if ( triUvMode ) { mat3 tb = triTBN( - vViewPosition, normal, vTriUv ); normal = normalize( tb * triTan ); } else
 #endif
   { normal = normalize( vTriM * triNp ) * faceDirection; }
 `;
-const FRAG_EMIS = /* glsl */`
+const FRAG_EMIS = /* glsl */ `
 #ifdef TRI_ATTR
   totalEmissiveRadiance += vMat.w > 0.0 ? vec3( 1.0, 0.72, 0.36 ) * vMat.w * uNight : triTint * ( - vMat.w );
 #endif
 `;
 /** brillo de Fresnel para agua y vidrio: más opaco y con reflejo del cielo en ángulos rasantes */
-const FRAG_FRESNEL = /* glsl */`
+const FRAG_FRESNEL = /* glsl */ `
 {
   float fres = pow( 1.0 - saturate( dot( normal, normalize( vViewPosition ) ) ), 3.0 );
   diffuseColor.a = mix( diffuseColor.a, 1.0, fres * 0.85 );
@@ -144,19 +161,35 @@ const FRAG_FRESNEL = /* glsl */`
 
 function shared(sh: { uniforms: Record<string, any> }) {
   const t = layerTextures();
-  sh.uniforms.tAlb = { value: t.alb }; sh.uniforms.tNrm = { value: t.nrm };
-  sh.uniforms.uWet = G.uWet; sh.uniforms.uTime = G.uTime; sh.uniforms.uNight = G.uNight; sh.uniforms.uSky = G.uSky;
+  sh.uniforms.tAlb = { value: t.alb };
+  sh.uniforms.tNrm = { value: t.nrm };
+  sh.uniforms.uWet = G.uWet;
+  sh.uniforms.uTime = G.uTime;
+  sh.uniforms.uNight = G.uNight;
+  sh.uniforms.uSky = G.uSky;
 }
 /** Convierte un MeshStandardMaterial en triplanar. `attr` = capa/color por vértice (utilería fusionada). */
-export function triplanar<T extends THREE.MeshStandardMaterial>(mat: T, o: { attr?: boolean; layer?: LayerName; water?: boolean; fresnel?: boolean; nk?: number } = {}): T {
-  const uMat = { value: new THREE.Vector4(layerIndex(o.layer ?? 'plastic'), 1 / TILE[o.layer ?? 'plastic'], o.nk ?? 1, 0) };
+export function triplanar<T extends THREE.MeshStandardMaterial>(
+  mat: T,
+  o: { attr?: boolean; layer?: LayerName; water?: boolean; fresnel?: boolean; nk?: number } = {},
+): T {
+  const uMat = {
+    value: new THREE.Vector4(layerIndex(o.layer ?? 'plastic'), 1 / TILE[o.layer ?? 'plastic'], o.nk ?? 1, 0),
+  };
   mat.defines = { ...(mat.defines ?? {}), ...(o.attr ? { TRI_ATTR: '' } : {}), ...(o.water ? { TRI_WATER: '' } : {}) };
-  mat.onBeforeCompile = sh => {
-    shared(sh); sh.uniforms.uMat = uMat;
-    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\n' + VERT_PARS).replace('#include <project_vertex>', '#include <project_vertex>\n' + VERT_MAIN);
-    let f = sh.fragmentShader.replace('#include <common>', '#include <common>\n' + FRAG_PARS).replace('#include <map_fragment>', FRAG_MAP)
-      .replace('#include <roughnessmap_fragment>', FRAG_ROUGH).replace('#include <metalnessmap_fragment>', FRAG_METAL)
-      .replace('#include <normal_fragment_maps>', FRAG_NORMAL).replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n' + FRAG_EMIS);
+  mat.onBeforeCompile = (sh) => {
+    shared(sh);
+    sh.uniforms.uMat = uMat;
+    sh.vertexShader = sh.vertexShader
+      .replace('#include <common>', `#include <common>\n${VERT_PARS}`)
+      .replace('#include <project_vertex>', `#include <project_vertex>\n${VERT_MAIN}`);
+    let f = sh.fragmentShader
+      .replace('#include <common>', `#include <common>\n${FRAG_PARS}`)
+      .replace('#include <map_fragment>', FRAG_MAP)
+      .replace('#include <roughnessmap_fragment>', FRAG_ROUGH)
+      .replace('#include <metalnessmap_fragment>', FRAG_METAL)
+      .replace('#include <normal_fragment_maps>', FRAG_NORMAL)
+      .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>\n${FRAG_EMIS}`);
     if (o.fresnel) f = f.replace('#include <opaque_fragment>', FRAG_FRESNEL);
     sh.fragmentShader = f;
   };
@@ -167,19 +200,60 @@ export function triplanar<T extends THREE.MeshStandardMaterial>(mat: T, o: { att
 const cache = new Map<string, THREE.Material>();
 /** material cacheado por (tipo, color) */
 export function hdMaterial(kind: MatKind, color: string): THREE.Material {
-  const key = kind + '|' + color; let m = cache.get(key); if (m) return m;
+  const key = `${kind}|${color}`;
+  let m = cache.get(key);
+  if (m) return m;
   const k = KIND[kind] ?? KIND.plastic;
-  if (kind === 'neon') { const c = new THREE.Color(color); m = new THREE.MeshBasicMaterial({ color: c, toneMapped: false }); }
-  else if (kind === 'water') m = triplanar(new THREE.MeshStandardMaterial({ color, roughness: k.r, metalness: 0, transparent: true, opacity: 0.74, envMapIntensity: 1.6 }), { layer: 'water', water: true, fresnel: true, nk: 0.55 });
-  else if (kind === 'glass') m = triplanar(new THREE.MeshStandardMaterial({ color, roughness: k.r, metalness: 0, transparent: true, opacity: 0.4, envMapIntensity: 1.6 }), { layer: 'plastic', fresnel: true, nk: 0 });
-  else m = triplanar(new THREE.MeshStandardMaterial({ color, roughness: k.r, metalness: k.m, envMapIntensity: kind === 'gold' || kind === 'metal' ? 1.25 : 1 }), { layer: k.l });
-  m.name = 'hd:' + kind;
-  cache.set(key, m); return m;
+  if (kind === 'neon') {
+    const c = new THREE.Color(color);
+    m = new THREE.MeshBasicMaterial({ color: c, toneMapped: false });
+  } else if (kind === 'water')
+    m = triplanar(
+      new THREE.MeshStandardMaterial({
+        color,
+        roughness: k.r,
+        metalness: 0,
+        transparent: true,
+        opacity: 0.74,
+        envMapIntensity: 1.6,
+      }),
+      { layer: 'water', water: true, fresnel: true, nk: 0.55 },
+    );
+  else if (kind === 'glass')
+    m = triplanar(
+      new THREE.MeshStandardMaterial({
+        color,
+        roughness: k.r,
+        metalness: 0,
+        transparent: true,
+        opacity: 0.4,
+        envMapIntensity: 1.6,
+      }),
+      { layer: 'plastic', fresnel: true, nk: 0 },
+    );
+  else
+    m = triplanar(
+      new THREE.MeshStandardMaterial({
+        color,
+        roughness: k.r,
+        metalness: k.m,
+        envMapIntensity: kind === 'gold' || kind === 'metal' ? 1.25 : 1,
+      }),
+      { layer: k.l },
+    );
+  m.name = `hd:${kind}`;
+  cache.set(key, m);
+  return m;
 }
 
-let _prop: THREE.MeshStandardMaterial | null = null, _prop2: THREE.MeshStandardMaterial | null = null;
+let _prop: THREE.MeshStandardMaterial | null = null,
+  _prop2: THREE.MeshStandardMaterial | null = null;
 /** Material único de la utilería fusionada: lee capa/rugosidad/metal/emisión (aMat) y color (aCol) por vértice. */
 export function propMaterial(doubleSided = false) {
-  if (doubleSided) return (_prop2 ??= triplanar(new THREE.MeshStandardMaterial({ side: THREE.DoubleSide, shadowSide: THREE.DoubleSide }), { attr: true }));
+  if (doubleSided)
+    return (_prop2 ??= triplanar(
+      new THREE.MeshStandardMaterial({ side: THREE.DoubleSide, shadowSide: THREE.DoubleSide }),
+      { attr: true },
+    ));
   return (_prop ??= triplanar(new THREE.MeshStandardMaterial(), { attr: true }));
 }

@@ -1,50 +1,119 @@
 // Modelo de datos de Mundo Catrucho en Convex. Ver docs/ARQUITECTURA.md.
 // Regla: el juego nunca escribe estas tablas directo; todo pasa por mutaciones que validan.
-import { defineSchema, defineTable } from "convex/server";
-import { v } from "convex/values";
+import { defineSchema, defineTable } from 'convex/server';
+import { v } from 'convex/values';
 
 const avatar = v.object({
-  body: v.optional(v.union(v.literal("h"), v.literal("m"))),
-  skin: v.string(), hair: v.string(), hairColor: v.string(), face: v.string(),
-  shirt: v.string(), shirtColor: v.string(), pants: v.string(), pantsColor: v.string(),
-  hat: v.string(), hatColor: v.string(), acc: v.string(), accColor: v.string(),
+  body: v.optional(v.union(v.literal('h'), v.literal('m'))),
+  skin: v.string(),
+  hair: v.string(),
+  hairColor: v.string(),
+  face: v.string(),
+  shirt: v.string(),
+  shirtColor: v.string(),
+  pants: v.string(),
+  pantsColor: v.string(),
+  hat: v.string(),
+  hatColor: v.string(),
+  acc: v.string(),
+  accColor: v.string(),
 });
-const modo = v.union(v.literal("solo"), v.literal("duo"), v.literal("abierto"));
+const modo = v.union(v.literal('solo'), v.literal('duo'), v.literal('abierto'));
 
 export default defineSchema({
-  usuarios: defineTable({ nombre: v.string(), esInvitado: v.boolean(), tokenIdentifier: v.optional(v.string()) })
-    .index("por_token", ["tokenIdentifier"]),
-  perfiles: defineTable({ usuarioId: v.id("usuarios"), avatar, monedas: v.number(), xp: v.number(), nivel: v.number(), modo })
-    .index("por_usuario", ["usuarioId"]),
-  inventario: defineTable({ usuarioId: v.id("usuarios"), itemId: v.string() })
-    .index("por_usuario", ["usuarioId", "itemId"]),
+  usuarios: defineTable({ nombre: v.string(), esInvitado: v.boolean(), tokenIdentifier: v.optional(v.string()) }).index(
+    'por_token',
+    ['tokenIdentifier'],
+  ),
+  perfiles: defineTable({
+    usuarioId: v.id('usuarios'),
+    avatar,
+    monedas: v.number(),
+    xp: v.number(),
+    nivel: v.number(),
+    modo,
+  }).index('por_usuario', ['usuarioId']),
+  inventario: defineTable({ usuarioId: v.id('usuarios'), itemId: v.string() }).index('por_usuario', [
+    'usuarioId',
+    'itemId',
+  ]),
   // avance por etapas de cada juego del catálogo (id 'depto.juego')
-  progresoJuegos: defineTable({ usuarioId: v.id("usuarios"), juegoId: v.string(), etapa: v.number(), estrellas: v.array(v.number()), mejor: v.number(), veces: v.number() })
-    .index("por_usuario_juego", ["usuarioId", "juegoId"]),
-  visitas: defineTable({ usuarioId: v.id("usuarios"), deptId: v.string(), recuerdo: v.boolean() })
-    .index("por_usuario", ["usuarioId", "deptId"]),
-  misionesDia: defineTable({ usuarioId: v.id("usuarios"), fecha: v.string(), misiones: v.array(v.object({ id: v.string(), progreso: v.number(), cobrada: v.boolean() })) })
-    .index("por_usuario_fecha", ["usuarioId", "fecha"]),
-  logros: defineTable({ usuarioId: v.id("usuarios"), logroId: v.string() })
-    .index("por_usuario", ["usuarioId", "logroId"]),
+  progresoJuegos: defineTable({
+    usuarioId: v.id('usuarios'),
+    juegoId: v.string(),
+    etapa: v.number(),
+    estrellas: v.array(v.number()),
+    mejor: v.number(),
+    veces: v.number(),
+  }).index('por_usuario_juego', ['usuarioId', 'juegoId']),
+  visitas: defineTable({ usuarioId: v.id('usuarios'), deptId: v.string(), recuerdo: v.boolean() }).index(
+    'por_usuario',
+    ['usuarioId', 'deptId'],
+  ),
+  misionesDia: defineTable({
+    usuarioId: v.id('usuarios'),
+    fecha: v.string(),
+    misiones: v.array(v.object({ id: v.string(), progreso: v.number(), cobrada: v.boolean() })),
+  }).index('por_usuario_fecha', ['usuarioId', 'fecha']),
+  logros: defineTable({ usuarioId: v.id('usuarios'), logroId: v.string() }).index('por_usuario', [
+    'usuarioId',
+    'logroId',
+  ]),
   // una partida se abre antes de jugar y solo la cierra el recibo firmado de la sala
   partidas: defineTable({
-    juegoId: v.string(), etapa: v.number(), modo, sala: v.optional(v.string()), semilla: v.number(),
-    jugadores: v.array(v.id("usuarios")), estado: v.union(v.literal("abierta"), v.literal("cerrada"), v.literal("vencida")),
-    resultado: v.optional(v.array(v.object({ usuarioId: v.id("usuarios"), puntos: v.number(), estrellas: v.number(), gano: v.boolean() }))),
-  }).index("por_estado", ["estado"]),
-  marcas: defineTable({ juegoId: v.string(), deptId: v.string(), usuarioId: v.id("usuarios"), puntos: v.number(), etapa: v.number() })
-    .index("por_juego", ["juegoId", "puntos"]).index("por_dept", ["deptId", "puntos"]).index("por_usuario_juego", ["usuarioId", "juegoId"]),
-  amistades: defineTable({ a: v.id("usuarios"), b: v.id("usuarios"), estado: v.union(v.literal("pedida"), v.literal("aceptada")) })
-    .index("por_a", ["a"]).index("por_b", ["b"]),
-  invitaciones: defineTable({ codigo: v.string(), de: v.id("usuarios"), juegoId: v.optional(v.string()), vence: v.number() })
-    .index("por_codigo", ["codigo"]),
+    juegoId: v.string(),
+    etapa: v.number(),
+    modo,
+    sala: v.optional(v.string()),
+    semilla: v.number(),
+    jugadores: v.array(v.id('usuarios')),
+    estado: v.union(v.literal('abierta'), v.literal('cerrada'), v.literal('vencida')),
+    resultado: v.optional(
+      v.array(v.object({ usuarioId: v.id('usuarios'), puntos: v.number(), estrellas: v.number(), gano: v.boolean() })),
+    ),
+  }).index('por_estado', ['estado']),
+  marcas: defineTable({
+    juegoId: v.string(),
+    deptId: v.string(),
+    usuarioId: v.id('usuarios'),
+    puntos: v.number(),
+    etapa: v.number(),
+  })
+    .index('por_juego', ['juegoId', 'puntos'])
+    .index('por_dept', ['deptId', 'puntos'])
+    .index('por_usuario_juego', ['usuarioId', 'juegoId']),
+  amistades: defineTable({
+    a: v.id('usuarios'),
+    b: v.id('usuarios'),
+    estado: v.union(v.literal('pedida'), v.literal('aceptada')),
+  })
+    .index('por_a', ['a'])
+    .index('por_b', ['b']),
+  invitaciones: defineTable({
+    codigo: v.string(),
+    de: v.id('usuarios'),
+    juegoId: v.optional(v.string()),
+    vence: v.number(),
+  }).index('por_codigo', ['codigo']),
   // la escribe cada sala cada 30 s; de aquí salen los «conectados» del mapa
-  salas: defineTable({ tipo: v.union(v.literal("mapa"), v.literal("dept"), v.literal("juego"), v.literal("viaje")), deptId: v.optional(v.string()), tramo: v.number(), ocupacion: v.number(), visto: v.number() })
-    .index("por_dept", ["deptId"]),
+  salas: defineTable({
+    tipo: v.union(v.literal('mapa'), v.literal('dept'), v.literal('juego'), v.literal('viaje')),
+    deptId: v.optional(v.string()),
+    tramo: v.number(),
+    ocupacion: v.number(),
+    visto: v.number(),
+  }).index('por_dept', ['deptId']),
   // el contenido del juego (hoy vive en apps/web/shared/data); se sube con un script y se edita desde el panel
-  catalogo: defineTable({ version: v.number(), deptId: v.string(), datos: v.any() })
-    .index("por_version", ["version", "deptId"]),
-  eventos: defineTable({ nombre: v.string(), desde: v.number(), hasta: v.number(), deptId: v.optional(v.string()), reglas: v.any() }),
-  reportes: defineTable({ de: v.id("usuarios"), a: v.id("usuarios"), motivo: v.string() }),
+  catalogo: defineTable({ version: v.number(), deptId: v.string(), datos: v.any() }).index('por_version', [
+    'version',
+    'deptId',
+  ]),
+  eventos: defineTable({
+    nombre: v.string(),
+    desde: v.number(),
+    hasta: v.number(),
+    deptId: v.optional(v.string()),
+    reglas: v.any(),
+  }),
+  reportes: defineTable({ de: v.id('usuarios'), a: v.id('usuarios'), motivo: v.string() }),
 });
