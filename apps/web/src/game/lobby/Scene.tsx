@@ -25,7 +25,7 @@ export function LobbyScene() {
   });
   return (
     <>
-      <art.SkyRig time="dia" weather="despejado" fogFar={650} shadowRadius={65} />
+      <art.SkyRig time="auto" weather="despejado" fogFar={650} shadowRadius={65} />
       <Spawn pos={SPAWN} />
       <World />
       <MapBoard />

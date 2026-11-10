@@ -240,7 +240,7 @@ export function DrivingScene({
   });
   return (
     <>
-      <art.SkyRig time="dia" weather="despejado" fogFar={155} shadowRadius={32} />
+      <art.SkyRig time="auto" weather="despejado" fogFar={155} shadowRadius={32} />
       <Ground size={380} color={coastal ? '#c4ba7e' : '#648d46'} mat={coastal ? 'sand' : 'grass'} />
       <Ground
         size={[15.5, 310]}
