@@ -1,7 +1,13 @@
 // Plan técnico de la versión 3D independiente (Unity / Unreal). Lo muestra el panel "Plan técnico" de la versión 3D.
-export interface PlanSection { title: string; intro?: string; bullets?: string[]; table?: { head: string[]; rows: string[][] } }
+export interface PlanSection {
+  title: string;
+  intro?: string;
+  bullets?: string[];
+  table?: { head: string[]; rows: string[][] };
+}
 export const PLAN_V2: { summary: string; sections: PlanSection[] } = {
-  summary: 'Este prototipo 3D corre en el navegador y ya prueba las mecánicas. El siguiente paso es reconstruirlo en un motor profesional, reutilizando datos, reglas y diseños, sin depender de Roblox.',
+  summary:
+    'Este prototipo 3D corre en el navegador y ya prueba las mecánicas. El siguiente paso es reconstruirlo en un motor profesional, reutilizando datos, reglas y diseños, sin depender de Roblox.',
   sections: [
     {
       title: '1. Motor recomendado: Unity 6 (URP)',
@@ -19,9 +25,21 @@ export const PLAN_V2: { summary: string; sections: PlanSection[] } = {
         rows: [
           ['Datos del juego', 'shared/data/*.json', 'Los mismos JSON, importados como ScriptableObjects'],
           ['Progreso y premios', 'core/store.ts, core/data.ts', 'ProfileService.cs + RewardRules.cs'],
-          ['Minijuegos', 'game/minigames/* (intro → juego → resultado)', 'IMinigame + una escena aditiva por minijuego'],
-          ['Jugador y cámara', 'PlayerController.tsx + core/phys.ts', 'CharacterController + Cinemachine en tercera persona'],
-          ['Mundo', 'lobby/ y dept/ (18 zonas por datos)', 'Una escena Addressable por departamento, cargada por streaming'],
+          [
+            'Minijuegos',
+            'game/minigames/* (intro → juego → resultado)',
+            'IMinigame + una escena aditiva por minijuego',
+          ],
+          [
+            'Jugador y cámara',
+            'PlayerController.tsx + core/phys.ts',
+            'CharacterController + Cinemachine en tercera persona',
+          ],
+          [
+            'Mundo',
+            'lobby/ y dept/ (18 zonas por datos)',
+            'Una escena Addressable por departamento, cargada por streaming',
+          ],
           ['Red', 'core/net.ts (NetAdapter)', 'Misma interfaz sobre Netcode for GameObjects o Photon Fusion'],
           ['Guardado', 'localStorage (perfil JSON)', 'Archivo local + Cloud Save, mismo esquema de perfil'],
         ],
@@ -71,11 +89,19 @@ export const PLAN_V2: { summary: string; sections: PlanSection[] } = {
       table: {
         head: ['Fase', 'Entrega', 'Tiempo estimado'],
         rows: [
-          ['1', 'Prototipo web 3D: mapa gigante, 18 departamentos, 226 juegos sobre 14 motores, viajes y ropero (esta entrega)', 'Listo'],
+          [
+            '1',
+            'Prototipo web 3D: mapa gigante, 18 departamentos, 226 juegos sobre 14 motores, viajes y ropero (esta entrega)',
+            'Listo',
+          ],
           ['2', 'Unity: jugador, cámara, mapa gigante y terminal de buses', '4–6 semanas'],
           ['3', 'Unity: los 14 motores y el catálogo completo, con arte propio por departamento', '3–4 meses'],
           ['4', 'Multijugador real: dúo, mundo abierto, salas y validación en servidor', '2–3 meses'],
-          ['5', 'Versión para celulares, eventos (Carnaval de La Ceiba, Feria Juniana) y más juegos por departamento', 'continuo'],
+          [
+            '5',
+            'Versión para celulares, eventos (Carnaval de La Ceiba, Feria Juniana) y más juegos por departamento',
+            'continuo',
+          ],
         ],
       },
     },

@@ -1,24 +1,53 @@
 // Piezas comunes de los dos documentos de plan: cáscara HTML, estilos y ayudantes de tablas.
-export const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-export const slug = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+export const esc = (s) =>
+  String(s ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+export const slug = (s) =>
+  s
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
 
-const ESTADO = { hecho: ['Hecho en el prototipo', 'ok'], parcial: ['Parcial', 'mid'], pendiente: ['Pendiente', 'no'], decision: ['Decisión abierta', 'ask'] };
+const ESTADO = {
+  hecho: ['Hecho en el prototipo', 'ok'],
+  parcial: ['Parcial', 'mid'],
+  pendiente: ['Pendiente', 'no'],
+  decision: ['Decisión abierta', 'ask'],
+};
 const PRIO = { 1: 'Imprescindible', 2: 'Importante', 3: 'Después' };
 export const chip = (txt, cls = '') => `<span class="chip ${cls}">${esc(txt)}</span>`;
 /** Tabla genérica. head: string[]; rows: (string | {html})[][]; las celdas string se escapan. */
 export function table(head, rows, cls = '') {
-  const cell = c => (c && typeof c === 'object' ? c.html : esc(c));
-  return `<div class="tabla"><table class="${cls}"><thead><tr>${head.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${r.map(c => `<td>${cell(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+  const cell = (c) => (c && typeof c === 'object' ? c.html : esc(c));
+  return `<div class="tabla"><table class="${cls}"><thead><tr>${head.map((h) => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map((r) => `<tr>${r.map((c) => `<td>${cell(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
 }
 /** Requerimientos: grupos de [id, texto, prioridad 1-3, estado, nota?]. */
 export function reqs(groups) {
-  return groups.map(([name, items]) => `<h3>${esc(name)}</h3>` + table(['Id', 'Requerimiento', 'Prioridad', 'Estado'], items.map(([id, txt, p, st, nota]) => [
-    { html: `<code>${esc(id)}</code>` }, { html: esc(txt) + (nota ? `<span class="nota"> ${esc(nota)}</span>` : '') }, PRIO[p], { html: `<span class="est ${ESTADO[st][1]}">${ESTADO[st][0]}</span>` },
-  ]), 'req')).join('');
+  return groups
+    .map(
+      ([name, items]) =>
+        `<h3>${esc(name)}</h3>` +
+        table(
+          ['Id', 'Requerimiento', 'Prioridad', 'Estado'],
+          items.map(([id, txt, p, st, nota]) => [
+            { html: `<code>${esc(id)}</code>` },
+            { html: esc(txt) + (nota ? `<span class="nota"> ${esc(nota)}</span>` : '') },
+            PRIO[p],
+            { html: `<span class="est ${ESTADO[st][1]}">${ESTADO[st][0]}</span>` },
+          ]),
+          'req',
+        ),
+    )
+    .join('');
 }
-export const mermaid = code => `<div class="diagrama"><pre class="mermaid">${esc(code.trim())}</pre></div>`;
-export const tree = txt => `<pre class="arbol">${esc(txt.trim())}</pre>`;
-export const section = (id, title, eyebrow, body) => `<section id="${id}"><p class="eyebrow">${esc(eyebrow)}</p><h2>${esc(title)}</h2>${body}</section>`;
+export const mermaid = (code) => `<div class="diagrama"><pre class="mermaid">${esc(code.trim())}</pre></div>`;
+export const tree = (txt) => `<pre class="arbol">${esc(txt.trim())}</pre>`;
+export const section = (id, title, eyebrow, body) =>
+  `<section id="${id}"><p class="eyebrow">${esc(eyebrow)}</p><h2>${esc(title)}</h2>${body}</section>`;
 
 /** Página completa (fragmento de artifact). nav: [id, etiqueta][] */
 export function page({ title, lead, facts, nav, body, accent, accentDark, accent2, accent2Dark }) {
@@ -137,7 +166,7 @@ pre.arbol { margin: 0; font: 13.5px/1.5 var(--mono); background: var(--surface);
 <div class="wrap">
   <header class="top">
     <p class="eyebrow">Arquitectura, requerimientos y contenido · versión del 9 de noviembre de 2026</p>
-    <h1>${title.replace(/^Plan /, 'Plan <em>') + '</em>'}</h1>
+    <h1>${`${title.replace(/^Plan /, 'Plan <em>')}</em>`}</h1>
     <p class="lead">${lead}</p>
     <div class="facts">${facts.map(([n, l]) => `<div><b>${esc(n)}</b><span>${esc(l)}</span></div>`).join('')}</div>
   </header>
@@ -152,31 +181,79 @@ pre.arbol { margin: 0; font: 13.5px/1.5 var(--mono); background: var(--surface);
 const TAM = { C: 'Chico · hasta 1 día', M: 'Mediano · 2 a 4 días', G: 'Grande · 1 a 2 semanas' };
 /** Tickets por fase: [fase, nota, [id, título, listo cuando, tamaño, depende][]][] */
 export function tickets(fases) {
-  return fases.map(([fase, nota, ts]) => `<h3>${esc(fase)}</h3>${nota ? `<p class="nota">${esc(nota)}</p>` : ''}` + table(['Id', 'Ticket', 'Listo cuando', 'Tamaño', 'Depende de'], ts.map(([id, t, ok, tam, dep]) => [{ html: `<code>${esc(id)}</code>` }, t, { html: esc(ok).replace(/`([^`]+)`/g, '<code>$1</code>') }, TAM[tam], dep || '—']), 'tk')).join('');
+  return fases
+    .map(
+      ([fase, nota, ts]) =>
+        `<h3>${esc(fase)}</h3>${nota ? `<p class="nota">${esc(nota)}</p>` : ''}` +
+        table(
+          ['Id', 'Ticket', 'Listo cuando', 'Tamaño', 'Depende de'],
+          ts.map(([id, t, ok, tam, dep]) => [
+            { html: `<code>${esc(id)}</code>` },
+            t,
+            { html: esc(ok).replace(/`([^`]+)`/g, '<code>$1</code>') },
+            TAM[tam],
+            dep || '—',
+          ]),
+          'tk',
+        ),
+    )
+    .join('');
 }
-export const ticketsMd = (titulo, fases) => `# Tickets · ${titulo}\n\nTamaños: C = hasta 1 día · M = 2 a 4 días · G = 1 a 2 semanas.\n` + fases.map(([fase, nota, ts]) => `\n## ${fase}\n${nota ? `\n${nota}\n` : ''}\n| Id | Ticket | Listo cuando | Tamaño | Depende de |\n|---|---|---|---|---|\n` + ts.map(([id, t, ok, tam, dep]) => `| ${id} | ${t} | ${ok} | ${tam} | ${dep || '—'} |`).join('\n') + '\n').join('');
-export const contar = fases => fases.reduce((n, f) => n + f[2].length, 0);
+export const ticketsMd = (titulo, fases) =>
+  `# Tickets · ${titulo}\n\nTamaños: C = hasta 1 día · M = 2 a 4 días · G = 1 a 2 semanas.\n` +
+  fases
+    .map(
+      ([fase, nota, ts]) =>
+        `\n## ${fase}\n${nota ? `\n${nota}\n` : ''}\n| Id | Ticket | Listo cuando | Tamaño | Depende de |\n|---|---|---|---|---|\n` +
+        ts.map(([id, t, ok, tam, dep]) => `| ${id} | ${t} | ${ok} | ${tam} | ${dep || '—'} |`).join('\n') +
+        '\n',
+    )
+    .join('');
+export const contar = (fases) => fases.reduce((n, f) => n + f[2].length, 0);
 
 /** Olas: [nombre, lo que vas a ver, necesita cuentas, ids][] sobre las fases de tickets. */
 export const COMO_OLA = [
   ['Decís la ola', 'Por ejemplo: «haz la ola 0 de Tuerce».'],
-  ['Se reparte', 'Un agente por ticket, todos al mismo tiempo, cada uno en su copia del proyecto. Antes reviso tus límites.'],
+  [
+    'Se reparte',
+    'Un agente por ticket, todos al mismo tiempo, cada uno en su copia del proyecto. Antes reviso tus límites.',
+  ],
   ['Se junta', 'Todo entra a una rama <code>ola-N</code>; se corren las pruebas del juego completo.'],
   ['Lo ves', 'Vista previa para jugarlo, capturas o video de lo nuevo y un pull request con el resumen.'],
-  ['Aprobás', 'Con «full send» se une a la rama principal y los issues de la ola se cierran. Si algo no te gusta, lo decís con tus palabras y se corrige dentro de la misma ola.'],
+  [
+    'Aprobás',
+    'Con «full send» se une a la rama principal y los issues de la ola se cierran. Si algo no te gusta, lo decís con tus palabras y se corrige dentro de la misma ola.',
+  ],
 ];
 export function olas(lista, fases) {
-  const t = Object.fromEntries(fases.flatMap(f => f[2]).map(x => [x[0], x]));
+  const t = Object.fromEntries(fases.flatMap((f) => f[2]).map((x) => [x[0], x]));
   const pasos = `<ol class="pasos">${COMO_OLA.map(([a, b]) => `<li><b>${esc(a)}.</b> ${b}</li>`).join('')}</ol>`;
-  return pasos + table(['Ola', 'Lo que vas a ver al final', 'Tickets'], lista.map(([nombre, ver, cuentas, ids], i) => [
-    { html: `<b>Ola ${i}</b><br>${esc(nombre)}` },
-    { html: esc(ver) + (cuentas ? `<br>${chip('necesita tus cuentas')}` : '') },
-    { html: ids.map(id => `<code>${esc(id)}</code> ${esc(t[id][1])}`).join('<br>') },
-  ]), 'olas');
+  return (
+    pasos +
+    table(
+      ['Ola', 'Lo que vas a ver al final', 'Tickets'],
+      lista.map(([nombre, ver, cuentas, ids], i) => [
+        { html: `<b>Ola ${i}</b><br>${esc(nombre)}` },
+        { html: esc(ver) + (cuentas ? `<br>${chip('necesita tus cuentas')}` : '') },
+        { html: ids.map((id) => `<code>${esc(id)}</code> ${esc(t[id][1])}`).join('<br>') },
+      ]),
+      'olas',
+    )
+  );
 }
 export const olasMd = (titulo, lista, fases) => {
-  const t = Object.fromEntries(fases.flatMap(f => f[2]).map(x => [x[0], x]));
-  return `# Olas · ${titulo}\n\nUna ola = varios tickets en paralelo, una rama \`ola-N\`, una vista previa y una aprobación.\n\n` +
-    COMO_OLA.map(([a, b], i) => `${i + 1}. **${a}.** ${b.replace(/<\/?code>/g, '`')}`).join('\n') + '\n' +
-    lista.map(([nombre, ver, cuentas, ids], i) => `\n## Ola ${i} · ${nombre}\n\n**Vas a ver:** ${ver}${cuentas ? ' _(necesita tus cuentas)_' : ''}\n\n` + ids.map(id => `- ${id} · ${t[id][1]}`).join('\n') + '\n').join('');
+  const t = Object.fromEntries(fases.flatMap((f) => f[2]).map((x) => [x[0], x]));
+  return (
+    `# Olas · ${titulo}\n\nUna ola = varios tickets en paralelo, una rama \`ola-N\`, una vista previa y una aprobación.\n\n` +
+    COMO_OLA.map(([a, b], i) => `${i + 1}. **${a}.** ${b.replace(/<\/?code>/g, '`')}`).join('\n') +
+    '\n' +
+    lista
+      .map(
+        ([nombre, ver, cuentas, ids], i) =>
+          `\n## Ola ${i} · ${nombre}\n\n**Vas a ver:** ${ver}${cuentas ? ' _(necesita tus cuentas)_' : ''}\n\n` +
+          ids.map((id) => `- ${id} · ${t[id][1]}`).join('\n') +
+          '\n',
+      )
+      .join('')
+  );
 };
