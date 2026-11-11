@@ -146,5 +146,18 @@
   "icon": "🚐",
   "desc": "Manejá, recogé y llegá sin chocar.",
   "rules": {}
+ },
+ {
+  "id": "franciscomorazan.rosquilla",
+  "name": "Horno de Sabanagrande",
+  "place": "Sabanagrande",
+  "icon": "🥨",
+  "desc": "Girá la bandeja y sacá las rosquillas parejas antes de quemarlas.",
+  "rules": {
+   "duration": 70,
+   "bronze": 80,
+   "silver": 180,
+   "gold": 280
+  }
  }
 ]

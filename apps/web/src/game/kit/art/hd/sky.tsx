@@ -580,7 +580,11 @@ export function SkyRig({
       fog.far = far;
       fog.near = far * lerp(0.28, 0.04, Math.max(world.fog, rainK * 0.5));
     }
-    (scene.background as THREE.Color).copy(fog.color);
+    // Con escenas que cargan perezosamente, el cielo anterior puede desmontarse después de que monta este y
+    // restaurar su niebla y su fondo viejos (o null): el cielo activo los reafirma en cada cuadro.
+    if (scene.fog !== fog) scene.fog = fog;
+    if (!(scene.background instanceof THREE.Color)) scene.background = new THREE.Color();
+    scene.background.copy(fog.color);
 
     // --- luces
     const L = sun.current,
@@ -667,6 +671,8 @@ export function SkyRig({
       gl.setRenderTarget(rt);
       scene.environment = R.pmremRT.texture;
     }
+    // igual que la niebla y el fondo: el cielo anterior pudo restaurar su entorno al desmontarse después
+    if (R.pmremRT && scene.environment !== R.pmremRT.texture) scene.environment = R.pmremRT.texture;
     scene.environmentIntensity = indoor ? 0.9 : c.envI;
     tmpC.setRGB(lerp(zen[0], hor[0], 0.5), lerp(zen[1], hor[1], 0.5), lerp(zen[2], hor[2], 0.5), THREE.SRGBColorSpace);
     G.uSky.value.copy(tmpC);

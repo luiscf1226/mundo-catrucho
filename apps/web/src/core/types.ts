@@ -15,7 +15,8 @@ export type MinigameId =
   | 'atrapa'
   | 'cocina'
   | 'trivia'
-  | 'manejo';
+  | 'manejo'
+  | 'franciscomorazan.rosquilla';
 /** solo = vos contra bots · duo = vos y un compa contra parejas · abierto = sala abierta (se llena con bots si no hay gente) */
 export type Modo = 'solo' | 'duo' | 'abierto';
 export type Vehiculo = 'rapidito' | 'taxi' | 'bus';

@@ -10,13 +10,17 @@ import minigamesJson from '../../shared/data/minigames.json';
 import progressJson from '../../shared/data/progress.json';
 import rewardsJson from '../../shared/data/rewards.json';
 import shopJson from '../../shared/data/shop.json';
+import { cargarCatalogoRemoto } from './catalogoRemoto';
 import type { AvatarConfig, Department, DeptCat, Juego, MinigameId, MinigameInfo, ShopItem, Vehiculo } from './types';
+
+const remoto = await cargarCatalogoRemoto();
 
 export const MAP_VIEWBOX = departmentsJson.viewBox as [number, number];
 export const MAP_CREDIT = departmentsJson.credit;
-export const DEPARTMENTS = departmentsJson.departments as unknown as Department[];
+export const DEPARTMENTS = (remoto?.departamentos.map((d) => d.datos.departamento) ??
+  departmentsJson.departments) as unknown as Department[];
 export const deptById = (id: string) => DEPARTMENTS.find((d) => d.id === id)!;
-export const MINIGAMES = minigamesJson as unknown as MinigameInfo[];
+export const MINIGAMES = (remoto?.departamentos[0]?.datos.minigames ?? minigamesJson) as unknown as MinigameInfo[];
 export const minigameById = (id: MinigameId) => MINIGAMES.find((m) => m.id === id)!;
 export const REWARDS = rewardsJson;
 export const SHOP = shopJson as unknown as {
@@ -49,30 +53,32 @@ export const xpForLevel = (n: number) => REWARDS.level.base + (n - 1) * REWARDS.
 type RawCat = { tipos: string; lugares: any[][]; comidas: any[][]; palabras: any[][]; juegos: any[][] };
 const RAW = { ...catCentro, ...catNorte, ...catOccidente, ...catSurOriente } as unknown as Record<string, RawCat>;
 const EMPTY: DeptCat = { id: '', tipos: '', lugares: [], comidas: [], palabras: [], juegos: [] };
-export const CATALOGO: Record<string, DeptCat> = Object.fromEntries(
-  Object.entries(RAW).map(([id, r]) => [
-    id,
-    {
-      id,
-      tipos: r.tipos ?? '',
-      lugares: (r.lugares ?? []).map(([lid, name, kind, nota]) => ({ id: lid, name, kind, nota: nota ?? '' })),
-      comidas: (r.comidas ?? []).map(([name, lugar, nota]) => ({ name, lugar, nota: nota ?? '' })),
-      palabras: (r.palabras ?? []).map(([dice, es]) => ({ dice, es })),
-      juegos: (r.juegos ?? []).map(([jid, name, motor, lugar, icon, desc, guino, tema, etapas]) => ({
-        id: `${id}.${jid}`,
-        dept: id,
-        lugar,
-        name,
-        motor,
-        icon,
-        desc,
-        guino: guino ?? '',
-        tema: tema ?? {},
-        etapas: etapas ?? 3,
-      })),
-    },
-  ]),
-);
+export const CATALOGO: Record<string, DeptCat> = remoto
+  ? Object.fromEntries(remoto.departamentos.map((d) => [d.deptId, d.datos.catalogo]))
+  : Object.fromEntries(
+      Object.entries(RAW).map(([id, r]) => [
+        id,
+        {
+          id,
+          tipos: r.tipos ?? '',
+          lugares: (r.lugares ?? []).map(([lid, name, kind, nota]) => ({ id: lid, name, kind, nota: nota ?? '' })),
+          comidas: (r.comidas ?? []).map(([name, lugar, nota]) => ({ name, lugar, nota: nota ?? '' })),
+          palabras: (r.palabras ?? []).map(([dice, es]) => ({ dice, es })),
+          juegos: (r.juegos ?? []).map(([jid, name, motor, lugar, icon, desc, guino, tema, etapas]) => ({
+            id: `${id}.${jid}`,
+            dept: id,
+            lugar,
+            name,
+            motor,
+            icon,
+            desc,
+            guino: guino ?? '',
+            tema: tema ?? {},
+            etapas: etapas ?? 3,
+          })),
+        },
+      ]),
+    );
 export const catDe = (dept: string): DeptCat => CATALOGO[dept] ?? { ...EMPTY, id: dept };
 export const JUEGOS: Juego[] = Object.values(CATALOGO).flatMap((c) => c.juegos);
 export const juegoById = (id: string) => JUEGOS.find((j) => j.id === id);

@@ -29,6 +29,7 @@
       ["trancazo", "tráfico parado"]
     ],
     "juegos": [
+      ["rosquilla-satelite", "Rosquilla satélite", "franciscomorazan.rosquilla", "sabanagrande", "🥨", "Girá la bandeja entre zonas de calor sin quemar el borde.", "La bolsa del camino al sur nunca llega llena.", {"nombre": "Rosquillas de Sabanagrande", "frases": ["¡Que salgan parejitas, vos!", "Guardá unas para el camino."]}, 4],
       ["rapidito", "Rapidito al Centro", "manejo", "comayaguela", "🚐", "Llevá el rapidito lleno hasta el Parque Central sin chocar.", "El cobrador grita: «¡Centro, Centro, va vacío!» con el bus repleto.", {"veh": "rapidito", "via": "ciudad", "recoge": ["pasajeros"], "destino": "Parque Central"}, 5],
       ["picacho", "Subida al Picacho", "ruta", "picacho", "⛰️", "Subí saltando hasta los pies del Cristo.", "Arriba se ve toda Tegus, hasta el trancazo del bulevar.", {"estilo": "cerro", "meta": "Cristo del Picacho"}, 5],
       ["clasico", "Clásico capitalino", "futbol", "estadio", "⚽", "Leones contra Águilas. El que pierde aguanta la burla el lunes.", "El lunes nadie del equipo perdedor llega temprano al trabajo.", {"equipo": ["Leones", "#f4f4f4"], "rival": ["Águilas", "#12306b"]}, 3],

@@ -1,46 +1,41 @@
-import type { FC } from 'react';
+import { type FC, lazy } from 'react';
 import type { MinigameId } from '../../core/types';
-import { Atrapa, guia as gAtrapa } from './Atrapa';
 import type { Guia } from './api';
-import { Carrera } from './Carrera';
-import { Cocina, guia as gCocina } from './Cocina';
-import { Corte, guia as gCorte } from './Corte';
-import { Exploradores } from './Exploradores';
-import { Feria } from './Feria';
-import { Futbol } from './Futbol';
-import { guia as gManejo, Manejo } from './Manejo';
-import { guia as gMonta, Monta } from './Monta';
-import { guia as gPesca, Pesca } from './Pesca';
-import { Pulperia } from './Pulperia';
-import { guia as gRitmo, Ritmo } from './Ritmo';
-import { guia as gRuta, Ruta } from './Ruta';
-import { guia as gTrivia, Trivia } from './Trivia';
 
-export const MINIGAME_SCENES: Record<MinigameId, FC> = {
-  carrera: Carrera,
-  futbol: Futbol,
-  feria: Feria,
-  exploradores: Exploradores,
-  pulperia: Pulperia,
-  corte: Corte,
-  monta: Monta,
-  ritmo: Ritmo,
-  ruta: Ruta,
-  pesca: Pesca,
-  atrapa: Atrapa,
-  cocina: Cocina,
-  trivia: Trivia,
-  manejo: Manejo,
-};
-/** Guías de los motores nuevos (los cinco primeros tienen la suya en ui/screens/Minigame.tsx). */
-export const MOTOR_GUIDES: Partial<Record<MinigameId, Guia>> = {
-  corte: gCorte,
-  monta: gMonta,
-  ritmo: gRitmo,
-  ruta: gRuta,
-  pesca: gPesca,
-  atrapa: gAtrapa,
-  cocina: gCocina,
-  trivia: gTrivia,
-  manejo: gManejo,
-};
+function motor(load: () => Promise<{ default: FC; guia?: Guia }>) {
+  let module: { default: FC; guia?: Guia } | undefined;
+  let pending: ReturnType<typeof load> | undefined;
+  const resolve = () =>
+    (pending ??= load().then((m) => {
+      module = m;
+      return m;
+    }));
+  return {
+    Scene: lazy(resolve),
+    guide: () => {
+      if (!module) throw resolve();
+      return module.guia;
+    },
+  };
+}
+const MOTORS = {
+  'franciscomorazan.rosquilla': motor(() => import('./Rosquilla').then((m) => ({ ...m, default: m.Rosquilla }))),
+  carrera: motor(() => import('./Carrera').then((m) => ({ ...m, default: m.Carrera }))),
+  futbol: motor(() => import('./Futbol').then((m) => ({ ...m, default: m.Futbol }))),
+  feria: motor(() => import('./Feria').then((m) => ({ ...m, default: m.Feria }))),
+  exploradores: motor(() => import('./Exploradores').then((m) => ({ ...m, default: m.Exploradores }))),
+  pulperia: motor(() => import('./Pulperia').then((m) => ({ ...m, default: m.Pulperia }))),
+  corte: motor(() => import('./Corte').then((m) => ({ ...m, default: m.Corte }))),
+  monta: motor(() => import('./Monta').then((m) => ({ ...m, default: m.Monta }))),
+  ritmo: motor(() => import('./Ritmo').then((m) => ({ ...m, default: m.Ritmo }))),
+  ruta: motor(() => import('./Ruta').then((m) => ({ ...m, default: m.Ruta }))),
+  pesca: motor(() => import('./Pesca').then((m) => ({ ...m, default: m.Pesca }))),
+  atrapa: motor(() => import('./Atrapa').then((m) => ({ ...m, default: m.Atrapa }))),
+  cocina: motor(() => import('./Cocina').then((m) => ({ ...m, default: m.Cocina }))),
+  trivia: motor(() => import('./Trivia').then((m) => ({ ...m, default: m.Trivia }))),
+  manejo: motor(() => import('./Manejo').then((m) => ({ ...m, default: m.Manejo }))),
+} satisfies Record<MinigameId, ReturnType<typeof motor>>;
+export const MINIGAME_SCENES = MOTORS;
+export function motorGuide(id: MinigameId) {
+  return MOTORS[id].guide();
+}

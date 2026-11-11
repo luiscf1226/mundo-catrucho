@@ -25,6 +25,8 @@ pnpm install       # instala todo el espacio de trabajo (Node 22 o más, pnpm 12
 pnpm dev           # juego en http://localhost:5173 y sala en ws://localhost:8799
 pnpm check         # Biome (lint y formato) + tipos de todo + validar que el contenido no se repita
 pnpm test          # compila y juega solo de punta a punta en Chromium; la sala conecta dos jugadores
+pnpm --filter @mundo-catrucho/web build:web # sitio estático en apps/web/dist/web, tamaños por trozo
+node apps/web/tools/test-carga.mjs          # prueba HTTP de cargas diferidas (también MC_GPU=0 MC_LENTO=6)
 pnpm build         # apps/web/dist/mundo-catrucho-hd.html y el empaquetado de la sala
 pnpm capturas      # compila y deja ./capturas/*.png, ./capturas/recorrido.mp4 e INDICE.md
 pnpm fix           # arregla el formato y lo que Biome sabe arreglar solo
@@ -47,7 +49,10 @@ llaves por índice en listas fijas. Código nuevo: sin `any` ni `!` si se puede 
 ## Reglas duras
 
 1. **Cero red en tiempo de ejecución.** Nada de `fetch`, imágenes, modelos ni fuentes externas (salvo Google Fonts).
-   Texto 3D con `Label`/`Plate` del kit, texturas con lienzo. La prueba falla si hay peticiones de red.
+   En la compilación web se permiten los assets del propio sitio (trozos JS/CSS); el HTML autónomo sigue sin red.
+   Texto 3D con `Label`/`Plate` del kit, texturas con lienzo. Excepción: si se compila con `VITE_CONVEX_URL`,
+   el juego consulta el catálogo público de ese Convex al iniciar (máximo 3 s; respaldo empaquetado si falla).
+   Sin esa variable no hay peticiones a Convex. El arnés solo permite ese dominio cuando la prueba lo pide explícitamente.
 2. **Cada motor de juego existe en un solo departamento.** `node docs/generador/validar-contenido.mjs` lo revisa.
 3. **Marcas, clubes y la Selección van con apodos**, nunca con logotipos ni nombres oficiales.
 4. **Rendimiento:** menos de ~350 llamadas de dibujo por escena y una sola luz con sombras.

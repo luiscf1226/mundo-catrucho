@@ -105,6 +105,12 @@ const ok = await run('smoke', file, { hash: '#test' }, async (t) => {
   await t.waitFor(`${S}.scene.kind==='dept' && ${S}.scene.id==='copan'`, 8000, 'llegar a Copán');
   await t.sleep(900);
   if (shots) await t.shot(`${shots}/08-copan.png`);
+  // tras tantos cambios de escena (lobby, departamentos, 14 motores, viaje) el cielo activo sigue dueño de la escena
+  const cielo = await t.ev(
+    `(()=>{const s=window.__mc.scene;return JSON.stringify({fog:!!s.fog,fondo:!!s.background,entorno:!!s.environment})})()`,
+  );
+  if (cielo !== '{"fog":true,"fondo":true,"entorno":true}')
+    throw new Error(`la escena quedó sin cielo completo: ${cielo}`);
   // tienda y guardado
   await t.ev(`${S}.addCoins(500)`);
   await t.click('hud-btn-tienda');

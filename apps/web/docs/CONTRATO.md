@@ -232,3 +232,80 @@ futbol    equipo: [nombre, color]   rival: [nombre, color]            explorador
 debe jugar de verdad al menos una etapa hasta `mg-result`, probar un tema del catálogo y el motor sin tema, y mirar
 capturas con ojo crítico. Construí siempre con tu propio `--out`. **Tiempo: unos 40 minutos; no pulas de más.**
 Al terminar, matá tus Chromium (el arnés lo hace solo si usás `run`).
+
+## Carga por departamento (MC-55)
+
+`pnpm --filter @mundo-catrucho/web build:web` produce `dist/web/index.html` y sus assets para alojamiento estático
+(por ejemplo Cloudflare). `node tools/build.mjs web --out <carpeta>` permite aislar la salida. El comando imprime
+bytes sin compresión: HTML + dependencias JS estáticas + CSS inicial, sin Google Fonts, y cada trozo diferido.
+La primera carga debe quedar debajo de 3 000 000 bytes. El catálogo sigue en `core/data.ts`: partirlo queda pendiente
+de la integración del catálogo en Convex; no se modificó ese módulo.
+
+- Departamento nuevo: poné su constructor en `src/game/dept/zones/<id>.tsx` y agregá una línea con `import()` en
+  `zones/index.ts`. No lo reexportés ni lo importés estáticamente desde el lobby. `zoneOf` es un recurso para usar
+  durante el render bajo `Suspense`; descarga el constructor, prepara la zona y la conserva al volver. Los módulos
+  comunes (`zone`, piezas, estaciones) se comparten sin duplicar el código específico de otros departamentos.
+- Motor nuevo: exportá el componente y su `guia` como siempre. Agregá una sola línea
+  `nuevo: motor(() => import('./Nuevo').then((m) => ({ ...m, default: m.Nuevo }))),` al registro de
+  `minigames/index.ts` (además del tipo y los datos del motor). La escena y la guía usan la misma promesa; no importés
+  la guía desde la UI. `motorGuide(id)` suspende mientras se carga. Exploradores carga las zonas de sus sitios al abrirlo.
+- `LoadingScreen` muestra «Ya casi… Estamos preparando tu destino.» mientras falta código de escena o guía.
+- El modo habitual `build` sigue produciendo `mundo-catrucho-hd.html` autónomo: las importaciones dinámicas se incrustan,
+  sin peticiones de assets. La excepción a cero red del modo web son únicamente los assets del mismo sitio.
+
+`node tools/test-carga.mjs` sirve `dist/web` en un puerto local efímero, registra solicitudes y bytes y comprueba
+menú/lobby sin zonas ni motores, Olancho sin otros departamentos y Corte sin otros motores. También funciona con
+`MC_GPU=0 MC_LENTO=6`. Guarda las capturas en `capturas/mc-55/`; bloquea la respuesta de Olancho hasta capturar el
+aviso para observarlo sin depender de la velocidad de la máquina. El arnés acepta `{ url: 'http://127.0.0.1:<puerto>/' }`
+y permite exclusivamente ese origen (además de Google Fonts); sin esa opción mantiene intacta la política de `file://`.
+
+## Kit de motores
+
+Para un motor nuevo usá `defineMotor` de `minigames/kit`. Los motores anteriores siguen con su API actual.
+El kit toma una foto de `partida()`, prepara tres segundos de cuenta regresiva, corre la simulación únicamente
+mientras `mg.phase === 'playing'` y respeta la pausa. Valida una duración de 60–120 segundos, publica tiempo,
+puntos, meta, objetivo y líneas en el HUD y llama una sola vez a `finish` con `starsFor`.
+El guardado, recompensas y desbloqueo de etapas siguen siendo responsabilidad de `store.finishMinigame`.
+
+1. Elegí un motor exclusivo del departamento en `docs/generador/contenido.json`. Agregá su ID a `MinigameId`,
+   sus datos a `shared/data/minigames.json` y un juego de 3–6 etapas al catálogo del departamento.
+2. Definí parámetros en `etapa(P)` usando `P.dif`. Interpretá aquí los campos opcionales de `P.tema` con valores
+   por defecto. `crear(parametros)` produce el estado mutable de una partida, sin estado compartido entre intentos.
+3. Implementá `actualizar(motor, dt)` y `Escena({ motor })`. Usá `motor.sumar(n)` para puntos (admite penalizaciones),
+   `motor.objetivo`, `motor.lineas` y `motor.stats` para feedback. `motor.datos` contiene tu simulación y
+   `motor.parametros` los parámetros. Leé la entrada en `actualizar`, que comienza después de la cuenta regresiva.
+4. Implementá `bot(motor, dt, actor)` con las mismas acciones que usa el jugador. `actor === 'compa'` ayuda en dúo;
+   `actor === 'jugador'` juega la prueba. No asignes puntos directamente desde el bot. El kit muestra un rival en
+   solo, un compa en dúo y tres bots de ambiente en abierto, con avatares y nombres «🤖 …».
+   Reservá el lado derecho de la escena (x=5..9, z=-1) para esos avatares. El kit muestra `tema.frases` como toast.
+5. Exportá `motor.Escena` y `motor.guia`, registralos en las dos tablas de `minigames/index.ts` sin reorganizarlas.
+   Construí HD y corré `node tools/test-motor.mjs dist/mundo-catrucho-hd.html <motorId> [juegoId]`.
+   Repetí con `MC_GPU=0 MC_LENTO=6`. Las capturas quedan en `capturas/mc-32/<motorId>/` (o sufijo `-sin-gpu`).
+
+Ejemplo de forma de la API (ver `Rosquilla.tsx` para una implementación jugable):
+
+```tsx
+const motor = defineMotor({
+  id: 'franciscomorazan.rosquilla',
+  guia: { goal: 'Sacá la tanda a tiempo.', keys: [['F', 'sacar']], touch: [['🎯', 'sacar']] },
+  etapa: (p) => ({ velocidad: 1 + p.dif }),
+  metas: (p) => [80 + 80 * p.dif, 180 + 80 * p.dif, 280 + 80 * p.dif],
+  duracion: (p) => 70 + 20 * p.dif,
+  crear: () => ({ calor: 0 }),
+  actualizar: actualizarHorno,
+  bot: jugarHorno,
+  Escena: EscenaHorno,
+});
+export const Rosquilla = motor.Escena;
+export const guia = motor.guia;
+```
+
+Con `#test` se instala `window.__mcTest.motor`. `estado()` devuelve ID, etapa (base cero), etapas, modo,
+bots, cuenta, tiempo transcurrido, duración, puntos, metas, terminado y stats. `jugarBot(activo = true)` enciende
+el jugador automático. `avanzar(segundos)` simula hasta 123 segundos en pasos de 50 ms pasando por las mismas
+acciones, calor, puntajes y cierre que el reloj normal. No salta directo al resultado ni modifica el perfil.
+El gancho se limpia al desmontar y no se instala fuera de `#test`.
+
+La prueba genérica verifica derrota por inacción, motor sin tema, victoria de primera etapa, guardado tras recargar,
+dúo y abierto, y llega a la última ganando las intermedias. En CPU recorta modos y etapas posteriores con `SALTA`.
+Los controles específicos de cada mecánica se verifican además con el arnés (teclado, puntero o táctil).
