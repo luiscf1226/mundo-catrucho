@@ -3,6 +3,7 @@ import { input } from '../../core/input';
 import { useGame } from '../../core/store';
 import { changeRadio, RADIOS, useViaje } from '../../game/viaje/state';
 import { Bar, Btn } from '../components/kit';
+import { VendedorViaje } from './VendedorViaje';
 export function ViajeHud() {
   const scene = useGame((s) => s.scene),
     v = useViaje();
@@ -35,6 +36,7 @@ export function ViajeHud() {
           </Btn>
         </div>
       </div>
+      <VendedorViaje />
     </div>
   );
 }

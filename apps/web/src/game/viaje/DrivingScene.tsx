@@ -6,6 +6,7 @@ import { input } from '../../core/input';
 import { player } from '../../core/player';
 import { useGame } from '../../core/store';
 import { art, Ball, Block, Ground, Label, P, Plate, useTick } from '../kit';
+import { usePruebaCamino } from './eventos/usePruebaCamino';
 import {
   createDrive,
   type DriveConfig,
@@ -155,8 +156,14 @@ export function DrivingScene({
   onStep,
   modo = 'solo',
   tramo,
+  onRoadStep,
+  camino,
+  clima,
 }: {
   config: DriveConfig;
+  clima?: 'lluvia' | 'neblina';
+  camino?: import('react').ReactNode;
+  onRoadStep?: (s: DriveState, dt: number) => void;
   tramo?: TramoRuta;
   destination: string;
   biome?: string;
@@ -183,10 +190,12 @@ export function DrivingScene({
       player.fixedCam = null;
     };
   }, []);
+  usePruebaCamino(s, config, onRoadStep, onStep);
   useTick((dt) => {
     if (!config.trip && useGame.getState().mg?.phase !== 'playing') return;
     const honk = input.take('fire'),
       ev = stepDrive(s, config, dt, input.mx, input.mz, honk);
+    onRoadStep?.(s, dt);
     if (honk) audio.sfx('horn');
     if (ev.collision) {
       audio.sfx('hit');
@@ -243,7 +252,12 @@ export function DrivingScene({
   });
   return (
     <>
-      <art.SkyRig time="auto" weather={biome === 'montana' ? 'neblina' : 'despejado'} fogFar={155} shadowRadius={32} />
+      <art.SkyRig
+        time="auto"
+        weather={clima ?? (biome === 'montana' ? 'neblina' : 'despejado')}
+        fogFar={clima ? 65 : 155}
+        shadowRadius={32}
+      />
       {(biome === 'lago' || biome === 'puente') && (
         <>
           <Block
@@ -399,6 +413,7 @@ export function DrivingScene({
             )}
           </group>
         ))}
+      {camino}
       <group ref={car}>
         <Vehicle kind={config.veh} />
       </group>

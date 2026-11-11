@@ -4,6 +4,8 @@ import { deptById } from '../../core/data';
 import { useGame } from '../../core/store';
 import type { Vehiculo } from '../../core/types';
 import { DrivingScene } from './DrivingScene';
+import { EscenaCamino } from './eventos/EscenaCamino';
+import { iniciarCamino, pasoCamino, useCamino } from './eventos/state';
 import type { DriveConfig } from './model';
 import { lineaDeViaje, resolverRuta } from './routes';
 import { RADIOS, useViaje } from './state';
@@ -14,12 +16,14 @@ export function Viaje({ veh, to }: { veh: Vehiculo; to: string }) {
   const scene = useGame((s) => s.scene);
   const from = scene.kind === 'viaje' ? scene.from : 'franciscomorazan';
   const ruta = useMemo(() => resolverRuta(from, to), [from, to]);
+  const clima = useCamino((s) => s.activa?.accion);
   const linea = useViaje((s) => s.linea);
   const config = useMemo<DriveConfig>(
     () => ({ veh, via: 'carretera', difficulty: 0.35, trip: true, seed: 504 }),
     [veh],
   );
   useLayoutEffect(() => {
+    iniciarCamino(ruta);
     const radio = veh === 'taxi' ? 2 : veh === 'bus' ? 3 : 0;
     useViaje.setState({ progress: 0, hits: 0, speed: 0, radio, ruta, linea: ruta ? lineaDeViaje(ruta, 0) : null });
     audio.music(RADIOS[radio].track);
@@ -27,6 +31,9 @@ export function Viaje({ veh, to }: { veh: Vehiculo; to: string }) {
   return (
     <DrivingScene
       config={config}
+      camino={<EscenaCamino />}
+      clima={clima === 'lluvia' || clima === 'neblina' ? clima : undefined}
+      onRoadStep={(s, dt) => pasoCamino(s, dt, veh)}
       destination={dept?.name ?? to}
       biome={linea?.tramo?.paisaje ?? dept?.biome}
       tramo={linea?.tramo ?? undefined}
