@@ -196,4 +196,4 @@ export type Scene =
   | { kind: 'lobby' }
   | { kind: 'dept'; id: string }
   | { kind: 'minigame'; id: MinigameId }
-  | { kind: 'viaje'; veh: Vehiculo; to: string };
+  | { kind: 'viaje'; veh: Vehiculo; to: string; from: string };

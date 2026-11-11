@@ -309,3 +309,46 @@ El gancho se limpia al desmontar y no se instala fuera de `#test`.
 La prueba genérica verifica derrota por inacción, motor sin tema, victoria de primera etapa, guardado tras recargar,
 dúo y abierto, y llega a la última ganando las intermedias. En CPU recorta modos y etapas posteriores con `SALTA`.
 Los controles específicos de cada mecánica se verifican además con el arnés (teclado, puntero o táctil).
+
+## Viajes
+
+`game/viaje/routes.ts` importa directamente `docs/generador/viajes.json` durante la compilación.
+No hay copia manual ni peticiones de red. `VIAJES` también expone los eventos, vehículos y reglas para MC-28/29/30.
+`resolverRuta(de, a, medios = ['carretera'])` busca la combinación de menor tiempo real, admite regreso y devuelve
+`null` sin conexión. El lobby sale de Francisco Morazán. `scene.from` guarda el origen antes de abrir la escena.
+Un recorrido dentro del mismo departamento dura el mínimo, sin atribuirle una carretera ni distancia inventada.
+
+`RutaViaje` contiene `tramos`, `horas`, `kilometros` y `segundos`. Cada `TramoRuta` conserva `fuente`, carretera,
+medio, terminales, paisaje, `desdeHoras`, `horas`, `desdeKm` y `hastaKm`. Su `id` combina índice del catálogo,
+sentido e índice del paisaje. Los paisajes dividen por igual el tiempo y la distancia de su ruta fuente.
+**Esos límites son aproximaciones de diseño, no ubicaciones geográficas verificadas.** Los kilómetros desconocidos
+son `null`, nunca una distancia estimada en secreto. Al invertir una ruta se invierte también el orden de sus paisajes.
+
+La escala es **1 hora real = 25 segundos de juego**, con mínimo de 40 y máximo de 240 segundos, según las reglas
+fuente. El vehículo y los choques no cambian ese reloj. La pausa del juego lo detiene. Saltar está disponible desde
+el inicio y usa `llegarViaje(0)`, sin premio adicional.
+
+`lineaDeViaje(ruta, segundos)` devuelve `posicion` (0..1), `tramo`, `indice`, `posicionTramo` (0..1),
+`kilometros` acumulados y `kilometrosTramo`. `useViaje` publica `ruta` y `linea` aproximadamente cada 120 ms.
+Para disparar un evento una sola vez, compará el kilómetro anterior con el actual o guardá el `tramo.id` ya atendido.
+No usés `DriveState.distance` como kilómetros reales: son metros visuales de la física local.
+
+```ts
+const ruta = resolverRuta('franciscomorazan', 'cortes');
+if (ruta) {
+  const antes = lineaDeViaje(ruta, 20);
+  const ahora = lineaDeViaje(ruta, 21);
+  const cruzoKm50 = antes.kilometros !== null && ahora.kilometros !== null
+    && antes.kilometros < 50 && ahora.kilometros >= 50;
+}
+// MC-30 puede pedir ['carretera', 'ferry', 'lancha', 'avioneta'] y preparar cada cambio de medio.
+```
+
+La red fuente enlaza **departamentos**, no garantiza terminales continuos ni servicios directos. Por ejemplo,
+Yoro → Atlántida termina en Tela; Atlántida → Colón sale de La Ceiba. La UI muestra los terminales originales.
+Faltan distancias y tiempos de esas conexiones internas, incluyendo Tela → La Ceiba y La Paz → Marcala.
+No se suman kilómetros no documentados. Los vehículos actuales solo salen por carretera; Islas de la Bahía y
+Gracias a Dios requieren los medios de MC-30. El modelo ya admite sus rutas y kilómetros desconocidos.
+
+`node apps/web/tools/test-rutas.mjs apps/web/dist/mundo-catrucho-hd.html` verifica la red completa, límites,
+regresos, duración, kilómetros, cambios visibles de paisaje y salto. Capturas en `capturas/mc-27/`.

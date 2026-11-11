@@ -15,6 +15,7 @@ import {
   type VehicleKind,
   vehicles,
 } from './model';
+import type { TramoRuta } from './routes';
 
 export function Vehicle({ kind, bot = false }: { kind: VehicleKind; bot?: boolean }) {
   const v = vehicles[kind],
@@ -153,8 +154,10 @@ export function DrivingScene({
   cargo = 'pasajeros',
   onStep,
   modo = 'solo',
+  tramo,
 }: {
   config: DriveConfig;
+  tramo?: TramoRuta;
   destination: string;
   biome?: string;
   cargo?: string;
@@ -168,7 +171,7 @@ export function DrivingScene({
   const traffic = useRef<(Group | null)[]>([]),
     stops = useRef<(Group | null)[]>([]);
   const water = config.via === 'mar' || config.via === 'rio',
-    city = config.via === 'ciudad';
+    city = tramo ? tramo.paisaje === 'ciudad' : config.via === 'ciudad';
   const coastal = ['costa', 'isla', 'sur'].includes(biome) || config.via === 'costa';
   useLayoutEffect(() => {
     player.control = false;
@@ -240,7 +243,22 @@ export function DrivingScene({
   });
   return (
     <>
-      <art.SkyRig time="auto" weather="despejado" fogFar={155} shadowRadius={32} />
+      <art.SkyRig time="auto" weather={biome === 'montana' ? 'neblina' : 'despejado'} fogFar={155} shadowRadius={32} />
+      {(biome === 'lago' || biome === 'puente') && (
+        <>
+          <Block
+            pos={[biome === 'puente' ? 0 : -35, 0.005, -48]}
+            size={[biome === 'puente' ? 140 : 45, 0.01, 40]}
+            color="#258fa7"
+            mat="water"
+            solid={false}
+          />
+          {biome === 'puente' &&
+            [-8, 8].map((x) => (
+              <Block key={x} pos={[x, 1, -48]} size={[0.3, 1.8, 42]} color="#c7c9c5" mat="concrete" solid={false} />
+            ))}
+        </>
+      )}
       <Ground size={380} color={coastal ? '#c4ba7e' : '#648d46'} mat={coastal ? 'sand' : 'grass'} />
       <Ground
         size={[15.5, 310]}
@@ -302,6 +320,8 @@ export function DrivingScene({
                   </>
                 ) : coastal || water ? (
                   <P.Palm pos={[side * (12 + (i % 3) * 4), 0, -9]} scale={1.1} solid={false} />
+                ) : biome === 'valle' ? (
+                  <P.Tree pos={[side * (13 + (i % 3) * 5), 0, -8]} scale={1.1} solid={false} />
                 ) : (
                   <P.Pine pos={[side * (13 + (i % 3) * 5), 0, -8]} scale={1.2} solid={false} />
                 )}
@@ -316,15 +336,24 @@ export function DrivingScene({
           <art.Avatar config={SHOP.defaultAvatar} state={{ anim: 'wave', speed: 0 }} />
         </group>
         <P.Stall pos={[10, 0, -40]} sign={city ? 'BALEADAS · L 15' : 'CAFÉ DEL CAMINO'} solid={false} />
-        <P.Sign pos={[-10, 0, -58]} text={`Bienvenidos a ${destination}`} w={6} solid={false} />
+        <P.Sign
+          pos={[-10, 0, -58]}
+          text={tramo ? `${tramo.carretera} · ${tramo.nombre}` : `Bienvenidos a ${destination}`}
+          w={6}
+          solid={false}
+        />
         <P.Sign
           pos={[10, 0, -115]}
-          text={water ? 'Cuidá el río' : 'Bajá la velocidad · Hay túmulos'}
+          text={
+            tramo ? `${tramo.salida} → ${tramo.llegada}` : water ? 'Cuidá el río' : 'Bajá la velocidad · Hay túmulos'
+          }
           w={5}
           solid={false}
         />
       </group>
+      {tramo && <Plate pos={[-10, 2.5, -10]} text={tramo.carretera} h={0.42} bg="#176c45" />}
       {!city &&
+        (!tramo || biome === 'montana' || biome === 'pinar') &&
         [-1, 1].map((side) => (
           <group key={side}>
             {[0, 1, 2, 3].map((i) => (
