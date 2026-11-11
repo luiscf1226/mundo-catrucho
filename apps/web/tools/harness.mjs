@@ -41,7 +41,7 @@ const KEY = {
 
 export async function launch(
   file,
-  { url, width = 1280, height = 720, hash = '', touch = false, gpu = process.env.MC_GPU !== '0' } = {},
+  { url, width = 1280, height = 720, hash = '', touch = false, red, gpu = process.env.MC_GPU !== '0' } = {},
 ) {
   const target = url ? new URL(url) : null;
   if (target && (target.protocol !== 'http:' || target.hostname !== '127.0.0.1'))
@@ -117,7 +117,11 @@ export async function launch(
       const u = d.params.request.url;
       if (!/^(file|data|blob|about):/.test(u)) {
         requests.push(u);
-        if (new URL(u).origin !== target?.origin && !/^https:\/\/fonts\.(googleapis|gstatic)\.com\//.test(u))
+        if (
+          new URL(u).origin !== target?.origin &&
+          !/^https:\/\/fonts\.(googleapis|gstatic)\.com\//.test(u) &&
+          !red?.test(u)
+        )
           errors.push(`RED no permitida ${u.slice(0, 200)}`);
       }
     }

@@ -15,7 +15,8 @@
     "avisos": "biome check .",
     "capturas": "pnpm --filter @mundo-catrucho/web build && pnpm --filter @mundo-catrucho/web capturas",
     "web:dev": "pnpm --filter @mundo-catrucho/web dev",
-    "salas:dev": "pnpm --filter @mundo-catrucho/salas dev"
+    "salas:dev": "pnpm --filter @mundo-catrucho/salas dev",
+    "catalogo:subir": "node scripts/catalogo.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "2.6.6",
