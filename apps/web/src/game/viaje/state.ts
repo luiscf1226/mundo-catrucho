@@ -1,12 +1,22 @@
 import { create } from 'zustand';
 import { audio, type Track } from '../../core/audio';
+import type { LineaViaje, RutaViaje } from './routes';
 export const RADIOS: { track: Track; name: string }[] = [
   { track: 'viajePunta', name: 'Punta encendida' },
   { track: 'viajeDembow', name: 'Dembow del barrio' },
   { track: 'viajeTrap', name: 'Trap de la ruta' },
   { track: 'viajeBanda', name: 'Banda del camino' },
 ];
-export const useViaje = create<{ progress: number; hits: number; speed: number; radio: number }>(() => ({
+export const useViaje = create<{
+  progress: number;
+  hits: number;
+  speed: number;
+  radio: number;
+  ruta: RutaViaje | null;
+  linea: LineaViaje | null;
+}>(() => ({
+  ruta: null,
+  linea: null,
   progress: 0,
   hits: 0,
   speed: 0,

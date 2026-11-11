@@ -2,11 +2,16 @@ import { useState } from 'react';
 import { catDe, DEPARTMENTS, TRANSPORTES } from '../../core/data';
 import { useGame } from '../../core/store';
 import type { Vehiculo } from '../../core/types';
+import { resolverRuta } from '../../game/viaje/routes';
 import { Btn, Panel } from '../components/kit';
 export function TransportePanel() {
   const coins = useGame((s) => s.profile.coins),
     [veh, setVeh] = useState<Vehiculo>('rapidito'),
     [to, setTo] = useState(DEPARTMENTS[0].id);
+  const scene = useGame((s) => s.scene);
+  const from = scene.kind === 'dept' ? scene.id : 'franciscomorazan';
+  const ruta = resolverRuta(from, to);
+  const conexiones = ruta?.tramos.filter((t, i, ts) => i === 0 || t.fuente !== ts[i - 1].fuente);
   const fare = TRANSPORTES.find((t) => t.id === veh)?.precio ?? 0;
   return (
     <Panel
@@ -15,9 +20,26 @@ export function TransportePanel() {
       icon="map"
       size="lg"
       footer={
-        <Btn id="tr-go" tone="play" size="lg" cls="w-full" onClick={() => useGame.getState().startViaje(veh, to)}>
-          ¡Vámonos! · L {fare} · Tenés L {coins}
-        </Btn>
+        <>
+          <div data-testid="tr-ruta" className="mb-3 rounded-xl bg-black/10 p-3 text-sm">
+            {ruta ? (
+              <>
+                <b>{conexiones?.map((t) => t.carretera).join(' → ') || 'Recorrido local'}</b>
+                <p>{conexiones?.map((t) => `${t.salida} → ${t.llegada}`).join(' · ')}</p>
+                <p>
+                  {Math.round(ruta.kilometros ?? 0)} km · {ruta.horas.toFixed(1)} h reales aprox. ·{' '}
+                  {Math.round(ruta.segundos)} s de juego
+                </p>
+                <p>Podés saltar desde el inicio. Tiempos de tramos publicados; conexiones internas no incluidas.</p>
+              </>
+            ) : (
+              <p>Ocupás conexión marítima o aérea. Escogé otro destino por carretera.</p>
+            )}
+          </div>
+          <Btn id="tr-go" tone="play" size="lg" cls="w-full" onClick={() => useGame.getState().startViaje(veh, to)}>
+            ¡Vámonos! · L {fare} · Tenés L {coins}
+          </Btn>
+        </>
       }
     >
       <p className="mb-2 text-sm font-bold">1. Escogé en qué te vas</p>

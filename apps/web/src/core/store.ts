@@ -2,6 +2,7 @@
 // Este módulo es la "capa de servidor" del prototipo: aquí se validan compras y recompensas. En la versión de
 // Roblox el mismo papel lo cumplen los servicios de ServerScriptService (ver roblox/).
 import { create } from 'zustand';
+import { resolverRuta } from '../game/viaje/routes';
 import {
   ACHIEVEMENTS,
   BOT_NAMES,
@@ -464,6 +465,12 @@ export const useGame = create<Game>((set, get) => {
     }, // la escena se vuelve a montar para que el motor lea el modo nuevo
     startViaje: (veh, to) => {
       const t = TRANSPORTES.find((x) => x.id === veh);
+      const origen = get().scene;
+      const from = origen.kind === 'dept' ? origen.id : 'franciscomorazan';
+      if (!resolverRuta(from, to)) {
+        get().toast('Ocupás otra conexión para llegar. Escogé otro destino.', '🧭');
+        return false;
+      }
       if (!t || !DEPARTMENTS.some((d) => d.id === to)) return false;
       if (get().profile.coins < t.precio) {
         get().toast('No ajusta el pisto para el pasaje', '🪙');
@@ -474,7 +481,7 @@ export const useGame = create<Game>((set, get) => {
       });
       set((s) => ({
         screen: 'world',
-        scene: { kind: 'viaje', veh, to },
+        scene: { kind: 'viaje', veh, to, from },
         sceneKey: s.sceneKey + 1,
         panel: null,
         mg: null,

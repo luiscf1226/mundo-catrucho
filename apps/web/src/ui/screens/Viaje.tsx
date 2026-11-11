@@ -17,6 +17,11 @@ export function ViajeHud() {
         <span className="text-sm">
           {Math.round(v.progress * 100)} % · {v.speed} km/h · {v.hits} choques
         </span>
+        <span data-testid="viaje-tramo" data-paisaje={v.linea?.tramo?.paisaje} className="text-sm">
+          {v.linea?.tramo ? `${v.linea.tramo.carretera} · ${v.linea.tramo.nombre}` : 'Recorrido local'}
+          {' · '}
+          {Math.round(v.linea?.kilometros ?? 0)} / {Math.round(v.ruta?.kilometros ?? 0)} km
+        </span>
         <span className="text-xs">Girá con A / D · W acelera · S frena · F toca el claxon</span>
         <div className="pointer-events-auto flex flex-wrap gap-2">
           <Btn id="viaje-radio" size="sm" tone="dark" onClick={changeRadio}>
