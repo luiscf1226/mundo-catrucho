@@ -331,4 +331,109 @@
   "desc": "Trazá cortes sobre madera ya aserrada evitando nudos y respetando la orientación de la fibra. Ganás completando piezas estructurales con poco desperdicio; una veta transversal invalida la pieza.",
   "rules": {}
  }
+,
+{
+ "id": "copan.cadera",
+ "name": "Pelota con cadera",
+ "place": "Copán",
+ "icon": "🗿",
+ "desc": "Con teclas laterales orientá cadera y muslo de un avatar hacia una pelota de hule. Ganás desviándola a marcadores de práctica; manos y pies anulan el punto de esta interpretación jugable.",
+ "rules": {
+  "duration": 75,
+  "bronze": 120,
+  "silver": 360,
+  "gold": 600
+ }
+},
+{
+ "id": "copan.glifos",
+ "name": "Bordes de la Escalinata",
+ "place": "Copán",
+ "icon": "🗿",
+ "desc": "Girás réplicas digitales de bloques y cotejás continuidad de trazos por dos bordes. Ganás un panel coherente sin atribuir traducciones; un borde incompatible mantiene la pieza suelta.",
+ "rules": {
+  "duration": 75,
+  "bronze": 120,
+  "silver": 360,
+  "gold": 600
+ }
+},
+{
+ "id": "copan.guaras",
+ "name": "Corredor de guaras",
+ "place": "Copán",
+ "icon": "🦜",
+ "desc": "Conectá refugios y árboles de alimento en un grafo de distancias de vuelo. Ganás cuando parejas virtuales cruzan con descansos intermedios; una jaula nunca cuenta como destino.",
+ "rules": {
+  "duration": 75,
+  "bronze": 120,
+  "silver": 360,
+  "gold": 600
+ }
+},
+{
+ "id": "copan.estratigrafia",
+ "name": "Edificios superpuestos",
+ "place": "Copán",
+ "icon": "🗿",
+ "desc": "Elegí una fase constructiva con una rueda temporal y recorré únicamente sus accesos existentes. Ganás conectando patios de la misma época; mezclar puertas de fases distintas cierra el modelo.",
+ "rules": {
+  "duration": 75,
+  "bronze": 120,
+  "silver": 360,
+  "gold": 600
+ }
+},
+{
+ "id": "copan.hojas",
+ "name": "Diagnóstico del cafetal copaneco",
+ "place": "Copán",
+ "icon": "🗿",
+ "desc": "Contrastá haz y envés de hojas en fichas ilustradas de diagnóstico. Ganás ubicando una misma lesión en ambas caras; acertar solo por color no completa el informe.",
+ "rules": {
+  "duration": 75,
+  "bronze": 120,
+  "silver": 360,
+  "gold": 600
+ }
+},
+{
+ "id": "copan.adoquin",
+ "name": "Suspensión en empedrado",
+ "place": "Copán",
+ "icon": "🗿",
+ "desc": "Elegí diagonales de rueda en un tramo de adoquines con golpes desfasados. Ganás manteniendo una taza sobre su marca; alinear todos los impactos hace resonar la suspensión.",
+ "rules": {
+  "duration": 75,
+  "bronze": 120,
+  "silver": 360,
+  "gold": 600
+ }
+},
+{
+ "id": "copan.estelas",
+ "name": "Orientaciones del patio",
+ "place": "Copán",
+ "icon": "🗿",
+ "desc": "Rotá monumentos de réplica hasta que dos fotografías desde extremos opuestos concuerden. Ganás un patio orientado; aceptar una sola vista permite una simetría falsa.",
+ "rules": {
+  "duration": 75,
+  "bronze": 120,
+  "silver": 360,
+  "gold": 600
+ }
+},
+{
+ "id": "copan.atol",
+ "name": "Masa en suspensión",
+ "place": "Copán",
+ "icon": "🗿",
+ "desc": "Pulsá agitación lateral para levantar sedimento sin variar el fuego del atol. Ganás manteniendo partículas suspendidas durante el servicio; agitar verticalmente incorpora espuma y reduce el volumen útil.",
+ "rules": {
+  "duration": 75,
+  "bronze": 120,
+  "silver": 360,
+  "gold": 600
+ }
+}
 ]

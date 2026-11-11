@@ -2,6 +2,14 @@ export type V3 = [number, number, number];
 
 /** Motores de minijuego. Cada juego del catálogo (shared/data/catalogo) es un motor + un tema del departamento. */
 export type MinigameId =
+  | 'copan.cadera'
+  | 'copan.glifos'
+  | 'copan.guaras'
+  | 'copan.estratigrafia'
+  | 'copan.hojas'
+  | 'copan.adoquin'
+  | 'copan.estelas'
+  | 'copan.atol'
   | 'olancho.batea'
   | 'olancho.arreo'
   | 'olancho.calcita'

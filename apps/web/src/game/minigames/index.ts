@@ -19,6 +19,14 @@ function motor(load: () => Promise<{ default: FC; guia?: Guia }>) {
   };
 }
 const MOTORS = {
+  'copan.cadera': motor(() => import('./copan/Cadera').then((m) => ({ ...m, default: m.Cadera }))),
+  'copan.glifos': motor(() => import('./copan/Glifos').then((m) => ({ ...m, default: m.Glifos }))),
+  'copan.guaras': motor(() => import('./copan/Guaras').then((m) => ({ ...m, default: m.Guaras }))),
+  'copan.estratigrafia': motor(() => import('./copan/Estratigrafia').then((m) => ({ ...m, default: m.Estratigrafia }))),
+  'copan.hojas': motor(() => import('./copan/Hojas').then((m) => ({ ...m, default: m.Hojas }))),
+  'copan.adoquin': motor(() => import('./copan/Adoquin').then((m) => ({ ...m, default: m.Adoquin }))),
+  'copan.estelas': motor(() => import('./copan/Estelas').then((m) => ({ ...m, default: m.Estelas }))),
+  'copan.atol': motor(() => import('./copan/Atol').then((m) => ({ ...m, default: m.Atol }))),
   'olancho.batea': motor(() => import('./olancho/Batea').then((m) => ({ ...m, default: m.Batea }))),
   'olancho.arreo': motor(() => import('./olancho/Arreo').then((m) => ({ ...m, default: m.Arreo }))),
   'olancho.calcita': motor(() => import('./olancho/Calcita').then((m) => ({ ...m, default: m.Calcita }))),
