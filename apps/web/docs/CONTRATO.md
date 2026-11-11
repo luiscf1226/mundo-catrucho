@@ -232,3 +232,29 @@ futbol    equipo: [nombre, color]   rival: [nombre, color]            explorador
 debe jugar de verdad al menos una etapa hasta `mg-result`, probar un tema del catálogo y el motor sin tema, y mirar
 capturas con ojo crítico. Construí siempre con tu propio `--out`. **Tiempo: unos 40 minutos; no pulas de más.**
 Al terminar, matá tus Chromium (el arnés lo hace solo si usás `run`).
+
+## Carga por departamento (MC-55)
+
+`pnpm --filter @mundo-catrucho/web build:web` produce `dist/web/index.html` y sus assets para alojamiento estático
+(por ejemplo Cloudflare). `node tools/build.mjs web --out <carpeta>` permite aislar la salida. El comando imprime
+bytes sin compresión: HTML + dependencias JS estáticas + CSS inicial, sin Google Fonts, y cada trozo diferido.
+La primera carga debe quedar debajo de 3 000 000 bytes. El catálogo sigue en `core/data.ts`: partirlo queda pendiente
+de la integración del catálogo en Convex; no se modificó ese módulo.
+
+- Departamento nuevo: poné su constructor en `src/game/dept/zones/<id>.tsx` y agregá una línea con `import()` en
+  `zones/index.ts`. No lo reexportés ni lo importés estáticamente desde el lobby. `zoneOf` es un recurso para usar
+  durante el render bajo `Suspense`; descarga el constructor, prepara la zona y la conserva al volver. Los módulos
+  comunes (`zone`, piezas, estaciones) se comparten sin duplicar el código específico de otros departamentos.
+- Motor nuevo: exportá el componente y su `guia` como siempre. Agregá una sola línea
+  `nuevo: motor(() => import('./Nuevo').then((m) => ({ ...m, default: m.Nuevo }))),` al registro de
+  `minigames/index.ts` (además del tipo y los datos del motor). La escena y la guía usan la misma promesa; no importés
+  la guía desde la UI. `motorGuide(id)` suspende mientras se carga. Exploradores carga las zonas de sus sitios al abrirlo.
+- `LoadingScreen` muestra «Ya casi… Estamos preparando tu destino.» mientras falta código de escena o guía.
+- El modo habitual `build` sigue produciendo `mundo-catrucho-hd.html` autónomo: las importaciones dinámicas se incrustan,
+  sin peticiones de assets. La excepción a cero red del modo web son únicamente los assets del mismo sitio.
+
+`node tools/test-carga.mjs` sirve `dist/web` en un puerto local efímero, registra solicitudes y bytes y comprueba
+menú/lobby sin zonas ni motores, Olancho sin otros departamentos y Corte sin otros motores. También funciona con
+`MC_GPU=0 MC_LENTO=6`. Guarda las capturas en `capturas/mc-55/`; bloquea la respuesta de Olancho hasta capturar el
+aviso para observarlo sin depender de la velocidad de la máquina. El arnés acepta `{ url: 'http://127.0.0.1:<puerto>/' }`
+y permite exclusivamente ese origen (además de Google Fonts); sin esa opción mantiene intacta la política de `file://`.

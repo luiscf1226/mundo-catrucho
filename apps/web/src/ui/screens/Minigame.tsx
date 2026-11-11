@@ -1,14 +1,15 @@
 // Flujo de un minijuego: tarjeta de inicio (qué es, cómo se juega, tu mejor marca) y pantalla de resultados.
-import { useEffect, useMemo } from 'react';
+import { Suspense, useEffect, useMemo } from 'react';
 import { audio } from '../../core/audio';
 import { ACHIEVEMENTS, catDe, deptById, juegoById, minigameById } from '../../core/data';
 import { leaderboard } from '../../core/leaderboard';
 import { type Best, useGame } from '../../core/store';
 import type { MinigameId, Modo } from '../../core/types';
-import { MOTOR_GUIDES } from '../../game/minigames';
+import { motorGuide } from '../../game/minigames';
 import { partida } from '../../game/minigames/api';
 import { Coin, Icon, type IconName, Star } from '../components/Icon';
 import { Btn, Confetti, Stars, Tag } from '../components/kit';
+import { LoadingScreen } from '../LoadingScreen';
 import { cx, fmtTime, g, useCountUp, useTouch } from '../lib';
 
 interface Guide {
@@ -99,6 +100,13 @@ useGame.subscribe((s) => {
 });
 
 export function MgIntro() {
+  return (
+    <Suspense fallback={<LoadingScreen />}>
+      <LoadedIntro />
+    </Suspense>
+  );
+}
+function LoadedIntro() {
   const mg = useGame((s) => s.mg)!,
     bestMotor = useGame((s) => s.profile.best[mg.id]),
     prog = useGame((s) => (mg.juego ? s.profile.juegos[mg.juego] : undefined)),
@@ -117,7 +125,7 @@ export function MgIntro() {
       }
     : base;
   const old = GUIDE[mg.id],
-    nu = MOTOR_GUIDES[mg.id],
+    nu = motorGuide(mg.id),
     guide = old ?? nu!,
     stars = old ? old.stars(base.rules) : nu!.metas(P);
   const best = j
