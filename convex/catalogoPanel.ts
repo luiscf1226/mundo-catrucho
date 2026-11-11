@@ -70,8 +70,16 @@ export const deshacer = mutation({
       .collect();
     const departamentos = filas.filter((d) => d.deptId !== REGISTRO).map(({ deptId, datos }) => ({ deptId, datos }));
     if (departamentos.length !== 18) throw new Error('La versión anterior no está completa.');
-    // la restauración hereda el «anterior» de la versión restaurada: deshacer otra vez retrocede, no rehace
+    // la restauración hereda el «anterior» de la versión restaurada: deshacer otra vez retrocede, no rehace.
+    // Sin registro (catálogo de antes del panel) no hay más atrás: 0 hace que el próximo deshacer avise.
     const registroRestaurado = filas.find((d) => d.deptId === REGISTRO)?.datos as { anterior?: number } | undefined;
-    return publicar(ctx, departamentos, 'panel', `Restauración de v${anterior}`, version, registroRestaurado?.anterior);
+    return publicar(
+      ctx,
+      departamentos,
+      'panel',
+      `Restauración de v${anterior}`,
+      version,
+      registroRestaurado?.anterior ?? 0,
+    );
   },
 });

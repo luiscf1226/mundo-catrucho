@@ -78,13 +78,12 @@ const motor = defineMotor({
   },
   Escena: ({ motor: m }) => {
     const s = m.datos;
+    // el marco gira alrededor de su centro (y = 2) entre derecho y de cabeza; las etiquetas siguen a su bloque
+    const giro = m.parametros.invertido ? (Math.PI * (1 - Math.cos(s.marco))) / 2 : 0,
+      lado = Math.cos(giro);
     return (
       <Mesa titulo="Girás la réplica y cotejás dos bordes">
-        {/* el marco gira alrededor de su centro (y = 2) entre derecho y de cabeza */}
-        <group
-          position={[0, 2, 0]}
-          rotation={[0, 0, m.parametros.invertido ? (Math.PI * (1 - Math.cos(s.marco))) / 2 : 0]}
-        >
+        <group position={[0, 2, 0]} rotation={[0, 0, giro]}>
           <group position={[0, -2, 0]}>
             {m.parametros.invertido && (
               <group position={[0, 1, 0]}>
@@ -112,8 +111,8 @@ const motor = defineMotor({
             ))}
           </group>
         </group>
-        <Label pos={[-2.6, 3.6, 0]} text="Referencia · dos bordes" h={0.3} />
-        <Label pos={[2.6, 3.6, 0]} text="Tu réplica" h={0.3} />
+        <Label pos={[-2.6 * lado, 3.6, 0]} text="Referencia · dos bordes" h={0.3} />
+        <Label pos={[2.6 * lado, 3.6, 0]} text="Tu réplica" h={0.3} />
       </Mesa>
     );
   },

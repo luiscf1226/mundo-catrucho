@@ -28,7 +28,7 @@ export async function publicar(
   que: string,
   anterior: number,
   /** a qué versión vuelve el próximo «Deshacer»; por omisión, a la que esta reemplaza */
-  deshaceA: number | undefined = anterior,
+  deshaceA: number = anterior,
 ) {
   const version = anterior + 1;
   for (const d of departamentos) await ctx.db.insert('catalogo', { version, ...d });
