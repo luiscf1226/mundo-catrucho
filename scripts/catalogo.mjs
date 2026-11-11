@@ -71,11 +71,12 @@ export function ejecutarConvex(funcion, args = {}) {
     ),
   );
 }
-export function subirCatalogo(departamentos) {
-  const resultado = ejecutarConvex('catalogo:reemplazar', { departamentos });
+export function subirCatalogo(departamentos, { forzar = false } = {}) {
+  const resultado = ejecutarConvex('catalogo:reemplazar', { departamentos, forzar });
   console.log(
     `PASA catálogo v${resultado.version}: ${departamentos.length} departamentos, ${departamentos.reduce((n, d) => n + d.datos.catalogo.juegos.length, 0)} juegos, ${departamentos.reduce((n, d) => n + d.datos.catalogo.lugares.length, 0)} lugares`,
   );
   return resultado;
 }
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) subirCatalogo(armarCatalogo());
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url))
+  subirCatalogo(armarCatalogo(), { forzar: process.argv.includes('--forzar') });
