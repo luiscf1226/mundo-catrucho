@@ -1,5 +1,6 @@
 // Prueba de la sala: levanta `wrangler dev`, conecta dos jugadores y comprueba que se ven moverse y salir.
 import { spawn } from 'node:child_process';
+import { SALA } from '@mundo-catrucho/reglas';
 
 const PORT = 8799,
   url = `ws://127.0.0.1:${PORT}/sala/dept:olancho:0`;
@@ -52,13 +53,23 @@ try {
   await sleep(150);
   const lim = a.cola.filter((x) => x.t === 'pos').at(-1);
   if (lim.x !== 1000 || lim.anim !== 'idle') throw new Error(`no limitó valores raros: ${JSON.stringify(lim)}`);
+  // ritmo: una ráfaga de 150 mensajes de golpe; pasan los de la cubeta y lo demás se ignora
+  const antes = a.cola.length;
+  for (let i = 0; i < 150; i++) b.ws.send(JSON.stringify({ t: 'pos', x: i, y: 0, z: 0, yaw: 0, anim: 'walk' }));
+  await sleep(800);
+  const rafaga = a.cola.slice(antes).filter((x) => x.t === 'pos').length;
+  if (rafaga > SALA.ritmo.rafaga + 15 || rafaga < SALA.ritmo.rafaga / 2)
+    throw new Error(`ritmo: pasaron ${rafaga} de 150 (cubeta de ${SALA.ritmo.rafaga})`);
   const oc = await (await fetch(`http://127.0.0.1:${PORT}/sala/dept:olancho:0`)).json();
   if (oc.ocupacion !== 2) throw new Error(`ocupación ${oc.ocupacion}`);
   b.ws.close();
   const sale = await espera(a, 'sale');
   if (sale.id !== holaB.id) throw new Error('salida mal avisada');
   a.ws.close();
-  console.log('PASA sala: dos jugadores se ven entrar, moverse y salir; id de Ana', holaA.id);
+  console.log(
+    `PASA sala: dos jugadores se ven entrar, moverse y salir; ráfaga recortada a ${rafaga} de 150; id de Ana`,
+    holaA.id,
+  );
   fin(0);
 } catch (e) {
   console.log('FALLA', e.message);

@@ -1,6 +1,15 @@
 // Estado del juego (Zustand). Todo el progreso vive en `profile` y se guarda en localStorage.
 // Este módulo es la "capa de servidor" del prototipo: aquí se validan compras y recompensas. En la versión de
 // Roblox el mismo papel lo cumplen los servicios de ServerScriptService (ver roblox/).
+import {
+  bonoViaje,
+  ganarXp,
+  MONEDA,
+  MONEDA_SUELTA,
+  PREMIO_PRIMERA_VISITA,
+  PREMIO_RECUERDO,
+  premioPartida,
+} from '@mundo-catrucho/reglas';
 import { create } from 'zustand';
 import { OPCIONES, rutaParaVehiculo } from '../game/viaje/opciones';
 import {
@@ -12,9 +21,7 @@ import {
   juegoById,
   MISSIONS,
   minigameById,
-  REWARDS,
   SHOP,
-  xpForLevel,
 } from './data';
 import { player } from './player';
 import type { AvatarConfig, MinigameId, MinigameResult, Modo, PanelId, Rewards, Scene, V3, Vehiculo } from './types';
@@ -291,17 +298,14 @@ export const useGame = create<Game>((set, get) => {
     }
     return fresh;
   };
+  /** Suma XP con las reglas compartidas; cada nivel nuevo paga su premio. Devuelve si subió. */
   const gainXp = (p: Profile, n: number) => {
-    p.xp += n;
-    let up = false;
-    while (p.level < REWARDS.level.max && p.xp >= xpForLevel(p.level)) {
-      p.xp -= xpForLevel(p.level);
-      p.level++;
-      p.coins += REWARDS.levelUp.coins;
-      p.stats.coinsEarned += REWARDS.levelUp.coins;
-      up = true;
-    }
-    return up;
+    const a = ganarXp({ nivel: p.level, xp: p.xp }, n);
+    p.level = a.nivel;
+    p.xp = a.xp;
+    p.coins += a.monedas;
+    p.stats.coinsEarned += a.monedas;
+    return a.subidas > 0;
   };
   const gainCoins = (p: Profile, n: number) => {
     p.coins += n;
@@ -392,12 +396,12 @@ export const useGame = create<Game>((set, get) => {
       commit((p) => {
         if (first) {
           p.visited.push(id);
-          gainCoins(p, REWARDS.world.firstVisit.coins);
-          gainXp(p, REWARDS.world.firstVisit.xp);
+          gainCoins(p, PREMIO_PRIMERA_VISITA.monedas);
+          gainXp(p, PREMIO_PRIMERA_VISITA.xp);
           bumpMissions(p, 'visit', 1);
         }
       });
-      if (first) get().toast(`Primera visita: +${REWARDS.world.firstVisit.coins} ${REWARDS.currency}`, '🚌');
+      if (first) get().toast(`Primera visita: +${PREMIO_PRIMERA_VISITA.monedas} ${MONEDA}`, '🚌');
     },
     openPanel: (panel) => set({ panel }),
     closePanel: () => set({ panel: null }),
@@ -495,7 +499,7 @@ export const useGame = create<Game>((set, get) => {
     llegarViaje: (bonus = 0) => {
       const sc = get().scene;
       if (sc.kind !== 'viaje') return;
-      if (bonus > 0) commit((p) => gainCoins(p, Math.min(30, Math.round(bonus))));
+      if (bonus > 0) commit((p) => gainCoins(p, bonoViaje(bonus)));
       get().travel(sc.to);
     },
     tomarLlegada: () => {
@@ -507,10 +511,7 @@ export const useGame = create<Game>((set, get) => {
     finishMinigame: (r) => {
       const mg = get().mg;
       if (mg?.phase !== 'playing') return;
-      const R = REWARDS.minigame,
-        stars = Math.max(0, Math.min(3, r.stars));
-      const coins = r.won ? R.win.coins + stars * R.perStar.coins : R.lose.coins;
-      const xp = r.won ? R.win.xp + stars * R.perStar.xp : R.lose.xp;
+      const { monedas: coins, xp, estrellas: stars } = premioPartida({ gano: r.won, estrellas: r.stars });
       let leveledUp = false,
         avance = false;
       const fresh = commit((p) => {
@@ -553,7 +554,7 @@ export const useGame = create<Game>((set, get) => {
           phase: 'ended',
           avance,
           ranking: rankingDe(mg, r, get().profile.name),
-          result: { ...r, stars: stars as 0 | 1 | 2 | 3 },
+          result: { ...r, stars },
           rewards: { coins, xp, leveledUp, newAchievements: fresh },
         },
       });
@@ -614,7 +615,7 @@ export const useGame = create<Game>((set, get) => {
         gainXp(p, n);
       });
     },
-    pickupCoin: (n = REWARDS.world.coinPickup) => {
+    pickupCoin: (n = MONEDA_SUELTA) => {
       commit((p) => {
         gainCoins(p, n);
         p.stats.pickups += 1;
@@ -625,8 +626,8 @@ export const useGame = create<Game>((set, get) => {
       if (get().profile.collected.includes(deptId)) return false;
       commit((p) => {
         p.collected.push(deptId);
-        gainCoins(p, REWARDS.world.collectible.coins);
-        gainXp(p, REWARDS.world.collectible.xp);
+        gainCoins(p, PREMIO_RECUERDO.monedas);
+        gainXp(p, PREMIO_RECUERDO.xp);
         bumpMissions(p, 'collect', 1);
       });
       return true;

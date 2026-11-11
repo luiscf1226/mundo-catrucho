@@ -9,11 +9,12 @@
     "build:web": "node tools/build.mjs web --out dist/web",
     "test:carga": "node tools/test-carga.mjs",
     "build:all": "node tools/build.mjs all --out dist",
-    "test": "node tools/smoke.mjs dist/mundo-catrucho-hd.html && node tools/test-apodos.mjs dist/mundo-catrucho-hd.html && node tools/test-camara-mando.mjs dist/mundo-catrucho-hd.html",
+    "test": "node tools/smoke.mjs dist/mundo-catrucho-hd.html && node tools/test-apodos.mjs dist/mundo-catrucho-hd.html && node tools/test-camara-mando.mjs dist/mundo-catrucho-hd.html && node tools/test-reglas.mjs dist/mundo-catrucho-hd.html",
     "capturas": "node tools/capturas.mjs dist/mundo-catrucho-hd.html ../../capturas",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@mundo-catrucho/reglas": "workspace:*",
     "@react-three/drei": "^10.7.9",
     "@react-three/fiber": "^9.8.2",
     "react": "^19.3.1",

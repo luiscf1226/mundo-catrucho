@@ -11,6 +11,14 @@ npx convex dev --once     # lo mismo una sola vez
 La primera vez en una máquina nueva: `npx convex login` y luego `npx convex dev` (elegí el proyecto existente
 `mundo-catrucho`). Eso escribe `.env.local` con `CONVEX_DEPLOYMENT` y `CONVEX_URL`; está ignorado por git.
 
+`partidas.validar` es una consulta pura: recibe `{ motor, puntos, estrellas, duracion, etapa, etapas?, gano? }` y
+responde `validarResultado` de `@mundo-catrucho/reglas` (`{ ok, motivos, estrellasPosibles, conocido }`). No toca
+tablas; la usará `cerrarPartida` (MC-14).
+
+```bash
+npx convex run partidas:validar '{"motor":"cortes.chuco","puntos":320,"estrellas":2,"duracion":74,"etapa":0}'
+```
+
 Falta escribir las funciones que lista `docs/plan.html` (sección «Datos»): `miPerfil`, `comprar`, `abrirPartida`,
 `cerrarPartida`, etc.
 
