@@ -16,6 +16,8 @@ export interface TopeMotor {
   puntosMax?: (dif: number) => number;
   /** puntos por segundo que nadie supera (sobre el reloj si existe; si no, sobre la duración reportada) */
   puntosPorSegundo: number;
+  /** se gana exactamente al llegar a la primera meta (motores del kit) */
+  ganaConMeta?: boolean;
 }
 
 /** Segundos de holgura por latencia al medir la duración de una partida. */
@@ -43,10 +45,18 @@ const kit = (metas: TopeMotor['metas'], reloj: TopeMotor['reloj']): TopeMotor =>
   metas,
   reloj,
   puntosPorSegundo: 20,
+  ganaConMeta: true,
 });
 const lineal = (a: number, b: number, c: number, k: number) => (d: number) =>
   [a + r(d * k), b + r(d * k), c + r(d * k)] as Metas;
 const taller = kit(lineal(80, 240, 400, 80), () => 75);
+/** los ocho motores de Copán comparten metas y reloj (apps/web/src/game/minigames/copan/comun.tsx) */
+const copan = kit(
+  (d) => [120 + r(d * 120), 360, 600],
+  () => 75,
+);
+const islas = (a: number, b: number, c: number, k: number, base: number, extra: number) =>
+  kit(lineal(a, b, c, k), (d) => base + r(d * extra));
 
 const carrera = reglasDe('carrera'),
   limite = num(carrera.timeLimit, 120),
@@ -102,6 +112,22 @@ export const TOPES: Record<string, TopeMotor> = {
   'olancho.cuajada': taller,
   'olancho.postura': taller,
   'olancho.tablas': taller,
+  'copan.adoquin': copan,
+  'copan.atol': copan,
+  'copan.cadera': copan,
+  'copan.estelas': copan,
+  'copan.estratigrafia': copan,
+  'copan.glifos': copan,
+  'copan.guaras': copan,
+  'copan.hojas': copan,
+  'islas.absorcion': islas(110, 220, 330, 60, 85, 15),
+  'islas.ballena': islas(80, 170, 260, 60, 75, 15),
+  'islas.bonacca': islas(120, 260, 400, 80, 80, 15),
+  'islas.cangrejo': islas(120, 240, 360, 60, 80, 10),
+  'islas.colorprofundo': islas(140, 300, 460, 80, 75, 15),
+  'islas.coral': islas(120, 260, 400, 80, 80, 15),
+  'islas.estela': islas(120, 260, 400, 80, 80, 15),
+  'islas.flotacion': islas(100, 220, 340, 60, 80, 15),
   // motores propios: el reloj puede acortarse (golpes, errores), así que solo se acotan metas y puntos
   atrapa: {
     metas: (d) => [r10(120 + 180 * d), r10(300 + 300 * d), r10(500 + 400 * d)],
@@ -194,5 +220,10 @@ export function validarResultado(res: Resultado): Veredicto {
   if (posibles !== null && estrellas > posibles)
     motivos.push(`${estrellas} estrellas con ${puntos} pts; la meta da ${posibles}`);
   if (res.gano === false && estrellas > 0) motivos.push('estrellas sin ganar');
+  // en los motores del kit se gana al llegar a la primera meta; `gano` no puede contradecir el puntaje
+  if (metas && t.ganaConMeta && res.gano === true && puntos < metas[0])
+    motivos.push(`ganó con ${puntos} pts; la meta es ${metas[0]}`);
+  if (metas && t.ganaConMeta && res.gano === false && puntos >= metas[0])
+    motivos.push(`perdió con ${puntos} pts; la meta es ${metas[0]}`);
   return { ok: motivos.length === 0, motivos, estrellasPosibles: posibles, conocido: !!tope };
 }

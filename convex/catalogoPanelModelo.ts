@@ -7,10 +7,10 @@ export const MAX_TEXTO = 1000;
 
 export function contenidoIgual(a: unknown, b: unknown): boolean {
   if (a === b) return true;
-  if (!a || !b || typeof a !== 'object' || typeof b !== 'object') return false;
+  if (!a || !b || typeof a !== 'object' || typeof b !== 'object' || Array.isArray(a) !== Array.isArray(b)) return false;
   const x = Object.entries(a),
-    y = Object.entries(b);
-  return x.length === y.length && x.every(([k, v]) => contenidoIgual(v, Object.fromEntries(y)[k]));
+    y = new Map(Object.entries(b));
+  return x.length === y.size && x.every(([k, v]) => y.has(k) && contenidoIgual(v, y.get(k)));
 }
 
 function forma(base: unknown, nuevo: unknown, ruta: string): void {
@@ -52,6 +52,12 @@ export function validarEdicion(base: Entrada, nuevo: Entrada, departamentos: str
   filas(b.comidas, n.comidas, e.comidas, ['name', 'nota', 'lugar']);
   filas(b.palabras, n.palabras, e.palabras, ['dice', 'es']);
   filas(b.juegos, n.juegos, e.juegos, ['name', 'desc', 'guino', 'etapas', 'tema']);
+  // estas llaves del tema eligen mecánica o escenario en el motor: no son texto para editar
+  n.juegos.forEach((j, i) => {
+    for (const k of ['variante', 'fondo'])
+      if (Object.hasOwn(b.juegos[i].tema, k) && j.tema[k] !== b.juegos[i].tema[k])
+        throw new Error(`tema.${k}: valor fijo.`);
+  });
   for (const j of n.juegos) {
     if (
       Array.isArray(j.tema.sitios) &&

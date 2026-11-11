@@ -21,7 +21,7 @@ también van en español.
 ## Comandos (siempre desde la raíz)
 
 ```bash
-pnpm install       # instala todo el espacio de trabajo (Node 22 o más, pnpm 12)
+pnpm install       # instala todo el espacio de trabajo (Node 22.18 o más, pnpm 12)
 pnpm dev           # juego en http://localhost:5173 y sala en ws://localhost:8799
 pnpm check         # Biome (lint y formato) + tipos de todo + validar que el contenido no se repita
 pnpm test          # compila y juega solo de punta a punta en Chromium; la sala conecta dos jugadores; pruebas de reglas

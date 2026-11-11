@@ -2,7 +2,7 @@
 // 1. Premios: para varias partidas de ejemplo, `finishMinigame` (que ahora usa @mundo-catrucho/reglas) da las mismas
 //    monedas, XP y niveles que la lógica vieja de store.ts (copiada abajo). También primera visita, recuerdo,
 //    moneda suelta y bono de viaje.
-// 2. Metas: abre cada motor del kit en la primera y la última etapa y compara metas y reloj con `TOPES` del paquete,
+// 2. Metas: revisa que cada `defineMotor` del código tenga tope, abre cada motor del kit en la primera y la última etapa y compara metas y reloj con `TOPES` del paquete,
 //    para que la validación del servidor no se desfase de lo que el jugador ve. Con MC_GPU=0 solo la primera etapa.
 // Uso: node tools/test-reglas.mjs <mundo-catrucho-hd.html>
 import assert from 'node:assert/strict';
@@ -17,6 +17,19 @@ if (!file) throw new Error('Uso: test-reglas.mjs <html>');
 const raiz = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const REWARDS = JSON.parse(readFileSync(resolve(raiz, 'shared/data/rewards.json'), 'utf8'));
 const sinGpu = process.env.MC_GPU === '0';
+
+// todo motor del kit (`defineMotor`) necesita su tope: sin él el servidor usaría el genérico, que deja pasar casi todo
+const fuentes = (dir) =>
+  readdirSync(dir, { withFileTypes: true }).flatMap((d) =>
+    d.isDirectory() ? fuentes(resolve(dir, d.name)) : d.name.endsWith('.tsx') ? [resolve(dir, d.name)] : [],
+  );
+const delKit = fuentes(resolve(raiz, 'src/game/minigames')).flatMap((f) =>
+  [...readFileSync(f, 'utf8').matchAll(/defineMotor(?:<[^>]*>)?\(\{\s*id:\s*'([^']+)'/g)].map((m) => m[1]),
+);
+assert.ok(delKit.length >= 30, `solo encontré ${delKit.length} motores del kit`);
+const sinTope = delKit.filter((id) => !TOPES[id]?.reloj);
+assert.deepEqual(sinTope, [], `motores del kit sin tope en packages/reglas/src/topes.ts: ${sinTope.join(', ')}`);
+console.log(`PASA los ${delKit.length} motores del kit tienen tope`);
 
 // ---- lógica vieja, copiada de apps/web/src/core/store.ts y data.ts (ola 4, antes de MC-12)
 const xpForLevel = (n) => REWARDS.level.base + (n - 1) * REWARDS.level.perLevel;

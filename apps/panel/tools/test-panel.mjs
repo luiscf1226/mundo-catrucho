@@ -166,6 +166,30 @@ try {
     restaurado.version,
   );
   console.log('PASA deshacer restaura todo el catálogo y carga idéntica conserva versión');
+
+  // dos ediciones y dos «Deshacer»: el segundo retrocede hasta antes de la primera, no rehace la segunda
+  const cero = ejecutarConvex('catalogo:ultima'),
+    deptCero = cero.departamentos.find((d) => d.deptId === 'comayagua'),
+    editar = (d, nota) => {
+      const x = structuredClone(d);
+      x.datos.catalogo.juegos[0].desc = `${x.datos.catalogo.juegos[0].desc} ${nota}`;
+      return x;
+    };
+  const a = await client.mutation(guardar, { llave, version: cero.version, departamento: editar(deptCero, 'A') });
+  const b = await client.mutation(guardar, {
+    llave,
+    version: a.version,
+    departamento: editar(
+      ejecutarConvex('catalogo:ultima').departamentos.find((d) => d.deptId === 'comayagua'),
+      'B',
+    ),
+  });
+  const u1 = await client.mutation(undo, { llave, version: b.version });
+  const conA = ejecutarConvex('catalogo:ultima').departamentos.find((d) => d.deptId === 'comayagua');
+  assert(conA.datos.catalogo.juegos[0].desc.endsWith(' A'), 'el primer deshacer deja la edición A');
+  await client.mutation(undo, { llave, version: u1.version });
+  assert.deepEqual(ejecutarConvex('catalogo:ultima').departamentos, cero.departamentos, 'el segundo deshacer quita A');
+  console.log('PASA deshacer dos veces retrocede dos publicaciones');
 } finally {
   try {
     const actual = ejecutarConvex('catalogo:ultima');

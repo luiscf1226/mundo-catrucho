@@ -120,3 +120,16 @@ test('cada motor del kit: el oro justo en el reloj justo pasa, y una estrella de
     }
   }
 });
+
+test('kit: «ganó» tiene que cuadrar con la primera meta', () => {
+  falla({ motor: 'cortes.chuco', puntos: 0, estrellas: 0, duracion: 75, etapa: 0, gano: true }, 'ganó con 0');
+  falla({ motor: 'copan.cadera', puntos: 300, estrellas: 1, duracion: 76, etapa: 0, gano: false }, 'perdió con 300');
+  pasa({ motor: 'copan.cadera', puntos: 120, estrellas: 1, duracion: 76, etapa: 0, gano: true });
+  // el fútbol gana por diferencia de goles, no por meta: perder 2 a 3 con dos goles es posible
+  pasa({ motor: 'futbol', puntos: 2, estrellas: 0, duracion: 90, etapa: 0, gano: false });
+});
+
+test('Copán e Islas: un puntaje imposible para el reloj real no pasa', () => {
+  falla({ motor: 'copan.cadera', puntos: 5000, estrellas: 3, duracion: 76, etapa: 0, gano: true }, 'no caben');
+  falla({ motor: 'islas.coral', puntos: 400, estrellas: 3, duracion: 30, etapa: 0, gano: true }, 'no se puede');
+});

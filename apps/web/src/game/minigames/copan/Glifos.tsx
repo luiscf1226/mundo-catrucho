@@ -4,7 +4,14 @@ import { defineMotor, type Motor } from '../kit';
 import { Campesino } from '../kit/Figuras';
 import { controles, cursor, duracion, Mesa, metas, mover } from './comun';
 
-type Estado = ReturnType<typeof cursor> & { pieza: number; juntas: number; sueltas: number; espera: number };
+type Estado = ReturnType<typeof cursor> & {
+  pieza: number;
+  juntas: number;
+  sueltas: number;
+  espera: number;
+  /** fase del marco que gira en «El glifo quedó de cabeza» */
+  marco: number;
+};
 type Parametros = { margen: number; invertido: boolean };
 type Sesion = Motor<Parametros, Estado>;
 
@@ -40,16 +47,19 @@ const motor = defineMotor({
   }),
   metas,
   duracion,
-  crear: (): Estado => ({ ...cursor(), pieza: 0, juntas: 0, sueltas: 0, espera: 0 }),
+  crear: (): Estado => ({ ...cursor(), pieza: 0, juntas: 0, sueltas: 0, espera: 0, marco: 0 }),
   actualizar(m, dt) {
     const s = m.datos;
     mover(s, dt);
+    if (m.parametros.invertido) s.marco += dt * 0.45;
     s.espera = Math.max(0, s.espera - dt);
     if (input.take('fire')) encajar(m);
-    const r = referencia(s);
-    m.objetivo = 'Cotejá las dos juntas antes de encajar';
+    // el objetivo no va en números: hay que comparar la réplica con la referencia a ojo
+    m.objetivo = m.parametros.invertido
+      ? 'El marco gira: cotejá las juntas aunque todo quede de cabeza'
+      : 'Cotejá las dos juntas antes de encajar';
     m.lineas = [
-      `A/D giro ${Math.round(s.x * 90)}° → ${Math.round(r.a * 90)}° · W/S inclinación ${Math.round(s.y * 90)}° → ${Math.round(r.b * 90)}°`,
+      `A/D giro ${Math.round(s.x * 90)}° · W/S inclinación ${Math.round(s.y * 90)}° · Pieza ${s.pieza + 1}`,
       'Réplica con trazos geométricos inventados · No traduce escritura',
     ];
     m.stats = { juntas: s.juntas, sueltas: s.sueltas, x: s.x, y: s.y };
@@ -70,34 +80,37 @@ const motor = defineMotor({
     const s = m.datos;
     return (
       <Mesa titulo="Girás la réplica y cotejás dos bordes">
+        {/* el marco gira alrededor de su centro (y = 2) entre derecho y de cabeza */}
         <group
-          position={[0, m.parametros.invertido ? 4 : 0, 0]}
-          rotation={[0, 0, m.parametros.invertido ? Math.PI : 0]}
+          position={[0, 2, 0]}
+          rotation={[0, 0, m.parametros.invertido ? (Math.PI * (1 - Math.cos(s.marco))) / 2 : 0]}
         >
-          {m.parametros.invertido && (
-            <group position={[0, 1, 0]}>
-              <Campesino />
-            </group>
-          )}
-          {[-1, 1].map((l) => (
-            <group
-              key={l}
-              position={[l * 2.6, 0, 0]}
-              rotation={[l > 0 ? s.y : referencia(s).b, l > 0 ? s.x : referencia(s).a, 0]}
-            >
-              <Block pos={[0, 1.8, 0]} size={[2, 0.4, 2]} color="#c4b79c" mat="stone" solid={false} />
-              {[-1, 1].map((i) => (
-                <Block
-                  key={i}
-                  pos={[i * 0.4, 2.03, i * 0.4]}
-                  size={[0.9, 0.06, 0.15]}
-                  color="#588e91"
-                  mat="cloth"
-                  solid={false}
-                />
-              ))}
-            </group>
-          ))}
+          <group position={[0, -2, 0]}>
+            {m.parametros.invertido && (
+              <group position={[0, 1, 0]}>
+                <Campesino />
+              </group>
+            )}
+            {[-1, 1].map((l) => (
+              <group
+                key={l}
+                position={[l * 2.6, 0, 0]}
+                rotation={[l > 0 ? s.y : referencia(s).b, l > 0 ? s.x : referencia(s).a, 0]}
+              >
+                <Block pos={[0, 1.8, 0]} size={[2, 0.4, 2]} color="#c4b79c" mat="stone" solid={false} />
+                {[-1, 1].map((i) => (
+                  <Block
+                    key={i}
+                    pos={[i * 0.4, 2.03, i * 0.4]}
+                    size={[0.9, 0.06, 0.15]}
+                    color="#588e91"
+                    mat="cloth"
+                    solid={false}
+                  />
+                ))}
+              </group>
+            ))}
+          </group>
         </group>
         <Label pos={[-2.6, 3.6, 0]} text="Referencia · dos bordes" h={0.3} />
         <Label pos={[2.6, 3.6, 0]} text="Tu réplica" h={0.3} />

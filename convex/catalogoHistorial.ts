@@ -27,9 +27,15 @@ export async function publicar(
   quien: 'panel' | 'script',
   que: string,
   anterior: number,
+  /** a qué versión vuelve el próximo «Deshacer»; por omisión, a la que esta reemplaza */
+  deshaceA: number | undefined = anterior,
 ) {
   const version = anterior + 1;
   for (const d of departamentos) await ctx.db.insert('catalogo', { version, ...d });
-  await ctx.db.insert('catalogo', { version, deptId: REGISTRO, datos: { quien, que, cuando: Date.now(), anterior } });
+  await ctx.db.insert('catalogo', {
+    version,
+    deptId: REGISTRO,
+    datos: { quien, que, cuando: Date.now(), anterior: deshaceA },
+  });
   return { version, departamentos: departamentos.length };
 }
