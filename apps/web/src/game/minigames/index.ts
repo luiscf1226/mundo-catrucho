@@ -25,6 +25,18 @@ const MOTORS = {
   'olancho.cuajada': motor(() => import('./olancho/Cuajada').then((m) => ({ ...m, default: m.Cuajada }))),
   'olancho.postura': motor(() => import('./olancho/Postura').then((m) => ({ ...m, default: m.Postura }))),
   'olancho.tablas': motor(() => import('./olancho/Tablas').then((m) => ({ ...m, default: m.Tablas }))),
+  'franciscomorazan.niebla': motor(() =>
+    import('./franciscomorazan/Niebla').then((m) => ({ ...m, default: m.Niebla })),
+  ),
+  'franciscomorazan.baleada': motor(() =>
+    import('./franciscomorazan/Baleada').then((m) => ({ ...m, default: m.Baleada })),
+  ),
+  'franciscomorazan.repartidor': motor(() =>
+    import('./franciscomorazan/Repartidor').then((m) => ({ ...m, default: m.Repartidor })),
+  ),
+  'franciscomorazan.artesania': motor(() =>
+    import('./franciscomorazan/Artesania').then((m) => ({ ...m, default: m.Artesania })),
+  ),
 
   'franciscomorazan.rosquilla': motor(() => import('./Rosquilla').then((m) => ({ ...m, default: m.Rosquilla }))),
   carrera: motor(() => import('./Carrera').then((m) => ({ ...m, default: m.Carrera }))),

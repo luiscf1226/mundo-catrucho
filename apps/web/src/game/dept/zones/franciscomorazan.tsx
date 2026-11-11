@@ -3,6 +3,8 @@ import { P } from '../../kit';
 import { bl, bx, cy, distToPath, inR, type Pc, PI, place, rng, ss } from '../lib';
 import { baranda, edificio, mont } from '../parts';
 import { ZB, type ZoneSpec } from '../zone';
+import { PuntosFM } from './franciscomorazan-puntos';
+import puntosFM from './franciscomorazan-puntos.json';
 
 const barrio = (seed: number, c = '#7aa060'): Pc[] => {
   const r = rng(seed),
@@ -29,6 +31,7 @@ const barrio = (seed: number, c = '#7aa060'): Pc[] => {
 };
 /** Francisco Morazán: el Cristo del Picacho en lo alto del cerro, con el parque en la ladera y Tegucigalpa abajo. */
 export function cristo(d: Department): ZoneSpec {
+  const libre = (x: number, z: number) => puntosFM.every((p) => Math.hypot(p.x - x, p.z - z) > 6);
   const way: [number, number][] = [
       [0, 27],
       [0, 20],
@@ -83,7 +86,7 @@ export function cristo(d: Department): ZoneSpec {
     [15, -24],
     [-5, 15],
   ])
-    Z.n(<P.Pine pos={Z.at(x, z)} seed={x - z} />);
+    if (libre(x, z)) Z.n(<P.Pine pos={Z.at(x, z)} seed={x - z} />);
   for (const [x, z] of [
     [-6.5, 12],
     [5.5, -3],
@@ -120,15 +123,25 @@ export function cristo(d: Department): ZoneSpec {
     place(barrio(5, '#6f9a5a'), -110, 0, 140),
   );
   const park = (x: number, z: number) =>
-    z < 17 && distToPath(x, z, way) > 3.2 && !inR(x, z, -11, 11, -38, -17) && !inR(x, z, -23, -8, -19, -13);
+    libre(x, z) &&
+    z < 17 &&
+    distToPath(x, z, way) > 3.2 &&
+    !inR(x, z, -11, 11, -38, -17) &&
+    !inR(x, z, -23, -8, -19, -13);
   Z.veg('pine', 60, park, { sep: 4.5 });
-  Z.veg('tree', 18, (x, z) => park(x, z) || (z > 18 && z < 27 && Math.abs(x) > 14 && Math.abs(x) < 24), { sep: 5.5 });
+  Z.veg(
+    'tree',
+    18,
+    (x, z) => libre(x, z) && (park(x, z) || (z > 18 && z < 27 && Math.abs(x) > 14 && Math.abs(x) < 24)),
+    { sep: 5.5 },
+  );
   Z.veg('bush', 24, (x, z) => park(x, z) && Math.abs(x) < 48, { sep: 3 });
   Z.trail(way, 8)
     .coin(-5, Y, -22)
     .coin(5, Y, -22)
     .coin(0, Y + 1.2, PZ - 4.2)
     .coin(-16, Y, -17);
+  Z.n(<PuntosFM altura={Z.h} />);
   return Z.done({
     limit: { minX: -50, maxX: 50, minZ: -38, maxZ: 50 },
     npc: {
