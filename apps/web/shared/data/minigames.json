@@ -201,11 +201,6 @@
   "rules": {}
  },
  {
-  "id": "olancho.tablas",
-  "name": "Pedido de Campamento",
-  "place": "Olancho",
-  "icon": "🧭",
-  "desc": "Trazá cortes sobre madera ya aserrada evitando nudos y respetando la orientación de la fibra. Ganás completando piezas estructurales con poco desperdicio; una veta transversal invalida la pieza.",
   "id": "franciscomorazan.niebla",
   "name": "Agua de La Tigra",
   "place": "Francisco Morazán",
@@ -327,5 +322,13 @@
    "silver": 300,
    "gold": 500
   }
+ },
+ {
+  "id": "olancho.tablas",
+  "name": "Pedido de Campamento",
+  "place": "Olancho",
+  "icon": "🧭",
+  "desc": "Trazá cortes sobre madera ya aserrada evitando nudos y respetando la orientación de la fibra. Ganás completando piezas estructurales con poco desperdicio; una veta transversal invalida la pieza.",
+  "rules": {}
  }
 ]
