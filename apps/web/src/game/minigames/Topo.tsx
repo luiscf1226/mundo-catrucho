@@ -1,5 +1,5 @@
 import { input } from '../../core/input';
-import { Ball, Block, Label } from '../kit';
+import { Ball, Block, Cyl, Label } from '../kit';
 import { controles, cursor, limitar, Mesa, mover } from './cortes/comun';
 import { defineMotor, type Motor } from './kit';
 
@@ -73,11 +73,21 @@ const motor = defineMotor({
     <Mesa
       titulo="Despegue de topogigios"
       texto={`Pedido: ${sabores[m.datos.pedido]} · A/D sello izquierdo · W/S derecho · F tirá`}
-      color="#a6cbd3"
     >
       {sabores.map((s, i) => (
         <group key={s}>
-          <Block pos={[-4 + i * 2.6, 1.6, 0]} size={[1.6, 1.7, 0.6]} color={colores[i]} mat="glass" solid={false} />
+          <group scale={[1, 1, 0.5]}>
+            <Cyl
+              pos={[-4 + i * 2.6, 1.6, 0]}
+              r={0.7}
+              rTop={0.5}
+              h={1.7}
+              color={colores[i]}
+              mat="plastic"
+              solid={false}
+            />
+            <Cyl pos={[-4 + i * 2.6, 2.6, 0]} r={0.13} h={0.3} color="#f1e8d3" mat="cloth" solid={false} />
+          </group>
           <Block pos={[-4 + i * 2.6, 2.6, 0]} size={[1.8, 0.16, 0.7]} color="#d8efff" mat="plastic" solid={false} />
           <Label pos={[-4 + i * 2.6, 3.2, 0]} text={`${s}${i === m.datos.pedido ? ' ← pedido' : ''}`} h={0.32} />
         </group>

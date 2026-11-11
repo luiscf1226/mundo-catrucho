@@ -2,6 +2,7 @@ import { input } from '../../core/input';
 import { Ball, Block, Cyl, Label } from '../kit';
 import { controles, cursor, Mesa, mover } from './cortes/comun';
 import { defineMotor, type Motor } from './kit';
+import { Tajadas } from './kit/Figuras';
 
 type Estado = ReturnType<typeof cursor> & {
   capas: number[];
@@ -82,14 +83,9 @@ const motor = defineMotor({
     <Mesa titulo={m.parametros.nombre} texto="F apilá · A/D repartí peso · S incliná la salsa">
       <Cyl pos={[-1, 0.85, 0]} r={3} h={0.12} mat="cloth" color="#fff0ca" solid={false} />
       {m.datos.capas.map((x, i) => (
-        <Block
-          key={i}
-          pos={[-1 + x, 1.1 + i * 0.45, 0]}
-          size={[2.2, 0.4, 1.3]}
-          color={i === 1 ? '#bf6c28' : '#f6cb52'}
-          mat="sand"
-          solid={false}
-        />
+        <group key={i} position={[-1 + x, 1.1 + i * 0.45, 0]}>
+          <Tajadas pollo={i === 1} />
+        </group>
       ))}
       <Ball pos={[-1 + centro(m), 1.5, 2]} r={0.18} color="#e54428" mat="neon" />
       <Block

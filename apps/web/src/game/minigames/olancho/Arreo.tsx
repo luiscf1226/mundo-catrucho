@@ -1,5 +1,6 @@
-import { Ball, Block, Cyl, Label } from '../../kit';
+import { Block, Label, P } from '../../kit';
 import { defineMotor, type Motor } from '../kit';
+import { Campesino, Vaca } from '../kit/Figuras';
 import { clamp, controles, duracion, metas, mover, Taller } from './Taller';
 
 type Estado = {
@@ -89,22 +90,19 @@ const motor = defineMotor({
   Escena: ({ motor: m }) => {
     const s = m.datos;
     return (
-      <Taller nombre={m.parametros.nombre} aviso="Corral abierto al fondo · Sin golpes" verde>
+      <Taller nombre={m.parametros.nombre} aviso="Corral abierto al fondo · Sin golpes">
         <Block pos={[-2, 0.6, -4]} size={[0.15, 1.2, 3]} color="#a17c50" mat="wood" />
         <Block pos={[2, 0.6, -4]} size={[0.15, 1.2, 3]} color="#a17c50" mat="wood" />
         {[-1, 0, 1].map((i) => (
           <group key={i} position={[s.hato * 2 + i * 0.7, 0.6, 1 - s.avance * 4]}>
-            <Block pos={[0, 0, 0]} size={[0.6, 0.7, 1]} color={i ? '#f4e2c4' : '#674a36'} mat="cloth" />
-            {[-0.2, 0.2].flatMap((x) =>
-              [-0.3, 0.3].map((z) => (
-                <Block key={`${x}-${z}`} pos={[x, -0.45, z]} size={[0.13, 0.4, 0.13]} color="#674a36" mat="cloth" />
-              )),
-            )}
-            <Ball pos={[0, 0.25, -0.6]} r={0.25} color="#674a36" />
+            <Vaca clara={i !== 0} />
           </group>
         ))}
-        <Cyl pos={[s.x * 3, 0.8, s.y * 3]} r={0.3} h={1.6} color="#28788b" mat="cloth" />
-        <Label pos={[0, 0.2, 0]} text="LÍNEA DE EQUILIBRIO" h={0.3} />
+        <group position={[s.x * 3, 0, s.y * 3]}>
+          <Campesino />
+        </group>
+        <Block pos={[0, 0.03, 0]} size={[5, 0.03, 0.08]} color="#e8d7aa" mat="sand" solid={false} />
+        <P.Fence pos={[0, 0, -5.5]} length={4} solid={false} />
       </Taller>
     );
   },

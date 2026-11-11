@@ -80,7 +80,6 @@ const motor = defineMotor({
     <Mesa
       titulo="Cruce de grúas portuarias"
       texto={`Manifiesto: riel ${m.datos.manifiesto + 1} · A/D elegí · F programá`}
-      color="#8ec8cc"
     >
       {[0, 1].map((r) => (
         <group key={r}>
@@ -92,6 +91,34 @@ const motor = defineMotor({
             solid={false}
           />
           <Block pos={[r ? -1 : -4, 2, r ? -3 : 0]} size={[0.3, 3, 0.3]} color="#eebc30" mat="metal" solid={false} />
+          <Block
+            pos={[r ? -1 : -1, 3.45, r ? 0 : 0]}
+            size={r ? [0.25, 0.25, 6.5] : [7, 0.25, 0.25]}
+            color="#eebc30"
+            mat="metal"
+            solid={false}
+          />
+          <Block
+            pos={[r ? -1 : 2, 2.5, r ? 3 : 0]}
+            size={[0.045, 1.8, 0.045]}
+            color="#313e4b"
+            mat="metal"
+            solid={false}
+          />
+          <Block
+            pos={[r ? -1 : 2, 1.6, r ? 3 : 0]}
+            size={[0.65, 0.13, 0.65]}
+            color="#eebc30"
+            mat="metal"
+            solid={false}
+          />
+          <Block
+            pos={[r ? -1 : -4, 1.5, r ? -3 : 0]}
+            size={[0.8, 0.8, 0.8]}
+            color="#3a7184"
+            mat="glass"
+            solid={false}
+          />
           <Label pos={[r ? -1 : -4, 4, r ? -3 : 0]} text={`Riel ${r + 1}`} h={0.4} />
         </group>
       ))}

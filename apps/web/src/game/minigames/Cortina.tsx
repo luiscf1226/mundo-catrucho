@@ -1,5 +1,5 @@
 import { input } from '../../core/input';
-import { Ball, Block, Label } from '../kit';
+import { Ball, Block, Label, P } from '../kit';
 import { controles, cursor, Mesa, mover } from './cortes/comun';
 import { defineMotor, type Motor } from './kit';
 
@@ -64,7 +64,10 @@ const motor = defineMotor({
     if (abierta(m, 0) && abierta(m, 1)) marcar(m, m.datos.primero < 0 ? 0 : 1);
   },
   Escena: ({ motor: m }) => (
-    <Mesa titulo="Ventanas de Pulhapanzak" texto="Esperá dos huecos verdes · F marcá 1 y después 2" color="#709f9b">
+    <Mesa titulo="Ventanas de Pulhapanzak" texto="Esperá dos huecos verdes · F marcá 1 y después 2">
+      <P.Rock pos={[-5, 0, -3]} scale={2} solid={false} />
+      <P.Rock pos={[3, 0, -3]} scale={2} solid={false} />
+      <Block pos={[-1, 0.76, 0]} size={[9, 0.1, 6]} mat="water" color="#67b6c5" solid={false} />
       {[0, 1].map((i) => (
         <group key={i}>
           <Block

@@ -1,7 +1,6 @@
-import { type ReactNode, useLayoutEffect } from 'react';
+import type { ReactNode } from 'react';
 import { input } from '../../../core/input';
-import { player } from '../../../core/player';
-import { art, Ground, Label, Spawn } from '../../kit';
+import { Label, Spawn } from '../../kit';
 import type { Guia, Partida } from '../api';
 
 export const metas = (p: Partida): [number, number, number] => [
@@ -19,31 +18,9 @@ export function mover(s: { x: number; y: number; px: number; py: number }, dt: n
   s.px = input.px;
   s.py = input.py;
 }
-export function Taller({
-  nombre,
-  aviso,
-  children,
-  verde = false,
-}: {
-  nombre: string;
-  aviso: string;
-  children: ReactNode;
-  verde?: boolean;
-}) {
-  useLayoutEffect(() => {
-    player.control = false;
-    player.visible = false;
-    player.fixedCam = { pos: [0, 8, 10], target: [0, 0, 0], fov: 52 };
-    return () => {
-      player.control = true;
-      player.visible = true;
-      player.fixedCam = null;
-    };
-  }, []);
+export function Taller({ nombre, aviso, children }: { nombre: string; aviso: string; children: ReactNode }) {
   return (
     <>
-      <art.SkyRig time="tarde" shadowRadius={25} />
-      <Ground size={70} color={verde ? '#6d955a' : '#b3a085'} mat={verde ? 'grass' : 'dirt'} />
       <Spawn pos={[-6, 0, 5]} />
       <Label pos={[0, 0.4, 6]} text={nombre} h={0.55} fg="#ffe4ad" />
       <Label pos={[0, 2.4, -4]} text={aviso} h={0.3} />

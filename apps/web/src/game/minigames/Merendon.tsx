@@ -1,7 +1,8 @@
 import { input } from '../../core/input';
-import { Ball, Block, Label } from '../kit';
+import { Block, Label } from '../kit';
 import { controles, Mesa } from './cortes/comun';
 import { defineMotor, type Motor } from './kit';
+import { Campesino } from './kit/Figuras';
 
 type Estado = { altura: number; reserva: number; descanso: number; cumbres: number; agotadas: number; mensaje: string };
 type Sesion = Motor<{ recarga: number; coste: number }, Estado>;
@@ -72,11 +73,7 @@ const motor = defineMotor({
     if (m.datos.reserva >= costo(m) + 12) subir(m);
   },
   Escena: ({ motor: m }) => (
-    <Mesa
-      titulo="Reserva de altura"
-      texto="Guardá esfuerzo para el último tramo · F subí · Esperá para descansar"
-      color="#93b8a0"
-    >
+    <Mesa titulo="Reserva de altura" texto="Guardá esfuerzo para el último tramo · F subí · Esperá para descansar">
       {Array.from({ length: 8 }, (_, i) => (
         <Block
           key={i}
@@ -87,7 +84,9 @@ const motor = defineMotor({
           solid={false}
         />
       ))}
-      <Ball pos={[-1, 1.5 + m.datos.altura * 0.33, 3 - m.datos.altura * 0.8]} r={0.3} color="#ffc749" mat="cloth" />
+      <group position={[-1, 1 + m.datos.altura * 0.33, 3 - m.datos.altura * 0.8]} scale={0.7}>
+        <Campesino />
+      </group>
       <Label pos={[-1, 4, -3]} text="MERENDÓN" h={0.6} />
       <Block
         pos={[-1, 1, 4]}

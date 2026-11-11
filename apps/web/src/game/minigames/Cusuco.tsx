@@ -98,11 +98,7 @@ const motor = defineMotor({
     if (i !== undefined) apoyo(m, i);
   },
   Escena: ({ motor: m }) => (
-    <Mesa
-      titulo="Raíces conectadas de Cusuco"
-      texto="Dos apoyos sanos por fila · Marrón: raíz podrida y sus salidas"
-      color="#79998b"
-    >
+    <Mesa titulo="Raíces conectadas de Cusuco" texto="Dos apoyos sanos por fila · Marrón: raíz podrida y sus salidas">
       {[0, 1, 2].map((i) => (
         <group key={i}>
           <Ball pos={[-4 + i * 3, 1, 3.4]} r={0.4} color={i === m.datos.podrida ? '#7e5034' : '#5bad79'} mat="wood" />
