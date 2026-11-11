@@ -8,5 +8,5 @@
     "noEmit": true,
     "lib": ["ES2022"]
   },
-  "include": ["schema.ts"]
+  "include": ["**/*.ts"]
 }

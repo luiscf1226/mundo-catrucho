@@ -47,7 +47,9 @@ llaves por índice en listas fijas. Código nuevo: sin `any` ni `!` si se puede 
 ## Reglas duras
 
 1. **Cero red en tiempo de ejecución.** Nada de `fetch`, imágenes, modelos ni fuentes externas (salvo Google Fonts).
-   Texto 3D con `Label`/`Plate` del kit, texturas con lienzo. La prueba falla si hay peticiones de red.
+   Texto 3D con `Label`/`Plate` del kit, texturas con lienzo. Excepción: si se compila con `VITE_CONVEX_URL`,
+   el juego consulta el catálogo público de ese Convex al iniciar (máximo 3 s; respaldo empaquetado si falla).
+   Sin esa variable no hay peticiones a Convex. El arnés solo permite ese dominio cuando la prueba lo pide explícitamente.
 2. **Cada motor de juego existe en un solo departamento.** `node docs/generador/validar-contenido.mjs` lo revisa.
 3. **Marcas, clubes y la Selección van con apodos**, nunca con logotipos ni nombres oficiales.
 4. **Rendimiento:** menos de ~350 llamadas de dibujo por escena y una sola luz con sombras.
