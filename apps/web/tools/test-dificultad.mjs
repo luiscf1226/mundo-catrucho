@@ -19,7 +19,7 @@ const JUEGO = {
   monta: 'olancho.jaripeo',
   ritmo: 'atlantida.carnaval',
   atrapa: 'yoro.lluvia',
-  pesca: 'cortes.pescayojoa',
+  pesca: 'cortes.pesca-en-yojoa',
   trivia: 'franciscomorazan.paletapilon',
   cocina: 'franciscomorazan.baleadas',
   ruta: 'copan.escalinata',

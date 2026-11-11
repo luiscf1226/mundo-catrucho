@@ -3,6 +3,7 @@ import { P } from '../../kit';
 import { bl, bx, cy, distToPath, inR, type Pc, PI, place, py, ss } from '../lib';
 import { champa, fish, mesa, mont, pier, pipante, stairs } from '../parts';
 import { ZB, type ZoneSpec } from '../zone';
+import { CortesDescubrimientos } from './CortesDescubrimientos';
 
 const garza = (): Pc[] => [
   cy(-0.06, 0.4, 0, 0.02, 0.8, 'plastic', '#3a3a3a', { n: 4, solid: false }),
@@ -31,6 +32,7 @@ export function lago(d: Department): ZoneSpec {
   Z.sea(-0.35).plane('grass', B.grass, -0.06, [900, 520], [0, 0, 250]);
   Z.far = { mat: 'sand', color: B.sand, y: -2.42 };
   Z.stop(0, 42);
+  Z.n(<CortesDescubrimientos />);
   // muelle en T con balsa
   Z.add(
     place(pier(30), 0, 0, -9.4),

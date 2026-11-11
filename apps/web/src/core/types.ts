@@ -26,7 +26,14 @@ export type MinigameId =
   | 'franciscomorazan.baleada'
   | 'franciscomorazan.repartidor'
   | 'franciscomorazan.artesania'
-  | 'franciscomorazan.rosquilla';
+  | 'franciscomorazan.rosquilla'
+  | 'cortes.chuco'
+  | 'cortes.gruas'
+  | 'cortes.cortina'
+  | 'cortes.garitas'
+  | 'cortes.merendon'
+  | 'cortes.cusuco'
+  | 'cortes.topo';
 /** solo = vos contra bots · duo = vos y un compa contra parejas · abierto = sala abierta (se llena con bots si no hay gente) */
 export type Modo = 'solo' | 'duo' | 'abierto';
 export type Vehiculo = 'rapidito' | 'taxi' | 'bus';
