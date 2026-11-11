@@ -6,7 +6,7 @@ import { input } from '../../core/input';
 import { player } from '../../core/player';
 import { useGame } from '../../core/store';
 import { art, Ball, Block, Ground, Label, P, Plate, useTick } from '../kit';
-import { AguaAire } from './escenas/AguaAire';
+import { AguaAire, Estela } from './escenas/AguaAire';
 import { usePruebaCamino } from './eventos/usePruebaCamino';
 import {
   createDrive,
@@ -287,9 +287,10 @@ export function DrivingScene({
   return (
     <>
       <art.SkyRig
+        key={clima ?? 'despejado'}
         time="auto"
         weather={clima ?? (biome === 'montana' ? 'neblina' : 'despejado')}
-        fogFar={clima ? 65 : 155}
+        fogFar={clima === 'neblina' ? 130 : clima ? 100 : water ? 360 : aire ? 650 : 155}
         shadowRadius={32}
       />
       {!water && !aire && (biome === 'lago' || biome === 'puente') && (
@@ -466,6 +467,7 @@ export function DrivingScene({
       {camino}
       <group ref={car} userData={{ vehiculo: config.veh }}>
         <Vehicle kind={config.veh} />
+        {water && <Estela ancho={config.veh === 'ferry' ? 2.2 : 0.9} velocidad={() => s.speed} />}
       </group>
       <group ref={sparks} visible={false}>
         {Array.from({ length: 7 }, (_, i) => (

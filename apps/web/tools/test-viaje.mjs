@@ -4,6 +4,7 @@ import { run } from './harness.mjs';
 const file = process.argv[2] ?? '/tmp/claude-1000/mc-viaje/mundo-catrucho-hd.html';
 const shots = '/tmp/claude-1000/mc-viaje/capturas';
 const ok = await run('viaje', file, { hash: '#go,test' }, async (t) => {
+  await t.waitFor('!!window.__mc?.gl', 60000);
   await t.ev(`window.__mc.store.getState().addCoins(100)`);
   await t.ev(`window.__mc.store.getState().openPanel('transporte')`);
   await t.click('tr-veh-rapidito');
