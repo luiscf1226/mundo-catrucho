@@ -54,7 +54,7 @@ export function validarEdicion(base: Entrada, nuevo: Entrada, departamentos: str
   filas(b.juegos, n.juegos, e.juegos, ['name', 'desc', 'guino', 'etapas', 'tema']);
   // estas llaves del tema eligen mecánica o escenario en el motor: no son texto para editar
   n.juegos.forEach((j, i) => {
-    for (const k of ['variante', 'fondo', 'estilo', 'veh', 'via', 'montura', 'arma', 'con'])
+    for (const k of ['variante', 'fondo', 'estilo', 'veh', 'via', 'montura', 'arma', 'con', 'toca'])
       if (Object.hasOwn(b.juegos[i].tema, k) && j.tema[k] !== b.juegos[i].tema[k])
         throw new Error(`tema.${k}: valor fijo.`);
   });
