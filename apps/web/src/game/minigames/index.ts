@@ -19,6 +19,19 @@ function motor(load: () => Promise<{ default: FC; guia?: Guia }>) {
   };
 }
 const MOTORS = {
+  'franciscomorazan.niebla': motor(() =>
+    import('./franciscomorazan/Niebla').then((m) => ({ ...m, default: m.Niebla })),
+  ),
+  'franciscomorazan.baleada': motor(() =>
+    import('./franciscomorazan/Baleada').then((m) => ({ ...m, default: m.Baleada })),
+  ),
+  'franciscomorazan.repartidor': motor(() =>
+    import('./franciscomorazan/Repartidor').then((m) => ({ ...m, default: m.Repartidor })),
+  ),
+  'franciscomorazan.artesania': motor(() =>
+    import('./franciscomorazan/Artesania').then((m) => ({ ...m, default: m.Artesania })),
+  ),
+
   'franciscomorazan.rosquilla': motor(() => import('./Rosquilla').then((m) => ({ ...m, default: m.Rosquilla }))),
   carrera: motor(() => import('./Carrera').then((m) => ({ ...m, default: m.Carrera }))),
   futbol: motor(() => import('./Futbol').then((m) => ({ ...m, default: m.Futbol }))),
