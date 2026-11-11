@@ -79,3 +79,14 @@ El trabajo va en olas (`docs/OLAS.md`); cada ola es un hito en GitHub y cada tic
 - `main` solo recibe cambios por pull request con la revisión automática en verde. Los PR cierran sus issues con
   `Closes #NN` (GitHub no entiende «Cierra»).
 - **Nunca se une un pull request a `main` sin que el usuario diga «full send»** o lo pida claramente.
+
+## Panel de contenido (MC-33)
+
+`apps/panel/` (`@mundo-catrucho/panel`) edita el catálogo existente sin compilar el juego.
+Corré `pnpm --filter @mundo-catrucho/panel dev` (puerto 5174) o `build`.
+Usa `CONVEX_URL` de `.env.local`, o `VITE_CONVEX_URL`. `pnpm check` incluye sus tipos y Biome.
+La llave se obtiene con `npx convex env get PANEL_LLAVE`; ingresala en la pantalla de acceso.
+Solo se guarda en `sessionStorage`; nunca la agregués al código ni a variables `VITE_*`.
+Con Clerk (MC-07) el acceso debe migrar a roles. Prueba real (edita y restaura):
+`node apps/panel/tools/test-panel.mjs`. No la corras junto a otras publicaciones en ese entorno.
+Capturas en `capturas/mc-33/`. `catalogo:subir` exige `--forzar` si la última publicación vino del panel.
