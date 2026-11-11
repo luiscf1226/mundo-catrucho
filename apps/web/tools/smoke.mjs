@@ -23,7 +23,7 @@ const JUEGOS = [
   'franciscomorazan.rapidito',
   'ocotepeque.tresfronteras',
   'atlantida.isidra',
-  'islas.buceo',
+  'lapaz.pintadas',
   'franciscomorazan.pulperia',
   'carrera',
 ];
