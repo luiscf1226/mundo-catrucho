@@ -27,19 +27,246 @@
       ["catrín", "bien vestido"]
     ],
     "juegos": [
-      ["pollochuco", "Pollo chuco", "cocina", "sps", "🍗", "Armá el plato callejero más famoso del norte.", "Si no chorrea aderezo, no es chuco.", {"plato": "Pollo chuco", "sirve": "plato", "pasos": [["Tajadas de guineo", "#f2d16b"], ["Pollo frito", "#c8782a"], ["Repollo", "#dff0c2"], ["Chismol", "#e74c3c"], ["Aderezo", "#fff0c9"]], "extras": [["Encurtido", "#e8b4d0"]]}, 5],
-      ["pescayojoa", "Pesca en Yojoa", "pesca", "yojoa", "🎣", "Sacá el pescado más grande del lago.", "El bass llegó de fuera y se adueñó del lago.", {"agua": "lago", "desde": "lancha", "peces": [["Tilapia", 20, "#9aa7ad"], ["Guapote", 35, "#5b7f4a"], ["Bass", 55, "#3c5a3a"]], "basura": ["Bota", "Llanta"]}, 5],
-      ["pescadofrito", "Pescado frito del lago", "cocina", "yojoa", "🐟", "Freí y serví como en los comedores de la orilla.", "Decenas de comedores, todos con el mismo menú y todos llenos.", {"plato": "Pescado frito", "sirve": "plato", "pasos": [["Pescado", "#9aa7ad"], ["Sal y limón", "#f7f2b0"], ["Freír", "#c8782a"], ["Tajadas", "#f2d16b"], ["Encurtido", "#e8b4d0"]]}, 4],
-      ["pulhapanzak", "Detrás de la catarata", "ruta", "pulhapanzak", "💦", "Cruzá las piedras mojadas hasta la cueva tras la caída.", "El guía dice «tranquilo» justo antes de que te empapés.", {"estilo": "rio", "meta": "La cueva tras la catarata"}, 5],
-      ["omoa", "Tesoro de la fortaleza", "exploradores", "omoa", "🏴‍☠️", "Buscá lo que dejaron los piratas.", "Tardaron tanto en construirla que los piratas ya casi no venían.", {"sitios": ["cortes"]}, 3],
-      ["contenedores", "Furgón al puerto", "manejo", "puertocortes", "🚛", "Llevá los contenedores al muelle a tiempo.", "La fila de furgones se ve desde lejos.", {"veh": "camion", "via": "costa", "recoge": ["contenedores"], "destino": "El muelle"}, 4],
-      ["juniana", "Feria Juniana", "feria", "sps", "🎡", "Los puestos de la feria más grande del norte.", "En junio, San Pedro entero es feria.", {}, 3],
-      ["clasicosps", "Clásico sampedrano", "futbol", "olimpico", "⚽", "Aurinegros contra Verdolagas en el Olímpico.", "La ciudad se parte en dos colores.", {"equipo": ["Aurinegros", "#f4c20d"], "rival": ["Verdolagas", "#1e8449"]}, 3],
-      ["desfile", "Desfile de carrozas", "ritmo", "sps", "🎺", "Marcá el paso de la banda en el desfile.", "Las palillonas ensayan todo el año.", {"estilo": "banda", "toca": "baila"}, 4],
-      ["topogigio", "¿Topogigio o charamusca?", "trivia", "sps", "🧊", "Caminá a la palabra que se usa en el norte.", "Es lo mismo, pero según donde lo pidás.", {"de": "palabras"}, 4],
-      ["cocos", "Agua de coco helada", "corte", "puertocortes", "🥥", "Abrí los cocos de un machetazo.", "A 38 grados, el coquero es héroe nacional.", {"arma": "machete", "cosas": [["Coco verde", "coco", "#6aa84f"], ["Coco seco", "coco", "#8d6e4a"]], "evita": [["Piedra", "piedra"]]}, 4],
-      ["merendon", "Subida al Merendón", "ruta", "merendon", "⛰️", "Subí hasta el rótulo gigante.", "De noche se ve encendido desde toda la ciudad.", {"estilo": "cerro", "meta": "El rótulo del Merendón"}, 5],
-      ["cusuco", "Sendero de Cusuco", "ruta", "cusuco", "🌿", "Cruzá el bosque nublado hasta el mirador.", "Cusuco es armadillo: el parque lleva su nombre.", {"estilo": "selva", "meta": "El mirador"}, 4]
+      [
+        "pesca-en-yojoa",
+        "Pesca en Yojoa",
+        "pesca",
+        "yojoa",
+        "🎣",
+        "Localizá peces y mantené la tensión durante la recogida.",
+        "La bota no entra en el menú del lago.",
+        {
+          "agua": "lago",
+          "desde": "lancha",
+          "peces": [
+            [
+              "Tilapia",
+              20,
+              "#9aa7ad"
+            ],
+            [
+              "Guapote",
+              35,
+              "#5b7f4a"
+            ],
+            [
+              "Bass",
+              55,
+              "#3c5a3a"
+            ]
+          ],
+          "basura": [
+            "Bota",
+            "Llanta"
+          ]
+        },
+        5
+      ],
+      [
+        "la-bota-no-es-pescado",
+        "La bota no es pescado",
+        "pesca",
+        "yojoa",
+        "🎣",
+        "Resolvé una jornada con capturas incidentales que debés soltar antes de seguir sumando.",
+        "La bota no entra en el menú del lago.",
+        {
+          "agua": "lago",
+          "desde": "lancha",
+          "peces": [
+            [
+              "Tilapia",
+              20,
+              "#9aa7ad"
+            ],
+            [
+              "Guapote",
+              35,
+              "#5b7f4a"
+            ],
+            [
+              "Bass",
+              55,
+              "#3c5a3a"
+            ]
+          ],
+          "basura": [
+            "Bota",
+            "Llanta"
+          ]
+        },
+        4
+      ],
+      [
+        "pollo-chuco-en-equilibrio",
+        "Pollo chuco en equilibrio",
+        "cortes.chuco",
+        "sps",
+        "🍗",
+        "Construí una torre que aguante tres inclinaciones.",
+        "Si chorrea de más, ya te tocó limpiar.",
+        {
+          "nombre": "Pollo chuco en equilibrio",
+          "frases": [
+            "Si chorrea de más, ya te tocó limpiar."
+          ],
+          "loco": false
+        },
+        5
+      ],
+      [
+        "se-vino-el-aderezo",
+        "¡Se vino el aderezo!",
+        "cortes.chuco",
+        "sps",
+        "🍗",
+        "Desviá un río absurdo de salsa con tajadas para salvar un plato ya servido mientras un pollo de espuma navega en una tapa de aderezo.",
+        "Si chorrea de más, ya te tocó limpiar.",
+        {
+          "nombre": "¡Se vino el aderezo!",
+          "frases": [
+            "Si chorrea de más, ya te tocó limpiar."
+          ],
+          "loco": true
+        },
+        4
+      ],
+      [
+        "gruas-de-puerto-cortes",
+        "Grúas de Puerto Cortés",
+        "cortes.gruas",
+        "puertocortes",
+        "🚛",
+        "Despachá cargas por barco y hora de zarpe.",
+        "El barco no espera a que encontrés el contenedor.",
+        {
+          "nombre": "Grúas de Puerto Cortés",
+          "frases": [
+            "El barco no espera a que encontrés el contenedor."
+          ],
+          "loco": false
+        },
+        5
+      ],
+      [
+        "el-contenedor-trae-confeti",
+        "El contenedor trae confeti",
+        "cortes.gruas",
+        "puertocortes",
+        "🚛",
+        "Descargá una bodega invertida con contenedores que se expanden al abrirse y estornudan confeti cuando les toca pasar por la grúa.",
+        "El barco no espera a que encontrés el contenedor.",
+        {
+          "nombre": "El contenedor trae confeti",
+          "frases": [
+            "El barco no espera a que encontrés el contenedor."
+          ],
+          "loco": true
+        },
+        4
+      ],
+      [
+        "detras-de-la-catarata",
+        "Detrás de la catarata",
+        "cortes.cortina",
+        "pulhapanzak",
+        "💦",
+        "Avanzá cuando coincidan dos ventanas del agua.",
+        "El guía dijo tranquilo… y vos ya estás empapado.",
+        {
+          "nombre": "Detrás de la catarata",
+          "frases": [
+            "El guía dijo tranquilo… y vos ya estás empapado."
+          ],
+          "loco": false
+        },
+        4
+      ],
+      [
+        "la-catarata-se-rie-primero",
+        "La catarata se ríe primero",
+        "cortes.cortina",
+        "pulhapanzak",
+        "💦",
+        "Rescatá un sombrero ficticio que viaja entre refugios sin abandonar la cuerda de guía.",
+        "El guía dijo tranquilo… y vos ya estás empapado.",
+        {
+          "nombre": "La catarata se ríe primero",
+          "frases": [
+            "El guía dijo tranquilo… y vos ya estás empapado."
+          ],
+          "loco": false
+        },
+        4
+      ],
+      [
+        "los-ojos-de-la-fortaleza",
+        "Los ojos de la fortaleza",
+        "cortes.garitas",
+        "omoa",
+        "🏴‍☠️",
+        "Orientá conos de visión desde garitas en un plano de la fortaleza.",
+        "La esquina que no miraste sigue ahí.",
+        {
+          "nombre": "Los ojos de la fortaleza",
+          "frases": [
+            "La esquina que no miraste sigue ahí."
+          ],
+          "loco": false
+        },
+        4
+      ],
+      [
+        "aire-para-el-merendon",
+        "Aire para el Merendón",
+        "cortes.merendon",
+        "merendon",
+        "⛰️",
+        "Elegí cuándo guardar impulsos de esfuerzo en una barra cuya capacidad disminuye al ascender.",
+        "El rótulo se miraba más cerca desde abajo.",
+        {
+          "nombre": "Aire para el Merendón",
+          "frases": [
+            "El rótulo se miraba más cerca desde abajo."
+          ],
+          "loco": false
+        },
+        4
+      ],
+      [
+        "la-rama-sostiene-a-todas",
+        "La rama sostiene a todas",
+        "cortes.cusuco",
+        "cusuco",
+        "🌿",
+        "Inspeccioná una red de raíces y seleccioná apoyos desde una pasarela virtual.",
+        "Una raíz mala le cambia el viaje a todas.",
+        {
+          "nombre": "La rama sostiene a todas",
+          "frases": [
+            "Una raíz mala le cambia el viaje a todas."
+          ],
+          "loco": false
+        },
+        4
+      ],
+      [
+        "topogigio-pegado",
+        "Topogigio pegado",
+        "cortes.topo",
+        "sps",
+        "🍗",
+        "Tirá de sellos congelados con dos cursores para separar bolsas adheridas.",
+        "Lo pediste de un sabor; no lo llevés de dos por accidente.",
+        {
+          "nombre": "Topogigio pegado",
+          "frases": [
+            "Lo pediste de un sabor; no lo llevés de dos por accidente."
+          ],
+          "loco": false
+        },
+        4
+      ]
     ]
   },
   "atlantida": {

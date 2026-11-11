@@ -19,6 +19,32 @@ function motor(load: () => Promise<{ default: FC; guia?: Guia }>) {
   };
 }
 const MOTORS = {
+  'olancho.batea': motor(() => import('./olancho/Batea').then((m) => ({ ...m, default: m.Batea }))),
+  'olancho.arreo': motor(() => import('./olancho/Arreo').then((m) => ({ ...m, default: m.Arreo }))),
+  'olancho.calcita': motor(() => import('./olancho/Calcita').then((m) => ({ ...m, default: m.Calcita }))),
+  'olancho.cuajada': motor(() => import('./olancho/Cuajada').then((m) => ({ ...m, default: m.Cuajada }))),
+  'olancho.postura': motor(() => import('./olancho/Postura').then((m) => ({ ...m, default: m.Postura }))),
+  'olancho.tablas': motor(() => import('./olancho/Tablas').then((m) => ({ ...m, default: m.Tablas }))),
+  'franciscomorazan.niebla': motor(() =>
+    import('./franciscomorazan/Niebla').then((m) => ({ ...m, default: m.Niebla })),
+  ),
+  'franciscomorazan.baleada': motor(() =>
+    import('./franciscomorazan/Baleada').then((m) => ({ ...m, default: m.Baleada })),
+  ),
+  'franciscomorazan.repartidor': motor(() =>
+    import('./franciscomorazan/Repartidor').then((m) => ({ ...m, default: m.Repartidor })),
+  ),
+  'franciscomorazan.artesania': motor(() =>
+    import('./franciscomorazan/Artesania').then((m) => ({ ...m, default: m.Artesania })),
+  ),
+
+  'cortes.chuco': motor(() => import('./Chuco').then((m) => ({ ...m, default: m.Chuco }))),
+  'cortes.gruas': motor(() => import('./Gruas').then((m) => ({ ...m, default: m.Gruas }))),
+  'cortes.cortina': motor(() => import('./Cortina').then((m) => ({ ...m, default: m.Cortina }))),
+  'cortes.garitas': motor(() => import('./Garitas').then((m) => ({ ...m, default: m.Garitas }))),
+  'cortes.merendon': motor(() => import('./Merendon').then((m) => ({ ...m, default: m.Merendon }))),
+  'cortes.cusuco': motor(() => import('./Cusuco').then((m) => ({ ...m, default: m.Cusuco }))),
+  'cortes.topo': motor(() => import('./Topo').then((m) => ({ ...m, default: m.Topo }))),
   'franciscomorazan.rosquilla': motor(() => import('./Rosquilla').then((m) => ({ ...m, default: m.Rosquilla }))),
   carrera: motor(() => import('./Carrera').then((m) => ({ ...m, default: m.Carrera }))),
   futbol: motor(() => import('./Futbol').then((m) => ({ ...m, default: m.Futbol }))),

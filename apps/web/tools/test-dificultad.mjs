@@ -19,16 +19,15 @@ const JUEGO = {
   monta: 'olancho.jaripeo',
   ritmo: 'atlantida.carnaval',
   atrapa: 'yoro.lluvia',
-  pesca: 'cortes.pescayojoa',
-  trivia: 'franciscomorazan.paletapilon',
-  cocina: 'franciscomorazan.baleadas',
+  pesca: 'cortes.pesca-en-yojoa',
+  trivia: 'comayagua.pilonpaleta',
+  cocina: 'lapaz.ticucos',
   ruta: 'copan.escalinata',
   manejo: 'franciscomorazan.rapidito',
-  feria: 'franciscomorazan.sanmiguel',
+  feria: 'atlantida.isidra',
   pulperia: 'franciscomorazan.pulperia',
   futbol: 'copan.pelota',
-  carrera: 'franciscomorazan.carrera',
-  exploradores: 'franciscomorazan.tigra',
+  exploradores: 'islas.buceo',
 };
 
 // ------------------------------------------------------------------ bots (corren dentro de la página)

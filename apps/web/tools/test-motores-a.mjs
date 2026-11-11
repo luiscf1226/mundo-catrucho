@@ -44,9 +44,9 @@ const BOT_MONTA = `(()=>{ const T=window.__mcTest.monta, I=window.__mc.input; if
 if (!only || only === 'corte')
   all =
     (await run('corte', file, { hash: '#go' }, async (t) => {
-      await abre(t, 'franciscomorazan.mangoverde', 'corte', 'solo');
+      await abre(t, 'comayagua.lena', 'corte', 'solo');
       const g = await t.ev(`window.__mc.store.getState().mg.juego`);
-      assert.equal(g, 'franciscomorazan.mangoverde');
+      assert.equal(g, 'comayagua.lena');
       await t.ev(BOT_CORTE);
       await sleep(14000);
       const s1 = await t.ev(
@@ -138,7 +138,7 @@ const PILOTO_RUTA = `(()=>{ const T=window.__mcTest.ruta, M=window.__mc, g=T.G; 
 if (!only || only === 'ruta')
   all =
     (await run('ruta', file, { hash: '#go' }, async (t) => {
-      await abre(t, 'franciscomorazan.picacho', 'ruta', 'solo');
+      await abre(t, 'comayagua.taulabe', 'ruta', 'solo');
       await t.press(' ');
       await sleep(200);
       assert(await t.ev(`window.__mc.player.pos[1]>0.3`), 'Espacio salta');

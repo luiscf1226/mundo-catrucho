@@ -2,6 +2,12 @@ export type V3 = [number, number, number];
 
 /** Motores de minijuego. Cada juego del catálogo (shared/data/catalogo) es un motor + un tema del departamento. */
 export type MinigameId =
+  | 'olancho.batea'
+  | 'olancho.arreo'
+  | 'olancho.calcita'
+  | 'olancho.cuajada'
+  | 'olancho.postura'
+  | 'olancho.tablas'
   | 'carrera'
   | 'futbol'
   | 'feria'
@@ -16,7 +22,18 @@ export type MinigameId =
   | 'cocina'
   | 'trivia'
   | 'manejo'
-  | 'franciscomorazan.rosquilla';
+  | 'franciscomorazan.niebla'
+  | 'franciscomorazan.baleada'
+  | 'franciscomorazan.repartidor'
+  | 'franciscomorazan.artesania'
+  | 'franciscomorazan.rosquilla'
+  | 'cortes.chuco'
+  | 'cortes.gruas'
+  | 'cortes.cortina'
+  | 'cortes.garitas'
+  | 'cortes.merendon'
+  | 'cortes.cusuco'
+  | 'cortes.topo';
 /** solo = vos contra bots · duo = vos y un compa contra parejas · abierto = sala abierta (se llena con bots si no hay gente) */
 export type Modo = 'solo' | 'duo' | 'abierto';
 export type Vehiculo = 'rapidito' | 'taxi' | 'bus';

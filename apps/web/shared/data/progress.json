@@ -2,7 +2,6 @@
   "achievements": [
     { "id": "primer_paso", "name": "Primeros pasos", "desc": "Entra al lobby por primera vez.", "icon": "👟", "coins": 20 },
     { "id": "primera_victoria", "name": "Primera victoria", "desc": "Gana cualquier minijuego.", "icon": "🏆", "coins": 30 },
-    { "id": "rayo", "name": "Rayo catracho", "desc": "Gana oro en Carrera Catrucha.", "icon": "⚡", "coins": 60 },
     { "id": "goleador", "name": "Goleador del barrio", "desc": "Mete 3 goles en un partido.", "icon": "⚽", "coins": 60 },
     { "id": "punteria", "name": "Buena puntería", "desc": "Gana oro en la Feria Catracha.", "icon": "🎯", "coins": 60 },
     { "id": "explorador", "name": "Explorador", "desc": "Completa Exploradores de Honduras.", "icon": "🧭", "coins": 60 },
@@ -18,7 +17,6 @@
   "missions": [
     { "id": "m_jugar2", "text": "Juega 2 minijuegos", "type": "play", "count": 2, "coins": 40, "xp": 40 },
     { "id": "m_ganar1", "text": "Gana 1 minijuego", "type": "win", "count": 1, "coins": 50, "xp": 50 },
-    { "id": "m_carrera", "text": "Termina la Carrera Catrucha", "type": "win", "target": "carrera", "count": 1, "coins": 50, "xp": 50 },
     { "id": "m_goles", "text": "Mete 2 goles", "type": "goals", "count": 2, "coins": 50, "xp": 50 },
     { "id": "m_feria", "text": "Haz 200 puntos en la feria", "type": "score", "target": "feria", "count": 200, "coins": 50, "xp": 50 },
     { "id": "m_visitar2", "text": "Visita 2 departamentos", "type": "visit", "count": 2, "coins": 40, "xp": 40 },

@@ -159,5 +159,176 @@
    "silver": 180,
    "gold": 280
   }
+ },
+ {
+  "id": "olancho.batea",
+  "name": "Sedimento del Guayape",
+  "place": "Olancho",
+  "icon": "🧭",
+  "desc": "Girás e inclinás una batea virtual siguiendo la separación por densidad de sus partículas. Ganás reteniendo material pesado; inclinar antes de que sedimente pierde la muestra.",
+  "rules": {}
+ },
+ {
+  "id": "olancho.arreo",
+  "name": "Línea de equilibrio del ganado",
+  "place": "Olancho",
+  "icon": "🧭",
+  "desc": "Caminá alrededor de un hato virtual sin tocarlo y cruzá su línea de equilibrio para cambiar marcha. Ganás guiando a un corral abierto; acercarte de frente dispersa al grupo.",
+  "rules": {}
+ },
+ {
+  "id": "olancho.calcita",
+  "name": "Luz sobre Talgua",
+  "place": "Olancho",
+  "icon": "🧭",
+  "desc": "Variá ángulos de iluminación en escaneos de calcita y hueso mediante dos focos virtuales. Ganás un registro de materiales sin contacto; confundir brillo con pieza extraíble invalida la ficha.",
+  "rules": {}
+ },
+ {
+  "id": "olancho.cuajada",
+  "name": "Prensado con drenaje",
+  "place": "Olancho",
+  "icon": "🧭",
+  "desc": "Añadí pesos graduales a una cuajada virtual observando el caudal de suero. Ganás una textura uniforme; cargar demasiado pronto sella canales y deja humedad atrapada.",
+  "rules": {}
+ },
+ {
+  "id": "olancho.postura",
+  "name": "Copas bajas de Agalta",
+  "place": "Olancho",
+  "icon": "🧭",
+  "desc": "Alterná postura erguida y agachada para modificar área expuesta al viento en una maqueta del bosque enano. Ganás alcanzando marcas sin rozar copas; levantarte bajo una rama te devuelve al apoyo.",
+  "rules": {}
+ },
+ {
+  "id": "franciscomorazan.niebla",
+  "name": "Agua de La Tigra",
+  "place": "Francisco Morazán",
+  "icon": "🧩",
+  "desc": "Arrastrá copas de árboles en un corte vertical para condensar niebla y abrir infiltraciones. Ganás al llenar el depósito sin erosionar la ladera; talar una copa baja permanentemente la captación.",
+  "rules": {}
+ },
+ {
+  "id": "franciscomorazan.baleada",
+  "name": "Origami de baleada",
+  "place": "Francisco Morazán",
+  "icon": "🧩",
+  "desc": "Arrastrá bordes de una tortilla elástica para encerrar frijoles móviles en un pliegue. Ganás si la abertura permite comer sin derramar; un doblez excesivo rompe la masa.",
+  "rules": {}
+ },
+ {
+  "id": "franciscomorazan.repartidor",
+  "name": "Puentes de las dos ciudades",
+  "place": "Francisco Morazán",
+  "icon": "🧩",
+  "desc": "Pulsá semáforos para alternar sentidos entre cruces conectados del Choluteca. Ganás al vaciar las colas de ambos lados; una intersección ocupada bloquea las dos ciudades.",
+  "rules": {}
+ },
+ {
+  "id": "franciscomorazan.artesania",
+  "name": "Caja de Valle de Ángeles",
+  "place": "Francisco Morazán",
+  "icon": "🧩",
+  "desc": "Girás piezas de madera en un empaque tridimensional con huecos irregulares. Ganás si cerrás la tapa dejando cada pieza apoyada; una prueba de vibración rompe las que quedan sueltas.",
+  "rules": {}
+ },
+ {
+  "id": "cortes.chuco",
+  "name": "Ingeniería del pollo chuco",
+  "place": "Cortés",
+  "icon": "🍗",
+  "desc": "Apilá tajadas y pollo sobre papel que cede y verté salsa inclinando el envase. Ganás si el plato sostiene su torre sin derrame; el aderezo desplaza el centro de masa.",
+  "rules": {
+   "duration": 75,
+   "bronze": 100,
+   "silver": 300,
+   "gold": 500
+  }
+ },
+ {
+  "id": "cortes.gruas",
+  "name": "Cruce de grúas portuarias",
+  "place": "Cortés",
+  "icon": "🚛",
+  "desc": "Programá secuencias de izado en dos rieles que comparten una intersección. Ganás al cumplir manifiestos sin cruzar plumas; un contenedor mal estibado bloquea la bodega.",
+  "rules": {
+   "duration": 75,
+   "bronze": 100,
+   "silver": 300,
+   "gold": 500
+  }
+ },
+ {
+  "id": "cortes.cortina",
+  "name": "Ventanas de Pulhapanzak",
+  "place": "Cortés",
+  "icon": "💦",
+  "desc": "Observá huecos temporales en una cortina de agua y marcá dos refugios consecutivos. Ganás atravesando el tramo acompañado por guía; cruzar con ventanas desfasadas te devuelve al refugio.",
+  "rules": {
+   "duration": 75,
+   "bronze": 100,
+   "silver": 300,
+   "gold": 500
+  }
+ },
+ {
+  "id": "cortes.garitas",
+  "name": "Visuales de Omoa",
+  "place": "Cortés",
+  "icon": "🏴‍☠️",
+  "desc": "Orientá conos de visión desde garitas en un plano de la fortaleza. Ganás si cada esquina recibe dos visuales; un muro alto oculta la franja posterior.",
+  "rules": {
+   "duration": 75,
+   "bronze": 100,
+   "silver": 300,
+   "gold": 500
+  }
+ },
+ {
+  "id": "cortes.merendon",
+  "name": "Reserva de altura",
+  "place": "Cortés",
+  "icon": "⛰️",
+  "desc": "Elegí cuándo guardar impulsos de esfuerzo en una barra cuya capacidad disminuye al ascender. Ganás llegando al rótulo con reserva; gastar temprano deja inaccesible el tramo final.",
+  "rules": {
+   "duration": 75,
+   "bronze": 100,
+   "silver": 300,
+   "gold": 500
+  }
+ },
+ {
+  "id": "cortes.cusuco",
+  "name": "Raíces conectadas",
+  "place": "Cortés",
+  "icon": "🌿",
+  "desc": "Inspeccioná una red de raíces y seleccioná apoyos desde una pasarela virtual. Ganás cruzando con redundancia; un apoyo podrido debilita todas sus salidas, no solo tu paso.",
+  "rules": {
+   "duration": 75,
+   "bronze": 100,
+   "silver": 300,
+   "gold": 500
+  }
+ },
+ {
+  "id": "cortes.topo",
+  "name": "Despegue de topogigios",
+  "place": "Cortés",
+  "icon": "🍗",
+  "desc": "Tirá de sellos congelados con dos cursores para separar bolsas adheridas. Ganás entregando el sabor pedido intacto; un tirón asimétrico rompe la bolsa vecina.",
+  "rules": {
+   "duration": 75,
+   "bronze": 100,
+   "silver": 300,
+   "gold": 500
+  }
+ },
+ {
+  "id": "olancho.tablas",
+  "name": "Pedido de Campamento",
+  "place": "Olancho",
+  "icon": "🧭",
+  "desc": "Trazá cortes sobre madera ya aserrada evitando nudos y respetando la orientación de la fibra. Ganás completando piezas estructurales con poco desperdicio; una veta transversal invalida la pieza.",
+  "rules": {}
  }
 ]

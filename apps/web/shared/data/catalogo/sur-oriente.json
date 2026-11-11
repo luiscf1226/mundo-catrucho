@@ -4,7 +4,7 @@
     "lugares": [
       ["juticalpa", "Juticalpa", "ciudad", "Cabecera del departamento más grande: «ancho para entrar, angosto para salir»."],
       ["catacamas", "Catacamas", "ciudad", "Ganado, queso y vaqueros."],
-      ["talgua", "Cuevas de Talgua", "cueva", "Las Calaveras Luminosas: huesos de 3,000 años que brillan."],
+      ["talgua", "Cuevas de Talgua", "cueva", "Los depósitos de calcita sobre restos brillan con la luz. Observá sin tocar."],
       ["agalta", "Sierra de Agalta", "montana", "Bosque enano en la cumbre."],
       ["guayape", "Río Guayape", "rio", "Todavía se lava oro en batea."],
       ["campamento", "Campamento", "pueblo", "Pinos y aserraderos."],
@@ -27,21 +27,232 @@
       ["olanchano", "de Olancho, y a mucha honra"]
     ],
     "juegos": [
-      ["pastel", "El pastel a machete", "corte", "juticalpa", "🎂", "Partí el pastel de cumpleaños como se debe: a puro machete.", "En Olancho el cuchillo es para los de fuera.", {"arma": "machete", "cosas": [["Pastel", "pastel", "#ffd1dc"], ["Tres leches", "pastel", "#fff3d6"], ["Piñata", "pinata", "#e63946"]], "evita": [["Florero", "piedra"]], "frases": ["¡Que lo parta, que lo parta!", "¡Macizo!"]}, 5],
-      ["jaripeo", "Jaripeo olanchano", "monta", "catacamas", "🐂", "Aguantá arriba del toro más bravo.", "Ocho segundos arriba y ya sos alguien.", {"montura": "toro", "nombre": "El Diablo", "fondo": "feria", "frases": ["¡Agarrate, cuñado!"]}, 6],
-      ["coyoles", "Coyoles", "atrapa", "lepaguare", "🌴", "Juntá coyoles sin que te caiga la penca.", "El vino sale del tronco tumbado, tapado con un trapo.", {"con": "saco", "fondo": "finca", "cae": [["Coyol", "coyol", "#c9a227"]], "evita": [["Penca", "rama"]]}, 4],
-      ["tapado", "Tapado olanchano", "cocina", "juticalpa", "🍲", "Armá la olla del tapado.", "Olancho no tiene mar, pero su sopa lleva coco.", {"plato": "Tapado olanchano", "sirve": "olla", "pasos": [["Carne salada", "#8e3b2e"], ["Costilla", "#b5651d"], ["Plátano", "#e0a43a"], ["Yuca", "#f5ecd7"], ["Leche de coco", "#ffffff"]]}, 5],
-      ["talgua", "Calaveras Luminosas", "ruta", "talgua", "💀", "Entrá a la cueva hasta la cámara que brilla.", "Los huesos brillan por la calcita que los cubrió.", {"estilo": "cueva", "meta": "La cámara de las calaveras"}, 6],
-      ["oro", "Oro del Guayape", "atrapa", "guayape", "✨", "Atrapá las pepitas que trae el río.", "Dicen que el Guayape arrastra oro desde la Colonia.", {"con": "canasta", "fondo": "rio", "cae": [["Pepita de oro", "moneda", "#f6c744"]], "evita": [["Piedra", "piedra"]]}, 4],
-      ["arreo", "Arreo en Lepaguare", "monta", "lepaguare", "🐎", "Aguantá sobre el cuaco arreando el ganado.", "Aquí se aprende a montar antes que a leer.", {"montura": "caballo", "nombre": "El Macho", "fondo": "finca"}, 5],
-      ["queso", "Queso olanchano", "cocina", "catacamas", "🧀", "Hacé el queso desde la leche.", "Todo carro que sale de Olancho lleva queso de encargo.", {"plato": "Queso olanchano", "sirve": "plato", "pasos": [["Leche", "#ffffff"], ["Cuajo", "#f7f2d0"], ["Cortar la cuajada", "#fbf5dc"], ["Prensar", "#f0e6b8"], ["Sal", "#eeeeee"]]}, 4],
-      ["agalta", "Sierra de Agalta", "ruta", "agalta", "⛰️", "Subí hasta el bosque enano.", "Arriba los árboles no pasan de dos metros.", {"estilo": "selva", "meta": "La Picucha"}, 6],
-      ["aserradero", "El aserradero", "corte", "campamento", "🪓", "Rajá la madera de pino.", "Huele a pino desde la carretera.", {"arma": "hacha", "cosas": [["Troza de pino", "lena", "#b07a45"], ["Tabla", "lena", "#d9b382"]], "evita": [["Nudo", "piedra"]]}, 4],
-      ["ancho", "Ancho para entrar", "manejo", "juticalpa", "🛻", "Sacá el queso de encargo hasta la capital.", "«Olancho: ancho para entrar, angosto para salir.»", {"veh": "pickup", "via": "carretera", "recoge": ["quesos"], "destino": "Tegucigalpa"}, 5],
-      ["feriajuti", "Feria de Juticalpa", "feria", "juticalpa", "🎯", "Los puestos de la feria de diciembre.", "Aquí la hulera se usa de verdad.", {}, 3],
-      ["macizo", "¿Macizo?", "trivia", "juticalpa", "💬", "Hablá como olanchano.", "«Macizo» sirve para casi todo lo bueno.", {"de": "palabras"}, 4],
-      ["boqueron", "Poza de El Boquerón", "pesca", "boqueron", "🎣", "Pescá en la poza del cañón.", "El cuyamel es el pez más buscado de los ríos hondureños.", {"agua": "rio", "desde": "orilla", "peces": [["Guapote", 30, "#5b7f4a"], ["Tepemechín", 45, "#8fa3ad"], ["Cuyamel", 70, "#c7d3db"]], "basura": ["Bota"]}, 4],
-      ["potros", "Potra de vaqueros", "futbol", "catacamas", "⚽", "Los Potros contra los del valle.", "Aquí hasta el portero llega con sombrero.", {"equipo": ["Potros", "#c0392b"], "rival": ["Los del valle", "#27ae60"]}, 3]
+      [
+        "pastel",
+        "El pastel a machete",
+        "corte",
+        "juticalpa",
+        "🎂",
+        "Partí un pastel circular siguiendo el canto del público.",
+        "El pastel pidió plato grande y escritura aparte.",
+        {
+          "nombre": "El pastel a machete",
+          "frases": [
+            "El pastel pidió plato grande y escritura aparte."
+          ],
+          "arma": "machete",
+          "cosas": [
+            [
+              "Pastel de utilería",
+              "pastel",
+              "#f6c8dc"
+            ]
+          ],
+          "evita": [
+            [
+              "Adorno",
+              "piedra"
+            ]
+          ],
+          "fondo": "feria"
+        },
+        5
+      ],
+      [
+        "la-tajada-pidio-escritura",
+        "¡La tajada pidió escritura!",
+        "corte",
+        "juticalpa",
+        "🎂",
+        "Dividí un pastel con pisos que giran en sentidos opuestos sin tocar adornos.",
+        "El pastel pidió plato grande y escritura aparte.",
+        {
+          "nombre": "¡La tajada pidió escritura!",
+          "frases": [
+            "El pastel pidió plato grande y escritura aparte."
+          ],
+          "arma": "machete",
+          "cosas": [
+            [
+              "Pastel de utilería",
+              "pastel",
+              "#f6c8dc"
+            ]
+          ],
+          "evita": [
+            [
+              "Adorno",
+              "piedra"
+            ]
+          ],
+          "fondo": "feria"
+        },
+        4
+      ],
+      [
+        "jaripeo",
+        "Jaripeo olanchano",
+        "monta",
+        "catacamas",
+        "🐂",
+        "Anticipá brincos leyendo la curvatura del lomo.",
+        "El toro avisó con el lomo; vos ibas viendo al público.",
+        {
+          "nombre": "Toro de caricatura",
+          "frases": [
+            "El toro avisó con el lomo; vos ibas viendo al público."
+          ],
+          "montura": "toro",
+          "fondo": "finca"
+        },
+        5
+      ],
+      [
+        "el-toro-se-cree-resorte",
+        "El toro se cree resorte",
+        "monta",
+        "catacamas",
+        "🐂",
+        "Aguantá giros laterales con recuperación limitada mientras el toro de caricatura se comprime como resorte y suelta un sonido de juguete al saltar.",
+        "El toro avisó con el lomo; vos ibas viendo al público.",
+        {
+          "nombre": "Toro de caricatura",
+          "frases": [
+            "El toro avisó con el lomo; vos ibas viendo al público."
+          ],
+          "montura": "toro",
+          "fondo": "finca"
+        },
+        4
+      ],
+      [
+        "oro-en-batea-del-guayape",
+        "Oro en batea del Guayape",
+        "olancho.batea",
+        "guayape",
+        "✨",
+        "Separá sedimento con giros y pausas de decantación.",
+        "La arena se va; la muestra no la regalés.",
+        {
+          "nombre": "Oro en batea del Guayape",
+          "frases": [
+            "La arena se va; la muestra no la regalés."
+          ]
+        },
+        5
+      ],
+      [
+        "la-batea-no-es-licuadora",
+        "La batea no es licuadora",
+        "olancho.batea",
+        "guayape",
+        "✨",
+        "Separá partículas de densidades parecidas con inclinaciones cortas mientras una batea de goma intenta girar como licuadora y vos le bajás el impulso.",
+        "La arena se va; la muestra no la regalés.",
+        {
+          "nombre": "La batea no es licuadora",
+          "frases": [
+            "La arena se va; la muestra no la regalés."
+          ]
+        },
+        4
+      ],
+      [
+        "arreo-en-lepaguare",
+        "Arreo en Lepaguare",
+        "olancho.arreo",
+        "lepaguare",
+        "🐎",
+        "Mové un hato compacto entre dos corrales.",
+        "La vaca dobló cuando vos te pusiste donde tocaba.",
+        {
+          "nombre": "Arreo en Lepaguare",
+          "frases": [
+            "La vaca dobló cuando vos te pusiste donde tocaba."
+          ]
+        },
+        4
+      ],
+      [
+        "la-vaca-dirige-el-desfile",
+        "La vaca dirige el desfile",
+        "olancho.arreo",
+        "lepaguare",
+        "🐎",
+        "Separá dos grupos por posición corporal del avatar sin dividir sus parejas de cría.",
+        "La vaca dobló cuando vos te pusiste donde tocaba.",
+        {
+          "nombre": "La vaca dirige el desfile",
+          "frases": [
+            "La vaca dobló cuando vos te pusiste donde tocaba."
+          ]
+        },
+        4
+      ],
+      [
+        "talgua-sin-tocar-los-restos",
+        "Talgua sin tocar los restos",
+        "olancho.calcita",
+        "talgua",
+        "💀",
+        "Variá ángulos de iluminación en escaneos de calcita y hueso mediante dos focos virtuales.",
+        "El brillo se documenta, no se embolsa.",
+        {
+          "nombre": "Talgua sin tocar los restos",
+          "frases": [
+            "El brillo se documenta, no se embolsa."
+          ]
+        },
+        4
+      ],
+      [
+        "queso-con-salida-de-suero",
+        "Queso con salida de suero",
+        "olancho.cuajada",
+        "catacamas",
+        "🐂",
+        "Añadí pesos graduales a una cuajada virtual observando el caudal de suero.",
+        "El suero ocupa salida, no regaño.",
+        {
+          "nombre": "Queso con salida de suero",
+          "frases": [
+            "El suero ocupa salida, no regaño."
+          ]
+        },
+        4
+      ],
+      [
+        "agalta-te-baja-el-copete",
+        "Agalta te baja el copete",
+        "olancho.postura",
+        "agalta",
+        "⛰️",
+        "Alterná postura erguida y agachada para modificar área expuesta al viento en una maqueta del bosque enano.",
+        "Te agachaste y el viento ya no te lleva igual.",
+        {
+          "nombre": "Agalta te baja el copete",
+          "frases": [
+            "Te agachaste y el viento ya no te lleva igual."
+          ]
+        },
+        4
+      ],
+      [
+        "cada-tabla-tiene-su-veta",
+        "Cada tabla tiene su veta",
+        "olancho.tablas",
+        "campamento",
+        "🪓",
+        "Trazá cortes sobre madera ya aserrada evitando nudos y respetando la orientación de la fibra.",
+        "Ese nudo no se quita fingiendo que no está.",
+        {
+          "nombre": "Cada tabla tiene su veta",
+          "frases": [
+            "Ese nudo no se quita fingiendo que no está."
+          ]
+        },
+        4
+      ]
     ]
   },
   "elparaiso": {

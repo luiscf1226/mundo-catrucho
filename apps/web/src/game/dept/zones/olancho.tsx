@@ -4,6 +4,7 @@ import { CaveCam, Darkness } from '../fx';
 import { bl, bx, cliff, cy, distToPath, inR, PI, place, ss } from '../lib';
 import { casa, fence, mont, vaca } from '../parts';
 import { ZB, type ZoneSpec } from '../zone';
+import { OlanchoPuntos } from './OlanchoPuntos';
 
 /** Olancho: potreros y el cerro de piedra caliza con las Cuevas de Talgua: túnel, galería y la sala de los cristales. */
 export function cuevas(d: Department): ZoneSpec {
@@ -48,6 +49,7 @@ export function cuevas(d: Department): ZoneSpec {
         ) * 2,
     )
     .layer('sand', B.sand, (x, z) => (4.2 - Math.abs(z - sz(x))) / 1.5);
+  Z.n(<OlanchoPuntos />);
   Z.sea(-0.35);
   Z.stop(0, 42);
   // paredes, techos y relleno de roca de la cueva

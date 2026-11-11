@@ -1,0 +1,83 @@
+[
+  {
+    "id": "franciscomorazan.visita-1",
+    "nombre": "Mirador de El Picacho",
+    "texto": "El Picacho es un mirador natural de Tegucigalpa. Subí al mirador y encuadrá cerros y ciudad en una postal.",
+    "fuente": "https://www.visitcentroamerica.com/visitar/tegucigalpa/",
+    "x": -18,
+    "z": -24,
+    "tipo": "lugar"
+  },
+  {
+    "id": "franciscomorazan.visita-2",
+    "nombre": "Basílica de Suyapa",
+    "texto": "La Basílica de Suyapa está en Tegucigalpa y está dedicada a la patrona de Honduras. Armá un recorrido de observación exterior respetando las zonas de culto.",
+    "fuente": "https://www.visitcentroamerica.com/visitar/tegucigalpa/",
+    "x": 19,
+    "z": 14,
+    "tipo": "lugar"
+  },
+  {
+    "id": "franciscomorazan.visita-3",
+    "nombre": "Taller de Valle de Ángeles",
+    "texto": "Valle de Ángeles tiene un mercado artesanal reconocido. Ayudá a empacar una artesanía y fotografiá su textura.",
+    "fuente": "https://www.visitcentroamerica.com/visitar/tegucigalpa/",
+    "x": -19,
+    "z": 1,
+    "tipo": "lugar"
+  },
+  {
+    "id": "franciscomorazan.visita-4",
+    "nombre": "Bosque de La Tigra",
+    "texto": "La Tigra es uno de los parques nacionales de Francisco Morazán. Fotografiá el dosel desde el sendero señalizado sin acercarte a fauna.",
+    "fuente": "https://icf.gob.hn/region-forestal-francisco-morazan/",
+    "x": 19,
+    "z": 1,
+    "tipo": "lugar"
+  },
+  {
+    "id": "franciscomorazan.visita-5",
+    "nombre": "Rosquillas del camino al sur",
+    "texto": "Sabanagrande elabora rosquillas y tustacas artesanalmente en hornos de barro. Probá una rosquilla virtual y compará su forma con una tustaca.",
+    "fuente": "https://hch.tv/conozca-el-proceso-para-elaborar-las-rosquillas-de-sabanagrande/",
+    "x": -19,
+    "z": -12,
+    "tipo": "lugar"
+  },
+  {
+    "id": "franciscomorazan.visita-6",
+    "nombre": "Cerros de Plata",
+    "texto": "Tegucigalpa también es conocida como Ciudad de los Cerros de Plata. Girás un visor panorámico para ubicar los cerros del horizonte.",
+    "fuente": "https://www.visitcentroamerica.com/visitar/tegucigalpa/",
+    "x": 19,
+    "z": -12,
+    "tipo": "lugar"
+  },
+  {
+    "id": "franciscomorazan.locura-1",
+    "nombre": "Congelado con dos pasaportes",
+    "texto": "¿Charamusca o topogigio? Activá el rótulo y mirá cómo cambia de gorrito.",
+    "fuente": "https://www.tunota.com/honduras-hoy/topogigio-o-charamusca-la-eterna-discusion-entre-sampedranos-y-capitalinos",
+    "x": -12,
+    "z": 17,
+    "tipo": "locura"
+  },
+  {
+    "id": "franciscomorazan.locura-2",
+    "nombre": "Rosquilla satélite",
+    "texto": "Chopeá la rosquilla viajera: baja de su órbita y aterriza en tu taza.",
+    "fuente": "https://hch.tv/conozca-el-proceso-para-elaborar-las-rosquillas-de-sabanagrande/",
+    "x": 0,
+    "z": 17,
+    "tipo": "locura"
+  },
+  {
+    "id": "franciscomorazan.locura-3",
+    "nombre": "La ciudad posa desde el cerro",
+    "texto": "Activá la foto: las casitas de cartón se enderezan para salir bien.",
+    "fuente": "https://www.visitcentroamerica.com/visitar/tegucigalpa/",
+    "x": 12,
+    "z": 17,
+    "tipo": "locura"
+  }
+]

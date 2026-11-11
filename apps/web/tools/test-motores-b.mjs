@@ -257,9 +257,7 @@ const res = [];
 res.push(await pruebaAtrapa('atrapa-catalogo-mangos', { juego: 'comayagua.mangos', motor: 'atrapa', golpe: true }));
 res.push(await pruebaAtrapa('atrapa-catalogo-cafe-duo', { juego: 'lapaz.cortecafe', motor: 'atrapa', modo: 'duo' }));
 res.push(await pruebaAtrapa('atrapa-sin-tema', { motor: 'atrapa', modo: 'solo' }));
-res.push(
-  await pruebaCocina('cocina-catalogo-baleadas', { juego: 'franciscomorazan.baleadas', motor: 'cocina', modo: 'duo' }),
-);
+res.push(await pruebaCocina('cocina-catalogo-baleadas', { juego: 'lapaz.ticucos', motor: 'cocina', modo: 'duo' }));
 res.push(
   await pruebaCocina('cocina-catalogo-alfombras', {
     juego: 'comayagua.alfombras',
@@ -317,7 +315,7 @@ res.push(
   await pruebaCocina(
     'captura-cocina-baleadas',
     {
-      juego: 'franciscomorazan.baleadas',
+      juego: 'lapaz.ticucos',
       motor: 'cocina',
       modo: 'duo',
       pedidos: 1,

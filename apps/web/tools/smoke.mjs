@@ -10,22 +10,22 @@ if (!file) {
   process.exit(2);
 }
 const S = `window.__mc.store.getState()`;
-// un juego del catálogo por motor
+// un juego del catálogo por cada motor viejo (sin punto = motor sin juego en el catálogo: se abre con startMinigame)
 const JUEGOS = [
   'olancho.pastel',
   'olancho.jaripeo',
   'atlantida.carnaval',
-  'olancho.talgua',
-  'cortes.pescayojoa',
+  'comayagua.taulabe',
+  'cortes.pesca-en-yojoa',
   'yoro.lluvia',
-  'franciscomorazan.baleadas',
+  'lapaz.ticucos',
   'comayagua.pilonpaleta',
   'franciscomorazan.rapidito',
   'copan.pelota',
-  'cortes.juniana',
+  'atlantida.isidra',
   'islas.buceo',
   'franciscomorazan.pulperia',
-  'franciscomorazan.carrera',
+  'carrera',
 ];
 const ok = await run('smoke', file, { hash: '#test' }, async (t) => {
   await t.ev(`localStorage.clear()`);
@@ -70,8 +70,9 @@ const ok = await run('smoke', file, { hash: '#test' }, async (t) => {
   if (shots) await t.shot(`${shots}/05-olancho.png`);
   console.log('olancho fps', await t.fps());
   // un juego por motor
+  const motores = new Set();
   for (const id of JUEGOS) {
-    await t.ev(`${S}.startJuego('${id}')`);
+    await t.ev(id.includes('.') ? `${S}.startJuego('${id}')` : `${S}.startMinigame('${id}')`);
     await t.waitFor(`!!document.querySelector('[data-testid=mg-intro]')`, 8000, `intro de ${id}`);
     if (id === 'olancho.pastel') {
       if (shots) await t.shot(`${shots}/06-intro.png`);
@@ -81,13 +82,16 @@ const ok = await run('smoke', file, { hash: '#test' }, async (t) => {
     }
     await t.click('mg-start');
     await t.waitFor(`${S}.mg?.phase==='playing'`);
+    motores.add(await t.ev(`${S}.mg.id`));
     await t.sleep(1300);
     if (shots) await t.shot(`${shots}/mg-${id.replace('.', '-')}.png`);
     console.log(id.padEnd(28), 'fps', await t.fps());
     await t.ev(`${S}.exitMinigame()`);
-    await t.waitFor(`${S}.scene.kind==='dept' && !${S}.mg`, 8000, `volver de ${id}`);
+    await t.waitFor(id.includes('.') ? `${S}.scene.kind==='dept' && !${S}.mg` : `!${S}.mg`, 8000, `volver de ${id}`);
     await t.sleep(250);
   }
+  if (motores.size !== JUEGOS.length)
+    throw new Error(`la lista no prueba un motor distinto por juego: ${[...motores]}`);
   // terminal: viaje simulado
   await t.ev(`${S}.goLobby()`);
   await t.sleep(600);
@@ -105,12 +109,12 @@ const ok = await run('smoke', file, { hash: '#test' }, async (t) => {
   await t.waitFor(`${S}.scene.kind==='dept' && ${S}.scene.id==='copan'`, 8000, 'llegar a Copán');
   await t.sleep(900);
   if (shots) await t.shot(`${shots}/08-copan.png`);
-  // tras tantos cambios de escena (lobby, departamentos, 14 motores, viaje) el cielo activo sigue dueño de la escena
-  const cielo = await t.ev(
-    `(()=>{const s=window.__mc.scene;return JSON.stringify({fog:!!s.fog,fondo:!!s.background,entorno:!!s.environment})})()`,
-  );
-  if (cielo !== '{"fog":true,"fondo":true,"entorno":true}')
-    throw new Error(`la escena quedó sin cielo completo: ${cielo}`);
+  // tras tantos cambios de escena (lobby, departamentos, 14 motores, viaje) el cielo activo sigue dueño de la escena.
+  // El entorno se genera unos cuadros después de montar el cielo: se espera (sin GPU van a ~1 cuadro por segundo).
+  const cielo = `(()=>{const s=window.__mc.scene;return JSON.stringify({fog:!!s.fog,fondo:!!s.background,entorno:!!s.environment})})()`;
+  await t.waitFor(`${cielo}==='{"fog":true,"fondo":true,"entorno":true}'`, 15000).catch(async () => {
+    throw new Error(`la escena quedó sin cielo completo: ${await t.ev(cielo)}`);
+  });
   // tienda y guardado
   await t.ev(`${S}.addCoins(500)`);
   await t.click('hud-btn-tienda');
