@@ -1,0 +1,74 @@
+[
+  {
+    "id": "cortes.visita-1",
+    "nombre": "Puesto de pollo chuco",
+    "texto": "San Pedro Sula tiene una amplia oferta callejera de pollo chuco.",
+    "fuente": "https://www.laprensa.hn/fotogalerias/san-pedro-enfotos/honduras-pollo-chuco-comida-callejera-gastronomia-san-pedro-sula-GE16565672"
+  },
+  {
+    "id": "cortes.visita-2",
+    "nombre": "Bahía del puerto",
+    "texto": "La municipalidad describe miradores desde donde se aprecia la bahía de Puerto Cortés.",
+    "fuente": "https://ampcwp.ampuertocortes.hn/turismo/"
+  },
+  {
+    "id": "cortes.visita-3",
+    "nombre": "Laguna de Alvarado",
+    "texto": "La Laguna de Alvarado forma parte del paisaje turístico de Puerto Cortés.",
+    "fuente": "https://ampcwp.ampuertocortes.hn/turismo/"
+  },
+  {
+    "id": "cortes.visita-4",
+    "nombre": "Cocina costera",
+    "texto": "La municipalidad destaca la oferta de restaurantes de mariscos de Puerto Cortés.",
+    "fuente": "https://ampcwp.ampuertocortes.hn/turismo/"
+  },
+  {
+    "id": "cortes.visita-5",
+    "nombre": "Bosque de Cusuco",
+    "texto": "Cusuco es un parque nacional de bosque nublado en el departamento de Cortés.",
+    "fuente": "https://es.wikipedia.org/wiki/Parque_nacional_Cusuco"
+  },
+  {
+    "id": "cortes.visita-6",
+    "nombre": "Topogigio o charamusca",
+    "texto": "La discusión entre topogigio y charamusca ha generado memes entre sampedranos y capitalinos.",
+    "fuente": "https://www.tunota.com/honduras-hoy/topogigio-o-charamusca-la-eterna-discusion-entre-sampedranos-y-capitalinos"
+  },
+  {
+    "id": "cortes.visita-7",
+    "nombre": "Fortaleza de San Fernando",
+    "texto": "La Fortaleza de San Fernando está entre los atractivos históricos de Omoa.",
+    "fuente": "https://www.laprensa.hn/economia/semana-santa-omoa-fortalece-oferta-turistica-GE29878538"
+  },
+  {
+    "id": "cortes.visita-8",
+    "nombre": "Cataratas de Pulhapanzak",
+    "texto": "Las cataratas están en San Buenaventura, Cortés, al norte del Lago de Yojoa.",
+    "fuente": "https://visitpulha.com/"
+  },
+  {
+    "id": "cortes.visita-9",
+    "nombre": "Orilla de Yojoa",
+    "texto": "El Lago de Yojoa se ubica entre Cortés, Comayagua y Santa Bárbara; su paisaje no pertenece en exclusiva a un departamento.",
+    "fuente": "https://rsis.ramsar.org/RISapp/files/36545686/documents/HN2456_descr190718.pdf"
+  },
+  {
+    "id": "cortes.locura-1",
+    "nombre": "Debate congelado",
+    "texto": "¿Vos cómo lo pedís? Estas dos bolsas no se ponen de acuerdo.",
+    "fuente": "https://www.tunota.com/honduras-hoy/topogigio-o-charamusca-la-eterna-discusion-entre-sampedranos-y-capitalinos"
+  },
+  {
+    "id": "cortes.locura-2",
+    "nombre": "Aderezo en creciente",
+    "texto": "¡Se vino el aderezo! La tajada navega en salsa y regresa al plato.",
+    "fuente": "https://www.laprensa.hn/fotogalerias/san-pedro-enfotos/honduras-pollo-chuco-comida-callejera-gastronomia-san-pedro-sula-GE16565672"
+  },
+  {
+    "id": "cortes.locura-3",
+    "nombre": "El contenedor saluda",
+    "texto": "¡Hasta el contenedor te saluda con pestañas de cartón y confeti!",
+    "fuente": "https://ampcwp.ampuertocortes.hn/turismo/"
+  }
+]
