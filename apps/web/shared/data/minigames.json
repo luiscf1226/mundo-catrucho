@@ -159,5 +159,53 @@
    "silver": 180,
    "gold": 280
   }
+ },
+ {
+  "id": "olancho.batea",
+  "name": "Sedimento del Guayape",
+  "place": "Olancho",
+  "icon": "🧭",
+  "desc": "Girás e inclinás una batea virtual siguiendo la separación por densidad de sus partículas. Ganás reteniendo material pesado; inclinar antes de que sedimente pierde la muestra.",
+  "rules": {}
+ },
+ {
+  "id": "olancho.arreo",
+  "name": "Línea de equilibrio del ganado",
+  "place": "Olancho",
+  "icon": "🧭",
+  "desc": "Caminá alrededor de un hato virtual sin tocarlo y cruzá su línea de equilibrio para cambiar marcha. Ganás guiando a un corral abierto; acercarte de frente dispersa al grupo.",
+  "rules": {}
+ },
+ {
+  "id": "olancho.calcita",
+  "name": "Luz sobre Talgua",
+  "place": "Olancho",
+  "icon": "🧭",
+  "desc": "Variá ángulos de iluminación en escaneos de calcita y hueso mediante dos focos virtuales. Ganás un registro de materiales sin contacto; confundir brillo con pieza extraíble invalida la ficha.",
+  "rules": {}
+ },
+ {
+  "id": "olancho.cuajada",
+  "name": "Prensado con drenaje",
+  "place": "Olancho",
+  "icon": "🧭",
+  "desc": "Añadí pesos graduales a una cuajada virtual observando el caudal de suero. Ganás una textura uniforme; cargar demasiado pronto sella canales y deja humedad atrapada.",
+  "rules": {}
+ },
+ {
+  "id": "olancho.postura",
+  "name": "Copas bajas de Agalta",
+  "place": "Olancho",
+  "icon": "🧭",
+  "desc": "Alterná postura erguida y agachada para modificar área expuesta al viento en una maqueta del bosque enano. Ganás alcanzando marcas sin rozar copas; levantarte bajo una rama te devuelve al apoyo.",
+  "rules": {}
+ },
+ {
+  "id": "olancho.tablas",
+  "name": "Pedido de Campamento",
+  "place": "Olancho",
+  "icon": "🧭",
+  "desc": "Trazá cortes sobre madera ya aserrada evitando nudos y respetando la orientación de la fibra. Ganás completando piezas estructurales con poco desperdicio; una veta transversal invalida la pieza.",
+  "rules": {}
  }
 ]
