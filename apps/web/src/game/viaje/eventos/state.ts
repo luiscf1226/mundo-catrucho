@@ -65,12 +65,13 @@ export function pasoCamino(s: DriveState, dt: number, veh: string) {
       cita.tipo === 'parada' && veh !== 'bus' && veh !== 'rapidito'
         ? { ...cita, nombre: `Comedor · ${cita.nombre}` }
         : cita;
-    useCamino.setState({ activa, inicio: s.elapsed, atendidas: [...camino.atendidas, cita.id] });
+    useCamino.setState({ activa, inicio: s.elapsed, atendidas: [...camino.atendidas, cita.id], velocidad: s.speed });
     camino = useCamino.getState();
   }
   if (camino.energia > 0) s.shake = Math.max(0, s.shake - dt * camino.energia * 0.05);
   const activa = camino.activa;
-  if (!activa) return;
+  // en el aire nada detiene la avioneta: ningún evento frena un tramo aéreo
+  if (!activa || activa.tramo.medio === 'avioneta') return;
   const antes = s.speed;
   const limite = limiteDeEvento(activa.accion, s.x);
   s.speed = Math.min(s.speed, Math.max(limite, s.speed - 22 * dt));

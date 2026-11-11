@@ -52,7 +52,8 @@ export function admiteEvento(indice: number, t: TramoRuta) {
   const e = VIAJES.eventosDeCarretera[indice];
   if (!e || (e.donde !== 'todas' && !e.donde.includes(t.a) && !e.donde.includes(t.de))) return false;
   if (indice === 17) return t.medio === 'ferry' || t.medio === 'lancha';
-  if (indice === 18) return t.medio === 'avioneta' || t.medio === 'lancha';
+  // el pesaje es en tierra, antes de embarcar: crearAgenda lo pone al final del tramo previo al vuelo o la lancha
+  if (indice === 18) return false;
   if (t.medio !== 'carretera') return false;
   if ([0, 5, 15].includes(indice)) return ['montana', 'pinar'].includes(t.paisaje) || /ladera|cafetal/.test(t.nombre);
   if ([1, 14].includes(indice)) return /valle|llanura|finca|cultivo|plantaci/.test(t.nombre);
@@ -110,6 +111,23 @@ export function crearAgenda(ruta: RutaViaje, semilla = 0): Cita[] {
       : Array.from({ length: 20 }, (_, i) => (i + semilla) % 20);
   const usados = new Set<string>();
   for (const i of prioridades) {
+    if (i === 18) {
+      const k = ruta.tramos.findIndex((t, j) => j > 0 && (t.medio === 'avioneta' || t.medio === 'lancha'));
+      const antes = k > 0 ? ruta.tramos[k - 1] : null;
+      if (antes?.medio === 'carretera' && !usados.has(antes.id)) {
+        const e = VIAJES.eventosDeCarretera[i];
+        poner(antes, 0.95, {
+          id: `evento-${i}-${antes.id}`,
+          tipo: 'evento',
+          nombre: e.nombre,
+          texto: e.queEs,
+          accion: acciones[i],
+        });
+        usados.add(antes.id);
+        if (citas.filter((c) => c.tipo === 'evento').length === 4) break;
+      }
+      continue;
+    }
     const candidatos = ruta.tramos.filter((t) => admiteEvento(i, t));
     const t = candidatos.find((p) => !usados.has(p.id)) ?? candidatos[0];
     if (!t) continue;

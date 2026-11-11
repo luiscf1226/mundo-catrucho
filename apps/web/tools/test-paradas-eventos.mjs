@@ -5,6 +5,12 @@ import { resolverRuta, VIAJES } from '../src/game/viaje/routes.ts';
 import { run } from './harness.mjs';
 
 const vistos = new Set();
+// el pesaje de equipaje (18) va en tierra, al final del tramo de carretera justo antes de volar o embarcar
+const pesajeEnTierra = (ruta, c) => {
+  const k = ruta.tramos.indexOf(c.tramo);
+  assert.equal(c.tramo.medio, 'carretera', 'el pesaje no puede caer en pleno vuelo ni en el mar');
+  assert.ok(['avioneta', 'lancha'].includes(ruta.tramos[k + 1]?.medio), 'el pesaje va justo antes de embarcar');
+};
 for (const fuente of VIAJES.rutas) {
   for (const [de, a] of [
     [fuente.de, fuente.a],
@@ -14,14 +20,32 @@ for (const fuente of VIAJES.rutas) {
     for (let seed = 0; seed < 20; seed++) {
       const agenda = crearAgenda(ruta, seed),
         eventos = agenda.filter((c) => c.tipo === 'evento');
-      assert.ok(eventos.length >= (fuente.medio === 'carretera' ? 2 : 1) && eventos.length <= 4);
+      // una ruta solo aérea puede no tener eventos: en el aire nada te detiene
+      const minimo = fuente.medio === 'carretera' ? 2 : fuente.medio === 'avioneta' ? 0 : 1;
+      assert.ok(eventos.length >= minimo && eventos.length <= 4);
       for (const c of eventos) {
         const i = VIAJES.eventosDeCarretera.findIndex((e) => e.nombre === c.nombre);
-        assert.ok(admiteEvento(i, c.tramo));
+        if (i === 18) pesajeEnTierra(ruta, c);
+        else assert.ok(admiteEvento(i, c.tramo));
         vistos.add(i);
         assert.ok(c.segundo >= 0 && c.segundo < ruta.segundos);
         if (c.km !== null) assert.ok(c.km >= c.tramo.desdeKm && c.km <= c.tramo.hastaKm);
       }
+    }
+  }
+}
+// rutas con taxi y luego avioneta o lancha: ahí sí sale el pesaje, en tierra
+for (const fuente of VIAJES.rutas.filter((f) => f.medio === 'avioneta' || f.medio === 'lancha')) {
+  for (const destino of [fuente.a, fuente.de]) {
+    for (const origen of ['franciscomorazan', 'cortes', 'atlantida', 'colon']) {
+      if (origen === destino) continue;
+      const ruta = resolverRuta(origen, destino, ['carretera', fuente.medio]);
+      if (!ruta?.tramos.some((t) => t.medio === fuente.medio)) continue;
+      for (let seed = 0; seed < 20; seed++)
+        for (const c of crearAgenda(ruta, seed).filter((x) => x.nombre === VIAJES.eventosDeCarretera[18].nombre)) {
+          pesajeEnTierra(ruta, c);
+          vistos.add(18);
+        }
     }
   }
 }
@@ -59,7 +83,7 @@ const ok = await run('paradas-eventos', file, { hash: '#go,test' }, async (t) =>
       if (c.accion === 'comprar') {
         await t.waitFor(`!!document.querySelector('[data-testid=viaje-vendedor] button:not(:disabled)')`);
         const id = await t.ev(`document.querySelector('[data-testid=viaje-vendedor] button').dataset.testid`);
-        assert.ok(id.includes(c.tramo.a));
+        assert.ok(id.includes(c.id), `la comida es de esta parada: ${id}`); // en otra parada se puede volver a comprar
         const antes = await t.ev('window.__mc.store.getState().profile.coins');
         await t.click(id);
         assert.equal(await t.ev('window.__mc.store.getState().profile.coins'), antes - 5);

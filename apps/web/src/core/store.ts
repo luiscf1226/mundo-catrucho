@@ -232,7 +232,6 @@ export interface Game {
   resetProgress(): void;
 }
 
-let ultimoAvisoViaje = '';
 let toastId = 0;
 /** Etapa que toca jugar: la siguiente sin ganar; si ya las ganó todas, la última. */
 const etapaDe = (p: Profile, juegoId: string) => {
@@ -411,8 +410,8 @@ export const useGame = create<Game>((set, get) => {
     },
     toast: (text, icon) => {
       const viaje = get().scene.kind === 'viaje';
-      if (viaje && ultimoAvisoViaje === text) return;
-      ultimoAvisoViaje = viaje ? text : '';
+      // en el viaje no se repite un aviso que todavía está en pantalla
+      if (viaje && get().toasts.some((t) => t.text === text)) return;
       const id = ++toastId;
       set((s) => ({ toasts: [...s.toasts.slice(viaje ? -1 : -3), { id, text, icon }] }));
       setTimeout(() => get().dropToast(id), 3500);
