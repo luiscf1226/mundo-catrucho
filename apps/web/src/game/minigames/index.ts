@@ -13,10 +13,12 @@ import { guia as gMonta, Monta } from './Monta';
 import { guia as gPesca, Pesca } from './Pesca';
 import { Pulperia } from './Pulperia';
 import { guia as gRitmo, Ritmo } from './Ritmo';
+import { guia as gRosquilla, Rosquilla } from './Rosquilla';
 import { guia as gRuta, Ruta } from './Ruta';
 import { guia as gTrivia, Trivia } from './Trivia';
 
 export const MINIGAME_SCENES: Record<MinigameId, FC> = {
+  'franciscomorazan.rosquilla': Rosquilla,
   carrera: Carrera,
   futbol: Futbol,
   feria: Feria,
@@ -34,6 +36,7 @@ export const MINIGAME_SCENES: Record<MinigameId, FC> = {
 };
 /** Guías de los motores nuevos (los cinco primeros tienen la suya en ui/screens/Minigame.tsx). */
 export const MOTOR_GUIDES: Partial<Record<MinigameId, Guia>> = {
+  'franciscomorazan.rosquilla': gRosquilla,
   corte: gCorte,
   monta: gMonta,
   ritmo: gRitmo,
