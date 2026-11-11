@@ -2,11 +2,14 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
-// Todo se empaqueta en un solo archivo JS + un CSS; tools/build.mjs los incrusta en un único HTML.
+// El modo autónomo incrusta todo; web conserva las fronteras import().
+const web = process.env.VITE_BUILD_MODE === 'web';
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   base: './',
   build: {
+    manifest: web,
+    rollupOptions: { output: { inlineDynamicImports: !web } },
     assetsInlineLimit: 100_000_000,
     cssCodeSplit: false,
     modulePreload: false,

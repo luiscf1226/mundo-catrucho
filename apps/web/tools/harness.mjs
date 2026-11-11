@@ -41,8 +41,11 @@ const KEY = {
 
 export async function launch(
   file,
-  { width = 1280, height = 720, hash = '', touch = false, gpu = process.env.MC_GPU !== '0' } = {},
+  { url, width = 1280, height = 720, hash = '', touch = false, gpu = process.env.MC_GPU !== '0' } = {},
 ) {
+  const target = url ? new URL(url) : null;
+  if (target && (target.protocol !== 'http:' || target.hostname !== '127.0.0.1'))
+    throw new Error('El arnés HTTP solo acepta http://127.0.0.1:<puerto>');
   const port = 9300 + Math.floor(Math.random() * 600),
     prof = mkdtempSync(join(tmpdir(), 'mc-test-'));
   const flags = gpu
@@ -114,7 +117,7 @@ export async function launch(
       const u = d.params.request.url;
       if (!/^(file|data|blob|about):/.test(u)) {
         requests.push(u);
-        if (!/^https:\/\/fonts\.(googleapis|gstatic)\.com\//.test(u))
+        if (new URL(u).origin !== target?.origin && !/^https:\/\/fonts\.(googleapis|gstatic)\.com\//.test(u))
           errors.push(`RED no permitida ${u.slice(0, 200)}`);
       }
     }
@@ -138,7 +141,7 @@ export async function launch(
     await send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 2, mobile: true });
     await send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 3 });
   }
-  await send('Page.navigate', { url: `file://${resolve(file)}${hash}` });
+  await send('Page.navigate', { url: `${target?.href ?? `file://${resolve(file)}`}${hash}` });
   for (let i = 0; i < 100; i++) {
     if (await ev(`!!window.__mc && !!document.querySelector('[data-testid]')`).catch(() => false)) break;
     await sleep(150);
