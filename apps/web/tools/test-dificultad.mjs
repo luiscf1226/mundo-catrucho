@@ -22,11 +22,11 @@ const JUEGO = {
   pesca: 'cortes.pesca-en-yojoa',
   trivia: 'comayagua.pilonpaleta',
   cocina: 'lapaz.ticucos',
-  ruta: 'copan.escalinata',
+  ruta: 'comayagua.taulabe',
   manejo: 'franciscomorazan.rapidito',
   feria: 'atlantida.isidra',
   pulperia: 'franciscomorazan.pulperia',
-  futbol: 'copan.pelota',
+  futbol: 'ocotepeque.tresfronteras',
   exploradores: 'islas.buceo',
 };
 
