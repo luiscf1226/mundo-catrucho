@@ -6,40 +6,35 @@ const puntos = [
   {
     id: 'olancho.punto-1',
     nombre: 'Cuevas de Talgua',
-    texto:
-      'Observá réplicas y registrá materiales sin tocar restos. Las Cuevas de Talgua se encuentran en Catacamas, Olancho.',
+    texto: 'Las Cuevas de Talgua están en Catacamas. Mirá las réplicas y anotá lo que ves, sin tocar nada.',
     x: -8,
     z: 34,
   },
   {
     id: 'olancho.punto-2',
     nombre: 'Sierra de Agalta',
-    texto:
-      'Fotografiá un perfil de vegetación y completá una libreta. La Sierra de Agalta ofrece turismo de naturaleza y montaña.',
+    texto: 'La Sierra de Agalta es puro bosque y montaña. Sacale foto a la vegetación y llená tu libreta.',
     x: -8,
     z: 27,
   },
   {
     id: 'olancho.punto-3',
     nombre: 'Mesa de tapado olanchano',
-    texto:
-      'Probá un plato virtual y escuchá cómo lo presentan sus cocineros. El tapado olanchano es parte de la gastronomía promocionada para visitantes de Olancho.',
+    texto: 'El tapado olanchano es de lo más rico de por acá. Probalo y escuchá cómo lo preparan.',
     x: -8,
     z: 20,
   },
   {
     id: 'olancho.punto-4',
     nombre: 'Ruta rural',
-    texto:
-      'Ayudá a completar una ficha de visita de finca con un anfitrión ficticio. La promoción turística de Olancho incluye actividades de turismo rural.',
+    texto: 'Olancho también se vive en las fincas. Ayudale al anfitrión a llenar la ficha de visita.',
     x: -8,
     z: 13,
   },
   {
     id: 'olancho.punto-5',
     nombre: 'Pastel al estilo del video',
-    texto:
-      'Partí un pastel de caricatura con un machete de goma dentro de una zona de seguridad. Una noticia describe como estilo olanchano un video de corte de pastel a machete; no verifica dónde fue grabado.',
+    texto: 'Dicen que en Olancho el pastel se parte a machete. Aquí va de goma y con cuidado: ¡partilo!',
     x: -8,
     z: 6,
   },
@@ -47,23 +42,21 @@ const puntos = [
     id: 'olancho.punto-6',
     nombre: 'Calcita sin recolección',
     texto:
-      'Variá una luz virtual sobre un escaneo y descubrí sus brillos. Los cristales de calcita sobre restos de Talgua brillan bajo la luz y dieron lugar al nombre de calaveras luminosas.',
+      'Por la calcita que brilla con la luz, a Talgua le dicen la cueva de las calaveras luminosas. Mové la luz y mirá cómo brilla.',
     x: 8,
     z: 34,
   },
   {
     id: 'olancho.punto-7',
     nombre: 'Pastel a machete de goma',
-    texto:
-      'Un video de corte de pastel fue descrito por prensa como estilo olanchano; la ubicación del video no está comprobada. Un anfitrión ficticio sin nombre real parte un pastel con herramienta de goma descomunal; la referencia no afirma que todos lo hagan.',
+    texto: '¡Ideay! El anfitrión saca un machete de goma más grande que él y parte el pastel de un solo tajo.',
     x: 8,
     z: 27,
   },
   {
     id: 'olancho.punto-8',
     nombre: 'Tapado con techo',
-    texto:
-      'El tapado olanchano figura en la oferta gastronómica del departamento. La tapa de la olla de decorado se abre como techo y las verduras hacen reverencia; animación original.',
+    texto: 'Se abre la tapa de la olla como si fuera un techo y las verduras del tapado te hacen reverencia.',
     x: 8,
     z: 20,
   },
@@ -71,7 +64,7 @@ const puntos = [
     id: 'olancho.punto-9',
     nombre: 'Talgua prende el brillo',
     texto:
-      'La calcita de Talgua brilla a la luz y motivó el apelativo de calaveras luminosas. Cristales de una réplica educativa encienden luces al orientar el foco; los restos humanos no se animan ni ridiculizan.',
+      'Apuntá bien el foco y los cristales de la réplica se encienden como luces de feria. Con respeto: los restos no se tocan.',
     x: 8,
     z: 13,
   },

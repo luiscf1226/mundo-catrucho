@@ -2,55 +2,55 @@
   {
     "id": "cortes.visita-1",
     "nombre": "Puesto de pollo chuco",
-    "texto": "San Pedro Sula tiene una amplia oferta callejera de pollo chuco.",
+    "texto": "En San Pedro Sula el pollo chuco se come en la calle y con bastante aderezo. ¡Pedí el tuyo!",
     "fuente": "https://www.laprensa.hn/fotogalerias/san-pedro-enfotos/honduras-pollo-chuco-comida-callejera-gastronomia-san-pedro-sula-GE16565672"
   },
   {
     "id": "cortes.visita-2",
     "nombre": "Bahía del puerto",
-    "texto": "La municipalidad describe miradores desde donde se aprecia la bahía de Puerto Cortés.",
+    "texto": "Desde los miradores de Puerto Cortés se ve toda la bahía con sus barcos.",
     "fuente": "https://ampcwp.ampuertocortes.hn/turismo/"
   },
   {
     "id": "cortes.visita-3",
     "nombre": "Laguna de Alvarado",
-    "texto": "La Laguna de Alvarado forma parte del paisaje turístico de Puerto Cortés.",
+    "texto": "La Laguna de Alvarado, en Puerto Cortés, es buena para ver el atardecer.",
     "fuente": "https://ampcwp.ampuertocortes.hn/turismo/"
   },
   {
     "id": "cortes.visita-4",
     "nombre": "Cocina costera",
-    "texto": "La municipalidad destaca la oferta de restaurantes de mariscos de Puerto Cortés.",
+    "texto": "En Puerto Cortés los mariscos llegan frescos. Pedite una sopa o un pescado frito.",
     "fuente": "https://ampcwp.ampuertocortes.hn/turismo/"
   },
   {
     "id": "cortes.visita-5",
     "nombre": "Bosque de Cusuco",
-    "texto": "Cusuco es un parque nacional de bosque nublado en el departamento de Cortés.",
+    "texto": "Cusuco es un parque nacional de bosque nublado. Caminá despacio y escuchá el bosque.",
     "fuente": "https://es.wikipedia.org/wiki/Parque_nacional_Cusuco"
   },
   {
     "id": "cortes.visita-6",
     "nombre": "Topogigio o charamusca",
-    "texto": "La discusión entre topogigio y charamusca ha generado memes entre sampedranos y capitalinos.",
+    "texto": "¿Topogigio o charamusca? Sampedranos y capitalinos no se ponen de acuerdo. ¿Vos cómo le decís?",
     "fuente": "https://www.tunota.com/honduras-hoy/topogigio-o-charamusca-la-eterna-discusion-entre-sampedranos-y-capitalinos"
   },
   {
     "id": "cortes.visita-7",
     "nombre": "Fortaleza de San Fernando",
-    "texto": "La Fortaleza de San Fernando está entre los atractivos históricos de Omoa.",
+    "texto": "La Fortaleza de San Fernando, en Omoa, cuidaba la costa de los piratas.",
     "fuente": "https://www.laprensa.hn/economia/semana-santa-omoa-fortalece-oferta-turistica-GE29878538"
   },
   {
     "id": "cortes.visita-8",
     "nombre": "Cataratas de Pulhapanzak",
-    "texto": "Las cataratas están en San Buenaventura, Cortés, al norte del Lago de Yojoa.",
+    "texto": "Las cataratas de Pulhapanzak están en San Buenaventura. Se puede pasar por detrás del agua.",
     "fuente": "https://visitpulha.com/"
   },
   {
     "id": "cortes.visita-9",
     "nombre": "Orilla de Yojoa",
-    "texto": "El Lago de Yojoa se ubica entre Cortés, Comayagua y Santa Bárbara; su paisaje no pertenece en exclusiva a un departamento.",
+    "texto": "El Lago de Yojoa lo comparten Cortés, Comayagua y Santa Bárbara. Aquí estás en su orilla.",
     "fuente": "https://rsis.ramsar.org/RISapp/files/36545686/documents/HN2456_descr190718.pdf"
   },
   {

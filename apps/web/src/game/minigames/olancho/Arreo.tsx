@@ -25,10 +25,11 @@ function caminar(m: Sesion, x: number, y: number, dt: number) {
     s.dispersion += dt;
     s.aviso = 'De frente o muy cerca se dispersan: alejate';
   } else if (s.y > 0.45 && Math.abs(s.x - s.hato) < 0.5) {
-    if (Math.abs(s.hato) < 0.25) s.avance += dt * m.parametros.velocidad;
-    else s.aviso = 'Movete al costado para alinear el hato con la entrada';
+    if (Math.abs(s.hato) < 0.25) {
+      s.avance += dt * m.parametros.velocidad;
+      s.aviso = 'Detrás de la línea: el hato marcha al corral';
+    } else s.aviso = 'Movete al costado para alinear el hato con la entrada';
     s.hato = clamp(s.hato + (s.x - s.hato) * dt);
-    s.aviso = 'Detrás de la línea: el hato marcha al corral';
   } else {
     s.hato = clamp(s.hato - s.x * dt * 0.4);
     s.aviso = 'Cruzá por el costado y ponete detrás';

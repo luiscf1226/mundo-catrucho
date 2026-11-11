@@ -315,7 +315,6 @@ export const useGame = create<Game>((set, get) => {
     const rules: Record<string, boolean> = {
       primer_paso: p.created,
       primera_victoria: p.stats.wins >= 1,
-      rayo: (b.carrera?.stars ?? 0) >= 3,
       goleador: p.stats.goals >= 3 && (b.futbol?.score ?? 0) >= 3,
       punteria: (b.feria?.stars ?? 0) >= 3,
       explorador: (b.exploradores?.stars ?? 0) >= 1,

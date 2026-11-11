@@ -61,7 +61,9 @@ const motor = defineMotor({
   },
   bot: (m, dt, actor) => {
     if (actor === 'compa') {
-      tirar(m, dt * 0.2);
+      // el compa solo ayuda cuando tu tirón va parejo; nunca rompe el sello ni te resta puntos
+      const t = m.datos;
+      if (t.espera <= 0 && Math.abs((t.x + 1) / 2 - (t.y + 1) / 2) <= m.parametros.margen) tirar(m, dt * 0.2);
       return;
     }
     const s = m.datos;

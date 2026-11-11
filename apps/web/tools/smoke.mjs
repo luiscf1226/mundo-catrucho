@@ -10,22 +10,22 @@ if (!file) {
   process.exit(2);
 }
 const S = `window.__mc.store.getState()`;
-// un juego del catálogo por motor
+// un juego del catálogo por cada motor viejo (sin punto = motor sin juego en el catálogo: se abre con startMinigame)
 const JUEGOS = [
   'olancho.pastel',
   'olancho.jaripeo',
   'atlantida.carnaval',
-  'olancho.talgua',
+  'comayagua.taulabe',
   'cortes.pesca-en-yojoa',
   'yoro.lluvia',
-  'franciscomorazan.baleadas',
+  'lapaz.ticucos',
   'comayagua.pilonpaleta',
   'franciscomorazan.rapidito',
   'copan.pelota',
   'atlantida.isidra',
   'islas.buceo',
   'franciscomorazan.pulperia',
-  'franciscomorazan.carrera',
+  'carrera',
 ];
 const ok = await run('smoke', file, { hash: '#test' }, async (t) => {
   await t.ev(`localStorage.clear()`);
@@ -70,8 +70,9 @@ const ok = await run('smoke', file, { hash: '#test' }, async (t) => {
   if (shots) await t.shot(`${shots}/05-olancho.png`);
   console.log('olancho fps', await t.fps());
   // un juego por motor
+  const motores = new Set();
   for (const id of JUEGOS) {
-    await t.ev(`${S}.startJuego('${id}')`);
+    await t.ev(id.includes('.') ? `${S}.startJuego('${id}')` : `${S}.startMinigame('${id}')`);
     await t.waitFor(`!!document.querySelector('[data-testid=mg-intro]')`, 8000, `intro de ${id}`);
     if (id === 'olancho.pastel') {
       if (shots) await t.shot(`${shots}/06-intro.png`);
@@ -81,13 +82,16 @@ const ok = await run('smoke', file, { hash: '#test' }, async (t) => {
     }
     await t.click('mg-start');
     await t.waitFor(`${S}.mg?.phase==='playing'`);
+    motores.add(await t.ev(`${S}.mg.id`));
     await t.sleep(1300);
     if (shots) await t.shot(`${shots}/mg-${id.replace('.', '-')}.png`);
     console.log(id.padEnd(28), 'fps', await t.fps());
     await t.ev(`${S}.exitMinigame()`);
-    await t.waitFor(`${S}.scene.kind==='dept' && !${S}.mg`, 8000, `volver de ${id}`);
+    await t.waitFor(id.includes('.') ? `${S}.scene.kind==='dept' && !${S}.mg` : `!${S}.mg`, 8000, `volver de ${id}`);
     await t.sleep(250);
   }
+  if (motores.size !== JUEGOS.length)
+    throw new Error(`la lista no prueba un motor distinto por juego: ${[...motores]}`);
   // terminal: viaje simulado
   await t.ev(`${S}.goLobby()`);
   await t.sleep(600);
