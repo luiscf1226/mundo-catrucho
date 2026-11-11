@@ -671,6 +671,8 @@ export function SkyRig({
       gl.setRenderTarget(rt);
       scene.environment = R.pmremRT.texture;
     }
+    // igual que la niebla y el fondo: el cielo anterior pudo restaurar su entorno al desmontarse después
+    if (R.pmremRT && scene.environment !== R.pmremRT.texture) scene.environment = R.pmremRT.texture;
     scene.environmentIntensity = indoor ? 0.9 : c.envI;
     tmpC.setRGB(lerp(zen[0], hor[0], 0.5), lerp(zen[1], hor[1], 0.5), lerp(zen[2], hor[2], 0.5), THREE.SRGBColorSpace);
     G.uSky.value.copy(tmpC);

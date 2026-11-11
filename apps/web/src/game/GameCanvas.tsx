@@ -111,8 +111,9 @@ export function GameCanvas() {
         dpr={test ? 0.6 : quality === 'alta' ? [1, 2] : quality === 'media' ? 1 : 0.75}
         camera={{ fov: 60, near: 0.1, far: 700, position: [0, 6, 10] }}
         gl={{ antialias: quality !== 'baja', powerPreference: 'high-performance' }}
-        onCreated={({ gl }) => {
+        onCreated={({ gl, scene }) => {
           (window as any).__mc.gl = gl;
+          (window as any).__mc.scene = scene;
         }}
       >
         <Suspense fallback={<LoadingScene onChange={setLoading} />}>
