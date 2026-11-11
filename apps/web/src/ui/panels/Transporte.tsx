@@ -30,6 +30,7 @@ export function TransportePanel() {
                   {Math.round(ruta.kilometros ?? 0)} km · {ruta.horas.toFixed(1)} h reales aprox. ·{' '}
                   {Math.round(ruta.segundos)} s de juego
                 </p>
+                <p>Peajes en CA-5 norte: L 2 por caseta; podés usar paso asistido sin cobro.</p>
                 <p>Podés saltar desde el inicio. Tiempos de tramos publicados; conexiones internas no incluidas.</p>
               </>
             ) : (
