@@ -363,12 +363,14 @@ function Celebrations() {
 
 export function Toasts() {
   const toasts = useGame((s) => s.toasts);
+  const viaje = useGame((s) => s.scene.kind === 'viaje');
   return (
     <div
-      className="mc-toasts pointer-events-none absolute left-1/2 z-40 flex -translate-x-1/2 flex-col items-center gap-1.5"
+      className={`mc-toasts pointer-events-none absolute z-40 flex flex-col items-center gap-1.5 ${viaje ? '' : 'left-1/2 -translate-x-1/2'}`}
+      data-viaje={viaje || undefined}
       aria-live="polite"
     >
-      {toasts.map((t) => (
+      {(viaje ? toasts.slice(-2) : toasts).map((t) => (
         <div key={t.id} data-testid="toast" className="mc-toast anim-drop">
           {t.icon && (
             <span aria-hidden className="text-lg leading-none">

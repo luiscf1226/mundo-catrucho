@@ -8,8 +8,11 @@ export type VehicleKind =
   | 'bici'
   | 'cayuco'
   | 'moto'
-  | 'camion';
-export type RoadKind = 'ciudad' | 'carretera' | 'montana' | 'mar' | 'rio' | 'costa';
+  | 'camion'
+  | 'ferry'
+  | 'avioneta'
+  | 'bicitaxi';
+export type RoadKind = 'ciudad' | 'carretera' | 'montana' | 'mar' | 'rio' | 'costa' | 'cielo';
 export const vehicles = {
   rapidito: { speed: 26, steer: 8.2, mass: 1, color: '#ef476f', length: 4.8 },
   taxi: { speed: 29, steer: 9, mass: 1, color: '#f6d44b', length: 3.8 },
@@ -20,14 +23,28 @@ export const vehicles = {
   bici: { speed: 17, steer: 9, mass: 0.3, color: '#65ca8a', length: 2 },
   camion: { speed: 20, steer: 4, mass: 5, color: '#c36a34', length: 7 },
   lancha: { speed: 25, steer: 6, mass: 1, color: '#f2f0dc', length: 4.5 },
+  ferry: { speed: 16, steer: 2.2, mass: 8, color: '#f4f2df', length: 9 },
+  avioneta: { speed: 48, steer: 4, mass: 2, color: '#f2d65c', length: 5.5 },
+  bicitaxi: { speed: 6, steer: 5.5, mass: 0.5, color: '#65ca8a', length: 2.7 },
   cayuco: { speed: 18, steer: 5, mass: 0.5, color: '#9e6337', length: 4.8 },
+};
+export const manejo: Partial<Record<VehicleKind, { acelera: number; frena: number; curva: number; ola: number }>> = {
+  pickup: { acelera: 5, frena: 9, curva: 0.23, ola: 0 },
+  mototaxi: { acelera: 4, frena: 12, curva: 0.4, ola: 0 },
+  bicitaxi: { acelera: 1.4, frena: 5, curva: 0.3, ola: 0 },
+  lancha: { acelera: 4, frena: 3, curva: 0.2, ola: 0.65 },
+  ferry: { acelera: 1.5, frena: 1.2, curva: 0.12, ola: 0.18 },
+  cayuco: { acelera: 1.8, frena: 2, curva: 0.35, ola: 1.1 },
+  avioneta: { acelera: 6, frena: 2, curva: 0.12, ola: 0.28 },
 };
 export function vehicleKind(v: unknown): VehicleKind {
   if (typeof v === 'string' && Object.hasOwn(vehicles, v)) return v as VehicleKind;
   return typeof v === 'string' && /bus|micro/.test(v) ? 'rapidito' : 'pickup';
 }
 export function roadKind(v: unknown): RoadKind {
-  return v === 'ciudad' || v === 'montana' || v === 'mar' || v === 'rio' || v === 'costa' ? v : 'carretera';
+  return v === 'ciudad' || v === 'montana' || v === 'mar' || v === 'rio' || v === 'costa' || v === 'cielo'
+    ? v
+    : 'carretera';
 }
 export type ObstacleKind =
   | 'taxi'
@@ -80,7 +97,7 @@ export function createDrive(c: DriveConfig): DriveState {
       : ['taxi', 'vaca', 'bache', 'camion', 'perro', 'tumulo', 'rapidito'];
   return {
     x: 0,
-    speed: vehicles[c.veh].speed * 0.72,
+    speed: (c.trip && c.veh === 'cayuco' ? 7 : vehicles[c.veh].speed) * 0.72,
     distance: 0,
     elapsed: 0,
     hits: 0,
@@ -88,27 +105,47 @@ export function createDrive(c: DriveConfig): DriveState {
     shake: 0,
     cooldown: 0,
     horn: 0,
-    traffic: Array.from({ length: 7 }, (_, i) => ({
-      kind: kinds[i % kinds.length],
-      x: [-3.4, 0, 3.4][(i + (c.seed % 3)) % 3],
-      lane: [-3.4, 0, 3.4][(i + (c.seed % 3)) % 3],
-      z: -32 - i * 25,
-      speed: 3 + (i % 3) * 2,
-      hit: false,
-      yield: 0,
-    })),
+    traffic:
+      c.via === 'cielo'
+        ? []
+        : Array.from({ length: 7 }, (_, i) => ({
+            kind: kinds[i % kinds.length],
+            x: [-3.4, 0, 3.4][(i + (c.seed % 3)) % 3],
+            lane: [-3.4, 0, 3.4][(i + (c.seed % 3)) % 3],
+            z: -32 - i * 25,
+            speed: 3 + (i % 3) * 2,
+            hit: false,
+            yield: 0,
+          })),
     stops: [160, 410, 660].map((distance) => ({ distance, taken: false, dwell: 0 })),
   };
 }
 export function stepDrive(s: DriveState, c: DriveConfig, dt: number, steer: number, pedal: number, horn: boolean) {
-  const v = vehicles[c.veh];
+  const v = c.trip && c.veh === 'cayuco' ? { ...vehicles.cayuco, speed: 7 } : vehicles[c.veh];
   s.elapsed += dt;
   s.cooldown = Math.max(0, s.cooldown - dt);
   s.shake = Math.max(0, s.shake - dt * 2);
   s.horn = Math.max(0, s.horn - dt);
   const target = pedal > 0.15 ? 0 : pedal < -0.15 ? v.speed : v.speed * 0.72;
-  s.speed += Math.max(-v.speed * 1.6 * dt, Math.min(v.speed * 0.45 * dt, target - s.speed));
-  s.x = Math.max(-6.9, Math.min(6.9, s.x + steer * v.steer * dt * (0.2 + (0.8 * s.speed) / v.speed)));
+  const m = c.trip ? manejo[c.veh] : undefined;
+  const esfuerzo = c.trip && (c.veh === 'cayuco' || c.veh === 'bicitaxi') ? 0.85 + 0.15 * Math.sin(s.elapsed * 5) : 1;
+  const limite = Math.max(
+    c.veh === 'avioneta' ? v.speed * 0.55 : 0,
+    target * esfuerzo * (1 - Math.abs(steer) * (m?.curva ?? 0)),
+  );
+  s.speed += Math.max(
+    -(m?.frena ?? v.speed * 1.6) * dt,
+    Math.min((m?.acelera ?? v.speed * 0.45) * dt, limite - s.speed),
+  );
+  s.x = Math.max(
+    -6.9,
+    Math.min(
+      6.9,
+      s.x +
+        Math.sin(s.elapsed * 1.7) * (m?.ola ?? 0) * (['mar', 'rio', 'cielo'].includes(c.via) ? dt : 0) +
+        steer * v.steer * dt * (0.2 + (0.8 * s.speed) / v.speed),
+    ),
+  );
   s.distance += s.speed * dt;
   if (horn && !s.horn) {
     s.horn = 0.6;

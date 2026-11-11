@@ -2,6 +2,7 @@
 // Este módulo es la "capa de servidor" del prototipo: aquí se validan compras y recompensas. En la versión de
 // Roblox el mismo papel lo cumplen los servicios de ServerScriptService (ver roblox/).
 import { create } from 'zustand';
+import { OPCIONES, rutaParaVehiculo } from '../game/viaje/opciones';
 import {
   ACHIEVEMENTS,
   BOT_NAMES,
@@ -13,7 +14,6 @@ import {
   minigameById,
   REWARDS,
   SHOP,
-  TRANSPORTES,
   xpForLevel,
 } from './data';
 import { player } from './player';
@@ -409,8 +409,11 @@ export const useGame = create<Game>((set, get) => {
       if (c?.label !== prompt?.label || c?.icon !== prompt?.icon) set({ prompt });
     },
     toast: (text, icon) => {
+      const viaje = get().scene.kind === 'viaje';
+      // en el viaje no se repite un aviso que todavía está en pantalla
+      if (viaje && get().toasts.some((t) => t.text === text)) return;
       const id = ++toastId;
-      set((s) => ({ toasts: [...s.toasts.slice(-3), { id, text, icon }] }));
+      set((s) => ({ toasts: [...s.toasts.slice(viaje ? -1 : -3), { id, text, icon }] }));
       setTimeout(() => get().dropToast(id), 3500);
     },
     dropToast: (id) => set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) })),
@@ -463,7 +466,13 @@ export const useGame = create<Game>((set, get) => {
       );
     }, // la escena se vuelve a montar para que el motor lea el modo nuevo
     startViaje: (veh, to) => {
-      const t = TRANSPORTES.find((x) => x.id === veh);
+      const t = OPCIONES.find((x) => x.id === veh);
+      const origen = get().scene;
+      const from = origen.kind === 'dept' ? origen.id : 'franciscomorazan';
+      if (!rutaParaVehiculo(veh, from, to)) {
+        get().toast('Ocupás otra conexión para llegar. Escogé otro destino.', '🧭');
+        return false;
+      }
       if (!t || !DEPARTMENTS.some((d) => d.id === to)) return false;
       if (get().profile.coins < t.precio) {
         get().toast('No ajusta el pisto para el pasaje', '🪙');
@@ -474,7 +483,7 @@ export const useGame = create<Game>((set, get) => {
       });
       set((s) => ({
         screen: 'world',
-        scene: { kind: 'viaje', veh, to },
+        scene: { kind: 'viaje', veh, to, from },
         sceneKey: s.sceneKey + 1,
         panel: null,
         mg: null,

@@ -122,7 +122,7 @@ const ok = await run('dept', file, { hash: '#test,go' }, async (t) => {
   await t.waitFor(`${S}.mg?.phase==='playing' && !!${X}`, 8000, 'exploradores en juego');
   await t.sleep(500);
   const xs = await t.ev(`JSON.stringify(${X}.sites)`);
-  if (xs !== '["franciscomorazan"]') throw new Error(`sitios del tema ignorados: ${xs}`);
+  if (xs !== '["islas"]') throw new Error(`sitios del tema ignorados: ${xs}`);
   for (const f of JSON.parse(await t.ev(`JSON.stringify(${X}.finds())`))) {
     await t.ev(`${P}.teleport(${f.pos[0]}, ${f.pos[1] + 0.15}, ${f.pos[2]})`);
     await t.sleep(500);

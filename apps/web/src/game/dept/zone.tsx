@@ -518,9 +518,9 @@ export function ZoneLife({ d, spec }: { d: Department; spec: ZoneSpec }) {
       <Interactable
         pos={spec.bus.use}
         radius={2.3}
-        label="Tomar el bus (mapa)"
+        label="Terminal: salir de viaje"
         icon="🚌"
-        onUse={() => g().openPanel('mapa')}
+        onUse={() => g().openPanel('transporte')}
       />
       <Npc npc={spec.npc} title={`${spec.npc.name} · ${d.name}`} text={d.fact} />
       <Collectible d={d} pos={spec.gem.pos} color={spec.gem.color} />
