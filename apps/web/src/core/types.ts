@@ -36,7 +36,17 @@ export type MinigameId =
   | 'cortes.topo';
 /** solo = vos contra bots · duo = vos y un compa contra parejas · abierto = sala abierta (se llena con bots si no hay gente) */
 export type Modo = 'solo' | 'duo' | 'abierto';
-export type Vehiculo = 'rapidito' | 'taxi' | 'bus';
+export type Vehiculo =
+  | 'rapidito'
+  | 'taxi'
+  | 'bus'
+  | 'pickup'
+  | 'mototaxi'
+  | 'lancha'
+  | 'ferry'
+  | 'avioneta'
+  | 'cayuco'
+  | 'bicitaxi';
 export type LugarKind =
   | 'ciudad'
   | 'pueblo'

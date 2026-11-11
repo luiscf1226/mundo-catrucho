@@ -11,6 +11,7 @@ export const useViaje = create<{
   progress: number;
   hits: number;
   speed: number;
+  x: number;
   radio: number;
   ruta: RutaViaje | null;
   linea: LineaViaje | null;
@@ -20,6 +21,7 @@ export const useViaje = create<{
   progress: 0,
   hits: 0,
   speed: 0,
+  x: 0,
   radio: 0,
 }));
 export function changeRadio() {
