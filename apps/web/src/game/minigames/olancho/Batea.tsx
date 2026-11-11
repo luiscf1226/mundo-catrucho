@@ -86,7 +86,10 @@ const motor = defineMotor({
     return (
       <Taller nombre={m.parametros.nombre} aviso="Girá → pausá → F para inclinar">
         <group rotation-z={s.x * 0.5}>
-          <Cyl pos={[0, 0.6, 0]} r={3} h={0.6} color="#80512f" mat="wood" />
+          <Cyl pos={[0, 0.6, 0]} r={3} rTop={3.2} h={0.6} color="#c4a06b" mat="wood" />
+          {[-1, 1].map((x) => (
+            <Cyl key={x} pos={[x * 3.2, 0.7, 0]} r={0.35} h={0.16} color="#bd945e" mat="wood" solid={false} />
+          ))}
           <Cyl pos={[0, 0.94, 0]} r={2.7} h={0.08} color="#799c9e" mat="water" />
           {Array.from({ length: 18 }, (_, i) => (
             <Ball

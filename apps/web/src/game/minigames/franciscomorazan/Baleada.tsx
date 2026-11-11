@@ -1,5 +1,5 @@
 import { input } from '../../../core/input';
-import { Ball, Block, Cyl, Label } from '../../kit';
+import { Ball, Cyl, Label } from '../../kit';
 import { defineMotor, type Motor } from '../kit';
 import { cursorInicial, Mesa, movioPuntero } from './Mesa';
 
@@ -109,7 +109,9 @@ const motor = defineMotor({
       <Cyl pos={[0, 1.1, 0]} r={2.7} h={0.12} color="#edcf96" mat="sand" solid={false} />
       {[-1, 1].map((lado, i) => (
         <group key={lado} position={[lado * 2, 1.2, 0]} rotation-z={lado * (i ? m.datos.der : m.datos.izq) * 1.7}>
-          <Block pos={[0, 0.2, 0]} size={[1.6, 0.12, 3.4]} color="#f4dba4" mat="sand" solid={false} />
+          <group scale={[0.55, 1, 1]}>
+            <Cyl pos={[0, 0.2, 0]} r={1.75} h={0.12} color="#f4dba4" mat="sand" solid={false} />
+          </group>
         </group>
       ))}
       {[0, 1, 2, 3, 4, 5].map((i) => (

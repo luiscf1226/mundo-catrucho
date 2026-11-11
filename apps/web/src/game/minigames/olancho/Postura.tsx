@@ -1,6 +1,7 @@
 import { input } from '../../../core/input';
-import { Block, Cyl, Label } from '../../kit';
+import { Block, Label, P } from '../../kit';
 import { defineMotor, type Motor } from '../kit';
+import { Campesino } from '../kit/Figuras';
 import { duracion, metas, Taller } from './Taller';
 
 type Estado = { paso: number; agachado: boolean; buenas: number; golpes: number; auto: boolean; aviso: string };
@@ -78,21 +79,17 @@ const motor = defineMotor({
   Escena: ({ motor: m }) => {
     const s = m.datos;
     return (
-      <Taller nombre={m.parametros.nombre} aviso="W avanzá · F agachate · Maqueta, no talés" verde>
+      <Taller nombre={m.parametros.nombre} aviso="W avanzá · F agachate · Maqueta, no talés">
         <Block pos={[0, 0.05, 0]} size={[3, 0.1, 12]} color="#c6b391" mat="dirt" />
         {[0, 4].map((i) => (
           <group key={i}>
             <Block pos={[-1.6, 0.8, 5 - (i + 2.25) * 1.65]} size={[0.3, 1.6, 0.3]} color="#775136" mat="wood" />
-            <Block pos={[0, 1.8, 5 - (i + 2.25) * 1.65]} size={[3.5, 0.5, 2.8]} color="#49734d" mat="glass" />
+            <P.Tree pos={[-1.6, 0, 5 - (i + 2.25) * 1.65]} scale={0.65} solid={false} />
           </group>
         ))}
-        <Cyl
-          pos={[0, s.agachado ? 0.4 : 0.9, 5 - s.paso * 1.65]}
-          r={0.3}
-          h={s.agachado ? 0.8 : 1.8}
-          color="#e6a552"
-          mat="cloth"
-        />
+        <group position={[0, 0, 5 - s.paso * 1.65]}>
+          <Campesino agachado={s.agachado} />
+        </group>
         <Label pos={[3, 1, 1]} text={`Viento ${Math.round(m.parametros.viento * 100)}%`} h={0.35} />
       </Taller>
     );

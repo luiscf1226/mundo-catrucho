@@ -3,7 +3,9 @@ import { isPaused, useGame } from '../../../core/store';
 import type { AvatarState, MinigameId } from '../../../core/types';
 import { Label, useMgTick } from '../../kit';
 import { finish, type Guia, type Partida, partida, setHud, starsFor } from '../api';
+import type { Fondo } from '../corte/common';
 import { BotAvatar } from '../corte/common';
+import { Ambiente, AmbienteContext, fondoMotor } from './Ambiente';
 
 export interface Motor<P, S> {
   partida: Partida;
@@ -19,6 +21,7 @@ export interface Motor<P, S> {
 }
 interface Definicion<P, S> {
   id: MinigameId;
+  fondo?: Fondo;
   guia: Omit<Guia, 'metas'>;
   etapa: (p: Partida) => P;
   metas: (p: Partida) => [number, number, number];
@@ -163,13 +166,14 @@ export function defineMotor<P, S>(def: Definicion<P, S>) {
       };
     }, [sesion]);
     return (
-      <>
+      <AmbienteContext.Provider value={fondoMotor(def.id, m.partida.tema.fondo, def.fondo)}>
+        <Ambiente fondo={fondoMotor(def.id, m.partida.tema.fondo, def.fondo)} />
         <def.Escena motor={m} />
         {m.cuenta > 0 && <Label pos={[0, 4, 0]} text={`¡Preparáte! ${Math.ceil(m.cuenta)}`} h={0.7} />}
         {sesion.bots.map((b, i) => (
           <BotAvatar key={i} i={i} state={b} pos={[5 + i * 1.8, 0, -1]} yaw={-0.7} compa={m.partida.modo === 'duo'} />
         ))}
-      </>
+      </AmbienteContext.Provider>
     );
   }
   return { Escena: EscenaMotor, guia };

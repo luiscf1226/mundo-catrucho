@@ -63,6 +63,10 @@ const motor = defineMotor({
   Escena: ({ motor: m }) => (
     <Taller nombre={m.parametros.nombre} aviso="Peso gradual · Dejá salir el suero">
       <Block pos={[0, 0.45, 0]} size={[6, 0.9, 5]} color="#865c39" mat="wood" />
+      <Cyl pos={[0, 0.94, 0]} r={1.9} h={0.12} color="#d1dce0" mat="metal" solid={false} />
+      {[-1, 1].map((x) => (
+        <Block key={x} pos={[x * 1.9, 1.65, 0]} size={[0.16, 1.4, 0.2]} color="#b8976a" mat="wood" solid={false} />
+      ))}
       <Cyl pos={[0, 1.2, 0]} r={1.6} h={0.6} color="#fff0ca" mat="sand" />
       {Array.from({ length: m.datos.peso }, (_, i) => (
         <Block key={i} pos={[0, 1.7 + i * 0.3, 0]} size={[2.4, 0.25, 2]} color="#586772" mat="stone" />

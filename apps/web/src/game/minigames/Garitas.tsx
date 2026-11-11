@@ -79,11 +79,7 @@ const motor = defineMotor({
     guardar(m);
   },
   Escena: ({ motor: m }) => (
-    <Mesa
-      titulo="Visuales de Omoa"
-      texto={`Garita ${m.datos.garita + 1} · Cada esquina necesita dos miradas`}
-      color="#a7bd9a"
-    >
+    <Mesa titulo="Visuales de Omoa" texto={`Garita ${m.datos.garita + 1} · Cada esquina necesita dos miradas`}>
       <Block pos={[-1, 1, 0]} size={[2, 1, 1.4]} color="#9e957c" mat="stone" solid={false} />
       {esquinas.map(([x, z], g) => {
         const a = g === m.datos.garita ? m.datos.x * Math.PI : m.datos.angulos[g];
@@ -97,7 +93,9 @@ const motor = defineMotor({
               mat="stone"
               solid={false}
             />
-            <Label pos={[x, 2.4, z]} text={`${g + 1}`} h={0.35} />
+            <Cyl pos={[x, 2.08, z]} r={0.7} rTop={0.12} h={0.45} color="#c3b390" mat="stone" solid={false} />
+            <Block pos={[x, 1.65, z + 0.54]} size={[0.16, 0.3, 0.03]} color="#454c48" mat="stone" solid={false} />
+            <Label pos={[x, 2.8, z]} text={`${g + 1}`} h={0.35} />
             <group position={[x, 1.9, z]} rotation-y={a}>
               <Block pos={[0, 0, 1.3]} size={[0.12, 0.1, 2.6]} color="#ffe384" mat="neon" solid={false} />
               {[-1, 1].map((k) => (

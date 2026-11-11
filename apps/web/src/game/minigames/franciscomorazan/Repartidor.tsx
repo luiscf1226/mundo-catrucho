@@ -1,5 +1,5 @@
 import { input } from '../../../core/input';
-import { Ball, Block, Label } from '../../kit';
+import { Ball, Block, Label, P } from '../../kit';
 import { defineMotor, type Motor } from '../kit';
 import { cursorInicial, Mesa, movioPuntero } from './Mesa';
 
@@ -126,12 +126,11 @@ const motor = defineMotor({
           {c.colas.map((n, j) => (
             <group key={j}>
               {Array.from({ length: Math.min(n, 9) }, (_, k) => (
-                <Block
+                <P.Car
                   key={k}
-                  pos={[-3.2 + i * 4.8 + j * 1.4, 1.5, 2 - k * 0.4]}
-                  size={[0.6, 0.3, 0.3]}
+                  pos={[-3.2 + i * 4.8 + j * 1.4, 1.3, 2 - k * 0.4]}
+                  scale={0.17}
                   color={j ? '#ffc857' : '#5ac8ed'}
-                  mat="metal"
                   solid={false}
                 />
               ))}

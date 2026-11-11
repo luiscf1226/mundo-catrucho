@@ -1,8 +1,6 @@
-import { useLayoutEffect } from 'react';
 import { audio } from '../../core/audio';
 import { input } from '../../core/input';
-import { player } from '../../core/player';
-import { art, Ball, Block, Cyl, Ground, Label, P, Spawn } from '../kit';
+import { Ball, Block, Cyl, Label, Spawn } from '../kit';
 import { defineMotor, type Motor } from './kit';
 
 type Parametros = { calor: number; margen: number; nombre: string };
@@ -38,21 +36,9 @@ function sacar(m: Sesion) {
 }
 function Escena({ motor: m }: { motor: Sesion }) {
   const s = m.datos;
-  useLayoutEffect(() => {
-    player.control = false;
-    player.fixedCam = { pos: [0, 10, 13], target: [0, 1, 0], fov: 52 };
-    return () => {
-      player.control = true;
-      player.fixedCam = null;
-    };
-  }, []);
   return (
     <>
-      <art.SkyRig time="tarde" shadowRadius={25} />
-      <Ground size={80} color="#b4a078" mat="dirt" />
       <Spawn pos={[-5, 0, 3]} yaw={0.6} />
-      <P.House pos={[-9, 0, -9]} />
-      <P.Tree pos={[10, 0, -9]} />
       <Block pos={[0, 0.7, 0]} size={[8, 1.4, 7]} color="#934e32" mat="brick" />
       <Cyl pos={[0, 1.5, 0]} r={3.4} h={0.25} color="#414a50" mat="metal" solid={false} />
       <Label pos={[0, 5, -3]} text={m.parametros.nombre} h={0.65} fg="#ffe0a1" />

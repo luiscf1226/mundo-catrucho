@@ -1,8 +1,8 @@
-import { type ReactNode, useLayoutEffect } from 'react';
+import type { ReactNode } from 'react';
 import { input } from '../../../core/input';
-import { player } from '../../../core/player';
-import { art, Block, Ground, Label, Spawn } from '../../kit';
+import { Block, Label, Spawn } from '../../kit';
 import type { Guia } from '../api';
+import { useMesaMaterial } from '../kit/Ambiente';
 
 export const limitar = (v: number, a = -1, b = 1) => Math.max(a, Math.min(b, v));
 export type Cursor = { x: number; y: number; px: number; py: number; auto: boolean };
@@ -20,33 +20,14 @@ export function mover(s: Cursor, dt: number) {
   s.py = input.py;
   s.auto = false;
 }
-export function Mesa({
-  titulo,
-  texto,
-  children,
-  color = '#d7b98b',
-}: {
-  titulo: string;
-  texto: string;
-  children: ReactNode;
-  color?: string;
-}) {
-  useLayoutEffect(() => {
-    player.control = false;
-    player.fixedCam = { pos: [0, 12, 15], target: [0, 1, 0], fov: 52 };
-    return () => {
-      player.control = true;
-      player.fixedCam = null;
-    };
-  }, []);
+export function Mesa({ titulo, texto, children }: { titulo: string; texto: string; children: ReactNode }) {
+  const material = useMesaMaterial();
   return (
     <>
-      <art.SkyRig time="dia" shadowRadius={22} />
-      <Ground size={60} color={color} mat="sand" />
       <Spawn pos={[-6, 0, 3]} />
-      <Block pos={[-1, 0.35, 0]} size={[10, 0.7, 9]} mat="wood" color="#513f37" solid={false} />
-      <Label pos={[-1, 4.2, -4]} text={titulo} h={0.6} />
-      <Label pos={[-1, 3.5, -4]} text={texto} h={0.3} />
+      <Block pos={[-1, 0.35, 0]} size={[10, 0.7, 9]} {...material} solid={false} />
+      <Label pos={[-1, 0.7, 5.4]} text={titulo} h={0.6} />
+      <Label pos={[-1, 1.4, 4.5]} text={texto} h={0.3} />
       {children}
     </>
   );
