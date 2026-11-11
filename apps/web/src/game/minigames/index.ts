@@ -19,6 +19,7 @@ function motor(load: () => Promise<{ default: FC; guia?: Guia }>) {
   };
 }
 const MOTORS = {
+  'franciscomorazan.rosquilla': motor(() => import('./Rosquilla').then((m) => ({ ...m, default: m.Rosquilla }))),
   carrera: motor(() => import('./Carrera').then((m) => ({ ...m, default: m.Carrera }))),
   futbol: motor(() => import('./Futbol').then((m) => ({ ...m, default: m.Futbol }))),
   feria: motor(() => import('./Feria').then((m) => ({ ...m, default: m.Feria }))),
