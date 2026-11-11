@@ -33,7 +33,15 @@ export type MinigameId =
   | 'cortes.garitas'
   | 'cortes.merendon'
   | 'cortes.cusuco'
-  | 'cortes.topo';
+  | 'cortes.topo'
+  | 'islas.ballena'
+  | 'islas.coral'
+  | 'islas.bonacca'
+  | 'islas.estela'
+  | 'islas.flotacion'
+  | 'islas.colorprofundo'
+  | 'islas.cangrejo'
+  | 'islas.absorcion';
 /** solo = vos contra bots · duo = vos y un compa contra parejas · abierto = sala abierta (se llena con bots si no hay gente) */
 export type Modo = 'solo' | 'duo' | 'abierto';
 export type Vehiculo =

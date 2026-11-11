@@ -27,7 +27,7 @@ const JUEGO = {
   feria: 'atlantida.isidra',
   pulperia: 'franciscomorazan.pulperia',
   futbol: 'copan.pelota',
-  exploradores: 'islas.buceo',
+  exploradores: 'lapaz.pintadas',
 };
 
 // ------------------------------------------------------------------ bots (corren dentro de la página)
