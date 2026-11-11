@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useRef } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import type { Group } from 'three';
 import { audio } from '../../core/audio';
 import { SHOP } from '../../core/data';
@@ -6,6 +6,7 @@ import { input } from '../../core/input';
 import { player } from '../../core/player';
 import { useGame } from '../../core/store';
 import { art, Ball, Block, Ground, Label, P, Plate, useTick } from '../kit';
+import { AguaAire } from './escenas/AguaAire';
 import { usePruebaCamino } from './eventos/usePruebaCamino';
 import {
   createDrive,
@@ -17,8 +18,10 @@ import {
   vehicles,
 } from './model';
 import type { TramoRuta } from './routes';
+import { Nuevos, PasajerosPickup } from './vehiculos/Nuevos';
 
 export function Vehicle({ kind, bot = false }: { kind: VehicleKind; bot?: boolean }) {
+  if (['ferry', 'avioneta', 'bicitaxi', 'mototaxi'].includes(kind)) return <Nuevos kind={kind} />;
   const v = vehicles[kind],
     water = kind === 'lancha' || kind === 'cayuco';
   const two = kind === 'moto' || kind === 'bici',
@@ -30,7 +33,21 @@ export function Vehicle({ kind, bot = false }: { kind: VehicleKind; bot?: boolea
         <Block pos={[0, 0.35, 0]} size={[1.8, 0.5, v.length]} color={v.color} mat="wood" solid={false} />
         <Block pos={[0, 0.65, -1.8]} size={[1, 0.35, 1]} color={v.color} mat="wood" rot={0.3} solid={false} />
         <Block pos={[0, 0.7, 0]} size={[1.3, 0.15, 2]} color="#694226" mat="wood" solid={false} />
-        <Block pos={[0.8, 1, 0.2]} size={[0.12, 0.12, 3]} rot={0.7} color="#dfc596" mat="wood" solid={false} />
+        {kind === 'cayuco' ? (
+          <Block pos={[0.8, 1, 0.2]} size={[0.12, 0.12, 3]} rot={0.7} color="#dfc596" mat="wood" solid={false} />
+        ) : (
+          <Block pos={[0, 0.75, 2.3]} size={[0.7, 1.1, 0.6]} color="#253c49" mat="metal" solid={false} />
+        )}
+        {[-1, 1].map((side) => (
+          <Block
+            key={side}
+            pos={[side * 0.85, 0.75, 0]}
+            size={[0.16, 0.45, v.length]}
+            color={v.color}
+            mat="wood"
+            solid={false}
+          />
+        ))}
         {kind === 'lancha' && (
           <Block pos={[0, 1.8, 0]} size={[2, 0.18, 2.7]} color="#37a9b4" mat="cloth" solid={false} />
         )}
@@ -106,7 +123,7 @@ export function Vehicle({ kind, bot = false }: { kind: VehicleKind; bot?: boolea
         </>
       )}
       {kind === 'bus' && <Plate pos={[0, 2.6, v.length / 2 + 0.05]} text="ESCOLAR · HONDURAS" h={0.24} bg="#25221b" />}
-      {kind === 'pickup' && <P.Crate pos={[0, 1.2, 1.2]} scale={0.8} solid={false} />}
+      {kind === 'pickup' && <PasajerosPickup />}
       {two && <Ball pos={[0, 1.8, 0]} r={0.38} color="#e5be97" />}
       {bot && <Label pos={[0, 3.4, 0]} text="🤖 Compa" h={0.36} />}
     </group>
@@ -171,13 +188,22 @@ export function DrivingScene({
   modo?: string;
   onStep: (s: DriveState, dt: number) => void;
 }) {
-  const s = useMemo(() => createDrive(config), [config]);
+  const estado = useRef<DriveState | null>(null);
+  if (!estado.current) estado.current = createDrive(config);
+  const s = estado.current;
+  const medioAnterior = useRef(config.via);
+  if (medioAnterior.current !== config.via) {
+    s.traffic = createDrive(config).traffic;
+    s.speed = vehicles[config.veh].speed * 0.72;
+    medioAnterior.current = config.via;
+  }
   const car = useRef<Group>(null),
     road = useRef<Group>(null),
     sparks = useRef<Group>(null);
   const traffic = useRef<(Group | null)[]>([]),
     stops = useRef<(Group | null)[]>([]);
   const water = config.via === 'mar' || config.via === 'rio',
+    aire = config.via === 'cielo',
     city = tramo ? tramo.paisaje === 'ciudad' : config.via === 'ciudad';
   const coastal = ['costa', 'isla', 'sur'].includes(biome) || config.via === 'costa';
   useLayoutEffect(() => {
@@ -196,7 +222,15 @@ export function DrivingScene({
     const honk = input.take('fire'),
       ev = stepDrive(s, config, dt, input.mx, input.mz, honk);
     onRoadStep?.(s, dt);
-    if (honk) audio.sfx('horn');
+    if (honk) {
+      if (['bicitaxi', 'cayuco', 'lancha', 'ferry', 'avioneta'].includes(config.veh))
+        audio.tone(
+          config.veh === 'bicitaxi' ? 880 : config.veh === 'cayuco' ? 180 : config.veh === 'avioneta' ? 120 : 90,
+          0.25,
+          { gain: 0.05 },
+        );
+      else audio.sfx('horn');
+    }
     if (ev.collision) {
       audio.sfx('hit');
       useGame.getState().toast(water ? '¡Cuidado con la lancha!' : '¡Suave, maje!', '💥');
@@ -216,9 +250,9 @@ export function DrivingScene({
         );
     if (car.current) {
       car.current.position.x = s.x;
-      car.current.rotation.z = (-input.mx * 0.035 * s.speed) / 20;
+      car.current.rotation.z = (water ? Math.sin(s.elapsed * 1.7) * 0.045 : 0) + (-input.mx * 0.035 * s.speed) / 20;
       car.current.rotation.y = -input.mx * 0.07;
-      car.current.position.y = Math.sin(s.elapsed * 12) * (water ? 0.08 : 0.018) + s.shake * 0.13;
+      car.current.position.y = Math.sin(s.elapsed * 12) * (water || aire ? 0.15 : 0.018) + s.shake * 0.13;
     }
     if (road.current) road.current.position.z = s.distance % 32;
     s.traffic.forEach((a, i) => {
@@ -258,7 +292,7 @@ export function DrivingScene({
         fogFar={clima ? 65 : 155}
         shadowRadius={32}
       />
-      {(biome === 'lago' || biome === 'puente') && (
+      {!water && !aire && (biome === 'lago' || biome === 'puente') && (
         <>
           <Block
             pos={[biome === 'puente' ? 0 : -35, 0.005, -48]}
@@ -273,114 +307,130 @@ export function DrivingScene({
             ))}
         </>
       )}
-      <Ground size={380} color={coastal ? '#c4ba7e' : '#648d46'} mat={coastal ? 'sand' : 'grass'} />
-      <Ground
-        size={[15.5, 310]}
-        pos={[0, 0, -115]}
-        y={0.018}
-        color={water ? '#258fa7' : config.via === 'montana' ? '#977255' : '#3a4349'}
-        mat={water ? 'water' : config.via === 'montana' ? 'dirt' : 'asphalt'}
-      />
-      {!water &&
-        [-7.4, 7.4].map((x) => (
-          <Block key={x} pos={[x, 0.04, -100]} size={[0.14, 0.035, 260]} color="#faf0c9" solid={false} />
-        ))}
-      <group ref={road}>
-        {Array.from({ length: 9 }, (_, i) => (
-          <group key={i} position={[0, 0, -i * 32]}>
-            {!water &&
-              [-1.8, 1.8].map((x) => (
-                <Block key={x} pos={[x, 0.04, -8]} size={[0.12, 0.035, 7]} color="#f7dc85" solid={false} />
-              ))}
-            {[-1, 1].map((side) => (
+      {water || aire ? (
+        <AguaAire aire={aire} rio={config.via === 'rio'} distance={() => s.distance} />
+      ) : (
+        <>
+          <Ground size={380} color={coastal ? '#c4ba7e' : '#648d46'} mat={coastal ? 'sand' : 'grass'} />
+          <Ground
+            size={[15.5, 310]}
+            pos={[0, 0, -115]}
+            y={0.018}
+            color={water ? '#258fa7' : config.via === 'montana' ? '#977255' : '#3a4349'}
+            mat={water ? 'water' : config.via === 'montana' ? 'dirt' : 'asphalt'}
+          />
+          {!water &&
+            [-7.4, 7.4].map((x) => (
+              <Block key={x} pos={[x, 0.04, -100]} size={[0.14, 0.035, 260]} color="#faf0c9" solid={false} />
+            ))}
+          <group ref={road}>
+            {Array.from({ length: 9 }, (_, i) => (
+              <group key={i} position={[0, 0, -i * 32]}>
+                {!water &&
+                  [-1.8, 1.8].map((x) => (
+                    <Block key={x} pos={[x, 0.04, -8]} size={[0.12, 0.035, 7]} color="#f7dc85" solid={false} />
+                  ))}
+                {[-1, 1].map((side) => (
+                  <group key={side}>
+                    {city ? (
+                      <>
+                        <Block
+                          pos={[side * (14 + (i % 3) * 3), 3 + (i % 2) * 2, -8]}
+                          size={[7, 6 + (i % 2) * 4, 10]}
+                          color={['#dca46e', '#a1bdad', '#e9c39a'][i % 3]}
+                          mat="stucco"
+                          solid={false}
+                        />
+                        <Block
+                          pos={[side * (14 + (i % 3) * 3), 2.7, -2.9]}
+                          size={[4.7, 1.7, 0.1]}
+                          color="#557b88"
+                          mat="glass"
+                          solid={false}
+                        />
+                        <Block
+                          pos={[side * (10.45 + (i % 3) * 3), 3.5, -8]}
+                          size={[0.12, 1.4, 7]}
+                          color="#365966"
+                          mat="glass"
+                          solid={false}
+                        />
+                        <Block
+                          pos={[side * (10.45 + (i % 3) * 3), 0.95, -7]}
+                          size={[0.12, 1.9, 1.3]}
+                          color="#78553d"
+                          mat="wood"
+                          solid={false}
+                        />
+                        <Block
+                          pos={[side * (10.4 + (i % 3) * 3), 5, -8]}
+                          size={[0.18, 0.18, 10]}
+                          color="#f2dcc1"
+                          mat="concrete"
+                          solid={false}
+                        />
+                      </>
+                    ) : coastal || water ? (
+                      <P.Palm pos={[side * (12 + (i % 3) * 4), 0, -9]} scale={1.1} solid={false} />
+                    ) : biome === 'valle' ? (
+                      <P.Tree pos={[side * (13 + (i % 3) * 5), 0, -8]} scale={1.1} solid={false} />
+                    ) : (
+                      <P.Pine pos={[side * (13 + (i % 3) * 5), 0, -8]} scale={1.2} solid={false} />
+                    )}
+                    {!water && (
+                      <Block
+                        pos={[side * 8.7, 0.5, -9]}
+                        size={[0.18, 1, 3]}
+                        color="#e6ddd0"
+                        mat="concrete"
+                        solid={false}
+                      />
+                    )}
+                  </group>
+                ))}
+              </group>
+            ))}
+            <group position={[8.7, 0, -38]} rotation-y={-0.8}>
+              <art.Avatar config={SHOP.defaultAvatar} state={{ anim: 'wave', speed: 0 }} />
+            </group>
+            <P.Stall pos={[10, 0, -40]} sign={city ? 'BALEADAS · L 15' : 'CAFÉ DEL CAMINO'} solid={false} />
+            <P.Sign
+              pos={[-10, 0, -58]}
+              text={tramo ? `${tramo.carretera} · ${tramo.nombre}` : `Bienvenidos a ${destination}`}
+              w={6}
+              solid={false}
+            />
+            <P.Sign
+              pos={[10, 0, -115]}
+              text={
+                tramo
+                  ? `${tramo.salida} → ${tramo.llegada}`
+                  : water
+                    ? 'Cuidá el río'
+                    : 'Bajá la velocidad · Hay túmulos'
+              }
+              w={5}
+              solid={false}
+            />
+          </group>
+          {tramo && <Plate pos={[-10, 2.5, -10]} text={tramo.carretera} h={0.42} bg="#176c45" />}
+          {!city &&
+            (!tramo || biome === 'montana' || biome === 'pinar') &&
+            [-1, 1].map((side) => (
               <group key={side}>
-                {city ? (
-                  <>
-                    <Block
-                      pos={[side * (14 + (i % 3) * 3), 3 + (i % 2) * 2, -8]}
-                      size={[7, 6 + (i % 2) * 4, 10]}
-                      color={['#dca46e', '#a1bdad', '#e9c39a'][i % 3]}
-                      mat="stucco"
-                      solid={false}
-                    />
-                    <Block
-                      pos={[side * (14 + (i % 3) * 3), 2.7, -2.9]}
-                      size={[4.7, 1.7, 0.1]}
-                      color="#557b88"
-                      mat="glass"
-                      solid={false}
-                    />
-                    <Block
-                      pos={[side * (10.45 + (i % 3) * 3), 3.5, -8]}
-                      size={[0.12, 1.4, 7]}
-                      color="#365966"
-                      mat="glass"
-                      solid={false}
-                    />
-                    <Block
-                      pos={[side * (10.45 + (i % 3) * 3), 0.95, -7]}
-                      size={[0.12, 1.9, 1.3]}
-                      color="#78553d"
-                      mat="wood"
-                      solid={false}
-                    />
-                    <Block
-                      pos={[side * (10.4 + (i % 3) * 3), 5, -8]}
-                      size={[0.18, 0.18, 10]}
-                      color="#f2dcc1"
-                      mat="concrete"
-                      solid={false}
-                    />
-                  </>
-                ) : coastal || water ? (
-                  <P.Palm pos={[side * (12 + (i % 3) * 4), 0, -9]} scale={1.1} solid={false} />
-                ) : biome === 'valle' ? (
-                  <P.Tree pos={[side * (13 + (i % 3) * 5), 0, -8]} scale={1.1} solid={false} />
-                ) : (
-                  <P.Pine pos={[side * (13 + (i % 3) * 5), 0, -8]} scale={1.2} solid={false} />
-                )}
-                {!water && (
-                  <Block pos={[side * 8.7, 0.5, -9]} size={[0.18, 1, 3]} color="#e6ddd0" mat="concrete" solid={false} />
-                )}
+                {[0, 1, 2, 3].map((i) => (
+                  <group
+                    key={i}
+                    position={[side * (38 + (i % 2) * 17), -3, -45 - i * 40]}
+                    scale={[17 + i * 3, 20 + i * 4, 23]}
+                  >
+                    <Ball pos={[0, 0, 0]} r={1} mat="grass" color={i % 2 ? '#638768' : '#71966f'} />
+                  </group>
+                ))}
               </group>
             ))}
-          </group>
-        ))}
-        <group position={[8.7, 0, -38]} rotation-y={-0.8}>
-          <art.Avatar config={SHOP.defaultAvatar} state={{ anim: 'wave', speed: 0 }} />
-        </group>
-        <P.Stall pos={[10, 0, -40]} sign={city ? 'BALEADAS · L 15' : 'CAFÉ DEL CAMINO'} solid={false} />
-        <P.Sign
-          pos={[-10, 0, -58]}
-          text={tramo ? `${tramo.carretera} · ${tramo.nombre}` : `Bienvenidos a ${destination}`}
-          w={6}
-          solid={false}
-        />
-        <P.Sign
-          pos={[10, 0, -115]}
-          text={
-            tramo ? `${tramo.salida} → ${tramo.llegada}` : water ? 'Cuidá el río' : 'Bajá la velocidad · Hay túmulos'
-          }
-          w={5}
-          solid={false}
-        />
-      </group>
-      {tramo && <Plate pos={[-10, 2.5, -10]} text={tramo.carretera} h={0.42} bg="#176c45" />}
-      {!city &&
-        (!tramo || biome === 'montana' || biome === 'pinar') &&
-        [-1, 1].map((side) => (
-          <group key={side}>
-            {[0, 1, 2, 3].map((i) => (
-              <group
-                key={i}
-                position={[side * (38 + (i % 2) * 17), -3, -45 - i * 40]}
-                scale={[17 + i * 3, 20 + i * 4, 23]}
-              >
-                <Ball pos={[0, 0, 0]} r={1} mat="grass" color={i % 2 ? '#638768' : '#71966f'} />
-              </group>
-            ))}
-          </group>
-        ))}
+        </>
+      )}
       {s.traffic.map((a, i) => (
         <group
           key={i}
@@ -414,7 +464,7 @@ export function DrivingScene({
           </group>
         ))}
       {camino}
-      <group ref={car}>
+      <group ref={car} userData={{ vehiculo: config.veh }}>
         <Vehicle kind={config.veh} />
       </group>
       <group ref={sparks} visible={false}>

@@ -7,7 +7,8 @@ import { DrivingScene } from './DrivingScene';
 import { EscenaCamino } from './eventos/EscenaCamino';
 import { iniciarCamino, pasoCamino, useCamino } from './eventos/state';
 import type { DriveConfig } from './model';
-import { lineaDeViaje, resolverRuta } from './routes';
+import { rutaParaVehiculo } from './opciones';
+import { lineaDeViaje } from './routes';
 import { RADIOS, useViaje } from './state';
 export function Viaje({ veh, to }: { veh: Vehiculo; to: string }) {
   const dept = deptById(to),
@@ -15,17 +16,37 @@ export function Viaje({ veh, to }: { veh: Vehiculo; to: string }) {
     clock = useRef(0);
   const scene = useGame((s) => s.scene);
   const from = scene.kind === 'viaje' ? scene.from : 'franciscomorazan';
-  const ruta = useMemo(() => resolverRuta(from, to), [from, to]);
+  const ruta = useMemo(() => rutaParaVehiculo(veh, from, to), [veh, from, to]);
   const clima = useCamino((s) => s.activa?.accion);
   const linea = useViaje((s) => s.linea);
+  const medio = (useViaje.getState().ruta === ruta ? linea?.tramo?.medio : null) ?? ruta?.tramos[0]?.medio;
+  const activo = medio === 'carretera' && ['ferry', 'lancha', 'avioneta'].includes(veh) ? 'taxi' : veh;
+  const via =
+    medio === 'avioneta'
+      ? 'cielo'
+      : medio === 'ferry' || medio === 'lancha'
+        ? 'mar'
+        : veh === 'cayuco'
+          ? 'rio'
+          : ['bicitaxi', 'mototaxi'].includes(veh)
+            ? 'ciudad'
+            : 'carretera';
   const config = useMemo<DriveConfig>(
-    () => ({ veh, via: 'carretera', difficulty: 0.35, trip: true, seed: 504 }),
-    [veh],
+    () => ({ veh: activo, via, difficulty: 0.35, trip: true, seed: 504 }),
+    [activo, via],
   );
   useLayoutEffect(() => {
     iniciarCamino(ruta);
     const radio = veh === 'taxi' ? 2 : veh === 'bus' ? 3 : 0;
-    useViaje.setState({ progress: 0, hits: 0, speed: 0, radio, ruta, linea: ruta ? lineaDeViaje(ruta, 0) : null });
+    useViaje.setState({
+      progress: 0,
+      hits: 0,
+      speed: 0,
+      x: 0,
+      radio,
+      ruta,
+      linea: ruta ? lineaDeViaje(ruta, 0) : null,
+    });
     audio.music(RADIOS[radio].track);
   }, [veh, ruta]);
   return (
@@ -46,7 +67,7 @@ export function Viaje({ veh, to }: { veh: Vehiculo; to: string }) {
         const progress = linea.posicion;
         if (clock.current > 0.12) {
           clock.current = 0;
-          useViaje.setState({ linea, progress, hits: s.hits, speed: Math.round(s.speed * 3.6) });
+          useViaje.setState({ linea, progress, hits: s.hits, x: s.x, speed: Math.round(s.speed * 3.6) });
         }
         if (progress >= 1 && !done.current) {
           done.current = true;
