@@ -29,8 +29,7 @@ function overviewFit(cam: THREE.PerspectiveCamera) {
   return { dist: Math.max(across / 2 / th, along / 2 / tv), yaw: portrait ? -Math.PI / 2 : 0 };
 }
 const angLerp = (a: number, b: number, k: number) => a + Math.atan2(Math.sin(b - a), Math.cos(b - a)) * k;
-/** Animación de cada emote (también la usan los avatares remotos). */
-export const EMOTE_ANIM: Record<string, Anim> = {
+const EMOTE_ANIM: Record<string, Anim> = {
   emote_saludar: 'wave',
   emote_punta: 'dance',
   emote_celebrar: 'celebrate',
