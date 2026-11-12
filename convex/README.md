@@ -40,9 +40,65 @@ cambia `tokenDe`.
   motor sin fila en `TOPES` → `rechazada`; más de 30 min → `vencida`; ajena, ya cerrada o abandonada → no se toca.
   Todo motor de `minigames.json` y del catálogo tiene que tener fila en `TOPES` (lo revisa `topes.test.mjs`).
 
-Pendiente para MC-15 y MC-16: con Convex, el juego no suma Lempiritas ni XP por monedas sueltas, primera visita,
-recuerdos, misiones, logros ni bono de viaje, y no cobra pasajes ni comida del viaje (`gainCoins`/`gainXp` no hacen
-nada con `VITE_CONVEX_URL`). Solo pagan las partidas validadas y solo cobra la tienda.
+Si la partida paga, `cerrarPartida` también guarda el avance (MC-15): `progresoJuegos` (etapa desbloqueada,
+estrellas por etapa, mejor puntaje y veces; también para los minijuegos sueltos, con el motor como id), la visita
+del departamento del juego (la primera paga) y la mejor marca del jugador en `marcas`. Avanza las misiones de hoy y
+da los logros que se cumplan. `abrirPartida` rechaza una etapa que todavía no está desbloqueada (`etapa bloqueada`).
+La respuesta trae `saldo`, `logros` (lo que pagó cada uno), `misiones` y `progreso`.
+
+## Avance, misiones, logros y clasificación (MC-15, MC-16, MC-17)
+
+Todo responde `{ ok, saldo, subidas, logros, misiones }` además de lo propio. Las cantidades salen de
+`packages/reglas` (`progreso.ts`), `rewards.json`, `progress.json` y `shop.json`; nunca del navegador.
+
+- `progreso:estado` (consulta): visitas, recuerdos, logros, misiones de hoy, avance por juego y si ya subió el
+  avance local.
+- `progreso:visitar { deptId }`: la primera visita paga. `progreso:recoger { deptId }`: el recuerdo, una sola vez y
+  solo si visitó el departamento (`sin-visita`, `ya`).
+- `progreso:recogerMonedas { cantidad }`: monedas sueltas en tandas, con cubeta (20 de golpe, una cada 1,5 s) y tope
+  de 300 por día de Honduras. Lo demás se ignora.
+- `progreso:registrarEmote`: cuenta un emote cada 2 s como mucho (logro «Bailarín» y misión de emotes).
+- `progreso:cobrarMision { misionId }`: valida que sea de hoy, esté completa y sin cobrar (`incompleta`, `cobrada`,
+  `no`); paga lo de `progress.json`.
+- `progreso:salirDeViaje { veh, de, a }`: cobra `PASAJES[veh]` (copia de los precios del juego; `progreso.test.mjs`
+  revisa que no se desfasen). `progreso:llegarViaje { viajeId, bono }`: paga `bonoViaje` solo si pasaron
+  `VIAJE_MIN_S` (40 s, de `viajes.json`) según el servidor, una vez. `progreso:gastar { monto, concepto }`: comida y
+  peaje del camino (1–50, con saldo).
+- `progreso:subirAvanceLocal { visitados, recuerdos, juegos }` (MC-08): una sola vez por jugador sube lo guardado en
+  el navegador sin dar premios: departamentos que existen, recuerdos de departamentos visitados y etapas y estrellas
+  dentro de cada juego del catálogo. Las marcas no suben y los logros que ya cumpla quedan marcados sin pagar.
+- `misiones:repartir` (interna): la corre `crons.ts` a las 06:00 UTC (medianoche de Honduras) y guarda en
+  `misionesGlobales` las misiones del día, sorteadas con la fecha (las mismas para todos). Cada jugador recibe su
+  copia en `misionesDia` la primera vez que hace algo ese día.
+- Logros: los da el servidor una sola vez (`logros`), por partida (`primera_victoria`, `goleador`, `punteria`,
+  `explorador`, `pulpero`) o por estado (visitas, recuerdos, compras, prendas típicas puestas, nivel, emotes).
+  «Primeros pasos» llega con `tienda:entrar { creado: true }`; «A la moda» y «Traje típico» con la tienda.
+- `clasificacion:porJuego { juegoId, invitado? }` y `clasificacion:porDepto { deptId, invitado? }`: los 10 mejores
+  (índices `por_juego` y `por_dept` de `marcas`), la mejor marca por jugador y su nombre limpio; `tuya` si no entraste.
+- `progreso:olvidarInvitado { invitado }` (interna): borra a un invitado y todo lo suyo. Las pruebas la usan para
+  no dejar marcas en la clasificación de desarrollo.
+
+Tablas nuevas: `contadores` (emotes, ritmo de monedas, «entró», avance local subido), `misionesGlobales` y `viajes`.
+
+```bash
+npx convex run misiones:repartir '{}'
+node apps/web/tools/test-progreso-servidor.mjs   # de punta a punta; capturas en capturas/mc-17/
+```
+
+El bono de viaje lo calcula el navegador (choques), así que además de la duración mínima tiene tope por día de
+Honduras (`BONOS_VIAJE_DIA`, 90).
+
+Confianza aceptada mientras todos sean invitados (cualquiera puede crear identidades nuevas): la primera visita y
+el recuerdo de cada departamento se pagan sin probar que estuvo ahí (como el mapa, que deja viajar gratis), y
+«Primeros pasos» y los emotes los declara el navegador. Todo eso paga una sola vez o con pausa. El avance local que
+sube puede desbloquear etapas (no paga, pero las etapas difíciles permiten más puntos en la tabla).
+
+Pendiente:
+- Las monedas, lo comprado y lo puesto del navegador no suben al servidor (eso pagaría sin validar). El nombre de
+  invitado se puede repetir hasta que lleguen las cuentas (MC-07).
+- La tabla por departamento compara puntos de juegos distintos (escalas distintas); `tuya` solo se busca entre las
+  400 mejores marcas del departamento.
+- La ruta del viaje (`rutaParaVehiculo`) solo la revisa el navegador.
 
 La lógica pura vive en `packages/reglas` (`tienda.ts`, `partidas.ts`) y se prueba con `node --test`.
 
