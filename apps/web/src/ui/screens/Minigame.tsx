@@ -9,6 +9,7 @@ import { motorGuide } from '../../game/minigames';
 import { partida } from '../../game/minigames/api';
 import { Coin, Icon, type IconName, Star } from '../components/Icon';
 import { Btn, Confetti, Stars, Tag } from '../components/kit';
+import { FinalJuntos } from '../Juntos';
 import { LoadingScreen } from '../LoadingScreen';
 import { cx, fmtTime, g, useCountUp, useTouch } from '../lib';
 
@@ -427,7 +428,7 @@ export function MgResults() {
             ))}
           </div>
         )}
-        {j && (
+        {j && !mg.juntos && (
           <div data-testid="mg-result-etapa" className="mc-label">
             {completo
               ? `¡Completaste las ${j.etapas} etapas!`
@@ -436,7 +437,8 @@ export function MgResults() {
                 : `Etapa ${mg.etapa + 1} de ${j.etapas}`}
           </div>
         )}
-        {mg.ranking && (
+        {mg.juntos && <FinalJuntos />}
+        {mg.ranking && !mg.juntos && (
           <ol data-testid="mg-ranking" className="mc-card flex w-full flex-col gap-0.5 px-3 py-1.5 text-left text-sm">
             {mg.ranking.slice(0, 5).map((row, i) => (
               <li
@@ -455,9 +457,11 @@ export function MgResults() {
         )}
         {!r.won && <p className="text-sm text-muted">No pasa nada. ¡Dale otra vez, que sí se puede!</p>}
         <div className="mt-1 flex w-full gap-2">
-          <Btn id="mg-replay" tone="primary" icon="refresh" cls="flex-1" onClick={() => g().replayMinigame()}>
-            {sigue ? 'Siguiente etapa' : 'Otra vez'}
-          </Btn>
+          {!mg.juntos && (
+            <Btn id="mg-replay" tone="primary" icon="refresh" cls="flex-1" onClick={() => g().replayMinigame()}>
+              {sigue ? 'Siguiente etapa' : 'Otra vez'}
+            </Btn>
+          )}
           <Btn id="mg-exit" tone="gold" icon="home" cls="flex-1" onClick={() => g().exitMinigame()}>
             {mg.origen.kind === 'dept' ? 'Volver' : 'Al lobby'}
           </Btn>

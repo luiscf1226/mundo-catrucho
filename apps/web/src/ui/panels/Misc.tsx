@@ -12,6 +12,7 @@ import { playEmote } from '../../game/PlayerController';
 import { IS_HD } from '../../variant';
 import { Coin, Icon, type IconName } from '../components/Icon';
 import { Bar, Btn, Coins, Note, Panel, Tabs, Tag } from '../components/kit';
+import { JugarConAlguien } from '../Juntos';
 import { act, copyText, cx, EMOTE_ICON, g, roomLabel, usePad, useTouch } from '../lib';
 
 // ------------------------------------------------------------------ misiones del día
@@ -340,7 +341,9 @@ const deptName = (id: string) => DEPARTMENTS.find((d) => d.id === id)?.name ?? i
 function SalasEnVivo() {
   const room = useGame((s) => s.profile.room),
     { estado, sala, otros } = useSala(),
-    gente = net.players().filter((p) => p.listo);
+    todos = net.players().filter((p) => p.listo),
+    gente = todos.filter((p) => !p.bot),
+    bots = todos.length - gente.length;
   const solo = room.mode === 'solo';
   return (
     <Panel id="salas" title="Salas" icon="users" size="md">
@@ -391,6 +394,12 @@ function SalasEnVivo() {
           </div>
         </>
       )}
+      {!solo && bots > 0 && (
+        <p data-testid="room-bots" className="mc-label mt-2">
+          🤖 {bots} {bots === 1 ? 'bot' : 'bots'} de relleno mientras llega más gente (no cuentan)
+        </p>
+      )}
+      {!solo && sala && <JugarConAlguien />}
       <Note cls="mt-3">
         Cada zona (el mapa y cada departamento) tiene salas de {SALA.cupo}. Si una se llena, entrás a la siguiente. Al
         viajar cambiás de sala solo.

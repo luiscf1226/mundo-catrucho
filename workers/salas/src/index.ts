@@ -6,7 +6,9 @@
 // tiene cupo de `SALA.cupo`; `GET /libre/<zona>` dice cuál es el primer tramo con espacio (MC-20).
 // Los rechazos se avisan cerrando el WebSocket con un código propio: el navegador no deja leer el estado HTTP.
 //
-// Falta: avisar la ocupación a Convex cada 30 s (para mostrar salas en el menú sin preguntarle a la sala).
+// Salas cerradas: `juego:<partidaId>` (partida entre amigos, MC-25, `partida.ts`) y `viaje:<id>` (viaje compartido,
+// MC-31, `viaje.ts`). Las de zona avisan su ocupación a Convex (`ocupacion.ts`) y, con poca gente, traen bots de
+// relleno (`bots.ts`, MC-23).
 
 import { DurableObject } from 'cloudflare:workers';
 import {
@@ -16,6 +18,7 @@ import {
   cubetaNueva,
   emoteValido,
   nombreSala,
+  partirSalaCerrada,
   permitirMensaje,
   SALA,
   SECRETO_MIN,
@@ -23,12 +26,19 @@ import {
   verificarPase,
   zonaValida,
 } from '@mundo-catrucho/reglas';
+import { botsDe, cambiosDeBots, cuantosBots } from './bots';
 import { esDeChat, recibirChat } from './chat';
+import { invitacionValida } from './comun';
+import { alarmaOcupacion, type EnvOcupacion, programarOcupacion } from './ocupacion';
+import { alarmaPartida, entrarPartida, mensajePartida, salirPartida } from './partida';
+import { entrarViaje, mensajeViaje, salirViaje } from './viaje';
 
-export interface Env {
+export interface Env extends EnvOcupacion {
   SALAS: DurableObjectNamespace<Sala>;
   /** secreto compartido con Convex para verificar pases; va en `wrangler secret put` o en `.dev.vars` */
   SALA_SECRETO: string;
+  /** solo pruebas: reloj corto para las partidas */
+  PARTIDA_SEGUNDOS?: string;
 }
 const CIERRE = SALA.cierre;
 interface Jugador {
@@ -87,6 +97,19 @@ export class Sala extends DurableObject<Env> {
     }
     const v = await verificarPase(url.searchParams.get('pase'), this.env.SALA_SECRETO, sala);
     if (!v.ok) return rechazar(v.motivo === 'otra-sala' ? CIERRE.otraSala : CIERRE.pase, v.motivo);
+    await this.ctx.storage.put('sala', sala);
+    const cerrada = partirSalaCerrada(sala);
+    if (cerrada?.tipo === 'juego')
+      return entrarPartida(
+        this.ctx,
+        this.env.SALA_SECRETO,
+        sala,
+        cerrada.id,
+        v.pase,
+        url.searchParams.get('acta'),
+        Number(this.env.PARTIDA_SEGUNDOS) || undefined,
+      );
+    if (cerrada) return entrarViaje(this.ctx, sala, v.pase);
     // el mismo jugador entrando otra vez (otra pestaña o reconexión): se va la conexión vieja
     for (const w of this.conectados())
       if ((w.deserializeAttachment() as Jugador | null)?.id === v.pase.id) {
@@ -94,8 +117,8 @@ export class Sala extends DurableObject<Env> {
         this.difundir({ t: 'sale', id: v.pase.id }, w);
         w.serializeAttachment(null);
       }
-    if (this.conectados().filter((w) => w.deserializeAttachment()).length >= SALA.cupo)
-      return rechazar(CIERRE.llena, 'llena');
+    const antes = this.conectados().filter((w) => w.deserializeAttachment()).length;
+    if (antes >= SALA.cupo) return rechazar(CIERRE.llena, 'llena');
     const { id, nombre, avatar, bloqueados = [] } = v.pase;
     const yo: Jugador = { id, nombre, avatar, x: 0, y: 0, z: 0, yaw: 0, anim: 'idle', sala, bloqueados };
     const [cliente, servidor] = Object.values(new WebSocketPair());
@@ -109,13 +132,16 @@ export class Sala extends DurableObject<Env> {
         jugadores: this.jugadores(servidor)
           .filter(Boolean)
           .map(({ sala: _s, bloqueados: _b, ...j }) => j),
+        bots: botsDe(sala, cuantosBots(antes + 1)),
       }),
     );
     this.difundir({ t: 'entra', id, nombre, avatar }, servidor);
+    for (const b of cambiosDeBots(sala, antes, antes + 1)) this.difundir(b, servidor);
+    await programarOcupacion(this.ctx, this.env, sala);
     return new Response(null, { status: 101, webSocket: cliente });
   }
 
-  webSocketMessage(ws: WebSocket, raw: string | ArrayBuffer) {
+  async webSocketMessage(ws: WebSocket, raw: string | ArrayBuffer) {
     if (typeof raw !== 'string' || raw.length > SALA.mensajeMax) return;
     const yo = ws.deserializeAttachment() as Jugador | null;
     if (!yo) return;
@@ -128,6 +154,9 @@ export class Sala extends DurableObject<Env> {
     } catch {
       return;
     }
+    const tipo = (yo as { tipo?: string }).tipo;
+    if (tipo === 'juego') return mensajePartida(this.ctx, ws, m);
+    if (tipo === 'viaje') return mensajeViaje(this.ctx, String((yo as { sala?: string }).sala), ws, m);
     if (m.t === 'pos') {
       yo.x = acotarEje('x', m.x);
       yo.y = acotarEje('y', m.y);
@@ -140,12 +169,28 @@ export class Sala extends DurableObject<Env> {
       this.difundir({ t: 'emote', id: yo.id, emote: m.id }, ws);
     } else if (esDeChat(m)) {
       return recibirChat(this.ctx.getWebSockets(), ws, yo, m, this.env.SALA_SECRETO);
+    } else if (m.t === 'invita') {
+      const inv = invitacionValida(m);
+      if (inv) this.difundir({ t: 'invita', id: yo.id, ...inv }, ws);
     }
   }
-  webSocketClose(ws: WebSocket) {
+  async webSocketClose(ws: WebSocket) {
     const yo = ws.deserializeAttachment() as Jugador | null;
+    const tipo = (yo as { tipo?: string } | null)?.tipo;
+    if (tipo === 'juego') return salirPartida(this.ctx, ws);
+    if (tipo === 'viaje') return salirViaje(this.ctx, ws);
     if (yo) this.difundir({ t: 'sale', id: yo.id }, ws);
     ws.serializeAttachment(null);
+    if (!yo) return;
+    const sala = await this.ctx.storage.get<string>('sala');
+    const quedan = this.conectados().filter((w) => w.deserializeAttachment()).length;
+    if (sala) for (const b of cambiosDeBots(sala, quedan + 1, quedan)) this.difundir(b);
+  }
+  /** Alarma: fin del reloj en una partida; aviso de ocupación en las salas de zona. */
+  async alarm() {
+    const sala = await this.ctx.storage.get<string>('sala');
+    if (partirSalaCerrada(sala)?.tipo === 'juego') return alarmaPartida(this.ctx, this.env.SALA_SECRETO);
+    if (sala && !partirSalaCerrada(sala)) return alarmaOcupacion(this.ctx, this.env, sala);
   }
   webSocketError(ws: WebSocket) {
     this.webSocketClose(ws);
@@ -162,7 +207,8 @@ export default {
     const m = pathname.match(/^\/sala\/([^/]{1,64})$/);
     if (m) {
       const nombre = decodeURIComponent(m[1]);
-      if (!salaValida(nombre)) return new Response('sala inválida', { status: 404, headers: CORS });
+      if (!salaValida(nombre) && !partirSalaCerrada(nombre))
+        return new Response('sala inválida', { status: 404, headers: CORS });
       return sala(env, nombre).fetch(req);
     }
     // /libre/mapa   /libre/dept:olancho   → primer tramo con espacio

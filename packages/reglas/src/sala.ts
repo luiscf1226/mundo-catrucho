@@ -70,6 +70,12 @@ export const salaValida = (nombre: unknown): nombre is string => partirSala(nomb
 /** Zona válida para pedir tramo: `mapa` o `dept:<id>`. */
 export const zonaValida = (zona: unknown): zona is string => typeof zona === 'string' && salaValida(`${zona}:0`);
 export const nombreSala = (zona: string, tramo: number) => `${zona}:${tramo}`;
+/** Salas cerradas: una partida entre amigos (`juego:<partidaId>`, MC-25) o un viaje compartido (`viaje:<id>`, MC-31). */
+const SALA_CERRADA = /^(juego|viaje):([A-Za-z0-9_-]{6,40})$/;
+export function partirSalaCerrada(nombre: unknown): { tipo: 'juego' | 'viaje'; id: string } | null {
+  const m = typeof nombre === 'string' ? SALA_CERRADA.exec(nombre) : null;
+  return m ? { tipo: m[1] as 'juego' | 'viaje', id: m[2] } : null;
+}
 
 const PERMITIDAS: ReadonlySet<string> = new Set(ANIMACIONES);
 /** Animación válida o 'idle'. */

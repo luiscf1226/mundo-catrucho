@@ -426,3 +426,34 @@ Solo con salas en vivo (`EN_VIVO`). Sin ellas el panel `amigos` muestra `amigos-
 
 `node tools/test-chat-amigos.mjs` corre contra el Convex de desarrollo (lee `SALA_SECRETO` con el CLI, sin
 imprimirlo) y una sala local. Capturas en `capturas/mc-22/`.
+
+## Jugar con gente de la sala (MC-23, MC-25, MC-31)
+
+Solo con `VITE_SALAS_URL` y `VITE_CONVEX_URL`; sin ellas nada de esto se muestra ni pide nada.
+
+- **Bots de relleno (MC-23).** Con menos de 4 personas en una sala de zona, la sala agrega hasta 3 bots
+  (`workers/salas/src/bots.ts`). Llegan en `hola.bots` y en `entra`/`sale` con `bot: true` y una ruta relativa al
+  punto de aparición; `EnVivo` los camina con el reloj (no mandan posiciones) y les pone «🤖 Nombre · bot» en gris.
+  `useSala.otros` y `room-gente` nunca los cuentan; `room-bots` dice cuántos hay. Se van cuando entra gente.
+- **Conectados de verdad (MC-23).** Cada sala de zona avisa su ocupación (sin bots) a Convex cada 30 s
+  (`POST /salas/ocupacion`, firmado). `core/conectados.ts` (`useConectados`) consulta `salas:conectados`; el panel
+  `mapa` (`map-online` con `data-fuente="servidor"`) y los letreros del mapa gigante muestran esa cuenta.
+- **Partida entre dos (MC-25).** `core/juntos.ts`: `jugarConAlguien(juegoId?)` (botón `pj-jugar` del panel
+  `salas`) abre la partida en Convex e invita a la sala; `unirseAPartida(partidaId)` entra a una abierta (la usa la
+  invitación `inv-aceptar` y la pueden usar los códigos de amigos). El minijuego (`mg.juntos`) usa la semilla de la
+  partida y el **reloj de la sala**: el kit de motores (`defineMotor`) sigue `relojPartida()` y manda su puntaje
+  con `reportarPuntos`. Solo motores del kit (`motorJuntos`). En vez de la tarjeta de inicio sale `pj-espera`
+  (`data-estado`, `pj-salir`); jugando, `pj-marcador` con una `pj-fila` por jugador (`data-id`, `data-yo`,
+  `data-puntos`); en los resultados `pj-final` y `pj-pago` (`data-pago="pagado"` cuando Convex pagó el recibo).
+  Entre dos no hay «Otra vez» ni avance de etapa: se juega la primera etapa.
+- **Viaje compartido (MC-31).** `core/viajeJuntos.ts`: `salirDeViajeCompartido(veh, a)` (el botón `tr-go` de la
+  terminal) entra a una sala `viaje:<id>`, invita a la sala de la zona y maneja; `unirseAViaje(sala)` (invitación
+  `inv-subir`) sube de pasajero: paga su pasaje como siempre y `DrivingScene` sigue el vehículo del chofer
+  (`remoto`). Los eventos salen de la misma semilla. Si el chofer se va, maneja el pasajero más antiguo.
+  `vj-rol` (`data-rol="chofer|pasajero"`) dice quién maneja.
+- Invitaciones: `inv-lista` con `inv-juego` / `inv-viaje`, y `inv-aceptar`, `inv-subir`, `inv-no`. Duran 60 s.
+
+`node tools/test-partida-juntos.mjs` levanta la sala con `wrangler dev` y un Convex de mentira que firma y valida
+con `@mundo-catrucho/reglas`, y juega con dos pestañas: bots y conectados, una partida completa de la rosquilla
+(70 s) con recibo pagado, y un viaje con chofer, pasajero y cambio de volante. Capturas en `capturas/mc-23/`,
+`capturas/mc-25/` y `capturas/mc-31/`. Con `MC_GPU=0` dice SALTA (usá `MC_JUNTOS_CPU=1` para forzarla).

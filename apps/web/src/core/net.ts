@@ -31,6 +31,19 @@ export interface RemotePlayer {
   emote: { id: string; hasta: number } | null;
   /** false hasta que llega su primera posición (no se dibuja en el origen) */
   listo: boolean;
+  /** MC-23: bot de relleno de la sala; camina su ruta (relativa al punto de aparición) y no cuenta como gente */
+  bot?: { ruta: [number, number][]; vel: number; fase: number };
+}
+/** MC-25, MC-31: invitación que alguien de la sala manda a los demás (partida o viaje compartido). */
+export interface Invitacion {
+  tipo: 'juego' | 'viaje';
+  /** `juego:<partidaId>` o `viaje:<id>` */
+  sala: string;
+  /** juego del catálogo (partida) */
+  juego?: string;
+  /** vehículo y destino (viaje) */
+  veh?: string;
+  a?: string;
 }
 export interface RoomInfo {
   code: string;
@@ -39,7 +52,7 @@ export interface RoomInfo {
   max: number;
   name: string;
 }
-type Evento = 'join' | 'leave' | 'emote' | 'chat';
+type Evento = 'join' | 'leave' | 'emote' | 'chat' | 'invita';
 /** MC-22: lo que la sala manda del chat. `chat` viene ya filtrado y firmado por la sala. */
 export type ChatEntrante =
   | {
@@ -70,6 +83,8 @@ export interface NetAdapter {
   sendState(pos: V3, yaw: number, anim: Anim): void;
   /** emote propio → los demás de la sala */
   sendEmote(id: string): void;
+  /** invitación a los demás de la sala (le llega como evento 'invita' con la invitación en JSON) */
+  sendInvite(inv: Invitacion): void;
   /** jugadores remotos de la sala actual */
   players(): RemotePlayer[];
   on(ev: Evento, cb: (p: RemotePlayer, data?: string) => void): () => void;
@@ -172,6 +187,9 @@ export class LocalNet implements NetAdapter {
   sendEmote() {
     /* local */
   }
+  sendInvite() {
+    /* local */
+  }
   players() {
     return [];
   }
@@ -212,6 +230,10 @@ const avatarDe = (a: Record<string, string> | undefined): AvatarConfig => ({
 type Entrante = {
   id: string;
   nombre: string;
+  bot?: boolean;
+  ruta?: [number, number][];
+  vel?: number;
+  fase?: number;
   avatar?: Record<string, string>;
   x?: number;
   y?: number;
@@ -373,7 +395,8 @@ export class SalaNet implements NetAdapter {
           this.espera = 2000;
           this.miId = typeof m.id === 'string' ? m.id : null;
           for (const j of (m.jugadores as Entrante[]) ?? []) this.agregar(j);
-          useSala.setState({ estado: 'en-sala', sala, otros: this.remotos.size });
+          for (const b of (m.bots as Entrante[]) ?? []) this.agregar({ ...b, bot: true });
+          useSala.setState({ estado: 'en-sala', sala, otros: this.gente() });
           this.ultimo = '';
           res('ok');
         } else this.recibir(m);
@@ -418,6 +441,12 @@ export class SalaNet implements NetAdapter {
       emote: null,
       listo: m.x !== 0 || m.y !== 0 || m.z !== 0,
     };
+    if (j.bot && Array.isArray(j.ruta) && j.ruta.length > 1) {
+      r.bot = { ruta: j.ruta, vel: Number(j.vel) || 1.4, fase: Number(j.fase) || 0 };
+      r.name = `🤖 ${j.nombre} · bot`;
+      r.anim = 'walk';
+      r.listo = true;
+    }
     this.remotos.set(j.id, r);
     this.emitir('join', r);
   }
@@ -426,11 +455,13 @@ export class SalaNet implements NetAdapter {
     const r = typeof m.id === 'string' ? this.remotos.get(m.id) : undefined;
     if (m.t === 'entra') {
       this.agregar(m as unknown as Entrante);
-      useSala.setState({ otros: this.remotos.size });
+      useSala.setState({ otros: this.gente() });
     } else if (m.t === 'sale' && r) {
       this.remotos.delete(r.id);
       this.emitir('leave', r);
-      useSala.setState({ otros: this.remotos.size });
+      useSala.setState({ otros: this.gente() });
+    } else if (m.t === 'invita' && r && !r.bot) {
+      this.emitir('invita', r, JSON.stringify({ tipo: m.tipo, sala: m.sala, juego: m.juego, veh: m.veh, a: m.a }));
     } else if (m.t === 'pos' && r) {
       const x = Number(m.x) || 0,
         y = Number(m.y) || 0,
@@ -507,6 +538,15 @@ export class SalaNet implements NetAdapter {
         void this.conectar();
       }
     });
+  }
+  sendInvite(inv: Invitacion) {
+    if (this.ws?.readyState === WebSocket.OPEN) this.ws.send(JSON.stringify({ t: 'invita', ...inv }));
+  }
+  /** gente de verdad en la sala, sin contarte a vos ni a los bots */
+  private gente() {
+    let n = 0;
+    for (const r of this.remotos.values()) if (!r.bot) n++;
+    return n;
   }
   players() {
     return [...this.remotos.values()];

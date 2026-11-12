@@ -87,6 +87,8 @@ export default defineSchema({
     cierre: v.optional(v.number()),
     motivos: v.optional(v.array(v.string())),
     pago: v.optional(v.object({ monedas: v.number(), xp: v.number() })),
+    // MC-25: partida entre amigos (`sala` = `juego:<id>`): lo que el recibo de la sala le pagó a cada uno
+    pagos: v.optional(v.array(v.object({ usuarioId: v.id('usuarios'), monedas: v.number(), xp: v.number() }))),
   })
     .index('por_estado', ['estado'])
     .index('por_dueno_estado', ['dueno', 'estado']),
@@ -124,7 +126,11 @@ export default defineSchema({
     tramo: v.number(),
     ocupacion: v.number(),
     visto: v.number(),
-  }).index('por_dept', ['deptId']),
+    /** MC-23: momento (de la sala) del último aviso; uno más viejo no pisa al nuevo */
+    momento: v.optional(v.number()),
+  })
+    .index('por_dept', ['deptId'])
+    .index('por_visto', ['visto']),
   // el contenido del juego (hoy vive en apps/web/shared/data); se sube con un script y se edita desde el panel
   catalogo: defineTable({ version: v.number(), deptId: v.string(), datos: v.any() }).index('por_version', [
     'version',

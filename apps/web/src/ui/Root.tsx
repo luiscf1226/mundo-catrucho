@@ -10,6 +10,7 @@ import { g, TEST, useOverview, usePad, useTouch } from './lib';
 
 let padHinted = false;
 
+import { Invitaciones, JuntosEspera, MarcadorJuntos, ViajeJuntosHud } from './Juntos';
 import { AmigosPanel } from './panels/Amigos';
 import { MapPanel } from './panels/Map';
 import {
@@ -136,7 +137,10 @@ export function GameUI() {
       {screen === 'world' && touch && !panel && !dialog && !overview && (!mg || mg.phase === 'playing') && (
         <TouchControls />
       )}
-      {screen === 'world' && mg?.phase === 'intro' && !panel && <MgIntro />}
+      {screen === 'world' && viaje && !panel && <ViajeJuntosHud />}
+      {screen === 'world' && !mg && !viaje && !dialog && <Invitaciones />}
+      {screen === 'world' && mg?.phase === 'intro' && !panel && (mg.juntos ? <JuntosEspera /> : <MgIntro />)}
+      {screen === 'world' && mg?.juntos && mg.phase === 'playing' && <MarcadorJuntos />}
       {screen === 'world' && mg?.phase === 'ended' && !panel && <MgResults />}
       {ActivePanel && <ActivePanel key={panel} />}
       {dialog && <Dialog />}
