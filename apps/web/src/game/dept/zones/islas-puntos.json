@@ -1,0 +1,82 @@
+[
+  {
+    "id": "islas.visita-1",
+    "nombre": "Observatorio del tiburón ballena",
+    "texto": "En Utila se sale a buscar al tiburón ballena, pero nadie te lo garantiza. Anotá las sombras desde lejos y dejalo pasar tranquilo.",
+    "x": -20,
+    "z": 14,
+    "fuente": "https://ecohonduras.net/node/100"
+  },
+  {
+    "id": "islas.visita-2",
+    "nombre": "Isla de pinos",
+    "texto": "Guanaja tiene cerros con pinos que bajan hasta el mar. Desde el agua se ve el contraste: ¡tomale foto!",
+    "x": -22,
+    "z": 25,
+    "fuente": "https://tnh.gob.hn/television/playas-hondurenas-un-destino-para-los-amantes-del-mar-cultura-y-naturaleza"
+  },
+  {
+    "id": "islas.visita-3",
+    "nombre": "Costa de Roatán",
+    "texto": "Roatán es la más grande de las tres islas. Si te dicen «wha' happen?», te están saludando. Caminá la orilla y armá tu postal.",
+    "x": 20,
+    "z": 12,
+    "fuente": "https://tnh.gob.hn/television/playas-hondurenas-un-destino-para-los-amantes-del-mar-cultura-y-naturaleza"
+  },
+  {
+    "id": "islas.visita-4",
+    "nombre": "Playa de West Bay",
+    "texto": "Arena blanca y agua clarita en West Bay. Aquí se flota tranquilo, sin pararse encima del coral.",
+    "x": 21,
+    "z": 24,
+    "fuente": "https://tnh.gob.hn/television/playas-hondurenas-un-destino-para-los-amantes-del-mar-cultura-y-naturaleza"
+  },
+  {
+    "id": "islas.visita-5",
+    "nombre": "Jardín submarino",
+    "texto": "El arrecife se mira y no se toca. Compará tus fotos y dejá todo como estaba.",
+    "x": -6,
+    "z": -7,
+    "fuente": "https://tnh.gob.hn/television/playas-hondurenas-un-destino-para-los-amantes-del-mar-cultura-y-naturaleza"
+  },
+  {
+    "id": "islas.visita-6",
+    "nombre": "Cuaderno de buceo",
+    "texto": "En Utila mucha gente aprende a bucear. Anotá profundidad y flotación en tu cuaderno antes de meterte.",
+    "x": 10,
+    "z": -5,
+    "fuente": "https://ecohonduras.net/node/100"
+  },
+  {
+    "id": "islas.visita-7",
+    "nombre": "The Cut de Guanaja",
+    "texto": "The Cut es un canal que cruza Guanaja de sur a norte sin darle la vuelta a la isla. El capitán te lleva: vos fotografiá las entradas.",
+    "x": -10,
+    "z": 33,
+    "fuente": "https://redhonduras.hn/geografia/guanaja/"
+  },
+  {
+    "id": "islas.locura-1",
+    "nombre": "El gigante no posa",
+    "texto": "Querías selfie con el gigante y la flecha te dice: ¡distancia! El que posa sos vos; él sigue su camino.",
+    "x": 13,
+    "z": 27,
+    "fuente": "https://ecohonduras.net/node/100"
+  },
+  {
+    "id": "islas.locura-2",
+    "nombre": "Postal de isla con pinos",
+    "texto": "Este pino de cartón se estira y se acomoda para salir completo en tu postal. ¡Ya casi, ya casi!",
+    "x": -26,
+    "z": 7,
+    "fuente": "https://tnh.gob.hn/television/playas-hondurenas-un-destino-para-los-amantes-del-mar-cultura-y-naturaleza"
+  },
+  {
+    "id": "islas.locura-3",
+    "nombre": "Aletas con semáforo",
+    "texto": "El instructor de mentiritas saca su semáforo de burbujas: verde, flotás; rojo, tocaste fondo. ¡Aletas arriba!",
+    "x": 25,
+    "z": 4,
+    "fuente": "https://ecohonduras.net/node/100"
+  }
+]

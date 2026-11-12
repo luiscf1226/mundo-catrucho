@@ -11,6 +11,14 @@ npx convex dev --once     # lo mismo una sola vez
 La primera vez en una máquina nueva: `npx convex login` y luego `npx convex dev` (elegí el proyecto existente
 `mundo-catrucho`). Eso escribe `.env.local` con `CONVEX_DEPLOYMENT` y `CONVEX_URL`; está ignorado por git.
 
+`partidas.validar` es una consulta pura: recibe `{ motor, puntos, estrellas, duracion, etapa, etapas?, gano? }` y
+responde `validarResultado` de `@mundo-catrucho/reglas` (`{ ok, motivos, estrellasPosibles, conocido }`). No toca
+tablas; la usará `cerrarPartida` (MC-14).
+
+```bash
+npx convex run partidas:validar '{"motor":"cortes.chuco","puntos":320,"estrellas":2,"duracion":74,"etapa":0}'
+```
+
 Falta escribir las funciones que lista `docs/plan.html` (sección «Datos»): `miPerfil`, `comprar`, `abrirPartida`,
 `cerrarPartida`, etc.
 
@@ -44,3 +52,49 @@ No la ejecutes a la vez que otra edición del catálogo en el mismo entorno de d
 El JSON excede el límite de tamaño de un argumento del sistema. `scripts/convex-stdin.mjs`
 pasa los argumentos al CLI por stdin mediante `npx --node-options=--import=… convex run`.
 No necesita leer ni mostrar credenciales; las resuelve el CLI con la sesión existente.
+
+## Panel de contenido (MC-33)
+
+```bash
+npx convex dev --once
+pnpm --filter @mundo-catrucho/panel dev
+pnpm --filter @mundo-catrucho/panel build
+npx convex env get PANEL_LLAVE
+node apps/panel/tools/test-panel.mjs
+```
+
+El panel usa `CONVEX_URL` de `.env.local` o `VITE_CONVEX_URL` al compilar. Distribuí `dist/`
+como un sitio estático. La URL es pública; la llave nunca se incluye en el sitio.
+Configurá `PANEL_LLAVE` como secreto del entorno Convex. La pantalla de entrada la guarda
+solo en `sessionStorage` y Salir la borra. Las mutaciones vuelven a comprobarla siempre.
+Con Clerk (MC-07) se reemplaza este acceso compartido por roles de administrador.
+
+Se editan nombres y notas de lugares, comidas (nombre, lugar existente, nota), palabras,
+textos de turismo y locuras, y nombre, descripción, guiño, etapas y valores del tema de juegos.
+No se agregan ni borran elementos ni campos del tema. Los ids, lugares de juegos y motores
+son fijos; una mecánica nueva requiere código. El panel y Convex validan la misma estructura:
+texto obligatorio si el original lo era, máximo 1000 caracteres, etapas enteras entre 1 y 20,
+números finitos hasta 10000 en valor absoluto y referencias de comidas a lugares existentes.
+
+Cada publicación conserva una instantánea completa en `catalogo`. Una fila reservada
+`deptId = __publicacion` registra quién (`panel` o `script`), qué, cuándo (milisegundos Unix)
+y la versión anterior. Se usa la tabla existente para no cambiar el esquema compartido.
+`catalogo:ultima` excluye esa fila y sigue entregando solo los 18 departamentos al juego.
+Los registros previos a MC-33 no tienen metadatos; la primera publicación nueva los conserva.
+`catalogoPanel:estado` devuelve los metadatos de la publicación actual. Deshacer copia la
+instantánea anterior a una versión nueva y registra la restauración; nunca borra historia.
+El guardado y deshacer exigen la versión vista por el editor. Si alguien publicó mientras tanto,
+se rechaza la escritura y hay que recargar (esto descarta el borrador local).
+
+El script ya no elimina versiones. Si la última publicación es del panel, rechaza reemplazarla,
+incluso con contenido idéntico, hasta que se ejecute conscientemente:
+
+```bash
+pnpm catalogo:subir --forzar
+```
+
+Revisá primero el contenido remoto con `npx convex run catalogo:ultima`. La protección también
+vive en la mutación interna, de modo que otro llamador del script no puede omitir el aviso.
+Las pruebas anteriores que reemplacen el catálogo deben usar `subirCatalogo(datos, { forzar: true })`
+solo cuando restauren una copia conocida. Las versiones se conservan sin límite de retención
+por ahora; definir limpieza del historial queda para una operación administrativa posterior.

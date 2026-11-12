@@ -22,8 +22,8 @@ const marca = 'Alfombra de Convex MC-10';
 juego.name = marca;
 let ok = false;
 try {
-  const primera = subirCatalogo(departamentos);
-  const segunda = subirCatalogo(departamentos);
+  const primera = subirCatalogo(departamentos, { forzar: true });
+  const segunda = subirCatalogo(departamentos, { forzar: true });
   assert.equal(primera.version, segunda.version, 'Subir el mismo contenido debe conservar la versión');
   execFileSync('node', ['apps/web/tools/build.mjs', 'hd', '--out', out], {
     cwd: raiz,
@@ -69,7 +69,7 @@ try {
     ok = respaldo && ok;
   }
 } finally {
-  subirCatalogo(original?.departamentos ?? armarCatalogo());
+  subirCatalogo(original?.departamentos ?? armarCatalogo(), { forzar: true });
   rmSync(out, { recursive: true, force: true });
 }
 if (!ok) process.exitCode = 1;

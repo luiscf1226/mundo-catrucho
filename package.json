@@ -4,7 +4,7 @@
   "type": "module",
   "packageManager": "pnpm@12.11.2",
   "engines": {
-    "node": ">=22"
+    "node": ">=22.18"
   },
   "scripts": {
     "dev": "pnpm --parallel --filter @mundo-catrucho/web --filter @mundo-catrucho/salas dev",
@@ -22,5 +22,8 @@
     "@biomejs/biome": "2.6.6",
     "convex": "^1.17.0",
     "typescript": "^5.6.0"
+  },
+  "dependencies": {
+    "@mundo-catrucho/reglas": "workspace:*"
   }
 }

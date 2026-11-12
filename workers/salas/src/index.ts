@@ -4,7 +4,18 @@
 //
 // Falta (fase 3 del plan): exigir el pase firmado que emite Convex antes de aceptar la conexión,
 // y avisar la ocupación a Convex cada 30 s. Hoy cualquiera puede entrar: sirve solo para desarrollo.
+
 import { DurableObject } from 'cloudflare:workers';
+import {
+  acotarEje,
+  animacionPermitida,
+  type Cubeta,
+  cubetaNueva,
+  emoteValido,
+  limpiarNombre,
+  permitirMensaje,
+  SALA,
+} from '@mundo-catrucho/reglas';
 
 export interface Env {
   SALAS: DurableObjectNamespace<Sala>;
@@ -18,28 +29,9 @@ interface Jugador {
   yaw: number;
   anim: string;
 }
-const CUPO = 24,
-  ANIMS = new Set([
-    'idle',
-    'walk',
-    'run',
-    'jump',
-    'fall',
-    'dance',
-    'dance2',
-    'celebrate',
-    'wave',
-    'clap',
-    'kick',
-    'throw',
-    'carry',
-    'drive',
-    'sit',
-  ]);
-const num = (v: unknown, min: number, max: number) =>
-  typeof v === 'number' && Number.isFinite(v) ? Math.max(min, Math.min(max, v)) : 0;
-
 export class Sala extends DurableObject<Env> {
+  /** ritmo de mensajes por conexión; si la sala hiberna se vuelve a llenar, que es lo justo */
+  private ritmo = new WeakMap<WebSocket, Cubeta>();
   private jugadores(menos?: WebSocket): Jugador[] {
     return this.ctx
       .getWebSockets()
@@ -60,11 +52,9 @@ export class Sala extends DurableObject<Env> {
 
   async fetch(req: Request): Promise<Response> {
     const n = this.ctx.getWebSockets().length;
-    if (req.headers.get('Upgrade') !== 'websocket') return Response.json({ ocupacion: n, cupo: CUPO });
-    if (n >= CUPO) return new Response('sala llena', { status: 409 });
-    const nombre =
-      (new URL(req.url).searchParams.get('nombre') ?? 'Catracho').replace(/[^\p{L}\p{N} _-]/gu, '').slice(0, 16) ||
-      'Catracho';
+    if (req.headers.get('Upgrade') !== 'websocket') return Response.json({ ocupacion: n, cupo: SALA.cupo });
+    if (n >= SALA.cupo) return new Response('sala llena', { status: 409 });
+    const nombre = limpiarNombre(new URL(req.url).searchParams.get('nombre'));
     const yo: Jugador = { id: crypto.randomUUID().slice(0, 8), nombre, x: 0, y: 0, z: 0, yaw: 0, anim: 'idle' };
     const [cliente, servidor] = Object.values(new WebSocketPair());
     this.ctx.acceptWebSocket(servidor);
@@ -75,7 +65,10 @@ export class Sala extends DurableObject<Env> {
   }
 
   webSocketMessage(ws: WebSocket, raw: string | ArrayBuffer) {
-    if (typeof raw !== 'string' || raw.length > 512) return;
+    if (typeof raw !== 'string' || raw.length > SALA.mensajeMax) return;
+    let cubeta = this.ritmo.get(ws);
+    if (!cubeta) this.ritmo.set(ws, (cubeta = cubetaNueva(Date.now())));
+    if (!permitirMensaje(cubeta, Date.now())) return;
     let m: Record<string, unknown>;
     try {
       m = JSON.parse(raw);
@@ -84,14 +77,14 @@ export class Sala extends DurableObject<Env> {
     }
     const yo = ws.deserializeAttachment() as Jugador;
     if (m.t === 'pos') {
-      yo.x = num(m.x, -1000, 1000);
-      yo.y = num(m.y, -50, 500);
-      yo.z = num(m.z, -1000, 1000);
-      yo.yaw = num(m.yaw, -10, 10);
-      yo.anim = typeof m.anim === 'string' && ANIMS.has(m.anim) ? m.anim : 'idle';
+      yo.x = acotarEje('x', m.x);
+      yo.y = acotarEje('y', m.y);
+      yo.z = acotarEje('z', m.z);
+      yo.yaw = acotarEje('yaw', m.yaw);
+      yo.anim = animacionPermitida(m.anim);
       ws.serializeAttachment(yo);
       this.difundir({ t: 'pos', id: yo.id, x: yo.x, y: yo.y, z: yo.z, yaw: yo.yaw, anim: yo.anim }, ws);
-    } else if (m.t === 'emote' && typeof m.id === 'string' && m.id.length <= 32) {
+    } else if (m.t === 'emote' && emoteValido(m.id)) {
       this.difundir({ t: 'emote', id: yo.id, emote: m.id }, ws);
     }
   }

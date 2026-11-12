@@ -3,6 +3,7 @@ import { P } from '../../kit';
 import { bl, bx, cy, distToPath, inR, type Pc, PI, place } from '../lib';
 import { mont, stairs } from '../parts';
 import { ZB, type ZoneSpec } from '../zone';
+import { CopanDescubrimientos } from './CopanDescubrimientos';
 
 const C = '#b5ab95',
   CD = '#8f866f';
@@ -17,7 +18,7 @@ const estela = (): Pc[] => [
   bx(0, 0.7, 0.31, 0.75, 0.3, 0.06, 'stone', CD, { solid: false }),
   cy(0, 0.28, 1.5, 0.75, 0.56, 'stone', C, { n: 8 }),
 ];
-/** Copán: la Gran Plaza con estelas, la pirámide de la Escalinata Jeroglífica (se sube), el Juego de Pelota y guacamayas. */
+/** Copán: la Gran Plaza con estelas, la pirámide de la Escalinata Jeroglífica (se observa desde el sendero), el Juego de Pelota y guacamayas. */
 export function ruinas(d: Department): ZoneSpec {
   const Z = new ZB(d, () => 0);
   Z.layer('grass', Z.bio.grass).layer(
@@ -32,6 +33,7 @@ export function ruinas(d: Department): ZoneSpec {
       2,
   );
   Z.stop(0, 42);
+  Z.n(<CopanDescubrimientos />);
   // pirámide escalonada con escalinata central y templo arriba
   for (let i = 0; i < 6; i++) {
     const hf = 11 - 1.6 * i;
@@ -128,14 +130,12 @@ export function ruinas(d: Department): ZoneSpec {
     ],
     6,
   )
-    .coin(0, 1.4, -6.8)
-    .coin(0, 3.5, -9.2)
-    .coin(0, 5.6, -11.6)
-    .coin(0, 7.7, -14)
     .coin(27, 0, -3)
     .coin(27, 0, 8);
   return Z.done({
     limit: { minX: -48, maxX: 48, minZ: -36, maxZ: 50 },
+    bad: (_x, y) => y > 2.2,
+    badMsg: 'Cuidá el patrimonio: observá desde el sendero y usá las réplicas',
     npc: {
       pos: [4.2, 0, 21],
       name: 'Ixchel',
@@ -150,49 +150,49 @@ export function ruinas(d: Department): ZoneSpec {
       },
       icon: '🗿',
     },
-    gem: [0, 8.4, -18.8],
-    gemColor: '#3fbf7f',
+    gem: [-8, 0, 36],
     finds: [
       {
-        id: 'mascara',
-        name: 'Máscara de jade',
-        icon: '🎭',
-        color: '#3fbf7f',
-        pos: [0, 8.4, -18.8],
-        fact: 'Los mayas de Copán tallaban el jade, una piedra verde que valoraban muchísimo.',
+        id: 'postal',
+        name: 'Postal del valle',
+        icon: '🖼️',
+        color: '#e7c77e',
+        pos: [-6, 0, 38],
+        fact: 'Llevate una postal y dejá el patrimonio en su sitio.',
       },
       {
-        id: 'estela',
-        name: 'Fragmento de estela',
-        icon: '🗿',
-        color: '#cdbf9f',
-        pos: [14.5, 0, -0.9],
-        fact: 'Varias estelas de la Gran Plaza retratan al gobernante 18 Conejo.',
+        id: 'cuaderno',
+        name: 'Cuaderno de práctica',
+        icon: '📒',
+        color: '#e7c77e',
+        pos: [6, 0, 38],
+        fact: 'Dibujá lo que observás sin tocar los monumentos.',
       },
       {
-        id: 'pluma',
-        name: 'Pluma de guacamaya',
-        icon: '🪶',
-        color: '#e63946',
-        pos: [-24.8, 0, 13.8],
-        fact: 'La guacamaya roja es el ave nacional de Honduras y vuela libre en Copán.',
+        id: 'mapa',
+        name: 'Mapa de senderos',
+        icon: '🗺️',
+        color: '#e7c77e',
+        pos: [-6, 0, 28],
+        fact: 'Seguí los senderos para cuidar el sitio.',
       },
       {
-        id: 'glifo',
-        name: 'Glifo tallado',
-        icon: '📜',
-        color: '#d9a05b',
-        pos: [4.3, 0, -6.2],
-        fact: 'La Escalinata Jeroglífica guarda el texto maya más largo que se conoce.',
+        id: 'taza',
+        name: 'Taza de recuerdo',
+        icon: '☕',
+        color: '#e7c77e',
+        pos: [6, 0, 28],
+        fact: 'Disfrutá un atol virtual de Santa Rosa.',
       },
       {
-        id: 'pelota',
-        name: 'Pelota de hule',
-        icon: '⚫',
-        color: '#4a4a4a',
-        pos: [27, 0, -9.4],
-        fact: 'En el Juego de Pelota se usaba una pelota de hule; sus marcadores tienen forma de cabeza de guacamaya.',
+        id: 'ficha',
+        name: 'Ficha de conservación',
+        icon: '📋',
+        color: '#e7c77e',
+        pos: [-6, 0, 18],
+        fact: 'Observá las aves sin perseguirlas ni alimentarlas.',
       },
     ],
+    gemColor: '#3fbf7f',
   });
 }

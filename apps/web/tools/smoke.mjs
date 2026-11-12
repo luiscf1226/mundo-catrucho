@@ -21,9 +21,9 @@ const JUEGOS = [
   'lapaz.ticucos',
   'comayagua.pilonpaleta',
   'franciscomorazan.rapidito',
-  'copan.pelota',
+  'ocotepeque.tresfronteras',
   'atlantida.isidra',
-  'islas.buceo',
+  'lapaz.pintadas',
   'franciscomorazan.pulperia',
   'carrera',
 ];

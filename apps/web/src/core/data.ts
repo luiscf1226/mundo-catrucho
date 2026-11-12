@@ -1,6 +1,7 @@
 // Datos compartidos por las dos versiones. La misma carpeta shared/data alimenta el proyecto de Roblox (Rojo
 // convierte cada .json en un ModuleScript), así que las reglas y los precios no se duplican.
 
+import { PREMIOS, xpParaNivel } from '@mundo-catrucho/reglas';
 import catCentro from '../../shared/data/catalogo/centro.json';
 import catNorte from '../../shared/data/catalogo/norte.json';
 import catOccidente from '../../shared/data/catalogo/occidente.json';
@@ -8,7 +9,6 @@ import catSurOriente from '../../shared/data/catalogo/sur-oriente.json';
 import departmentsJson from '../../shared/data/departments.json';
 import minigamesJson from '../../shared/data/minigames.json';
 import progressJson from '../../shared/data/progress.json';
-import rewardsJson from '../../shared/data/rewards.json';
 import shopJson from '../../shared/data/shop.json';
 import { cargarCatalogoRemoto } from './catalogoRemoto';
 import type { AvatarConfig, Department, DeptCat, Juego, MinigameId, MinigameInfo, ShopItem, Vehiculo } from './types';
@@ -22,7 +22,8 @@ export const DEPARTMENTS = (remoto?.departamentos.map((d) => d.datos.departament
 export const deptById = (id: string) => DEPARTMENTS.find((d) => d.id === id)!;
 export const MINIGAMES = (remoto?.departamentos[0]?.datos.minigames ?? minigamesJson) as unknown as MinigameInfo[];
 export const minigameById = (id: MinigameId) => MINIGAMES.find((m) => m.id === id)!;
-export const REWARDS = rewardsJson;
+/** Premios de rewards.json, servidos por @mundo-catrucho/reglas (el mismo paquete que usan Convex y la sala). */
+export const REWARDS = PREMIOS;
 export const SHOP = shopJson as unknown as {
   skin: string[];
   palette: string[];
@@ -44,7 +45,7 @@ export const MISSIONS = progressJson.missions as {
 export const DAILY_COUNT = progressJson.dailyCount;
 export const BOT_NAMES = progressJson.bots;
 /** XP necesario para pasar del nivel n al n+1. */
-export const xpForLevel = (n: number) => REWARDS.level.base + (n - 1) * REWARDS.level.perLevel;
+export const xpForLevel = xpParaNivel;
 
 // ------------------------------------------------------------------ catálogo por departamento
 // Los JSON van en tuplas para que sean cortos de escribir:

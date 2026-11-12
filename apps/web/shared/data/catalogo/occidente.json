@@ -2,39 +2,291 @@
   "copan": {
     "tipos": "🗿🦜☕🎶",
     "lugares": [
-      ["ruinas", "Copán Ruinas", "ruinas", "La Atenas del mundo maya."],
-      ["escalinata", "Escalinata de los Jeroglíficos", "ruinas", "El texto maya más largo que se conoce."],
-      ["santarosa", "Santa Rosa de Copán", "ciudad", "Calles de piedra, café y puros."],
-      ["guaras", "Montaña de las guaras", "parque", "Aquí crían guacamayas para devolverlas al valle."],
-      ["lunajaguar", "Aguas termales", "rio", "Pozas calientes en medio del bosque."],
-      ["cafetales", "Cafetales de Copán", "finca", "Café de altura bajo sombra."]
+      [
+        "ruinas",
+        "Copán Ruinas",
+        "ruinas",
+        "La Atenas del mundo maya."
+      ],
+      [
+        "escalinata",
+        "Escalinata de los Jeroglíficos",
+        "ruinas",
+        "El texto maya más largo que se conoce."
+      ],
+      [
+        "santarosa",
+        "Santa Rosa de Copán",
+        "ciudad",
+        "Calles de piedra, café y puros."
+      ],
+      [
+        "guaras",
+        "Montaña de las guaras",
+        "parque",
+        "Aquí crían guacamayas para devolverlas al valle."
+      ],
+      [
+        "lunajaguar",
+        "Aguas termales",
+        "rio",
+        "Pozas calientes en medio del bosque."
+      ],
+      [
+        "cafetales",
+        "Cafetales de Copán",
+        "finca",
+        "Café de altura bajo sombra."
+      ]
     ],
     "comidas": [
-      ["Atol chuco", "santarosa", "Atol de maíz fermentado con frijoles y alguashte."],
-      ["Totopostes", "santarosa", "Rosquitas duras de maíz, para el café."],
-      ["Tamalitos de elote", "ruinas", "Con mantequilla, recién salidos."]
+      [
+        "Atol chuco",
+        "santarosa",
+        "Atol de maíz fermentado con frijoles y alguashte."
+      ],
+      [
+        "Totopostes",
+        "santarosa",
+        "Rosquitas duras de maíz, para el café."
+      ],
+      [
+        "Tamalitos de elote",
+        "ruinas",
+        "Con mantequilla, recién salidos."
+      ]
     ],
     "palabras": [
-      ["guara", "guacamaya"],
-      ["alguashte", "semilla de ayote molida"],
-      ["totoposte", "rosquita dura de maíz"],
-      ["a pincel", "a pie"],
-      ["ispiar", "mirar a escondidas"],
-      ["tecolote", "búho"]
+      [
+        "guara",
+        "guacamaya"
+      ],
+      [
+        "alguashte",
+        "semilla de ayote molida"
+      ],
+      [
+        "totoposte",
+        "rosquita dura de maíz"
+      ],
+      [
+        "a pincel",
+        "a pie"
+      ],
+      [
+        "ispiar",
+        "mirar a escondidas"
+      ],
+      [
+        "tecolote",
+        "búho"
+      ]
     ],
     "juegos": [
-      ["pelota", "Juego de pelota maya", "futbol", "ruinas", "🏐", "Guacamayas contra Jaguares en la cancha sagrada.", "Los marcadores de la cancha de Copán son cabezas de guacamaya.", {"equipo": ["Guacamayas", "#c0392b"], "rival": ["Jaguares", "#e0a526"]}, 4],
-      ["escalinata", "Escalinata de los Jeroglíficos", "ruta", "escalinata", "🗿", "Subí las gradas sin pisar en falso.", "63 gradas y más de dos mil glifos.", {"estilo": "ruinas", "meta": "El Templo 26"}, 6],
-      ["tumbas", "Tumbas de los reyes", "exploradores", "ruinas", "🏺", "Encontrá las piezas escondidas entre las estelas.", "Copán tuvo 16 reyes de una misma dinastía.", {"sitios": ["copan"]}, 3],
-      ["frutas", "Frutas para las guaras", "atrapa", "guaras", "🦜", "Juntá fruta para las guacamayas.", "La guara roja es el ave nacional.", {"con": "canasta", "fondo": "ruinas", "cae": [["Nance", "nance", "#f1c40f"], ["Jocote", "jocote", "#c0392b"], ["Mango", "mango", "#f6a623"]], "evita": [["Rama", "rama"]]}, 4],
-      ["puros", "Puros de Santa Rosa", "cocina", "santarosa", "🍂", "Enrollá el puro hoja por hoja.", "Se hacen a mano desde hace más de 200 años.", {"plato": "Puro", "sirve": "plato", "pasos": [["Tripa", "#7b5a34"], ["Capote", "#8d6b3e"], ["Capa", "#a0793f"], ["Prensa", "#5a3d22"], ["Anillo", "#c0392b"]]}, 4],
-      ["mototaxi", "Mototaxi en la piedra", "manejo", "ruinas", "🛺", "Llevá turistas por las calles empedradas.", "El empedrado te sacude hasta el alma.", {"veh": "mototaxi", "via": "ciudad", "recoge": ["turistas"], "destino": "Las ruinas"}, 4],
-      ["reyes", "Los 16 reyes", "trivia", "ruinas", "👑", "¿Qué tanto sabés de Copán?", "Al rey 13 le decían 18 Conejo.", {"preguntas": [["¿Cómo le decían al rey 13 de Copán?", "18 Conejo", "Humo Jaguar", "Lempira"], ["¿Cuál es el ave nacional?", "La guacamaya roja", "El quetzal", "El zorzal"], ["¿Qué cuenta la Escalinata?", "La historia de los reyes", "Recetas de cocina", "El clima"], ["¿Cómo llaman a Copán?", "La Atenas maya", "La ciudad perdida", "La Roma maya"]]}, 4],
-      ["termales", "Camino a las termales", "ruta", "lunajaguar", "♨️", "Cruzá el río hasta la poza caliente.", "El agua sale a más de 80 grados de la montaña.", {"estilo": "rio", "meta": "La poza caliente"}, 4],
-      ["marimba", "Marimba en el parque", "ritmo", "santarosa", "🎶", "Tocá la marimba del domingo.", "La marimba no falta en ningún parque de occidente.", {"estilo": "marimba", "toca": "marimba"}, 4],
-      ["atolchuco", "Atol chuco", "cocina", "santarosa", "🥣", "Serví el atol como en el mercado.", "Chuco de agrio, no de sucio.", {"plato": "Atol chuco", "sirve": "vaso", "pasos": [["Atol de maíz", "#6b4a6e"], ["Frijoles", "#5a2d1a"], ["Alguashte", "#8a9a3a"], ["Chile", "#c0392b"]]}, 4],
-      ["feriasr", "Feria de Santa Rosa", "feria", "santarosa", "🎯", "Los puestos de la feria de agosto.", "Feria con chaqueta: aquí sí hace frío.", {}, 3],
-      ["chapia", "Chapia del cafetal", "corte", "cafetales", "🌱", "Limpiá el cafetal a machete.", "Chapiar es cortar el monte.", {"arma": "machete", "cosas": [["Bejuco", "lena", "#5a8f3d"], ["Caña brava", "cana", "#9cb85a"]], "evita": [["Piedra", "piedra"], ["Avispero", "avispa"]]}, 4]
+      [
+        "pelota-en-la-cancha-de-copan",
+        "Pelota en la cancha de Copán",
+        "copan.cadera",
+        "ruinas",
+        "🏐",
+        "Practicá direcciones desde una posición fija.",
+        "La pelota se juega con el cuerpo, no con guantes.",
+        {
+          "fondo": "ruinas",
+          "frases": [
+            "La pelota se juega con el cuerpo, no con guantes."
+          ],
+          "variante": "pelota-en-la-cancha-de-copan"
+        },
+        5
+      ],
+      [
+        "la-pelota-no-quiere-manos",
+        "La pelota no quiere manos",
+        "copan.cadera",
+        "ruinas",
+        "🏐",
+        "Encadená rebotes con desplazamiento corporal y zonas de recepción que se alternan.",
+        "La pelota se juega con el cuerpo, no con guantes.",
+        {
+          "fondo": "ruinas",
+          "frases": [
+            "La pelota se juega con el cuerpo, no con guantes."
+          ],
+          "variante": "la-pelota-no-quiere-manos"
+        },
+        4
+      ],
+      [
+        "escalinata-por-fragmentos",
+        "Escalinata por fragmentos",
+        "copan.glifos",
+        "escalinata",
+        "🗿",
+        "Reconstruí filas con una referencia visible.",
+        "De cabeza puede encajar bonito y seguir mal.",
+        {
+          "fondo": "ruinas",
+          "frases": [
+            "De cabeza puede encajar bonito y seguir mal."
+          ],
+          "variante": "escalinata-por-fragmentos"
+        },
+        5
+      ],
+      [
+        "el-glifo-quedo-de-cabeza",
+        "El glifo quedó de cabeza",
+        "copan.glifos",
+        "escalinata",
+        "🗿",
+        "Detectá dos réplicas de bloques mal orientadas comparando juntas mientras el marco de práctica gira y deja al avatar de cabeza, sin deformar ni traducir glifos reales.",
+        "De cabeza puede encajar bonito y seguir mal.",
+        {
+          "fondo": "ruinas",
+          "frases": [
+            "De cabeza puede encajar bonito y seguir mal."
+          ],
+          "variante": "el-glifo-quedo-de-cabeza"
+        },
+        4
+      ],
+      [
+        "corredor-de-guaras",
+        "Corredor de guaras",
+        "copan.guaras",
+        "guaras",
+        "🦜",
+        "Diseñá un corredor con pocos árboles.",
+        "Libre quiere decir que puede irse.",
+        {
+          "fondo": "valle",
+          "frases": [
+            "Libre quiere decir que puede irse."
+          ],
+          "variante": "corredor-de-guaras"
+        },
+        5
+      ],
+      [
+        "la-guara-quiere-escala",
+        "La guara quiere escala",
+        "copan.guaras",
+        "guaras",
+        "🦜",
+        "Repará un corredor para dos parejas con alcances distintos mientras guaras de papel sellan tarjetas de escala en cada refugio, sin capturar aves reales.",
+        "Libre quiere decir que puede irse.",
+        {
+          "fondo": "valle",
+          "frases": [
+            "Libre quiere decir que puede irse."
+          ],
+          "variante": "la-guara-quiere-escala"
+        },
+        4
+      ],
+      [
+        "tuneles-de-construccion",
+        "Túneles de construcción",
+        "copan.estratigrafia",
+        "ruinas",
+        "🏐",
+        "Recorré una fase con su plano disponible.",
+        "Esa puerta todavía no la habían hecho.",
+        {
+          "fondo": "ruinas",
+          "frases": [
+            "Esa puerta todavía no la habían hecho."
+          ],
+          "variante": "tuneles-de-construccion"
+        },
+        4
+      ],
+      [
+        "la-puerta-todavia-no-nace",
+        "La puerta todavía no nace",
+        "copan.estratigrafia",
+        "ruinas",
+        "🏐",
+        "Reconstruí la secuencia de clausuras a partir de puertas tapiadas en tres épocas.",
+        "Esa puerta todavía no la habían hecho.",
+        {
+          "fondo": "ruinas",
+          "frases": [
+            "Esa puerta todavía no la habían hecho."
+          ],
+          "variante": "la-puerta-todavia-no-nace"
+        },
+        4
+      ],
+      [
+        "dos-caras-de-la-hoja",
+        "Dos caras de la hoja",
+        "copan.hojas",
+        "cafetales",
+        "🧺",
+        "Contrastá haz y envés de hojas en fichas ilustradas de diagnóstico.",
+        "Dale vuelta a la hoja antes de dar consejo.",
+        {
+          "fondo": "finca",
+          "frases": [
+            "Dale vuelta a la hoja antes de dar consejo."
+          ],
+          "variante": "dos-caras-de-la-hoja"
+        },
+        4
+      ],
+      [
+        "mototaxi-sin-saltos",
+        "Mototaxi sin saltos",
+        "copan.adoquin",
+        "santarosa",
+        "🛺",
+        "Elegí diagonales de rueda en un tramo de adoquines con golpes desfasados.",
+        "La taza viene entera, aunque la calle tenga carácter.",
+        {
+          "fondo": "pueblo",
+          "frases": [
+            "La taza viene entera, aunque la calle tenga carácter."
+          ],
+          "variante": "mototaxi-sin-saltos"
+        },
+        4
+      ],
+      [
+        "patio-de-las-estelas",
+        "Patio de las estelas",
+        "copan.estelas",
+        "ruinas",
+        "🏐",
+        "Rotá monumentos de réplica hasta que dos fotografías desde extremos opuestos concuerden.",
+        "Una foto sola te puede vender el lado equivocado.",
+        {
+          "fondo": "ruinas",
+          "frases": [
+            "Una foto sola te puede vender el lado equivocado."
+          ],
+          "variante": "patio-de-las-estelas"
+        },
+        4
+      ],
+      [
+        "atol-chuco-sin-asiento",
+        "Atol chuco sin asiento",
+        "copan.atol",
+        "santarosa",
+        "🛺",
+        "Pulsá agitación lateral para levantar sedimento sin variar el fuego del atol.",
+        "El atol se mueve antes de sentarse.",
+        {
+          "fondo": "pueblo",
+          "frases": [
+            "El atol se mueve antes de sentarse."
+          ],
+          "variante": "atol-chuco-sin-asiento"
+        },
+        4
+      ]
     ]
   },
   "lempira": {

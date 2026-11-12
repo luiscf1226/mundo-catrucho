@@ -1,0 +1,52 @@
+[
+  {
+    "id": "copan.punto-1",
+    "nombre": "Escalinata Jeroglífica",
+    "texto": "Quedáte en el sendero. Armá réplicas en el taller y cuidá la escalinata."
+  },
+  {
+    "id": "copan.punto-2",
+    "nombre": "Altar Q",
+    "texto": "Mirá las cuatro caras de la reproducción. Dejá el altar en su sitio."
+  },
+  {
+    "id": "copan.punto-3",
+    "nombre": "Acrópolis",
+    "texto": "Buscá las puertas en la maqueta. Elegí una época antes de cruzar."
+  },
+  {
+    "id": "copan.punto-4",
+    "nombre": "Guacamayas en Libertad",
+    "texto": "Observá las guaras libres desde aquí. No les des comida ni las persigás."
+  },
+  {
+    "id": "copan.punto-5",
+    "nombre": "Marcadores de pelota",
+    "texto": "Compará las formas de guacamaya en los marcadores. Practicá con réplicas."
+  },
+  {
+    "id": "copan.punto-6",
+    "nombre": "Aprendizaje de conservación",
+    "texto": "Completá una ficha ficticia de liberación. Las aves se quedan libres."
+  },
+  {
+    "id": "copan.punto-7",
+    "nombre": "Atol chuco de Santa Rosa",
+    "texto": "Probá una taza virtual. Mové el atol a los lados para mantener su textura."
+  },
+  {
+    "id": "copan.punto-8",
+    "nombre": "Guara con tarjeta de embarque",
+    "texto": "¡Escala aprobada! La guara de papel sella tu postal. Las aves reales vuelan libres."
+  },
+  {
+    "id": "copan.punto-9",
+    "nombre": "El glifo se dio vuelta",
+    "texto": "¡Se giró el marco de práctica! Enderezá tu réplica sin inventarle traducción."
+  },
+  {
+    "id": "copan.punto-10",
+    "nombre": "La pelota rechaza el guante",
+    "texto": "¡La pelota de utilería se apartó del guante! Probá con cadera en el tutorial corporal."
+  }
+]

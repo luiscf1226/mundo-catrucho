@@ -5,6 +5,7 @@
 //   · donde un bot no es práctico (caminar, manejar, cancha), un cálculo con los parámetros reales de la etapa.
 // Uso: node tools/test-dificultad.mjs [html] [carpeta-capturas] [motor,motor…]
 import assert from 'node:assert/strict';
+import { readdirSync, readFileSync } from 'node:fs';
 import { cocina, manejo, ruta, trivia } from './dificultad-sim.mjs';
 import { run } from './harness.mjs';
 
@@ -22,12 +23,12 @@ const JUEGO = {
   pesca: 'cortes.pesca-en-yojoa',
   trivia: 'comayagua.pilonpaleta',
   cocina: 'lapaz.ticucos',
-  ruta: 'copan.escalinata',
+  ruta: 'comayagua.taulabe',
   manejo: 'franciscomorazan.rapidito',
   feria: 'atlantida.isidra',
   pulperia: 'franciscomorazan.pulperia',
-  futbol: 'copan.pelota',
-  exploradores: 'islas.buceo',
+  futbol: 'ocotepeque.tresfronteras',
+  exploradores: 'lapaz.pintadas',
 };
 
 // ------------------------------------------------------------------ bots (corren dentro de la página)
@@ -264,8 +265,19 @@ const metasDe = (txt) =>
     .filter((l) => /\d/.test(l) && /pts|s\b|gol|objeto|Ganar|:\d\d/.test(l))
     .slice(-3);
 
-const ETAPAS = (m) =>
-  ({ corte: 5, monta: 6, ritmo: 5, atrapa: 6, pesca: 5, trivia: 4, cocina: 5, ruta: 6, manejo: 5, futbol: 4 })[m] ?? 3;
+// etapas de cada juego, leídas del catálogo para que no se desfasen cuando cambia el juego de un motor
+const catalogo = Object.assign(
+  {},
+  ...readdirSync(new URL('../shared/data/catalogo/', import.meta.url))
+    .filter((f) => f.endsWith('.json'))
+    .map((f) => JSON.parse(readFileSync(new URL(`../shared/data/catalogo/${f}`, import.meta.url), 'utf8'))),
+);
+const ETAPAS = (m) => {
+  const [dept, juego] = JUEGO[m].split('.'),
+    fila = catalogo[dept]?.juegos.find((j) => j[0] === juego);
+  assert.ok(fila, `${JUEGO[m]} no está en el catálogo`);
+  return fila[8] ?? 3;
+};
 
 // ------------------------------------------------------------------ plan y ejecución en paralelo
 const MOTORES = Object.keys(JUEGO).filter((m) => !solo || solo.includes(m));

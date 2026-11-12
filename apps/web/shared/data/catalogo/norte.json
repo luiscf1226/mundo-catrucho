@@ -353,7 +353,7 @@
     ]
   },
   "islas": {
-    "tipos": "🤿🎣🏝️🦀",
+    "tipos": "🦈🤿🚤🦀",
     "lugares": [
       ["roatan", "Roatán", "isla", "La isla más grande, rodeada de arrecife."],
       ["westbay", "West Bay", "playa", "Arena blanca y agua transparente."],
@@ -378,19 +378,18 @@
       ["isleño", "de las Islas de la Bahía"]
     ],
     "juegos": [
-      ["buceo", "Buceo en el arrecife", "exploradores", "arrecife", "🤿", "Encontrá los tesoros entre el coral.", "No se toca el coral: tarda siglos en crecer.", {"sitios": ["islas"]}, 3],
-      ["ballena", "El tiburón ballena", "manejo", "utila", "🦈", "Llevá a los buzos hasta donde anda el gigante.", "Mide como un bus y solo come plancton.", {"veh": "lancha", "via": "mar", "recoge": ["buzos"], "destino": "El banco de Utila"}, 5],
-      ["altura", "Pesca de altura", "pesca", "roatan", "🎣", "Peleá con los grandes mar adentro.", "El marlin se pelea por horas.", {"agua": "mar", "desde": "lancha", "peces": [["Barracuda", 35, "#9fb3bd"], ["Dorado", 45, "#e2c044"], ["Marlin azul", 80, "#2d5fa5"]], "basura": ["Sargazo"]}, 5],
-      ["cangrejo", "Cangrejo azul", "atrapa", "puntagorda", "🦀", "Atrapá cangrejos antes de que se metan al hoyo.", "Con las primeras lluvias salen por montones.", {"con": "saco", "fondo": "costa", "cae": [["Cangrejo azul", "cangrejo", "#2e6fd9"], ["Jaiba", "cangrejo", "#c0392b"]], "evita": [["Erizo", "piedra"]]}, 4],
-      ["cocoswb", "Cocos de West Bay", "corte", "westbay", "🥥", "Abrí cocos para los turistas.", "Tres machetazos y pajilla.", {"arma": "machete", "cosas": [["Coco verde", "coco", "#6aa84f"], ["Piña", "pina", "#e0b422"]], "evita": [["Piedra", "piedra"]]}, 4],
-      ["ricebeans", "Rice and beans", "cocina", "coxen", "🍛", "Serví el plato isleño completo.", "Todo lleva coco. Todo.", {"plato": "Rice and beans", "sirve": "plato", "pasos": [["Arroz", "#f8f4e3"], ["Frijoles rojos", "#7b2d26"], ["Leche de coco", "#ffffff"], ["Plátano frito", "#e0a43a"], ["Pescado", "#c8782a"]]}, 4],
-      ["puntagorda", "Fiesta en Punta Gorda", "ritmo", "puntagorda", "🥁", "Bailá punta en la fiesta de la llegada.", "Cada 12 de abril se celebra la llegada garífuna.", {"estilo": "punta", "toca": "baila"}, 5],
-      ["paddle", "Tabla en West Bay", "monta", "westbay", "🏄", "Mantené el equilibrio sobre la tabla.", "El agua es tan clara que se ve la sombra de la tabla en el fondo.", {"montura": "tabla", "nombre": "La ola", "fondo": "mar"}, 4],
-      ["watertaxi", "Water taxi", "manejo", "roatan", "🚤", "Recogé pasajeros de muelle en muelle.", "Sale cuando se llena, no cuando dice.", {"veh": "lancha", "via": "mar", "recoge": ["turistas"], "destino": "West End"}, 4],
-      ["bonacca", "Bonacca sobre el agua", "ruta", "guanaja", "🌉", "Cruzá el pueblo por pasarelas y puentes.", "En Bonacca no hay carros: solo pasarelas y lanchas.", {"estilo": "pueblo", "meta": "El último muelle"}, 5],
-      ["morgan", "El tesoro de Morgan", "ruta", "roatan", "🏴‍☠️", "Entrá a la cueva de los piratas.", "Dicen que Henry Morgan escondió oro en Roatán.", {"estilo": "cueva", "meta": "El cofre"}, 4],
-      ["whahappen", "Wha' happen?", "trivia", "coxen", "💬", "Aprendé inglés isleño.", "En las islas se saluda con «wha' happen?».", {"de": "palabras"}, 4],
-      ["potraplaya", "Potra en la playa", "futbol", "westbay", "⚽", "Fútbol descalzo sobre arena blanca.", "La pelota al agua vale saque.", {"equipo": ["Isleños", "#1abc9c"], "rival": ["Turistas", "#e67e22"]}, 3]
+      ["encuentro-en-utila", "Encuentro en Utila", "islas.ballena", "utila", "🦈", "Mantené al grupo fuera del corredor de paso.", "El gigante no anda buscando tu cámara.", {"nombre": "Encuentro en Utila", "frases": ["El gigante no anda buscando tu cámara.", "Utila no promete cita: a veces solo hay agua bonita."], "loco": false}, 5],
+      ["el-pez-no-posa-para-vos", "El pez no posa para vos", "islas.ballena", "utila", "🦈", "Reubicá al grupo cuando el animal cambia de rumbo y aparece una segunda sombra.", "El gigante no anda buscando tu cámara.", {"nombre": "El pez no posa para vos", "frases": ["El gigante no anda buscando tu cámara.", "La sombra nueva manda: corré la boya, no la cámara."], "loco": false, "gira": true}, 4],
+      ["arrecife-por-generaciones", "Arrecife por generaciones", "islas.coral", "arrecife", "🤿", "Fundá una colonia con pocos módulos.", "Un coral joven no vive a codazos.", {"nombre": "Arrecife por generaciones", "frases": ["Un coral joven no vive a codazos.", "Esto es simulación: el coral de verdad no se toca."], "loco": false}, 5],
+      ["el-coral-pidio-espacio", "El coral pidió espacio", "islas.coral", "arrecife", "🤿", "Recuperá un parche de arrecife simulado con especies de exigencias distintas mientras los módulos de espuma sacan cartelitos de espacio personal.", "Un coral joven no vive a codazos.", {"nombre": "El coral pidió espacio", "frases": ["Un coral joven no vive a codazos.", "Cartelito nuevo: «un metro, porfa»."], "loco": true}, 4],
+      ["correo-de-bonacca", "Correo de Bonacca", "islas.bonacca", "guanaja", "🌉", "Entregá paquetes con marea conocida.", "El paquete va a la puerta, no al agua.", {"nombre": "Correo de Bonacca", "frases": ["El paquete va a la puerta, no al agua.", "En Bonacca la calle es el canal."], "loco": false}, 5],
+      ["el-balcon-bajo-a-saludarte", "El balcón bajó a saludarte", "islas.bonacca", "guanaja", "🌉", "Recogé devoluciones en balcones que suben y bajan como acordeones de cartón, ajustando el gancho a su altura sin mojar los paquetes.", "El paquete va a la puerta, no al agua.", {"nombre": "El balcón bajó a saludarte", "frases": ["El paquete va a la puerta, no al agua.", "Ese balcón tiene más subidas que la marea."], "loco": true}, 4],
+      ["water-taxi-sin-estela", "Water taxi sin estela", "islas.estela", "coxen", "🚤", "Entrá al embarcadero después de disipar la estela.", "Vos ya paraste; la ola todavía viene.", {"nombre": "Water taxi sin estela", "frases": ["Vos ya paraste; la ola todavía viene.", "Despacito al muelle, que la ola llega después."], "loco": false}, 4],
+      ["la-ola-cobro-el-pasaje", "La ola cobró el pasaje", "islas.estela", "coxen", "🚤", "Salí marcha atrás de un embarcadero con ondas que rebotan en dos paredes.", "Vos ya paraste; la ola todavía viene.", {"nombre": "La ola cobró el pasaje", "frases": ["Vos ya paraste; la ola todavía viene.", "Las paredes devuelven la ola: esperá que se calme."], "loco": false, "rebote": true}, 4],
+      ["quieto-sobre-west-bay", "Quieto sobre West Bay", "islas.flotacion", "westbay", "🏄", "Dosificá aire del chaleco y respiración simulada para mantener profundidad sin apoyar aletas.", "No necesitás pararte para ver bonito.", {"nombre": "Quieto sobre West Bay", "frases": ["No necesitás pararte para ver bonito.", "Poquito aire, likkle bit, y respirá parejo."], "loco": false}, 4],
+      ["el-rojo-se-quedo-arriba", "El rojo se quedó arriba", "islas.colorprofundo", "arrecife", "🤿", "Compará dos fotos del mismo coral tomadas a profundidades diferentes usando luz natural.", "El rojo no se fue: te fuiste más abajo.", {"nombre": "El rojo se quedó arriba", "frases": ["El rojo no se fue: te fuiste más abajo.", "Lo azul es el agua, no el coral."], "loco": false}, 4],
+      ["el-cangrejo-tiene-salida", "El cangrejo tiene salida", "islas.cangrejo", "guanaja", "🌉", "Mové cercas laterales temporales para que un cangrejo virtual encuentre su refugio.", "Dejale salida, que no es premio de feria.", {"nombre": "El cangrejo tiene salida", "frases": ["Dejale salida, que no es premio de feria.", "El cangrejo camina de lado: no lo encerrés."], "loco": false}, 4],
+      ["cada-grano-a-su-tiempo", "Cada grano a su tiempo", "islas.absorcion", "roatan", "🍛", "Distribuí líquido entre dos compartimentos de cocción que se comunican por absorción.", "Cada grano va agarrando su tiempo.", {"nombre": "Cada grano a su tiempo", "frases": ["Cada grano va agarrando su tiempo.", "Leche de coco sí; cuchara no."], "loco": false}, 4]
     ]
   },
   "yoro": {

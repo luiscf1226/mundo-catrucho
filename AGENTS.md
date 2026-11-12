@@ -14,17 +14,18 @@ también van en español.
 | `apps/web/tools/` | Compilación (`build.mjs`), arnés de Chromium (`harness.mjs`), prueba de punta a punta (`smoke.mjs`), capturas (`capturas.mjs`). |
 | `workers/salas/` | Sala en vivo (`@mundo-catrucho/salas`): Cloudflare Durable Object con WebSocket. |
 | `convex/` | Modelo de datos (`schema.ts`). Las funciones llegan en la ola 2. |
-| `packages/reglas/` | Reglas compartidas (premios, niveles, topes). Vacío hasta la ola 5. |
+| `packages/reglas/` | Reglas compartidas (`@mundo-catrucho/reglas`): premios, niveles, topes para validar resultados y límites de la sala. Las usan el juego, Convex y la sala. |
 | `.github/` | Revisión automática (`workflows/revision.yml`) y plantillas de pull request e issues. |
 | `docs/` | Plan, olas (`OLAS.md`), tickets (`TICKETS.md`) y el generador que los produce. |
 
 ## Comandos (siempre desde la raíz)
 
 ```bash
-pnpm install       # instala todo el espacio de trabajo (Node 22 o más, pnpm 12)
+pnpm install       # instala todo el espacio de trabajo (Node 22.18 o más, pnpm 12)
 pnpm dev           # juego en http://localhost:5173 y sala en ws://localhost:8799
 pnpm check         # Biome (lint y formato) + tipos de todo + validar que el contenido no se repita
-pnpm test          # compila y juega solo de punta a punta en Chromium; la sala conecta dos jugadores
+pnpm test          # compila y juega solo de punta a punta en Chromium; la sala conecta dos jugadores; pruebas de reglas
+pnpm --filter @mundo-catrucho/reglas test   # solo las pruebas unitarias de packages/reglas (node --test)
 pnpm --filter @mundo-catrucho/web build:web # sitio estático en apps/web/dist/web, tamaños por trozo
 node apps/web/tools/test-carga.mjs          # prueba HTTP de cargas diferidas (también MC_GPU=0 MC_LENTO=6)
 pnpm build         # apps/web/dist/mundo-catrucho-hd.html y el empaquetado de la sala
@@ -57,7 +58,8 @@ llaves por índice en listas fijas. Código nuevo: sin `any` ni `!` si se puede 
 3. **Marcas, clubes y la Selección van con apodos**, nunca con logotipos ni nombres oficiales.
 4. **Rendimiento:** menos de ~350 llamadas de dibujo por escena y una sola luz con sombras.
 5. **Nada que valga se decide en el navegador** una vez que exista el servidor (desde la ola 5): premios, compras y
-   puntajes los valida Convex con `packages/reglas`.
+   puntajes los valida Convex con `packages/reglas`. Premios, niveles y topes se cambian **solo** en ese paquete (o en
+   `rewards.json`); si cambiás metas o reloj de un motor del kit, cambiá también `TOPES` (`test-reglas.mjs` lo revisa).
 6. **Secretos nunca en el código.** Las llaves viven en los secretos de GitHub y de Cloudflare; `.env*` está ignorado.
 
 ## Qué no tocar
@@ -79,3 +81,14 @@ El trabajo va en olas (`docs/OLAS.md`); cada ola es un hito en GitHub y cada tic
 - `main` solo recibe cambios por pull request con la revisión automática en verde. Los PR cierran sus issues con
   `Closes #NN` (GitHub no entiende «Cierra»).
 - **Nunca se une un pull request a `main` sin que el usuario diga «full send»** o lo pida claramente.
+
+## Panel de contenido (MC-33)
+
+`apps/panel/` (`@mundo-catrucho/panel`) edita el catálogo existente sin compilar el juego.
+Corré `pnpm --filter @mundo-catrucho/panel dev` (puerto 5174) o `build`.
+Usa `CONVEX_URL` de `.env.local`, o `VITE_CONVEX_URL`. `pnpm check` incluye sus tipos y Biome.
+La llave se obtiene con `npx convex env get PANEL_LLAVE`; ingresala en la pantalla de acceso.
+Solo se guarda en `sessionStorage`; nunca la agregués al código ni a variables `VITE_*`.
+Con Clerk (MC-07) el acceso debe migrar a roles. Prueba real (edita y restaura):
+`node apps/panel/tools/test-panel.mjs`. No la corras junto a otras publicaciones en ese entorno.
+Capturas en `capturas/mc-33/`. `catalogo:subir` exige `--forzar` si la última publicación vino del panel.

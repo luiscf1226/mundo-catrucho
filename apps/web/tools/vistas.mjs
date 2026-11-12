@@ -31,7 +31,7 @@ const ok = await run('vistas', file, { hash: '#go', width: 1280, height: 720 }, 
     'lapaz.ticucos',
     'comayagua.pilonpaleta',
     'franciscomorazan.rapidito',
-    'islas.ballena',
+    'islas.encuentro-en-utila',
     'atlantida.rafting',
     'lempira.celaque',
   ]) {

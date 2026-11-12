@@ -125,7 +125,9 @@ import { finish, setHud, starsFor, fmtTime, rulesOf, useMgPhase } from './api';
 useMgTick((dt) => { ... setHud({ timer: segundos, score: '2 - 1', objective: 'texto corto', lines: [] }); });
 finish({ won, stars: 0|1|2|3, score /* mayor es mejor */, label: '1:02' | '3 - 1' | '320 pts', stats: { goals } });
 ```
-Las recompensas (monedas, XP, logros, misiones, tabla) las calcula `store.finishMinigame`; el minijuego no las toca.
+Las recompensas (monedas, XP, logros, misiones, tabla) las calcula `store.finishMinigame` con las reglas de
+`@mundo-catrucho/reglas` (`premioPartida`, `ganarXp`); el minijuego no las toca. Las metas y el reloj de cada motor del
+kit están copiados en `TOPES` de ese paquete para que el servidor valide resultados: si los cambiás, cambiá los dos.
 Reglas y umbrales: `rulesOf('carrera')` lee `shared/data/minigames.json`.
 
 ## Interfaz y pruebas

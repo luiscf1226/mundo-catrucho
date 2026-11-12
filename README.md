@@ -28,7 +28,7 @@ comprueba que nada se repita. Los viajes reales (rutas, vehículos, eventos de c
 ## Cómo se corre
 
 ```bash
-pnpm install       # instala todo el espacio de trabajo (Node 22+, pnpm 12)
+pnpm install       # instala todo el espacio de trabajo (Node 22.18+, pnpm 12)
 
 pnpm dev           # el juego en http://localhost:5173 y la sala en ws://localhost:8799
 pnpm check         # Biome (lint y formato), tipos del juego, la sala y Convex, y que el contenido no se repita

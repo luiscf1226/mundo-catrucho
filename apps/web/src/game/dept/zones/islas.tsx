@@ -3,6 +3,7 @@ import { P } from '../../kit';
 import { bl, bx, cy, inR, type Pc, PI, place, py, ss } from '../lib';
 import { champa, mesa, pier } from '../parts';
 import { ZB, type ZoneSpec } from '../zone';
+import { IslasDescubrimientos } from './IslasDescubrimientos';
 
 const CORAL = ['#ff6f91', '#ff9671', '#ffc75f', '#845ec2', '#f9f871', '#00c9a7', '#ff8066', '#d65db1'];
 /** Islas de la Bahía: una islita de arena blanca en Roatán, con muelle, arrecife bajo que se camina y un naufragio. */
@@ -17,6 +18,7 @@ export function arrecife(d: Department): ZoneSpec {
   Z.sea(-0.3);
   Z.far = { mat: 'sand', color: B.sand, y: -3.47 };
   Z.stop(0, 30);
+  Z.n(<IslasDescubrimientos altura={(x, z) => Z.h(x, z)} />);
   Z.add(place(pier(26), 0, 0, -19.5), place(champa(3.2, 3.2, '#c9a55a'), 0, 0.6, -43.4));
   Z.label('Arrecife Mesoamericano', 0, 5.4, -43.4, 0.8);
   // naufragio sobre el arrecife

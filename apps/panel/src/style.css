@@ -1,0 +1,260 @@
+@import "tailwindcss";
+:root {
+  font-family: system-ui, sans-serif;
+  color: #182e2a;
+  background: #f4f3ec;
+  font-synthesis: none;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+header {
+  background: #123f35;
+  color: white;
+  padding: 22px 4%;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+.marca {
+  background: #e9bd62;
+  color: #123f35;
+  font-weight: 900;
+  padding: 12px;
+  border-radius: 12px;
+}
+h1 {
+  font-size: 23px;
+  margin: 2px 0;
+}
+small {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  font-weight: 750;
+}
+.insignia {
+  margin-left: auto;
+  border: 1px solid #ffffff40;
+  padding: 8px 14px;
+  border-radius: 24px;
+  font-size: 13px;
+}
+h2 {
+  font-size: 32px;
+  font-weight: 750;
+  margin: 8px 0 18px;
+}
+p {
+  line-height: 1.6;
+}
+.entrada {
+  max-width: 540px;
+  margin: 70px auto;
+  padding: 36px;
+  background: white;
+  border: 1px solid #dedfd5;
+  border-radius: 18px;
+}
+.entrada small {
+  color: #8c621c;
+}
+.entrada form {
+  margin-top: 26px;
+}
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 650;
+  margin-bottom: 16px;
+}
+input,
+textarea,
+select {
+  font: inherit;
+  font-weight: 400;
+  color: #182e2a;
+  background: #fff;
+  border: 1px solid #c8d0c8;
+  border-radius: 7px;
+  padding: 11px;
+  width: 100%;
+}
+textarea:focus,
+input:focus,
+select:focus {
+  outline: 2px solid #c59744;
+  outline-offset: 2px;
+}
+button {
+  font: inherit;
+  cursor: pointer;
+  border: 1px solid #b8c9bf;
+  background: white;
+  color: #154e3c;
+  border-radius: 8px;
+  padding: 11px 18px;
+  font-weight: 650;
+}
+button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+button[data-testid="entrar"],
+button[data-testid="publicar"] {
+  background: #176348;
+  color: #fff;
+  border-color: #176348;
+}
+.ayuda {
+  font-size: 12px;
+  color: #60736a;
+  margin-top: 22px;
+}
+.editor {
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr);
+  gap: 34px;
+  max-width: 1280px;
+  margin: 32px auto;
+  padding: 0 28px;
+}
+aside {
+  align-self: start;
+  position: sticky;
+  top: 22px;
+}
+aside label {
+  margin-top: 18px;
+}
+nav {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-top: 20px;
+}
+nav button {
+  text-align: left;
+
+  border-color: transparent;
+  background: transparent;
+}
+nav button[aria-pressed="true"] {
+  background: #dce9df;
+  border-color: #b8cebe;
+}
+.titulo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.titulo span {
+  font-size: 13px;
+  color: #60736a;
+}
+fieldset {
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+article {
+  background: white;
+  border: 1px solid #dce1d7;
+  border-radius: 12px;
+  padding: 22px;
+  margin: 0 0 18px;
+}
+h3 {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 22px;
+}
+.campos {
+  display: grid;
+  gap: 0 18px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+.campos .campos {
+  grid-column: 1 / -1;
+  padding: 10px 0;
+  border-top: 1px solid #eee;
+}
+footer {
+  position: sticky;
+  bottom: 0;
+  background: #f4f3ecf5;
+  border-top: 1px solid #cad6cc;
+  padding: 16px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+footer span {
+  font-size: 12px;
+}
+.acciones {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 22px 0 60px;
+}
+.mensaje {
+  position: fixed;
+  bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 90vw;
+  width: 600px;
+  max-height: 160px;
+  overflow: auto;
+  background: #123f35;
+  color: white;
+  padding: 18px 24px;
+  border-radius: 12px;
+  box-shadow: 0 6px 24px #0003;
+  font-size: 14px;
+  z-index: 10;
+}
+@media (max-width: 760px) {
+  .editor {
+    grid-template-columns: 1fr;
+  }
+  aside {
+    position: static;
+  }
+  nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .entrada {
+    margin: 30px 16px;
+  }
+  .insignia {
+    display: none;
+  }
+  .campos {
+    grid-template-columns: 1fr;
+  }
+  h2 {
+    font-size: 26px;
+  }
+}
+
+.titulo h2 {
+  text-transform: capitalize;
+}
+.grupo-titulo {
+  grid-column: 1 / -1;
+  font-size: 12px;
+  font-weight: 700;
+  color: #60736a;
+  margin: 8px 0 14px;
+}
+textarea {
+  resize: vertical;
+}

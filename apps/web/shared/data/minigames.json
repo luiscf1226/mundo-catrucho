@@ -330,5 +330,174 @@
   "icon": "🧭",
   "desc": "Trazá cortes sobre madera ya aserrada evitando nudos y respetando la orientación de la fibra. Ganás completando piezas estructurales con poco desperdicio; una veta transversal invalida la pieza.",
   "rules": {}
+ },
+ {
+  "id": "islas.ballena",
+  "name": "Distancia en Utila",
+  "place": "Islas de la Bahía",
+  "icon": "🦈",
+  "desc": "Estimá velocidad del tiburón ballena con dos sombras sucesivas y mové boyas virtuales fuera de su rumbo. Ganás un encuentro a distancia; perseguirlo o cerrarle el paso termina la observación.",
+  "rules": {}
+ },
+ {
+  "id": "islas.coral",
+  "name": "Arrecife por generaciones",
+  "place": "Islas de la Bahía",
+  "icon": "🪸",
+  "desc": "Colocá módulos de simulación sobre una cuadrícula con luz y corriente. Ganás colonias adultas si cada juvenil recibe nutrientes y sombra adecuada; hacinarlas corta su crecimiento.",
+  "rules": {}
+ },
+ {
+  "id": "islas.bonacca",
+  "name": "Paquetes por canales",
+  "place": "Islas de la Bahía",
+  "icon": "🌉",
+  "desc": "Asigná entregas a balcones de Bonacca ajustando la altura del gancho con la marea. Ganás si cada bulto alcanza su puerta; un nivel equivocado moja el paquete.",
+  "rules": {}
+ },
+ {
+  "id": "islas.estela",
+  "name": "Estela que llega después",
+  "place": "Islas de la Bahía",
+  "icon": "🚤",
+  "desc": "Regulá aceleración y frenado de un taxi acuático leyendo las ondas que dejaste atrás. Ganás al atracar sin que tu estela golpee el muelle; frenar de golpe adelanta la ola.",
+  "rules": {}
+ },
+ {
+  "id": "islas.flotacion",
+  "name": "Trimado de buceo",
+  "place": "Islas de la Bahía",
+  "icon": "🤿",
+  "desc": "Dosificá aire del chaleco y respiración simulada para mantener profundidad sin apoyar aletas. Ganás una observación horizontal estable; ascender rápido o tocar fondo cancela la toma.",
+  "rules": {}
+ },
+ {
+  "id": "islas.colorprofundo",
+  "name": "Color con profundidad",
+  "place": "Islas de la Bahía",
+  "icon": "🎨",
+  "desc": "Compará dos fotos del mismo coral tomadas a profundidades diferentes usando luz natural. Ganás reconstruyendo la carta cromática perdida; atribuir al coral un color absorbido por el agua resta precisión.",
+  "rules": {}
+ },
+ {
+  "id": "islas.cangrejo",
+  "name": "Barreras para cangrejo azul",
+  "place": "Islas de la Bahía",
+  "icon": "🦀",
+  "desc": "Mové cercas laterales temporales para que un cangrejo virtual encuentre su refugio. Ganás dejándole una ruta abierta; arrinconarlo suspende el turno.",
+  "rules": {}
+ },
+ {
+  "id": "islas.absorcion",
+  "name": "Rice and beans sin revolver",
+  "place": "Islas de la Bahía",
+  "icon": "🍛",
+  "desc": "Distribuí líquido entre dos compartimentos de cocción que se comunican por absorción. Ganás cuando arroz y frijoles terminan simultáneamente; revolver altera la porosidad y reinicia el cálculo.",
+  "rules": {}
  }
+,
+{
+ "id": "copan.cadera",
+ "name": "Pelota con cadera",
+ "place": "Copán",
+ "icon": "🗿",
+ "desc": "Con teclas laterales orientá cadera y muslo de un avatar hacia una pelota de hule. Ganás desviándola a marcadores de práctica; manos y pies anulan el punto de esta interpretación jugable.",
+ "rules": {
+  "duration": 75,
+  "bronze": 120,
+  "silver": 360,
+  "gold": 600
+ }
+},
+{
+ "id": "copan.glifos",
+ "name": "Bordes de la Escalinata",
+ "place": "Copán",
+ "icon": "🗿",
+ "desc": "Girás réplicas digitales de bloques y cotejás continuidad de trazos por dos bordes. Ganás un panel coherente sin atribuir traducciones; un borde incompatible mantiene la pieza suelta.",
+ "rules": {
+  "duration": 75,
+  "bronze": 120,
+  "silver": 360,
+  "gold": 600
+ }
+},
+{
+ "id": "copan.guaras",
+ "name": "Corredor de guaras",
+ "place": "Copán",
+ "icon": "🦜",
+ "desc": "Conectá refugios y árboles de alimento en un grafo de distancias de vuelo. Ganás cuando parejas virtuales cruzan con descansos intermedios; una jaula nunca cuenta como destino.",
+ "rules": {
+  "duration": 75,
+  "bronze": 120,
+  "silver": 360,
+  "gold": 600
+ }
+},
+{
+ "id": "copan.estratigrafia",
+ "name": "Edificios superpuestos",
+ "place": "Copán",
+ "icon": "🗿",
+ "desc": "Elegí una fase constructiva con una rueda temporal y recorré únicamente sus accesos existentes. Ganás conectando patios de la misma época; mezclar puertas de fases distintas cierra el modelo.",
+ "rules": {
+  "duration": 75,
+  "bronze": 120,
+  "silver": 360,
+  "gold": 600
+ }
+},
+{
+ "id": "copan.hojas",
+ "name": "Diagnóstico del cafetal copaneco",
+ "place": "Copán",
+ "icon": "🗿",
+ "desc": "Contrastá haz y envés de hojas en fichas ilustradas de diagnóstico. Ganás ubicando una misma lesión en ambas caras; acertar solo por color no completa el informe.",
+ "rules": {
+  "duration": 75,
+  "bronze": 120,
+  "silver": 360,
+  "gold": 600
+ }
+},
+{
+ "id": "copan.adoquin",
+ "name": "Suspensión en empedrado",
+ "place": "Copán",
+ "icon": "🗿",
+ "desc": "Elegí diagonales de rueda en un tramo de adoquines con golpes desfasados. Ganás manteniendo una taza sobre su marca; alinear todos los impactos hace resonar la suspensión.",
+ "rules": {
+  "duration": 75,
+  "bronze": 120,
+  "silver": 360,
+  "gold": 600
+ }
+},
+{
+ "id": "copan.estelas",
+ "name": "Orientaciones del patio",
+ "place": "Copán",
+ "icon": "🗿",
+ "desc": "Rotá monumentos de réplica hasta que dos fotografías desde extremos opuestos concuerden. Ganás un patio orientado; aceptar una sola vista permite una simetría falsa.",
+ "rules": {
+  "duration": 75,
+  "bronze": 120,
+  "silver": 360,
+  "gold": 600
+ }
+},
+{
+ "id": "copan.atol",
+ "name": "Masa en suspensión",
+ "place": "Copán",
+ "icon": "🗿",
+ "desc": "Pulsá agitación lateral para levantar sedimento sin variar el fuego del atol. Ganás manteniendo partículas suspendidas durante el servicio; agitar verticalmente incorpora espuma y reduce el volumen útil.",
+ "rules": {
+  "duration": 75,
+  "bronze": 120,
+  "silver": 360,
+  "gold": 600
+ }
+}
 ]
