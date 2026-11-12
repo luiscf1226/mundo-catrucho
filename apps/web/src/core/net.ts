@@ -40,6 +40,22 @@ export interface RoomInfo {
   name: string;
 }
 type Evento = 'join' | 'leave' | 'emote' | 'chat';
+/** MC-22: lo que la sala manda del chat. `chat` viene ya filtrado y firmado por la sala. */
+export type ChatEntrante =
+  | {
+      t: 'chat';
+      id: string;
+      de: string;
+      nombre: string;
+      sala: string;
+      ts: number;
+      texto: string;
+      tapado: boolean;
+      firma: string;
+    }
+  | { t: 'chat-no'; motivo: string };
+/** MC-24: cómo terminó entrar a la sala exacta de un amigo. */
+export type Union = 'ok' | 'llena' | 'error';
 export interface NetAdapter {
   readonly online: boolean;
   listRooms(): Promise<RoomInfo[]>;
@@ -57,6 +73,15 @@ export interface NetAdapter {
   /** jugadores remotos de la sala actual */
   players(): RemotePlayer[];
   on(ev: Evento, cb: (p: RemotePlayer, data?: string) => void): () => void;
+  /** MC-22: mensaje de chat → sala (ella lo filtra y lo reparte) */
+  sendChat(texto: string): void;
+  /** MC-22: la sala deja de pasar mensajes entre vos y `id` (o vuelve a pasarlos) */
+  bloquearEnSala(id: string, si: boolean): void;
+  onChat(cb: (m: ChatEntrante) => void): () => void;
+  /** id público propio en la sala, o null fuera de sala */
+  yo(): string | null;
+  /** MC-24: entrar a esa sala exacta (la de un amigo) en vez del primer tramo libre, al estar en su zona */
+  unirseA(sala: string): Promise<Union>;
 }
 
 /** Cómo va la conexión, para la interfaz (panel de salas) y las pruebas. */
@@ -153,6 +178,21 @@ export class LocalNet implements NetAdapter {
   on() {
     return () => {};
   }
+  sendChat() {
+    /* local */
+  }
+  bloquearEnSala() {
+    /* local */
+  }
+  onChat() {
+    return () => {};
+  }
+  yo() {
+    return null;
+  }
+  async unirseA(): Promise<Union> {
+    return 'error';
+  }
 }
 
 // ------------------------------------------------------------------ sala en vivo
@@ -194,6 +234,11 @@ export class SalaNet implements NetAdapter {
   private proximo = 0;
   private ultimo = '';
   private convex: ConvexHttpClient;
+  private chat = new Set<(m: ChatEntrante) => void>();
+  private miId: string | null = null;
+  /** MC-24: sala exacta a la que entrar la próxima vez que se conecte en su zona, y a quién avisar */
+  private preferida: string | null = null;
+  private alUnirse: ((r: Union) => void) | undefined;
   /** nombre propio (lo pone el juego); va al pase */
   nombre = () => 'Catracho';
 
@@ -258,6 +303,19 @@ export class SalaNet implements NetAdapter {
       return;
     }
     useSala.setState({ estado: 'buscando', sala: null, otros: 0 });
+    // MC-24: la sala exacta de un amigo (aunque no sea el primer tramo libre); si está llena, avisa y sigue normal
+    const pref = this.preferida;
+    if (pref && partirSala(pref)?.zona === zona) {
+      this.preferida = null;
+      const r = await conPlazo(
+        this.convex.mutation(paseRef, { invitado: secretoInvitado(), sala: pref, nombre: this.nombre() }),
+      );
+      const fin = r?.ok && turno === this.turno ? await this.abrir(turno, pref, r.pase) : 0;
+      const avisar = this.alUnirse;
+      this.alUnirse = undefined;
+      avisar?.(fin === 'ok' ? 'ok' : fin === SALA.cierre.llena ? 'llena' : 'error');
+      if (fin === 'ok' || turno !== this.turno) return;
+    }
     let desde = 0;
     for (let intento = 0; intento < SALA.tramosMax && turno === this.turno; intento++) {
       const libre = await conPlazo(
@@ -306,6 +364,7 @@ export class SalaNet implements NetAdapter {
           dentro = true;
           clearTimeout(plazo);
           this.espera = 2000;
+          this.miId = typeof m.id === 'string' ? m.id : null;
           for (const j of (m.jugadores as Entrante[]) ?? []) this.agregar(j);
           useSala.setState({ estado: 'en-sala', sala, otros: this.remotos.size });
           this.ultimo = '';
@@ -386,6 +445,10 @@ export class SalaNet implements NetAdapter {
     } else if (m.t === 'emote' && r && typeof m.emote === 'string') {
       r.emote = { id: m.emote, hasta: performance.now() + 4200 };
       this.emitir('emote', r, m.emote);
+    } else if (m.t === 'chat' || m.t === 'chat-no') {
+      for (const cb of this.chat) cb(m as unknown as ChatEntrante);
+      const autor = typeof m.de === 'string' ? this.remotos.get(m.de) : undefined;
+      if (autor && typeof m.texto === 'string') this.emitir('chat', autor, m.texto);
     }
   }
 
@@ -410,6 +473,35 @@ export class SalaNet implements NetAdapter {
   }
   sendEmote(id: string) {
     if (this.ws?.readyState === WebSocket.OPEN) this.ws.send(JSON.stringify({ t: 'emote', id }));
+  }
+  sendChat(texto: string) {
+    if (this.ws?.readyState === WebSocket.OPEN) this.ws.send(JSON.stringify({ t: 'chat', texto: texto.slice(0, 400) }));
+  }
+  bloquearEnSala(id: string, si: boolean) {
+    if (this.ws?.readyState === WebSocket.OPEN) this.ws.send(JSON.stringify({ t: 'bloquear', id, si }));
+  }
+  onChat(cb: (m: ChatEntrante) => void) {
+    this.chat.add(cb);
+    return () => {
+      this.chat.delete(cb);
+    };
+  }
+  yo() {
+    return useSala.getState().estado === 'en-sala' ? this.miId : null;
+  }
+  unirseA(sala: string) {
+    const p = partirSala(sala);
+    if (!p) return Promise.resolve<Union>('error');
+    this.alUnirse?.('error');
+    this.preferida = sala;
+    return new Promise<Union>((res) => {
+      this.alUnirse = res;
+      // ya está en esa zona: se cambia de tramo ahí mismo; si no, entra al llegar (setZone)
+      if (this.zona === p.zona) {
+        this.espera = 2000;
+        void this.conectar();
+      }
+    });
   }
   players() {
     return [...this.remotos.values()];

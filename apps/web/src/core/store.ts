@@ -45,6 +45,8 @@ export interface Settings {
   quality: 'baja' | 'media' | 'alta';
   sens: number;
   invertY: boolean;
+  /** MC-22: chat de sala y directos; apagado no se muestra ni se manda nada */
+  chat: boolean;
 }
 export interface DailyMission {
   id: string;
@@ -163,7 +165,7 @@ const freshProfile = (): Profile => ({
   juegos: {},
   modo: 'solo',
   daily: { date: today(), missions: pickDaily(today()) },
-  settings: { music: 0.6, sfx: 0.8, quality: 'alta', sens: 1, invertY: false },
+  settings: { music: 0.6, sfx: 0.8, quality: 'alta', sens: 1, invertY: false, chat: true },
   room: { mode: 'publica', code: '' },
 });
 function load(): Profile {

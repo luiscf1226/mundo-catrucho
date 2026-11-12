@@ -112,7 +112,11 @@ export default defineSchema({
     de: v.id('usuarios'),
     juegoId: v.optional(v.string()),
     vence: v.number(),
-  }).index('por_codigo', ['codigo']),
+    /** MC-24: sala en vivo exacta de quien creó el código (`mapa:N` o `dept:<id>:N`) */
+    sala: v.optional(v.string()),
+  })
+    .index('por_codigo', ['codigo'])
+    .index('por_de', ['de']),
   // la escribe cada sala cada 30 s; de aquí salen los «conectados» del mapa
   salas: defineTable({
     tipo: v.union(v.literal('mapa'), v.literal('dept'), v.literal('juego'), v.literal('viaje')),
@@ -133,7 +137,38 @@ export default defineSchema({
     deptId: v.optional(v.string()),
     reglas: v.any(),
   }),
-  reportes: defineTable({ de: v.id('usuarios'), a: v.id('usuarios'), motivo: v.string() }),
+  reportes: defineTable({
+    de: v.id('usuarios'),
+    a: v.id('usuarios'),
+    motivo: v.string(),
+    // MC-22: qué se reportó. Del chat de sala: la sala y el mensaje (con la firma de la sala ya comprobada);
+    // de un directo: su id. El texto se guarda como estaba al reportarlo.
+    sala: v.optional(v.string()),
+    mensajeId: v.optional(v.string()),
+    directo: v.optional(v.id('directos')),
+    texto: v.optional(v.string()),
+    /** cola de moderación: 'nuevo' hasta que alguien lo revisa (`moderacion:resolver`) */
+    estado: v.optional(v.union(v.literal('nuevo'), v.literal('visto'))),
+  })
+    .index('por_de', ['de'])
+    .index('por_estado', ['estado']),
+  // MC-22: bloqueos. Un bloqueado no ve tus mensajes ni vos los suyos, y no te puede invitar ni pedir amistad.
+  bloqueos: defineTable({ de: v.id('usuarios'), a: v.id('usuarios') })
+    .index('por_de', ['de', 'a'])
+    .index('por_a', ['a']),
+  // MC-22, MC-24: id público de la sala (`idPublico`) → cuenta; se llena al pedir un pase o un código
+  publicos: defineTable({ id: v.string(), usuarioId: v.id('usuarios') })
+    .index('por_id', ['id'])
+    .index('por_usuario', ['usuarioId']),
+  // MC-22: mensajes directos entre amistades aceptadas, ya filtrados
+  directos: defineTable({
+    amistad: v.id('amistades'),
+    de: v.id('usuarios'),
+    texto: v.string(),
+    tapado: v.boolean(),
+  })
+    .index('por_amistad', ['amistad'])
+    .index('por_de', ['de']),
   // MC-15, MC-16: lo que el servidor cuenta del jugador fuera de las partidas
   contadores: defineTable({
     usuarioId: v.id('usuarios'),

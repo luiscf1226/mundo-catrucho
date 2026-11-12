@@ -401,3 +401,28 @@ Sin `VITE_SALAS_URL` y `VITE_CONVEX_URL` el juego usa `LocalNet` y no hace ningu
 con `firmarPase` de `@mundo-catrucho/reglas`, compila el juego con las dos variables y juega con dos pestañas:
 24 en el mapa (llamadas de dibujo), el tramo 2, Olancho, moverse a 15 Hz, el emote y salir al entrar a un minijuego.
 Capturas en `capturas/mc-19/`.
+
+## Chat y amigos (MC-22, MC-24)
+
+Solo con salas en vivo (`EN_VIVO`). Sin ellas el panel `amigos` muestra `amigos-sin-red` y no hay chat ni peticiones.
+
+- `core/chat.ts`: estado `useChat` (mensajes de la sala, silenciados de esta sesión, `social` de Convex, último
+  código usado) y llamadas a `amigos:*`, `chat:*` y `moderacion:*`. En `window.__mc.chat` con salas en vivo.
+- Chat de sala (`ui/chat/ChatSala.tsx`, abajo a la izquierda; con pantalla táctil, arriba): viaja por el WebSocket
+  (`net.sendChat`, `net.onChat`). La sala limpia, filtra (`filtrarChat` de `packages/reglas`), pone ritmo (5 seguidos,
+  luego uno cada 2 s), firma cada mensaje y no lo pasa entre bloqueados. El navegador filtra antes solo para avisar.
+  La tecla T abre el campo. Tocar un nombre: pedir amistad, silenciar (solo esta sesión), bloquear y reportar.
+- Ajustes → «Chat» (`set-chat`, `profile.settings.chat`): apagado no se guarda, no se muestra ni se manda nada.
+- Panel `amigos`: pestañas Amigos (pedidos, amigos, gente con quien jugás, directos con sondeo cada 3 s), Código
+  (crear el tuyo, unirte con el de alguien) y Bloqueados.
+- Código: `net.unirseA(sala)` entra a la sala exacta del amigo al llegar a su zona (viaja solo si hace falta).
+- `data-testid`: `chat-sala`, `chat-lista`, `chat-msg` (`data-de`, `data-tapado`), `chat-autor`, `chat-texto`,
+  `chat-input`, `chat-enviar`, `chat-toggle`, `chat-aviso`, `chat-menu`, `chat-amistad`, `chat-silenciar`,
+  `chat-bloquear`, `chat-reportar`, `chat-reportar-<motivo>`, `set-chat`, `amigos-tab-<amigos|codigo|bloqueados>`,
+  `amigos-lista`, `amigo` (`data-id`, `data-estado`), `amigo-aceptar|rechazar|escribir|quitar|bloquear`,
+  `amigos-cerca`, `cerca-amistad-<id>`, `directo`, `directo-lista`, `directo-msg` (`data-mio`), `directo-input`,
+  `directo-enviar`, `directo-reportar[-<motivo>]`, `directo-apagado`, `codigo-crear`, `codigo-mio`, `codigo-copiar`,
+  `codigo-input`, `codigo-unirme`, `codigo-estado` (`data-r`), `bloqueado`, `bloqueado-quitar`, `amigos-sin-red`.
+
+`node tools/test-chat-amigos.mjs` corre contra el Convex de desarrollo (lee `SALA_SECRETO` con el CLI, sin
+imprimirlo) y una sala local. Capturas en `capturas/mc-22/`.

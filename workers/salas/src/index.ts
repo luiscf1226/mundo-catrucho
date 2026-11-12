@@ -23,6 +23,7 @@ import {
   verificarPase,
   zonaValida,
 } from '@mundo-catrucho/reglas';
+import { esDeChat, recibirChat } from './chat';
 
 export interface Env {
   SALAS: DurableObjectNamespace<Sala>;
@@ -39,6 +40,9 @@ interface Jugador {
   z: number;
   yaw: number;
   anim: string;
+  /** MC-22: sala del pase y a quiénes bloqueó (para el chat) */
+  sala: string;
+  bloqueados: string[];
 }
 const CORS = { 'Access-Control-Allow-Origin': '*', 'Cache-Control': 'no-store' };
 /** Acepta el WebSocket solo para cerrarlo con un motivo que el navegador sí puede leer. */
@@ -92,12 +96,21 @@ export class Sala extends DurableObject<Env> {
       }
     if (this.conectados().filter((w) => w.deserializeAttachment()).length >= SALA.cupo)
       return rechazar(CIERRE.llena, 'llena');
-    const { id, nombre, avatar } = v.pase;
-    const yo: Jugador = { id, nombre, avatar, x: 0, y: 0, z: 0, yaw: 0, anim: 'idle' };
+    const { id, nombre, avatar, bloqueados = [] } = v.pase;
+    const yo: Jugador = { id, nombre, avatar, x: 0, y: 0, z: 0, yaw: 0, anim: 'idle', sala, bloqueados };
     const [cliente, servidor] = Object.values(new WebSocketPair());
     this.ctx.acceptWebSocket(servidor);
     servidor.serializeAttachment(yo);
-    servidor.send(JSON.stringify({ t: 'hola', id, sala, jugadores: this.jugadores(servidor).filter(Boolean) }));
+    servidor.send(
+      JSON.stringify({
+        t: 'hola',
+        id,
+        sala,
+        jugadores: this.jugadores(servidor)
+          .filter(Boolean)
+          .map(({ sala: _s, bloqueados: _b, ...j }) => j),
+      }),
+    );
     this.difundir({ t: 'entra', id, nombre, avatar }, servidor);
     return new Response(null, { status: 101, webSocket: cliente });
   }
@@ -125,6 +138,8 @@ export class Sala extends DurableObject<Env> {
       this.difundir({ t: 'pos', id: yo.id, x: yo.x, y: yo.y, z: yo.z, yaw: yo.yaw, anim: yo.anim }, ws);
     } else if (m.t === 'emote' && emoteValido(m.id)) {
       this.difundir({ t: 'emote', id: yo.id, emote: m.id }, ws);
+    } else if (esDeChat(m)) {
+      return recibirChat(this.ctx.getWebSockets(), ws, yo, m, this.env.SALA_SECRETO);
     }
   }
   webSocketClose(ws: WebSocket) {

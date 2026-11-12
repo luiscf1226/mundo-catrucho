@@ -1,10 +1,11 @@
 // Prueba de la sala: levanta `wrangler dev` con un secreto aleatorio y firma pases con la misma función que usa
 // Convex. Comprueba que sin pase (o vencido, o de otra sala) no se entra, que dos jugadores se ven entrar, moverse,
 // hacer emotes y salir, que el jugador 25 cae al tramo 2 y que la misma cuenta en otra pestaña reemplaza a la vieja.
+// MC-22: el chat llega filtrado y firmado, el ritmo corta la ráfaga y un bloqueado no recibe ni manda.
 import { spawn } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
 import { createServer } from 'node:net';
-import { firmarPase, SALA } from '@mundo-catrucho/reglas';
+import { CHAT, firmarPase, mensajeAutentico, SALA } from '@mundo-catrucho/reglas';
 
 /** Un puerto libre: 8799 puede estar ocupado por `pnpm dev` u otra copia del repo. */
 const libre = () =>
@@ -190,8 +191,58 @@ try {
   if (libre2.sala !== `${zona}:0`) throw new Error(`no liberó el cupo: ${JSON.stringify(libre2)}`);
   for (const c of llenos) c.ws.close();
   j25.ws.close();
+
+  // --- MC-22: chat de sala filtrado y firmado; bloqueos (del pase y en vivo); ritmo
+  const yoro = 'dept:yoro:0';
+  const carla = await abrir(yoro, await pase(yoro, 'carla1', 'Carla'));
+  await espera(carla, 'hola');
+  const dani = await abrir(yoro, await pase(yoro, 'dani1', 'Dani'));
+  await espera(dani, 'hola');
+  // Eli ya traía bloqueada a Carla desde Convex (en el pase)
+  const eli = await abrir(yoro, await pase(yoro, 'eli1', 'Eli', { bloqueados: ['carla1'] }));
+  const holaEli = await espera(eli, 'hola');
+  if (JSON.stringify(holaEli).includes('bloqueados'))
+    throw new Error('la bienvenida cuenta a quién bloqueó cada quien');
+  const chats = (c) => c.cola.filter((x) => x.t === 'chat');
+  carla.ws.send(JSON.stringify({ t: 'chat', texto: 'sos un p3nd3jo, mi cel es +504 9988-7766' }));
+  carla.ws.send(JSON.stringify({ t: 'chat', texto: '<img src=x onerror=alert(1)>hola Yoro' }));
+  await sleep(400);
+  const [c1, c2] = chats(dani);
+  if (!c1 || c1.texto !== 'sos un ***, ***' || !c1.tapado || c1.de !== 'carla1' || c1.nombre !== 'Carla')
+    throw new Error(`chat sin filtrar: ${JSON.stringify(c1)}`);
+  if (c2?.texto !== 'hola Yoro' || c2.tapado) throw new Error(`HTML en el chat: ${JSON.stringify(c2)}`);
+  if (!(await mensajeAutentico(c1, c1.firma, SECRETO))) throw new Error('el mensaje no viene firmado por la sala');
+  if (chats(carla).length !== 2) throw new Error('Carla no ve su propio mensaje filtrado');
+  if (chats(eli).length) throw new Error('Eli bloqueó a Carla y le llegó su chat');
+  eli.ws.send(JSON.stringify({ t: 'chat', texto: 'hola, soy Eli' }));
+  await sleep(300);
+  if (chats(carla).some((m) => m.de === 'eli1')) throw new Error('a Carla le llegó el chat de quien la bloqueó');
+  if (!chats(dani).some((m) => m.de === 'eli1')) throw new Error('a Dani no le llegó el chat de Eli');
+  // Dani bloquea a Eli en vivo: ya no se leen; desbloquea y vuelve
+  dani.ws.send(JSON.stringify({ t: 'bloquear', id: 'eli1', si: true }));
+  await sleep(100);
+  eli.ws.send(JSON.stringify({ t: 'chat', texto: 'otra vez Eli' }));
+  dani.ws.send(JSON.stringify({ t: 'chat', texto: 'solo Carla me lee' }));
+  await sleep(300);
+  if (chats(dani).some((m) => m.texto === 'otra vez Eli')) throw new Error('Dani bloqueó a Eli y le llegó');
+  if (chats(eli).some((m) => m.de === 'dani1')) throw new Error('Eli recibió a quien la bloqueó');
+  if (!chats(carla).some((m) => m.texto === 'solo Carla me lee')) throw new Error('Carla no recibió a Dani');
+  dani.ws.send(JSON.stringify({ t: 'bloquear', id: 'eli1', si: false }));
+  await sleep(100);
+  eli.ws.send(JSON.stringify({ t: 'chat', texto: 'ya me ves' }));
+  await sleep(300);
+  if (!chats(dani).some((m) => m.texto === 'ya me ves')) throw new Error('desbloquear no devolvió el chat');
+  // ritmo: una ráfaga de 15 de Dani; pasan los de la cubeta y Dani recibe el aviso
+  await sleep((1000 / CHAT.ritmo.porSegundo) * CHAT.ritmo.rafaga);
+  const antesChat = chats(carla).length;
+  for (let i = 0; i < 15; i++) dani.ws.send(JSON.stringify({ t: 'chat', texto: `mensaje ${i}` }));
+  await sleep(500);
+  const pasaron = chats(carla).length - antesChat;
+  if (pasaron !== CHAT.ritmo.rafaga) throw new Error(`ritmo del chat: pasaron ${pasaron} de 15`);
+  if (!dani.cola.some((m) => m.t === 'chat-no' && m.motivo === 'ritmo')) throw new Error('sin aviso de ritmo');
+  for (const c of [carla, dani, eli]) c.ws.close();
   console.log(
-    `PASA sala: sin pase, vencido, de otra sala y con otro secreto rechazados; dos jugadores se ven entrar, moverse, hacer emotes y salir; ráfaga recortada a ${rafaga} de 150; el 25 cae a ${libre.sala}`,
+    `PASA sala: sin pase, vencido, de otra sala y con otro secreto rechazados; dos jugadores se ven entrar, moverse, hacer emotes y salir; ráfaga recortada a ${rafaga} de 150; el 25 cae a ${libre.sala}; chat filtrado, firmado, con ritmo (${pasaron} de 15) y bloqueos`,
   );
   fin(0);
 } catch (e) {

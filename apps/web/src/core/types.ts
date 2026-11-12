@@ -230,6 +230,7 @@ export type PanelId =
   | 'logros'
   | 'clasificacion'
   | 'salas'
+  | 'amigos'
   | 'controles'
   | 'emotes'
   | 'proyecto';

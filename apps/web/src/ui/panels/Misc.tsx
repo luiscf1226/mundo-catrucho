@@ -717,6 +717,26 @@ export function SettingsPanel() {
             }}
           />
         </label>
+        <label className="mc-card flex cursor-pointer items-center gap-3 px-3 py-1.5">
+          <Icon name="users" size={22} cls="text-accent" />
+          <span className="flex-1 text-sm font-extrabold leading-tight">
+            Chat
+            <span className="block text-xs font-bold text-muted">
+              Sala y amigos. Apagado no ves ni mandás mensajes.
+            </span>
+          </span>
+          <input
+            data-testid="set-chat"
+            type="checkbox"
+            role="switch"
+            className="mc-toggle"
+            checked={s.chat}
+            onChange={(e) => {
+              audio.sfx('click');
+              set({ chat: e.target.checked });
+            }}
+          />
+        </label>
         <div className={cx('mc-card flex flex-wrap items-center gap-2 px-3 py-2', sure && 'mc-danger')}>
           <Icon name="trash" size={22} cls="text-bad" />
           {sure ? (
