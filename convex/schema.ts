@@ -144,6 +144,8 @@ export default defineSchema({
     ultimoEmote: v.optional(v.number()),
     /** ritmo y tope del día de las monedas sueltas */
     monedas: v.optional(v.object({ fecha: v.string(), hoy: v.number(), fichas: v.number(), t: v.number() })),
+    /** bonos de viaje pagados hoy (tope por día) */
+    bonosViaje: v.optional(v.object({ fecha: v.string(), suma: v.number() })),
     /** ya subió (o no tenía) avance guardado en el navegador */
     migrado: v.boolean(),
   }).index('por_usuario', ['usuarioId']),

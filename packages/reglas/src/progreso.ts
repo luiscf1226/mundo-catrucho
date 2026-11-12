@@ -284,6 +284,22 @@ export function decidirLlegada({
   if (s < VIAJE_MIN_S - 2) return { bono: 0, motivo: 'llegó antes de tiempo' };
   return { bono: Number.isFinite(bono) && bono > 0 ? Math.min(bonoMax, Math.round(bono)) : 0 };
 }
+/**
+ * Tope de bonos de viaje por día de Honduras. El bono lo calcula el navegador (choques), así que sin tope un viaje
+ * local barato repetido sería una fuente sin fin.
+ */
+export const BONOS_VIAJE_DIA = 90;
+export interface EstadoBonos {
+  fecha: string;
+  suma: number;
+}
+/** Cuánto del bono cabe hoy. */
+export function topeBonoDia(prev: EstadoBonos | null, { ahora, bono }: { ahora: number; bono: number }) {
+  const fecha = fechaHonduras(ahora),
+    suma = prev && prev.fecha === fecha ? prev.suma : 0,
+    pagado = Math.max(0, Math.min(bono, BONOS_VIAJE_DIA - suma));
+  return { bono: pagado, estado: { fecha, suma: suma + pagado } };
+}
 /** Gastos sueltos del viaje (comida, peaje): enteros y chicos. Gastar nunca da nada. */
 export const GASTO_MAX = 50;
 export const gastoValido = (n: number, saldo: number) => Number.isInteger(n) && n > 0 && n <= GASTO_MAX && saldo >= n;

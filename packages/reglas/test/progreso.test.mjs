@@ -5,6 +5,7 @@ import { test } from 'node:test';
 import {
   avanzarJuego,
   avanzarMisiones,
+  BONOS_VIAJE_DIA,
   DEPARTAMENTOS,
   decidirCobroMision,
   decidirLlegada,
@@ -27,6 +28,7 @@ import {
   misionesNuevas,
   PASAJES,
   prendasTipicas,
+  topeBonoDia,
   VIAJE_MIN_S,
 } from '../src/index.ts';
 
@@ -242,4 +244,17 @@ test('avance local: se acepta lo posible y nada más', () => {
     recuerdos: [],
     juegos: [],
   });
+});
+
+test('bono de viaje: tope por día de Honduras', () => {
+  const t0 = Date.UTC(2026, 10, 12, 18);
+  let e = null,
+    total = 0;
+  for (let i = 0; i < 10; i++) {
+    const r = topeBonoDia(e, { ahora: t0 + i * 60_000, bono: 30 });
+    total += r.bono;
+    e = r.estado;
+  }
+  assert.equal(total, BONOS_VIAJE_DIA);
+  assert.equal(topeBonoDia(e, { ahora: t0 + 24 * 3600_000, bono: 30 }).bono, 30, 'al otro día vuelve');
 });

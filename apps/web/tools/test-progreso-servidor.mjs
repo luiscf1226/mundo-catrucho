@@ -133,12 +133,14 @@ try {
         missions: reparto.ids.map((id) => ({ id, progress: 999, claimed: false })),
       },
     };
-    await t.ev(`(() => {
+    await t
+      .ev(`(() => {
       const prev = JSON.parse(localStorage.getItem('mundo-catrucho-v1') || '{}');
       localStorage.setItem('mundo-catrucho-v1', JSON.stringify({ ...prev, ...${JSON.stringify(local)} }));
       localStorage.setItem('mundo-catrucho-invitado', '${secretoA}');
       location.reload();
-    })()`).catch(() => {});
+    })()`)
+      .catch(() => {});
     await t.sleep(1500);
     await t.waitFor(`!!window.__mc?.store`, 30000, 'recargar');
     await t.waitFor(`${S}.sincronizar().then(Boolean)`, 20000, 'entrar con avance local');
@@ -146,9 +148,7 @@ try {
     assert.equal(e1.migrado, true);
     assert.deepEqual(e1.visitas.sort(), ['cortes', 'lapaz']);
     assert.deepEqual(e1.recuerdos, ['lapaz']);
-    assert.deepEqual(e1.juegos, [
-      { juegoId: 'lapaz.catacion', etapa: 2, estrellas: [3, 3], mejor: 0, veces: 500 },
-    ]);
+    assert.deepEqual(e1.juegos, [{ juegoId: 'lapaz.catacion', etapa: 2, estrellas: [3, 3], mejor: 0, veces: 500 }]);
     assert.deepEqual(e1.logros, ['primer_paso'], 'solo el logro de entrar; nada del avance inventado');
     const p1 = await q(fn.perfil, { invitado: secretoA });
     assert.equal(p1.monedas, 100 + coins('primer_paso'), 'el saldo inventado no sube');
@@ -157,7 +157,10 @@ try {
     assert.deepEqual(await st('s.profile.achievements'), ['primer_paso']);
     assert.equal(await st(`s.profile.juegos['lapaz.catacion'].etapa`), 2);
     assert.equal(await st(`s.profile.juegos['inventado.juego'] ?? null`), null);
-    assert.equal((await q(fn.porJuego, { juegoId: 'lapaz.catacion' })).filas.some((f) => f.nombre === nombreA), false);
+    assert.equal(
+      (await q(fn.porJuego, { juegoId: 'lapaz.catacion' })).filas.some((f) => f.nombre === nombreA),
+      false,
+    );
     // las misiones son las del servidor: sin progreso, no se cobran
     assert.deepEqual(
       e1.misiones.misiones.map((x) => x.id),
@@ -168,10 +171,10 @@ try {
     assert.equal(inc.ok, false);
     assert.equal(inc.motivo, 'incompleta');
     // una etapa todavía bloqueada no se abre
-    assert.deepEqual(
-      await m(fn.abrir, { invitado: secretoA, motor: 'trivia', juegoId: 'yoro.huelga', etapa: 1 }),
-      { ok: false, motivo: 'etapa bloqueada' },
-    );
+    assert.deepEqual(await m(fn.abrir, { invitado: secretoA, motor: 'trivia', juegoId: 'yoro.huelga', etapa: 1 }), {
+      ok: false,
+      motivo: 'etapa bloqueada',
+    });
 
     // 2. cerrar una partida guarda etapa, estrellas, visita y marca, y da «Primera victoria» una vez
     await t.sleep(1100);
@@ -210,7 +213,10 @@ try {
     ]);
     assert(rA.ok && rB.ok);
     assert.deepEqual(rA.logros, [], 'el logro se da una sola vez');
-    assert.deepEqual(rB.logros.map((l) => l.id), ['primera_victoria']);
+    assert.deepEqual(
+      rB.logros.map((l) => l.id),
+      ['primera_victoria'],
+    );
     assert.equal((await q(fn.estado, { invitado: secretoA })).logros.filter((l) => l === 'primera_victoria').length, 1);
     // la marca guarda la mejor: 470 no baja los 480
     const tabla = await q(fn.porJuego, { juegoId: 'yoro.huelga', invitado: secretoA });
@@ -242,7 +248,10 @@ try {
     const fA = textos.findIndex((x) => x.includes(nombreA)),
       fB = textos.findIndex((x) => x.includes(nombreB));
     assert(fA >= 0 && fB > fA, `en pantalla A antes que B: ${filas}`);
-    assert.equal(await t.ev(`document.querySelector('[data-testid=lb-you]')?.textContent.includes('${nombreA}')`), true);
+    assert.equal(
+      await t.ev(`document.querySelector('[data-testid=lb-you]')?.textContent.includes('${nombreA}')`),
+      true,
+    );
     await t.shot(join(capturas, '02-clasificacion-por-juego.png'));
     await t.click('lb-modo-depto');
     await t.waitFor(

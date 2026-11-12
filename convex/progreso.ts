@@ -12,6 +12,7 @@ import {
   gastoValido,
   limpiarAvanceLocal,
   PREMIO_RECUERDO,
+  topeBonoDia,
 } from '@mundo-catrucho/reglas';
 import {
   type DataModelFromSchemaDefinition,
@@ -190,9 +191,18 @@ export const llegarViaje = mutation({
     if (!viaje || viaje.usuarioId !== s.usuarioId) return { ok: false as const, motivo: 'ajeno' };
     if (viaje.estado !== 'en-camino') return { ok: false as const, motivo: 'cerrado' };
     const d = decidirLlegada({ inicio: viaje.inicio, ahora: s.ahora, bono: args.bono, bonoMax: BONO_VIAJE_MAX });
-    await ctx.db.patch(viaje._id, { estado: 'llego', llegada: s.ahora, bono: d.bono });
-    if (d.bono > 0) pagar(s, { monedas: d.bono, xp: 0 });
-    return { ok: true as const, bono: d.bono, motivo: d.motivo, ...(await terminar(s)) };
+    let bono = d.bono,
+      motivo = d.motivo;
+    if (bono > 0) {
+      const c = await asegurarContadores(ctx, s.usuarioId),
+        tope = topeBonoDia(c.bonosViaje ?? null, { ahora: s.ahora, bono });
+      if (tope.bono < bono) motivo = 'tope del día';
+      bono = tope.bono;
+      await ctx.db.patch(c._id, { bonosViaje: tope.estado });
+    }
+    await ctx.db.patch(viaje._id, { estado: 'llego', llegada: s.ahora, bono });
+    if (bono > 0) pagar(s, { monedas: bono, xp: 0 });
+    return { ok: true as const, bono, motivo, ...(await terminar(s)) };
   },
 });
 

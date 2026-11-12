@@ -85,8 +85,20 @@ npx convex run misiones:repartir '{}'
 node apps/web/tools/test-progreso-servidor.mjs   # de punta a punta; capturas en capturas/mc-17/
 ```
 
-Pendiente: las monedas, lo comprado y lo puesto del navegador no suben al servidor (eso pagaría sin validar); el
-nombre de invitado se puede repetir hasta que lleguen las cuentas (MC-07).
+El bono de viaje lo calcula el navegador (choques), así que además de la duración mínima tiene tope por día de
+Honduras (`BONOS_VIAJE_DIA`, 90).
+
+Confianza aceptada mientras todos sean invitados (cualquiera puede crear identidades nuevas): la primera visita y
+el recuerdo de cada departamento se pagan sin probar que estuvo ahí (como el mapa, que deja viajar gratis), y
+«Primeros pasos» y los emotes los declara el navegador. Todo eso paga una sola vez o con pausa. El avance local que
+sube puede desbloquear etapas (no paga, pero las etapas difíciles permiten más puntos en la tabla).
+
+Pendiente:
+- Las monedas, lo comprado y lo puesto del navegador no suben al servidor (eso pagaría sin validar). El nombre de
+  invitado se puede repetir hasta que lleguen las cuentas (MC-07).
+- La tabla por departamento compara puntos de juegos distintos (escalas distintas); `tuya` solo se busca entre las
+  400 mejores marcas del departamento.
+- La ruta del viaje (`rutaParaVehiculo`) solo la revisa el navegador.
 
 La lógica pura vive en `packages/reglas` (`tienda.ts`, `partidas.ts`) y se prueba con `node --test`.
 

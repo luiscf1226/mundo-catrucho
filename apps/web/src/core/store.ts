@@ -1012,7 +1012,8 @@ export const useGame = create<Game>((set, get) => {
         });
         e = await servidor.estado();
       }
-      if (e) aplicarEstado(e);
+      // si el avance local no se pudo subir, no se pisa: se intenta otra vez la próxima vez
+      if (e?.migrado) aplicarEstado(e);
       return true;
     },
   };
