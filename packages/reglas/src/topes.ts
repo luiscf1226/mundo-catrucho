@@ -138,6 +138,14 @@ export const TOPES: Record<string, TopeMotor> = {
   'comayagua.anden': comayagua(80, 180, 280, 40),
   'comayagua.mantas': comayagua(120, 300, 480, 120),
   'comayagua.fachadas': comayagua(90, 210, 330, 50),
+  // Atlántida (apps/web/src/game/minigames/atlantida): metas lineales y reloj de 80 + 15 × dificultad
+  'atlantida.balsa': islas(120, 260, 400, 80, 80, 15),
+  'atlantida.pancoco': islas(200, 450, 700, 100, 80, 15),
+  'atlantida.vagon': islas(150, 400, 650, 100, 80, 15),
+  'atlantida.manati': islas(100, 220, 340, 60, 80, 15),
+  'atlantida.lancetilla': islas(200, 450, 700, 100, 80, 15),
+  'atlantida.canopy': islas(150, 320, 500, 80, 80, 15),
+  'atlantida.carnaval': islas(120, 280, 440, 80, 80, 15),
   // motores propios: el reloj puede acortarse (golpes, errores), así que solo se acotan metas y puntos
   atrapa: {
     metas: (d) => [r10(120 + 180 * d), r10(300 + 300 * d), r10(500 + 400 * d)],

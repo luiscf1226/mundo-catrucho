@@ -3,6 +3,7 @@ import { P } from '../../kit';
 import { bl, bx, cy, inR, PI, place, ss } from '../lib';
 import { baranda, bunting, casa, champa, mont, pier, puesto } from '../parts';
 import { ZB, type ZoneSpec } from '../zone';
+import { AtlantidaDescubrimientos } from './AtlantidaDescubrimientos';
 
 const CARN = ['#e63946', '#ffd166', '#19b5c8', '#7b2cbf', '#2ea44f', '#ff7a3d'];
 /** Atlántida: malecón de La Ceiba con su muelle, tarima de carnaval y el Pico Bonito al fondo. */
@@ -17,6 +18,7 @@ export function playa(d: Department): ZoneSpec {
     .plane('sand', B.sand, -0.08, [900, 20], [0, 0, -7]);
   Z.far = { mat: 'sand', color: B.sand, y: -2.62 };
   Z.stop(0, 42);
+  Z.n(<AtlantidaDescubrimientos altura={(x, z) => Z.h(x, z)} />);
   // malecón
   Z.add(
     bx(0, 0.1, -11, 76, 0.2, 7, 'tile', '#eadfc8'),

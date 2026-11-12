@@ -1,0 +1,82 @@
+[
+  {
+    "id": "atlantida.visita-1",
+    "nombre": "Colección de Lancetilla",
+    "texto": "El Jardín Botánico Lancetilla está en Tela. En el puesto educativo relacioná cada placa con su semilla: el rótulo no está de adorno.",
+    "x": -6,
+    "z": 18,
+    "fuente": "https://visitatlantida.com/destino/atlantida/tela/jardin-botanico-lancetilla/"
+  },
+  {
+    "id": "atlantida.visita-2",
+    "nombre": "Refugio del manatí",
+    "texto": "Cuero y Salado cuida al manatí antillano. Se mira desde la embarcación quieta, sin buscar contacto: si anda cerca, vos esperás.",
+    "x": 8,
+    "z": 4,
+    "fuente": "https://visitatlantida.com/areas-protegidas-de-atlantida/"
+  },
+  {
+    "id": "atlantida.visita-3",
+    "nombre": "Frontera entre parques",
+    "texto": "El río Cangrejal hace de frontera natural entre Pico Bonito y Nombre de Dios. Cruzá el puente y marcá los dos parques en tu mapa.",
+    "x": -8,
+    "z": 30,
+    "fuente": "https://visitatlantida.com/destino/atlantida/rio-cangrejal/"
+  },
+  {
+    "id": "atlantida.visita-4",
+    "nombre": "Acceso a Pico Bonito",
+    "texto": "La cuenca del Cangrejal es una de las entradas más visitadas de Pico Bonito. Desde aquí sacale foto al perfil de la montaña.",
+    "x": 8,
+    "z": 45,
+    "fuente": "https://visitatlantida.com/areas-protegidas-de-atlantida/"
+  },
+  {
+    "id": "atlantida.visita-5",
+    "nombre": "Carnaval de la Amistad",
+    "texto": "En mayo La Ceiba sale a la calle con desfile de carrozas y comparsas. Seguí una comparsa y posá frente a la carroza.",
+    "x": -16,
+    "z": 14,
+    "fuente": "https://www.hondurasfolklore.com/calendario/evento.php?eid=699"
+  },
+  {
+    "id": "atlantida.visita-6",
+    "nombre": "Historia vegetal de Tela",
+    "texto": "Lancetilla junta plantas de todo el trópico y cuenta parte de la historia de Atlántida. Recorré sus tres estaciones y fijate cómo se conectan.",
+    "x": 8,
+    "z": 20,
+    "fuente": "https://visitatlantida.com/destino/atlantida/tela/jardin-botanico-lancetilla/"
+  },
+  {
+    "id": "atlantida.visita-7",
+    "nombre": "Vía de La Unión a Salado Barra",
+    "texto": "Desde La Unión se llega en vagón al refugio de Cuero y Salado. Mirá las aves desde el recorrido y no te bajés fuera de la estación.",
+    "x": -6,
+    "z": 4,
+    "fuente": "https://visitatlantida.com/cuero-y-salado/"
+  },
+  {
+    "id": "atlantida.locura-1",
+    "nombre": "Carroza de bolsillo",
+    "texto": "¡De una cajita sale una carroza de fantasía! Ocupa su espacio reservado y nada más: aquí no hay famosos, solo colores.",
+    "x": -10,
+    "z": -1,
+    "fuente": "https://www.hondurasfolklore.com/calendario/evento.php?eid=699"
+  },
+  {
+    "id": "atlantida.locura-2",
+    "nombre": "Manatí con pausa",
+    "texto": "Tocaste el icono del manatí: toca esperar en silencio. Al manatí de verdad nadie lo monta ni lo agarra.",
+    "x": 13,
+    "z": -2,
+    "fuente": "https://visitatlantida.com/areas-protegidas-de-atlantida/"
+  },
+  {
+    "id": "atlantida.locura-3",
+    "nombre": "Bambú con saludo",
+    "texto": "Unas plantas de cartón te hacen la ola al pasar. Son de fantasía: la colección de verdad se mira con respeto.",
+    "x": -20,
+    "z": 44,
+    "fuente": "https://visitatlantida.com/destino/atlantida/tela/jardin-botanico-lancetilla/"
+  }
+]

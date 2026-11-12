@@ -9,7 +9,18 @@ import type { AvatarState, V3 } from '../../core/types';
 import { art, Block, Cyl, Label, Plate, Spawn, useTick } from '../kit';
 import { type Guia, partida, setHud } from './api';
 import { BotAvatar, Escenario, fondoDe, frasesDe, newState, useBurst, useFinisher } from './corte/common';
-import { acompanamiento, chartDe, ESTILOS, estiloDe, LANE_COL, metasDe, type Nota, tocaDe } from './ritmo/musica';
+import {
+  ACENTOS_LIBRES,
+  acompanamiento,
+  chartDe,
+  ESTILOS,
+  estiloDe,
+  LANE_COL,
+  metasDe,
+  type Nota,
+  respuestaDe,
+  tocaDe,
+} from './ritmo/musica';
 
 export const guia: Guia = {
   goal: 'Tocá cada nota justo cuando llegue a la línea. La música la armás vos con tus aciertos.',
@@ -81,7 +92,22 @@ export function Ritmo() {
     toca = tocaDe(P, E),
     C = useMemo(() => chartDe(P), [P]),
     fondo = fondoDe(P, 'pueblo');
-  const evs = useMemo(() => acompanamiento(E, C.end + 2), [E, C]),
+  const resp = respuestaDe(P);
+  // la llamada del tambor suena con el acompañamiento; en modo libre solo la primera: después el tambor te contesta
+  const evs = useMemo(
+      () =>
+        [
+          ...acompanamiento(E, C.end + 2),
+          ...C.llamadas
+            .filter((l) => resp === 'copia' || l.time < (C.compases[1]?.t ?? 0))
+            .map((l) => ({
+              t: l.time,
+              k: 'drum' as const,
+              a: [l.lane === 2 ? 190 : 250, 0.2, 0.32] as [number, number, number],
+            })),
+        ].sort((a, b) => a.t - b.t),
+      [E, C, resp],
+    ),
     metas = useMemo(() => metasDe(P), [P]);
   const { end } = useFinisher(),
     fx = useBurst(80, 0.1);
@@ -91,7 +117,8 @@ export function Ritmo() {
     used = useRef<Set<Nota>[]>([new Set(), new Set(), new Set(), new Set()]),
     glow = useRef<(THREE.Mesh | null)[]>([]),
     jl = useRef<(THREE.Object3D | null)[]>([]),
-    bell = useRef<THREE.Group>(null);
+    bell = useRef<THREE.Group>(null),
+    aviso = useRef<(THREE.Object3D | null)[]>([]);
   const S = useRef({
     mode: '' as '' | 'a' | 'c',
     base: 0,
@@ -114,6 +141,13 @@ export function Ritmo() {
     stuck: 0,
     lastA: 0,
     notas: C.notas,
+    /** llamada y respuesta: cortes de frase, acentos propios por frase (modo libre) y el eco ya programado */
+    cortes: 0,
+    corteT: 0,
+    propios: 0,
+    eco: [] as { k: number; lane: number }[][],
+    ecoHecho: 0,
+    li: 0,
   });
   const presses = useRef<{ lane: number; t: number }[]>([]);
   const pl = useMemo(() => ({ s: newState('dance') as AvatarState }), []);
@@ -206,6 +240,48 @@ export function Ritmo() {
     s.total++;
   };
 
+  /** Toque sin nota en su carril, en llamada y respuesta: mezclar pie con cadera corta la frase; en modo libre la
+   *  cadera puede poner hasta cuatro acentos propios a contratiempo. Devuelve true si el toque contó para algo. */
+  const responder = (lane: number, t: number) => {
+    const s = S.current,
+      familia = (l: number) => (l < 2 ? 0 : 1);
+    const otra = s.notas.find(
+      (n) => !n.done && n.frase !== undefined && familia(n.lane) !== familia(lane) && Math.abs(n.time - t) < 0.13,
+    );
+    if (otra) {
+      for (const n of s.notas)
+        if (n.frase === otra.frase && !n.done) {
+          n.done = true;
+          s.hits[3]++;
+          s.total++;
+        }
+      s.combo = 0;
+      s.cortes++;
+      s.corteT = 1.3;
+      audio.tone(98, 0.3, { type: 'square', gain: 0.05 });
+      return true;
+    }
+    const c = C.compases.find((x) => x.tipo === 'respuesta' && t >= x.t - 0.1 && t < x.fin - 0.1);
+    if (resp !== 'libre' || lane < 2 || !c) return false;
+    const k = Math.round((t - c.t) / C.step),
+      d = Math.abs(t - (c.t + k * C.step));
+    s.eco[c.frase] ??= [];
+    const usados = s.eco[c.frase];
+    if (k % 2 !== 1 || k > 7 || d > 0.11 || usados.length >= ACENTOS_LIBRES || usados.some((u) => u.k === k))
+      return false;
+    usados.push({ k, lane });
+    s.propios++;
+    // copiar la llamada vale menos: el chiste es contestar con algo tuyo
+    const llamada =
+      c.frase === 0
+        ? C.llamadas.filter((l) => l.time < c.t).map((l) => Math.round((l.time - C.compases[0].t) / C.step))
+        : (s.eco[c.frase - 1] ?? []).map((u) => u.k);
+    judge(llamada.includes(k) ? 2 : d < 0.06 ? 0 : 1, lane);
+    audio.drum(cfg.lanes[lane], 0.18, 0.25);
+    player.play(s.cnt++ % 2 ? 'dance2' : 'dance', 0.35);
+    return true;
+  };
+
   useTick((dt, tt) => {
     const s = S.current;
     if (!s.over) player.visible = true;
@@ -243,6 +319,28 @@ export function Ritmo() {
         if (e.k === 'drum') audio.drum(e.a[0], e.a[1], e.a[2], at);
         else audio.tone(e.a[0], e.a[1], { gain: e.a[2], type: e.a[3] ?? 'sine', at });
       }
+      // llamada del tambor: se ve en los carriles de cadera (además de oírse)
+      if (resp) {
+        while (s.li < C.llamadas.length && C.llamadas[s.li].time <= t) {
+          const l = C.llamadas[s.li++];
+          if (resp === 'copia' || l.time < (C.compases[1]?.t ?? 0)) s.flash[l.lane] = 0.8;
+        }
+        // modo libre: en cada llamada el tambor repite lo que contestaste en la frase anterior
+        const sig = C.compases[s.ecoHecho * 2 + 2];
+        if (resp === 'libre' && sig && t >= sig.t - 0.15) {
+          for (const u of s.eco[s.ecoHecho] ?? []) {
+            const at = sig.t + u.k * C.step - t;
+            audio.drum(u.lane === 2 ? 190 : 250, 0.2, 0.32, Math.max(0, at));
+            setTimeout(
+              () => {
+                S.current.flash[u.lane] = 0.8;
+              },
+              Math.max(0, at * 1000),
+            );
+          }
+          s.ecoHecho++;
+        }
+      }
       // toques (teclas, flechas) y toque en pantalla
       if (input.take('fire')) {
         if (s.fkey) s.fkey = false;
@@ -273,7 +371,8 @@ export function Ritmo() {
           if (s.combo > 0 && s.combo % 10 === 0) audio.sfx('star');
           player.play(s.combo > 12 || toca === 'baila' ? (s.cnt++ % 2 ? 'dance2' : 'dance') : 'throw', 0.35);
           if (bell.current) bell.current.rotation.z = (p.lane % 2 ? 1 : -1) * 0.5;
-        } else audio.tone(cfg.lanes[p.lane] / 2, 0.08, { type: 'square', gain: 0.03 });
+        } else if (!(resp && responder(p.lane, p.t)))
+          audio.tone(cfg.lanes[p.lane] / 2, 0.08, { type: 'square', gain: 0.03 });
       }
       presses.current.length = 0;
       for (const n of s.notas)
@@ -292,7 +391,14 @@ export function Ritmo() {
         timer: Math.max(0, C.end - t),
         score: `${Math.round(s.score)} pts`,
         objective: `Racha ${s.combo}${s.combo >= 10 ? ` · ×${1 + Math.min(3, Math.floor(s.combo / 10))}` : ''} · Meta ${metas[0]} pts`,
-        lines: [`Precisión ${acc}% · perfectas ${s.hits[0]}`, 'A S D F / flechas · o tocá la pantalla'],
+        lines: resp
+          ? [
+              `${C.compases.find((c) => t >= c.t && t < c.fin)?.tipo === 'llamada' ? '🥁 Escuchá la llamada' : '💃 ¡Respondé!'} · Precisión ${acc}%${s.cortes ? ` · frases cortadas ${s.cortes}` : ''}`,
+              resp === 'libre'
+                ? `A S = pies en el pulso · D F = cadera a contratiempo (hasta ${ACENTOS_LIBRES})`
+                : 'A S = pies en el pulso · D F = cadera como el tambor',
+            ]
+          : [`Precisión ${acc}% · perfectas ${s.hits[0]}`, 'A S D F / flechas · o tocá la pantalla'],
       });
       if (t >= C.end) {
         s.over = true;
@@ -304,7 +410,7 @@ export function Ritmo() {
           stars: st as 0 | 1 | 2 | 3,
           score: sc,
           label: `${sc} pts`,
-          stats: { racha: s.best, perfectas: s.hits[0] },
+          stats: { racha: s.best, perfectas: s.hits[0], cortes: s.cortes, propios: s.propios },
         });
       }
     }
@@ -356,6 +462,11 @@ export function Ritmo() {
       }
     }
     s.jt = Math.max(0, s.jt - dt);
+    s.corteT = Math.max(0, s.corteT - dt);
+    const fase = resp && s.mode ? C.compases.find((c) => tn >= c.t && tn < c.fin)?.tipo : undefined;
+    aviso.current.forEach((o, i) => {
+      if (o) o.visible = i === 0 ? s.corteT > 0 : i === 1 ? fase === 'llamada' : fase === 'respuesta';
+    });
     jl.current.forEach((o, i) => {
       if (o) {
         o.visible = s.jt > 0 && s.jg === i;
@@ -442,7 +553,14 @@ export function Ritmo() {
             <circleGeometry args={[0.85, 24]} />
             <meshBasicMaterial color={LANE_COL[l]} transparent opacity={0.55} />
           </mesh>
-          <Label pos={[0, 0.02, 0.95]} text={'ASDF'[l]} h={0.4} depthTest={false} fg="#ffffff" bg="rgba(0,0,0,0.5)" />
+          <Label
+            pos={[0, 0.02, 0.95]}
+            text={resp ? `${'ASDF'[l]} · ${l < 2 ? 'pie' : 'cadera'}` : 'ASDF'[l]}
+            h={resp ? 0.3 : 0.4}
+            depthTest={false}
+            fg="#ffffff"
+            bg="rgba(0,0,0,0.5)"
+          />
         </group>
       ))}
       {[0, 1, 2, 3].map((l) => (
@@ -472,6 +590,29 @@ export function Ritmo() {
           <Label pos={[0, 1.3, -2.4]} text={g[0]} h={0.5} fg={g[1]} />
         </group>
       ))}
+      {resp &&
+        (
+          [
+            '¡Mezclaste pie y cadera! Se cortó la frase',
+            '🥁 Llamada: escuchá',
+            '💃 ¡Respondé con pies y cadera!',
+          ] as const
+        ).map((txt, i) => (
+          <group
+            key={txt}
+            ref={(o) => {
+              aviso.current[i] = o;
+            }}
+            visible={false}
+          >
+            <Label
+              pos={[0, i === 0 ? 2.1 : 2.9, -4]}
+              text={txt}
+              h={i === 0 ? 0.42 : 0.5}
+              fg={i === 0 ? '#ff6b6b' : cfg.color}
+            />
+          </group>
+        ))}
       {fx.node}
       <Plate
         pos={[0, 4.2, FAR - 0.5]}

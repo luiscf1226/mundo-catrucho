@@ -147,3 +147,17 @@ test('Comayagua: el reloj y las metas de sus motores también se cuidan', () => 
   );
   pasa({ motor: 'comayagua.reloj', puntos: 180, estrellas: 1, duracion: 91, etapa: 3, etapas: 4, gano: true });
 });
+
+test('Atlántida: cada motor tiene tope y un puntaje imposible no pasa', () => {
+  for (const motor of ['balsa', 'pancoco', 'vagon', 'manati', 'lancetilla', 'canopy', 'carnaval'].map(
+    (m) => `atlantida.${m}`,
+  )) {
+    const v = validarResultado({ motor, puntos: 0, estrellas: 0, duracion: 81, etapa: 0, gano: false });
+    assert.ok(v.conocido, `${motor} sin tope`);
+  }
+  pasa({ motor: 'atlantida.balsa', puntos: 400, estrellas: 3, duracion: 81, etapa: 0, gano: true });
+  falla({ motor: 'atlantida.balsa', puntos: 5000, estrellas: 3, duracion: 81, etapa: 0, gano: true }, 'no caben');
+  falla({ motor: 'atlantida.pancoco', puntos: 700, estrellas: 3, duracion: 40, etapa: 0, gano: true }, 'no se puede');
+  falla({ motor: 'atlantida.lancetilla', puntos: 450, estrellas: 3, duracion: 81, etapa: 0, gano: true }, 'estrellas');
+  falla({ motor: 'atlantida.canopy', puntos: 0, estrellas: 0, duracion: 81, etapa: 0, gano: true }, 'ganó con 0');
+});
