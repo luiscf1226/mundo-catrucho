@@ -3,6 +3,7 @@ import { P } from '../../kit';
 import { bl, bx, cy, dist, distToPath, inR, PI, place, ss } from '../lib';
 import { cannon, casa, garita, iglesia, mont, stairs } from '../parts';
 import { ZB, type ZoneSpec } from '../zone';
+import { LempiraDescubrimientos } from './LempiraDescubrimientos';
 
 /** Lempira: el Fuerte San Cristóbal en su cerro sobre Gracias: muros blancos, garitas, cañones y bandera. */
 export function fuerte(d: Department): ZoneSpec {
@@ -18,6 +19,7 @@ export function fuerte(d: Department): ZoneSpec {
     .layer('cobble', '#a59d92', (x, z) => (1.9 - distToPath(x, z, way)) * 2)
     .layer('dirt', '#c2a878', (x, z) => Math.min(12.4 - Math.abs(x), 10.4 - Math.abs(z + 20)) * 1.5);
   Z.stop(0, 42);
+  Z.n(<LempiraDescubrimientos altura={Z.h} />);
   Z.add(
     bx(0, Y + 1.3, -31, 27.2, 2.6, 1.2, 'stucco', W),
     bx(-7.65, Y + 1.3, -9, 11.9, 2.6, 1.2, 'stucco', W),

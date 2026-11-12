@@ -33,7 +33,7 @@ const ok = await run('vistas', file, { hash: '#go', width: 1280, height: 720 }, 
     'franciscomorazan.rapidito',
     'islas.encuentro-en-utila',
     'atlantida.remolino-del-cangrejal',
-    'lempira.celaque',
+    'lempira.sendero-de-celaque',
   ]) {
     await t.ev(`${S}.startJuego('${id}')`);
     await t.waitFor(`!!document.querySelector('[data-testid=mg-intro]')`);

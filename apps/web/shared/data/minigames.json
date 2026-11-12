@@ -684,4 +684,96 @@
  "desc": "Mové una plataforma virtual produciendo ondas circulares y calculá interferencias. Ganás una fotografía con reflejo completo; disparar mientras cruza un anillo deforma la silueta.",
  "rules": {}
 }
+,
+{
+  "id": "lempira.barro",
+  "name": "Anillos de La Campa",
+  "place": "Lempira",
+  "icon": "⛰️",
+  "desc": "Levantá una vasija por anillos de barro con distinto espesor y humedad usando arrastres circulares. Ganás altura estable después del secado; un cuello débil colapsa bajo el peso mojado.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "lempira.opalo",
+  "name": "Destello de Erandique",
+  "place": "Lempira",
+  "icon": "⛰️",
+  "desc": "Girás una muestra virtual frente a tres luces y marcás destellos internos. Ganás reconstruyendo una veta óptica tridimensional; confundir reflejo superficial con color interno invalida el plano.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "lempira.cuencas",
+  "name": "Agua que nace en Celaque",
+  "place": "Lempira",
+  "icon": "⛰️",
+  "desc": "Trazá divisorias sobre una montaña en relieve y asigná captaciones sin cortar el caudal ecológico. Ganás abasteciendo poblados aguas abajo; unir laderas equivocadas deja una toma seca.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "lempira.rebote",
+  "name": "Un rebote en el fuerte",
+  "place": "Lempira",
+  "icon": "⛰️",
+  "desc": "Apuntá pelotas de utilería a muros angulados sin línea directa al blanco. Ganás con exactamente un rebote; rozar dos paredes anula el tiro.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "lempira.pigmentos",
+  "name": "Capas de Colohete",
+  "place": "Lempira",
+  "icon": "⛰️",
+  "desc": "Ordená copias digitales de pigmentos por sus solapamientos observables. Ganás un mural compuesto sin huecos; invertir una capa tapa rasgos necesarios y nunca modifica la iglesia real.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "lempira.trapiche",
+  "name": "Rodillos alternados",
+  "place": "Lempira",
+  "icon": "⛰️",
+  "desc": "Alimentá un trapiche de maqueta con cañas alternando espesores y separación. Ganás jugo continuo sin superar el par del motor; dos tallos gruesos seguidos lo atascan.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "lempira.termal",
+  "name": "Descansos entre pozas",
+  "place": "Lempira",
+  "icon": "⛰️",
+  "desc": "Elegí una secuencia de reposo y baños virtuales según indicadores de recuperación. Ganás completando un circuito cómodo; entrar antes del intervalo reinicia la recuperación simulada.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+}
 ]
