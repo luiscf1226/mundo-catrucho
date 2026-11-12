@@ -126,7 +126,7 @@ function Barrier() {
     </group>
   );
 }
-export function CarreraScene() {
+export function CarreraScene({ limite }: { limite?: number }) {
   const rules = rulesOf('carrera');
   const race = useRef({ countdown: 3, elapsed: 0, checkpoint: -1, coins: 0, falls: 0, done: false, boost: 0 });
   const rivals = useMemo(
@@ -218,7 +218,7 @@ export function CarreraScene() {
       ],
     });
     const won = p[2] <= META[2] && r.checkpoint === 3 && p[1] > 4;
-    if (won || r.elapsed >= rules.timeLimit) {
+    if (won || r.elapsed >= (limite ?? rules.timeLimit)) {
       r.done = true;
       player.control = false;
       player.speedMul = 1;
