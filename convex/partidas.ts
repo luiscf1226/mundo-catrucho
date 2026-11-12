@@ -4,13 +4,19 @@ import {
   avanzarJuego,
   decidirApertura,
   decidirCierre,
+  decidirRecibo,
   deptoDeJuego,
   etapaAbierta,
   eventosDePartida,
+  idPublico,
   type JuegoDeCatalogo,
+  motorJuntos,
+  PARTIDA,
+  SECRETO_MIN,
   type Tema,
   turnoDeApertura,
   validarResultado,
+  verificarRecibo,
 } from '@mundo-catrucho/reglas';
 import {
   type DataModelFromSchemaDefinition,
@@ -26,7 +32,7 @@ import catNorte from '../apps/web/shared/data/catalogo/norte.json' with { type: 
 import catOccidente from '../apps/web/shared/data/catalogo/occidente.json' with { type: 'json' };
 import catSurOriente from '../apps/web/shared/data/catalogo/sur-oriente.json' with { type: 'json' };
 import minigames from '../apps/web/shared/data/minigames.json' with { type: 'json' };
-import { avanzar, sesion, terminar, visitar } from './avance';
+import { avanzar, pagar, type Sesion, sesion, terminar, visitar } from './avance';
 import { asegurarUsuario, quien } from './identidad';
 import type schema from './schema';
 
@@ -159,6 +165,8 @@ export const cerrarPartida = mutation({
     const s = await sesion(ctx, args),
       partida = await ctx.db.get(args.partidaId);
     if (!partida?.motor || partida.inicio === undefined) return { ok: false as const, motivo: 'ajena' as const };
+    // una partida entre amigos (MC-25) solo la cierra el recibo de su sala (`cerrarJuntos`)
+    if (partida.sala) return { ok: false as const, motivo: 'ajena' as const };
     const ahora = s.ahora,
       juego = partida.juegoId !== partida.motor ? await juegoDelCatalogo(ctx, partida.juegoId) : null;
     const d = decidirCierre({
@@ -223,5 +231,143 @@ export const cerrarPartida = mutation({
       ...fin,
       progreso: { juegoId: partida.juegoId, ...fila, avance: g.avance },
     };
+  },
+});
+
+// ------------------------------------------------------------------ partida entre amigos (MC-25)
+declare const process: { env: { SALA_SECRETO?: string } };
+const datosJuntos = (p: { _id: string; juegoId: string; motor?: string; etapa: number; semilla: number }) => ({
+  ok: true as const,
+  partidaId: p._id,
+  juegoId: p.juegoId,
+  motor: p.motor ?? '',
+  etapa: p.etapa,
+  semilla: p.semilla,
+});
+
+/**
+ * Abre una partida para jugar con alguien de la sala: un juego del catálogo con motor del kit, modo `duo`, la
+ * semilla de los dos y la sala `juego:<id>`. Sin `dueno`: no choca con la partida sola de cada uno. Solo la cierra
+ * `cerrarJuntos` con el recibo firmado de la sala.
+ */
+export const abrirJuntos = mutation({
+  args: { ...quien, juegoId: v.string() },
+  handler: async (ctx, args) => {
+    const { usuario } = await asegurarUsuario(ctx, args);
+    const juego = await juegoDelCatalogo(ctx, args.juegoId);
+    if (!juego) return { ok: false as const, motivo: 'juego desconocido' };
+    if (!motorJuntos(juego.motor)) return { ok: false as const, motivo: 'ese juego no se juega entre dos' };
+    const id = await ctx.db.insert('partidas', {
+      juegoId: args.juegoId,
+      motor: juego.motor,
+      // la primera etapa: la tienen abierta los dos
+      etapa: 0,
+      etapas: juego.etapas,
+      modo: 'duo',
+      semilla: Math.floor(Math.random() * 2 ** 31),
+      jugadores: [usuario._id],
+      estado: 'abierta',
+      inicio: Date.now(),
+    });
+    await ctx.db.patch(id, { sala: `juego:${id}` });
+    const p = await ctx.db.get(id);
+    return p ? datosJuntos(p) : { ok: false as const, motivo: 'no se abrió' };
+  },
+});
+
+/** Entra a una partida entre amigos (desde la invitación de la sala o un código de amigo). */
+export const unirseJuntos = mutation({
+  args: { ...quien, partidaId: v.string() },
+  handler: async (ctx, args) => {
+    const { usuario } = await asegurarUsuario(ctx, args);
+    const id = ctx.db.normalizeId('partidas', args.partidaId);
+    const p = id ? await ctx.db.get(id) : null;
+    if (!p?.sala || p.estado !== 'abierta') return { ok: false as const, motivo: 'ya no está' };
+    if (p.jugadores.includes(usuario._id)) return datosJuntos(p);
+    if (p.jugadores.length >= PARTIDA.cupo) return { ok: false as const, motivo: 'llena' };
+    if (Date.now() - (p.inicio ?? 0) > PARTIDA.esperaMaxMs) return { ok: false as const, motivo: 'ya no está' };
+    await ctx.db.patch(p._id, { jugadores: [...p.jugadores, usuario._id] });
+    return datosJuntos(p);
+  },
+});
+
+/** Sesión de otro jugador de la partida (el recibo les paga a todos en la misma llamada). */
+async function sesionDe(s: Sesion, usuarioId: GenericId<'usuarios'>): Promise<Sesion | null> {
+  const perfil = await s.ctx.db
+    .query('perfiles')
+    .withIndex('por_usuario', (q) => q.eq('usuarioId', usuarioId))
+    .unique();
+  if (!perfil) return null;
+  return {
+    ctx: s.ctx,
+    usuarioId,
+    perfilId: perfil._id,
+    avatar: perfil.avatar,
+    saldo: { monedas: perfil.monedas, xp: perfil.xp, nivel: perfil.nivel },
+    subidas: 0,
+    logros: [],
+    misiones: null,
+    ahora: s.ahora,
+  };
+}
+
+/**
+ * Cierra una partida entre amigos con el recibo firmado de su sala (`SALA_SECRETO`). El primero que lo manda le
+ * paga a cada jugador una sola vez (`decidirRecibo` + `premioPartida`); los demás reciben lo que ya les tocó.
+ * Un recibo alterado, de otra partida, vencido o repetido no paga.
+ */
+export const cerrarJuntos = mutation({
+  args: { ...quien, partidaId: v.string(), recibo: v.string() },
+  handler: async (ctx, args) => {
+    const s = await sesion(ctx, args),
+      id = ctx.db.normalizeId('partidas', args.partidaId),
+      p = id ? await ctx.db.get(id) : null;
+    if (!p?.sala || !p.motor || p.inicio === undefined || !p.jugadores.includes(s.usuarioId))
+      return { ok: false as const, motivo: 'ajena' };
+    const mio = () => p.pagos?.find((x) => x.usuarioId === s.usuarioId) ?? { monedas: 0, xp: 0 };
+    if (p.estado === 'cerrada') return { ok: true as const, ya: true, ...mio(), ...(await terminar(s)) };
+    const secreto = process.env.SALA_SECRETO;
+    if (!secreto || secreto.length < SECRETO_MIN) return { ok: false as const, motivo: 'sin-salas' };
+    const recibo = await verificarRecibo(args.recibo, secreto);
+    if (!recibo) return { ok: false as const, motivo: 'recibo' };
+    const jugadores = await Promise.all(
+      p.jugadores.map(async (usuarioId) => ({ usuarioId, idPublico: await idPublico(usuarioId, secreto) })),
+    );
+    const d = decidirRecibo({
+      partidaId: p._id,
+      recibo,
+      partida: { estado: p.estado, motor: p.motor, etapa: p.etapa, etapas: p.etapas ?? 1, inicio: p.inicio, jugadores },
+      ahora: s.ahora,
+    });
+    if (d.tipo === 'error') return { ok: false as const, motivo: d.motivo };
+    const pagos: { usuarioId: GenericId<'usuarios'>; monedas: number; xp: number }[] = [];
+    for (const x of d.pagos) {
+      const quienCobra = x.usuarioId === s.usuarioId ? s : await sesionDe(s, x.usuarioId);
+      if (!quienCobra || !x.premio) {
+        pagos.push({ usuarioId: x.usuarioId, monedas: 0, xp: 0 });
+        continue;
+      }
+      pagar(quienCobra, x.premio);
+      pagos.push({ usuarioId: x.usuarioId, monedas: x.premio.monedas, xp: x.premio.xp });
+      const r = { motor: p.motor, puntos: x.puntos, estrellas: x.premio.estrellas, gano: x.gano };
+      await avanzar(quienCobra, eventosDePartida(r));
+      if (quienCobra !== s) await terminar(quienCobra, { partida: r });
+    }
+    await ctx.db.patch(p._id, {
+      estado: 'cerrada',
+      cierre: s.ahora,
+      resultado: d.pagos.map((x) => ({
+        usuarioId: x.usuarioId,
+        puntos: x.puntos,
+        estrellas: x.estrellas,
+        gano: x.gano,
+      })),
+      pagos,
+      motivos: d.pagos.flatMap((x) => x.motivos),
+    });
+    const yo = d.pagos.find((x) => x.usuarioId === s.usuarioId);
+    const r = yo && { motor: p.motor, puntos: yo.puntos, estrellas: yo.premio?.estrellas ?? 0, gano: yo.gano };
+    const mia = pagos.find((x) => x.usuarioId === s.usuarioId) ?? { monedas: 0, xp: 0 };
+    return { ok: true as const, ya: false, ...mia, ...(await terminar(s, r && yo?.premio ? { partida: r } : {})) };
   },
 });

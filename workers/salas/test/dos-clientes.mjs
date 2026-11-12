@@ -1,10 +1,21 @@
 // Prueba de la sala: levanta `wrangler dev` con un secreto aleatorio y firma pases con la misma función que usa
 // Convex. Comprueba que sin pase (o vencido, o de otra sala) no se entra, que dos jugadores se ven entrar, moverse,
 // hacer emotes y salir, que el jugador 25 cae al tramo 2 y que la misma cuenta en otra pestaña reemplaza a la vieja.
+// MC-23: bots de relleno con poca gente y ocupación firmada a un Convex de mentira. MC-25: sala de partida con
+// reloj, semilla, puntajes acotados y recibo firmado. MC-31: viaje compartido con chofer y pasajero.
 import { spawn } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
+import { createServer as servidorHttp } from 'node:http';
 import { createServer } from 'node:net';
-import { firmarPase, SALA } from '@mundo-catrucho/reglas';
+import {
+  duracionPartida,
+  firmarActa,
+  firmarPase,
+  leerFirmado,
+  PARTIDA,
+  SALA,
+  verificarRecibo,
+} from '@mundo-catrucho/reglas';
 
 /** Un puerto libre: 8799 puede estar ocupado por `pnpm dev` u otra copia del repo. */
 const libre = () =>
@@ -14,6 +25,22 @@ const libre = () =>
       s.close(() => res(port));
     });
   });
+// Convex de mentira: recibe los avisos de ocupación (MC-23) y guarda los que traen buena firma
+const ocupaciones = [];
+let ocupacionesMalas = 0;
+const convex = servidorHttp((req, res) => {
+  let body = '';
+  req.on('data', (c) => (body += c));
+  req.on('end', async () => {
+    const d = req.url === '/salas/ocupacion' ? await leerFirmado('ocupacion', body, SECRETO) : null;
+    if (d) ocupaciones.push(d);
+    else ocupacionesMalas++;
+    res.writeHead(d ? 200 : 401).end();
+  });
+});
+await new Promise((r) => convex.listen(0, '127.0.0.1', r));
+/** segundos del reloj de las partidas en esta prueba (el de verdad es de 60 a 120) */
+const RELOJ = 4;
 const PORT = await libre(),
   INSPECTOR = await libre(),
   BASE = `127.0.0.1:${PORT}`,
@@ -30,6 +57,12 @@ const w = spawn(
     String(INSPECTOR),
     '--var',
     `SALA_SECRETO:${SECRETO}`,
+    '--var',
+    `CONVEX_SITE_URL:http://127.0.0.1:${convex.address().port}`,
+    '--var',
+    'OCUPACION_MS:400',
+    '--var',
+    `PARTIDA_SEGUNDOS:${RELOJ}`,
   ],
   {
     stdio: 'ignore',
@@ -40,15 +73,19 @@ const fin = (code) => {
   try {
     process.kill(-w.pid, 'SIGKILL');
   } catch {}
+  convex.close();
   process.exit(code);
 };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const SECRETO_FIRMA = SECRETO;
 const pase = (sala, id, nombre, extra = {}) =>
   firmarPase({ id, nombre, sala, avatar: { shirtColor: '#e63946', skin: '#8d5524' }, ...extra }, SECRETO, extra.ahora);
 /** Conecta y espera el primer mensaje («hola») o el cierre. Devuelve { ws, cola, cierre }. */
-const abrir = (sala, p) =>
+const abrir = (sala, p, extra = '') =>
   new Promise((res, rej) => {
-    const ws = new WebSocket(`ws://${BASE}/sala/${sala}${p === undefined ? '' : `?pase=${encodeURIComponent(p)}`}`),
+    const ws = new WebSocket(
+        `ws://${BASE}/sala/${sala}${p === undefined ? '' : `?pase=${encodeURIComponent(p)}`}${extra}`,
+      ),
       c = { ws, cola: [], cierre: null };
     ws.onmessage = (e) => {
       c.cola.push(JSON.parse(e.data));
@@ -190,8 +227,129 @@ try {
   if (libre2.sala !== `${zona}:0`) throw new Error(`no liberó el cupo: ${JSON.stringify(libre2)}`);
   for (const c of llenos) c.ws.close();
   j25.ws.close();
+
+  // --- MC-23: con poca gente hay bots marcados; se van cuando entra gente y vuelven cuando se va
+  const lem = 'dept:lempira:0',
+    gente = [];
+  const conBots = async (i) => {
+    const c = await abrir(lem, await pase(lem, `l${i}`, `Lenca ${i}`));
+    const h = await espera(c, 'hola');
+    gente.push(c);
+    return h;
+  };
+  const h1 = await conBots(0);
+  if (h1.jugadores.length !== 0 || h1.bots.length !== 3 || !h1.bots.every((b) => b.bot && b.ruta.length > 2))
+    throw new Error(`solo, sin 3 bots marcados: ${JSON.stringify(h1)}`);
+  const h2 = await conBots(1);
+  if (h2.bots.length !== 2 || h2.jugadores.length !== 1) throw new Error(`con 2 personas: ${JSON.stringify(h2)}`);
+  const seFue = await espera(gente[0], 'sale');
+  if (!seFue.bot || seFue.id !== 'bot-2') throw new Error(`no se fue un bot al entrar gente: ${JSON.stringify(seFue)}`);
+  await conBots(2);
+  const h4 = await conBots(3);
+  if (h4.bots.length !== 0) throw new Error(`con 4 personas siguen ${h4.bots.length} bots`);
+  await sleep(200);
+  const salidos = gente[0].cola.filter((m) => m.t === 'sale' && m.bot).map((m) => m.id);
+  if (salidos.sort().join() !== 'bot-0,bot-1,bot-2') throw new Error(`bots que se fueron: ${salidos}`);
+  if ((await (await fetch(`http://${BASE}/sala/${lem}`)).json()).ocupacion !== 4) throw new Error('contó bots');
+  // la ocupación (sin bots) le llega firmada a Convex
+  for (let i = 0; !ocupaciones.some((o) => o.sala === lem && o.ocupacion === 4); i++) {
+    if (i > 60) throw new Error(`Convex no recibió la ocupación: ${JSON.stringify(ocupaciones)}`);
+    await sleep(100);
+  }
+  if (ocupacionesMalas) throw new Error(`${ocupacionesMalas} avisos de ocupación sin firma`);
+  gente.pop().ws.close();
+  for (let i = 0; !gente[0].cola.some((m) => m.t === 'entra' && m.bot); i++) {
+    if (i > 60) throw new Error('no volvió ningún bot');
+    await sleep(50);
+  }
+  const vuelve = gente[0].cola.find((m) => m.t === 'entra' && m.bot);
+  if (!vuelve.bot || vuelve.id !== 'bot-0' || !vuelve.ruta)
+    throw new Error(`no volvió un bot: ${JSON.stringify(vuelve)}`);
+  for (const c of gente) c.ws.close();
+  for (let i = 0; !ocupaciones.some((o) => o.sala === lem && o.ocupacion === 0); i++) {
+    if (i > 60) throw new Error('la sala vacía no avisó 0');
+    await sleep(100);
+  }
+
+  // --- MC-25: sala de partida con reloj, semilla, puntajes acotados y recibo firmado
+  const partidaId = `p${randomBytes(6).toString('hex')}`,
+    juego = `juego:${partidaId}`,
+    motor = 'franciscomorazan.rosquilla';
+  const acta = (vence = Date.now() + PARTIDA.actaMs) =>
+    firmarActa({ partidaId, motor, etapa: 0, etapas: 4, semilla: 777, cupo: 2, vence }, SECRETO_FIRMA);
+  const conActa = async (a) => `&acta=${encodeURIComponent(await (a ?? acta()))}`;
+  await rechazo(juego, await pase(juego, 'ana2', 'Ana'), SALA.cierre.pase, 'partida sin acta');
+  const vieja = await abrir(juego, await pase(juego, 'ana2', 'Ana'), await conActa(acta(Date.now() - 1)));
+  if ((await esperaCierre(vieja)) !== SALA.cierre.pase) throw new Error('aceptó un acta vencida');
+  const pa = await abrir(juego, await pase(juego, 'ana2', 'Ana'), await conActa());
+  const hpa = await espera(pa, 'hola');
+  if (hpa.partida.fase !== 'espera' || hpa.partida.semilla !== 777) throw new Error(`hola: ${JSON.stringify(hpa)}`);
+  const pb = await abrir(juego, await pase(juego, 'beto2', 'Beto'), await conActa());
+  await espera(pb, 'hola');
+  const [ra, rb] = [await espera(pa, 'reloj'), await espera(pb, 'reloj')];
+  if (ra.inicio !== rb.inicio || ra.fin !== rb.fin || ra.semilla !== 777 || rb.semilla !== 777)
+    throw new Error(`relojes distintos: ${JSON.stringify([ra, rb])}`);
+  if (ra.inicio - ra.ahora !== PARTIDA.cuentaMs || ra.fin - ra.inicio !== RELOJ * 1000)
+    throw new Error(`reloj raro: ${JSON.stringify(ra)}`);
+  // un tercero ya no entra a una partida empezada
+  const colado = await abrir(juego, await pase(juego, 'colado', 'Colado'), await conActa());
+  if ((await esperaCierre(colado)) !== SALA.cierre.llena) throw new Error('entró un tercero a la partida empezada');
+  // puntos antes del inicio no cuentan
+  pa.ws.send(JSON.stringify({ t: 'puntos', puntos: 50 }));
+  await sleep(Math.max(0, ra.inicio - Date.now()) + 600);
+  pa.ws.send(JSON.stringify({ t: 'puntos', puntos: 1e6 }));
+  pb.ws.send(JSON.stringify({ t: 'puntos', puntos: 30 }));
+  const marcadorA = await espera(pb, 'marcador');
+  const tope = 20 * (1 + 2 + 1);
+  if (marcadorA.id !== 'ana2' || marcadorA.puntos > tope || marcadorA.puntos < 1)
+    throw new Error(`puntaje imposible sin acotar: ${JSON.stringify(marcadorA)}`);
+  await sleep(150);
+  if (!pa.cola.some((m) => m.t === 'marcador' && m.id === 'beto2' && m.puntos === 30))
+    throw new Error('Ana no ve el marcador de Beto');
+  // Beto se va a medias: la partida sigue y cuenta con lo que llevaba
+  pb.ws.close();
+  await espera(pa, 'sale');
+  const finA = await espera(pa, 'fin', (RELOJ + 5) * 1000);
+  const recibo = await verificarRecibo(finA.recibo, SECRETO);
+  if (!recibo || recibo.partidaId !== partidaId || recibo.duracion !== RELOJ)
+    throw new Error(`recibo no verifica: ${JSON.stringify(recibo)}`);
+  const fa = recibo.resultados.find((f) => f.id === 'ana2'),
+    fb = recibo.resultados.find((f) => f.id === 'beto2');
+  if (!fa || fa.puntos > tope || !fb || fb.puntos !== 30 || !fb.salio)
+    throw new Error(`resultados: ${JSON.stringify(recibo.resultados)}`);
+  if (await verificarRecibo(finA.recibo, randomBytes(32).toString('hex'))) throw new Error('verificó con otra llave');
+  // quien vuelve después del fin recibe el mismo recibo
+  const pb2 = await abrir(juego, await pase(juego, 'beto2', 'Beto'), await conActa());
+  if ((await espera(pb2, 'hola')).partida.recibo !== finA.recibo) throw new Error('sin recibo al volver');
+  pa.ws.close();
+  pb2.ws.close();
+  if (duracionPartida(motor, 0, 4) < 60) throw new Error('el reloj de verdad es de 60 s o más');
+
+  // --- MC-31: viaje compartido: el primero maneja, el pasajero ve su estado; si el chofer se va, pasa el volante
+  const vj = `viaje:v${randomBytes(6).toString('hex')}`;
+  const chofer = await abrir(vj, await pase(vj, 'chofer1', 'Chofer'));
+  const hc = await espera(chofer, 'hola');
+  if (hc.chofer !== 'chofer1') throw new Error(`el primero no maneja: ${JSON.stringify(hc)}`);
+  chofer.ws.send(JSON.stringify({ t: 'ruta', veh: 'bus', de: 'franciscomorazan', a: 'olancho', semilla: 9 }));
+  chofer.ws.send(JSON.stringify({ t: 'auto', x: 1.5, v: 20, d: 300, e: 12.5, h: 1 }));
+  await sleep(150);
+  const pasajero = await abrir(vj, await pase(vj, 'pasajero1', 'Pasajera'));
+  const hp = await espera(pasajero, 'hola');
+  if (hp.chofer !== 'chofer1' || hp.ruta?.a !== 'olancho' || hp.ruta.semilla !== 9 || hp.auto?.d !== 300)
+    throw new Error(`el pasajero no recibió la ruta y el estado: ${JSON.stringify(hp)}`);
+  chofer.ws.send(JSON.stringify({ t: 'auto', x: 99, v: 21, d: 320, e: 13.5, h: 2 }));
+  const auto = await espera(pasajero, 'auto');
+  if (auto.d !== 320 || auto.x !== 10 || auto.h !== 2) throw new Error(`estado del chofer: ${JSON.stringify(auto)}`);
+  // el pasajero no puede manejar
+  pasajero.ws.send(JSON.stringify({ t: 'auto', x: 0, v: 0, d: 0, e: 0, h: 0 }));
+  await sleep(200);
+  if (chofer.cola.some((m) => m.t === 'auto')) throw new Error('el pasajero manejó');
+  chofer.ws.close();
+  const volante = await espera(pasajero, 'chofer');
+  if (volante.id !== 'pasajero1') throw new Error(`no pasó el volante: ${JSON.stringify(volante)}`);
+  pasajero.ws.close();
   console.log(
-    `PASA sala: sin pase, vencido, de otra sala y con otro secreto rechazados; dos jugadores se ven entrar, moverse, hacer emotes y salir; ráfaga recortada a ${rafaga} de 150; el 25 cae a ${libre.sala}`,
+    `PASA sala: sin pase, vencido, de otra sala y con otro secreto rechazados; dos jugadores se ven entrar, moverse, hacer emotes y salir; ráfaga recortada a ${rafaga} de 150; el 25 cae a ${libre.sala}; bots de relleno y ocupación firmada; partida con el mismo reloj y semilla, puntaje acotado a ${marcadorA.puntos} y recibo que verifica; viaje con chofer, pasajero y cambio de volante`,
   );
   fin(0);
 } catch (e) {

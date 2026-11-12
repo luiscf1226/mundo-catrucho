@@ -4,7 +4,7 @@
 //
 // Formato: `<datos>.<firma>`, los dos en base64url. `datos` es el JSON de `Pase`.
 
-import { limpiarNombre, SALA, salaValida } from './sala.ts';
+import { limpiarNombre, partirSalaCerrada, SALA, salaValida } from './sala.ts';
 
 interface Llave {
   readonly type: string;
@@ -115,7 +115,7 @@ export async function firmarPase(
   secreto: string,
   ahora = Date.now(),
 ) {
-  if (!salaValida(datos.sala)) throw new Error(`Sala inválida: ${datos.sala}`);
+  if (!salaValida(datos.sala) && !partirSalaCerrada(datos.sala)) throw new Error(`Sala inválida: ${datos.sala}`);
   const pase: Pase = {
     id: datos.id,
     nombre: limpiarNombre(datos.nombre),
@@ -162,4 +162,31 @@ export async function verificarPase(
       avatar: avatarDePase(datos.avatar),
     },
   };
+}
+
+// ------------------------------------------------------------------ otros datos firmados
+/**
+ * Firma cualquier JSON con el mismo secreto (acta y recibo de partida, ocupación de sala). `uso` va dentro de lo
+ * firmado: un pase no sirve como recibo ni un recibo como acta.
+ */
+export async function firmarDatos(uso: string, datos: unknown, secreto: string) {
+  const cuerpo = a64(texto(JSON.stringify(datos)));
+  const firma = await crypto.subtle.sign('HMAC', await llave(secreto, ['sign']), texto(`${uso}.${cuerpo}`));
+  return `${cuerpo}.${a64(new Uint8Array(firma))}`;
+}
+/** Lo que firmó `firmarDatos` con ese mismo `uso`, o null si está roto, es muy largo o la firma no cuadra. */
+export async function leerFirmado(uso: string, token: unknown, secreto: string, largoMax = 8192): Promise<unknown> {
+  const k = await llave(secreto, ['verify']);
+  if (typeof token !== 'string' || token.length > largoMax) return null;
+  const [cuerpo, firma, sobra] = token.split('.');
+  const bytesFirma = firma ? de64(firma) : null;
+  if (!cuerpo || !bytesFirma || sobra !== undefined) return null;
+  if (!(await crypto.subtle.verify('HMAC', k, bytesFirma, texto(`${uso}.${cuerpo}`)))) return null;
+  const bytes = de64(cuerpo);
+  if (!bytes) return null;
+  try {
+    return JSON.parse(new TextDecoder().decode(bytes));
+  } catch {
+    return null;
+  }
 }

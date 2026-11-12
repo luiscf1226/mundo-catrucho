@@ -200,3 +200,23 @@ vive en la mutación interna, de modo que otro llamador del script no puede omit
 Las pruebas anteriores que reemplacen el catálogo deben usar `subirCatalogo(datos, { forzar: true })`
 solo cuando restauren una copia conocida. Las versiones se conservan sin límite de retención
 por ahora; definir limpieza del historial queda para una operación administrativa posterior.
+
+## Jugar con gente de la sala (MC-23, MC-25, MC-31)
+
+- `partidas:abrirJuntos { juegoId }`: partida entre dos (modo `duo`, primera etapa, solo motores del kit) con su
+  semilla y `sala = juego:<id>`. No tiene `dueno`, así que no choca con la partida sola. `partidas:unirseJuntos
+  { partidaId }` agrega al segundo (cupo `PARTIDA.cupo`, mientras esté abierta y no hayan pasado 3 min).
+- `salas:paseJuego { partidaId }`: pase para `juego:<id>` y un **acta** firmada (motor, etapa, semilla, cupo) que
+  la sala necesita para llevar el reloj. Solo para jugadores de esa partida.
+- La sala firma un **recibo** al terminar (`packages/reglas/src/recibo.ts`). `partidas:cerrarJuntos { partidaId,
+  recibo }` lo verifica con `SALA_SECRETO`, lo valida con `decidirRecibo` (misma partida y motor, no vencido, la
+  partida lleva abierta al menos lo que dice el recibo, cada fila con `validarResultado`) y le paga a **cada**
+  jugador una sola vez con `premioPartida`, misiones y logros. El que llega después recibe `{ ya: true }` con lo que
+  le tocó. `cerrarPartida` no cierra estas partidas.
+- `salas:paseViaje { sala }`: pase para un viaje compartido `viaje:<id>`. El pasaje y el bono siguen en
+  `progreso:salirDeViaje` / `llegarViaje` para cada uno.
+- `POST /salas/ocupacion` (`http.ts`): aviso firmado de cada sala de zona cada 30 s → `salas:reportar` (interna)
+  guarda la fila en `salas`. `salas:conectados` (consulta pública) suma los avisos de los últimos 75 s por
+  departamento y el mapa. La sala necesita `CONVEX_SITE_URL` (`https://<deployment>.convex.site`) en Cloudflare.
+
+Tablas: `partidas.pagos` y `salas.momento` (con el índice `por_visto`) son nuevos y opcionales.

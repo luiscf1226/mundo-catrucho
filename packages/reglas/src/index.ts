@@ -4,6 +4,7 @@ export * from './partidas.ts';
 export * from './pase.ts';
 export * from './premios.ts';
 export * from './progreso.ts';
+export * from './recibo.ts';
 export * from './sala.ts';
 export * from './tienda.ts';
 export * from './topes.ts';
