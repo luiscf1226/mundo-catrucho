@@ -14,7 +14,7 @@ const S = `window.__mc.store.getState()`;
 const JUEGOS = [
   'olancho.pastel',
   'olancho.jaripeo',
-  'atlantida.carnaval',
+  'atlantida.punta-en-sambo-creek',
   'comayagua.taulabe',
   'cortes.pesca-en-yojoa',
   'yoro.lluvia',
@@ -22,7 +22,7 @@ const JUEGOS = [
   'comayagua.pilonpaleta',
   'franciscomorazan.rapidito',
   'ocotepeque.tresfronteras',
-  'atlantida.isidra',
+  'lapaz.feriamarcala',
   'lapaz.pintadas',
   'franciscomorazan.pulperia',
   'carrera',

@@ -49,7 +49,14 @@ export type MinigameId =
   | 'islas.flotacion'
   | 'islas.colorprofundo'
   | 'islas.cangrejo'
-  | 'islas.absorcion';
+  | 'islas.absorcion'
+  | 'atlantida.balsa'
+  | 'atlantida.pancoco'
+  | 'atlantida.vagon'
+  | 'atlantida.manati'
+  | 'atlantida.lancetilla'
+  | 'atlantida.canopy'
+  | 'atlantida.carnaval';
 /** solo = vos contra bots · duo = vos y un compa contra parejas · abierto = sala abierta (se llena con bots si no hay gente) */
 export type Modo = 'solo' | 'duo' | 'abierto';
 export type Vehiculo =

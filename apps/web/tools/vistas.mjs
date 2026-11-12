@@ -24,7 +24,7 @@ const ok = await run('vistas', file, { hash: '#go', width: 1280, height: 720 }, 
   for (const id of [
     'olancho.pastel',
     'olancho.jaripeo',
-    'atlantida.carnaval',
+    'atlantida.punta-en-sambo-creek',
     'comayagua.taulabe',
     'cortes.pesca-en-yojoa',
     'yoro.lluvia',
@@ -32,7 +32,7 @@ const ok = await run('vistas', file, { hash: '#go', width: 1280, height: 720 }, 
     'comayagua.pilonpaleta',
     'franciscomorazan.rapidito',
     'islas.encuentro-en-utila',
-    'atlantida.rafting',
+    'atlantida.remolino-del-cangrejal',
     'lempira.celaque',
   ]) {
     await t.ev(`${S}.startJuego('${id}')`);

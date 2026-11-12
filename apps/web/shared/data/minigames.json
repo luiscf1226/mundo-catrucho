@@ -499,5 +499,61 @@
   "silver": 360,
   "gold": 600
  }
+},
+{
+ "id": "atlantida.balsa",
+ "name": "Remadas del Cangrejal",
+ "place": "Atlántida",
+ "icon": "🚣",
+ "desc": "Dibujá paladas para proa y popa de una balsa de cuatro plazas. Ganás entrando a remansos señalados; fuerzas iguales en ambos lados impiden girar y te sacan de la línea.",
+ "rules": {}
+},
+{
+ "id": "atlantida.pancoco",
+ "name": "Expansión del pan de coco",
+ "place": "Atlántida",
+ "icon": "🥥",
+ "desc": "Reservá espacio en bandejas según cuánto crecerá cada bollo durante el levado. Ganás piezas separadas del tamaño pedido; bollos que chocan forman una sola pieza.",
+ "rules": {}
+},
+{
+ "id": "atlantida.vagon",
+ "name": "Apartaderos de Cuero y Salado",
+ "place": "Atlántida",
+ "icon": "🛶",
+ "desc": "Planificá el movimiento de un vagón en una vía angosta con apartaderos cortos. Ganás dando paso al convoy contrario; dejar una carga demasiado larga bloquea el retorno.",
+ "rules": {}
+},
+{
+ "id": "atlantida.manati",
+ "name": "Canales de silencio",
+ "place": "Atlántida",
+ "icon": "🛶",
+ "desc": "Pulsá remadas silenciosas y detenelas al detectar presencia de fauna en el hidrófono virtual. Ganás llegando por canales alternos sin aproximarte al manatí; ruido repetido obliga a retroceder.",
+ "rules": {}
+},
+{
+ "id": "atlantida.lancetilla",
+ "name": "Fruto, semilla, árbol",
+ "place": "Atlántida",
+ "icon": "🍈",
+ "desc": "Conectá tríos botánicos arrastrando fruto, semilla y placa de colección. Ganás descartando hipótesis por parentesco; una unión errónea ocupa tres ranuras hasta revisarla.",
+ "rules": {}
+},
+{
+ "id": "atlantida.canopy",
+ "name": "Panza del cable",
+ "place": "Atlántida",
+ "icon": "🚣",
+ "desc": "Soltá y frená con el botón leyendo la energía potencial de un cable cóncavo. Ganás llegando a la plataforma con velocidad baja; frenar antes del punto bajo te deja sin alcance.",
+ "rules": {}
+},
+{
+ "id": "atlantida.carnaval",
+ "name": "Empalme de comparsas",
+ "place": "Atlántida",
+ "icon": "🎭",
+ "desc": "Deslizá barras de frases musicales de bandas que avanzan por calles paralelas. Ganás si cierran juntas al cruce; un compás suelto obliga a detener una comparsa.",
+ "rules": {}
 }
 ]

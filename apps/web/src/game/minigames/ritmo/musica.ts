@@ -133,10 +133,24 @@ export interface Nota {
   hit?: boolean;
   done?: boolean;
   slot?: number;
+  /** con `tema.respuesta`: la frase (compás de respuesta) a la que pertenece */
+  frase?: number;
+}
+/** Modo llamada y respuesta (punta): los carriles 0–1 son apoyo (pies) y 2–3 acento (cadera). */
+export type Respuesta = false | 'copia' | 'libre';
+export const respuestaDe = (p: Partida): Respuesta =>
+  p.tema.respuesta === 'libre' ? 'libre' : p.tema.respuesta ? 'copia' : false;
+export const ACENTOS_LIBRES = 4;
+export interface Compas {
+  t: number;
+  fin: number;
+  tipo: 'llamada' | 'respuesta';
+  frase: number;
 }
 export const START = 2.8;
 /** Patrón de la etapa: el número de notas depende solo de la dificultad y del estilo (no de la semilla). */
 export function chartDe(p: Partida) {
+  if (respuestaDe(p)) return chartRespuesta(p);
   const E = ESTILOS[estiloDe(p)],
     step = 60 / E.bpm / 2,
     L = 60 + 26 * p.dif, // la canción dura de ~64 s (etapa 1) a ~90 s (última)
@@ -164,7 +178,50 @@ export function chartDe(p: Partida) {
   notas.forEach((_, i) => {
     max += 100 * (1 + Math.min(3, Math.floor(i / 10)));
   });
-  return { notas, max, end: (notas[notas.length - 1]?.time ?? START) + 1.4, step, cfg: E };
+  return {
+    notas,
+    max,
+    end: (notas[notas.length - 1]?.time ?? START) + 1.4,
+    step,
+    cfg: E,
+    compases: [] as Compas[],
+    llamadas: [] as { time: number; lane: number }[],
+  };
+}
+/**
+ * Punta con respuesta: un compás de llamada del tambor (no se toca) y un compás de respuesta. En la respuesta los pies
+ * marcan el pulso en los tiempos (carriles 0 y 1) y la cadera contesta los acentos de la llamada a contratiempo
+ * (carriles 2 y 3). En modo `libre` la respuesta solo trae el pulso: los acentos los ponés vos.
+ */
+function chartRespuesta(p: Partida) {
+  const E = ESTILOS[estiloDe(p)],
+    modo = respuestaDe(p),
+    step = 60 / E.bpm / 2,
+    L = 60 + 26 * p.dif,
+    frases = Math.max(4, Math.floor(L / (step * 16))),
+    acentos = 1 + Math.round(p.dif * 2),
+    R = rng(p.seed ^ 0x9e11);
+  const notas: Nota[] = [],
+    compases: Compas[] = [],
+    llamadas: { time: number; lane: number }[] = [];
+  for (let f = 0; f < frases; f++) {
+    const t0 = START + f * 16 * step,
+      t1 = t0 + 8 * step;
+    compases.push({ t: t0, fin: t1, tipo: 'llamada', frase: f });
+    compases.push({ t: t1, fin: t1 + 8 * step, tipo: 'respuesta', frase: f });
+    const huecos = [1, 3, 5, 7].sort(() => R() - 0.5).slice(0, Math.min(4, acentos + (R() < 0.3 ? 1 : 0)));
+    for (const h of huecos) {
+      const lane = 2 + Math.floor(R() * 2);
+      llamadas.push({ time: t0 + h * step, lane });
+      if (modo === 'copia') notas.push({ lane, time: t1 + h * step, frase: f });
+    }
+    for (let b = 0; b < 4; b++) notas.push({ lane: b % 2, time: t1 + b * 2 * step, frase: f });
+  }
+  notas.sort((a, b) => a.time - b.time);
+  const cuenta = notas.length + (modo === 'libre' ? frases * ACENTOS_LIBRES : 0);
+  let max = 0;
+  for (let i = 0; i < cuenta; i++) max += 100 * (1 + Math.min(3, Math.floor(i / 10)));
+  return { notas, max, end: START + frases * 16 * step + 1.2, step, cfg: E, compases, llamadas };
 }
 export const metasDe = (p: Partida): [number, number, number] => {
   const m = chartDe(p).max;
