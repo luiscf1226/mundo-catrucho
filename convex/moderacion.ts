@@ -3,7 +3,14 @@
 //
 // Un mensaje de sala se cita tal como lo mandó la sala, con su firma: si el texto, el autor o la sala no coinciden
 // con la firma, el reporte se rechaza. De un directo basta su id: el texto sale de la base.
-import { CHAT, fechaHonduras, mensajeAutentico, motivoValido } from '@mundo-catrucho/reglas';
+import {
+  CHAT,
+  fechaHonduras,
+  mensajeAutentico,
+  motivoValido,
+  partirSalaCerrada,
+  salaValida,
+} from '@mundo-catrucho/reglas';
 import {
   type DataModelFromSchemaDefinition,
   internalMutationGeneric,
@@ -62,6 +69,15 @@ export const reportar = mutation({
       const secreto = secretoSalas();
       if (!secreto) return { ok: false as const, motivo: 'sin-salas' };
       const { firma, ...m } = args.mensaje;
+      if (
+        (!salaValida(m.sala) && !partirSalaCerrada(m.sala)) ||
+        !/^[a-z0-9]{1,32}$/.test(m.id) ||
+        !/^[\w-]{1,24}$/.test(m.de) ||
+        !Number.isSafeInteger(m.ts) ||
+        m.ts < 0 ||
+        m.texto.length > CHAT.largoMax
+      )
+        return { ok: false as const, motivo: 'mensaje' };
       if (!(await mensajeAutentico(m, firma, secreto))) return { ok: false as const, motivo: 'firma' };
       a = await usuarioDePublico(ctx, m.de);
       fila = { sala: m.sala, mensajeId: m.id, texto: m.texto };

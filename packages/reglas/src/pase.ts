@@ -4,7 +4,6 @@
 //
 // Formato: `<datos>.<firma>`, los dos en base64url. `datos` es el JSON de `Pase`.
 
-import { CHAT } from './chat.ts';
 import { limpiarNombre, partirSalaCerrada, SALA, salaValida } from './sala.ts';
 
 interface Llave {
@@ -43,13 +42,10 @@ export interface Pase {
 export type MotivoPase = 'sin-pase' | 'roto' | 'firma' | 'vencido' | 'otra-sala';
 export type Verificacion = { ok: true; pase: Pase } | { ok: false; motivo: MotivoPase };
 
-/** Ids públicos bloqueados: cortos, sin repetir y como mucho `CHAT.bloqueosEnPase` (los primeros). */
+/** Ids públicos bloqueados: cortos y sin repetir. Convex impone el límite por cuenta; acá nunca se trunca. */
 export function bloqueadosDePase(b: unknown): string[] {
   if (!Array.isArray(b)) return [];
-  return [...new Set(b.filter((x): x is string => typeof x === 'string' && /^[\w-]{1,24}$/.test(x)))].slice(
-    0,
-    CHAT.bloqueosEnPase,
-  );
+  return [...new Set(b.filter((x): x is string => typeof x === 'string' && /^[\w-]{1,24}$/.test(x)))];
 }
 
 /** El secreto tiene que ser largo; uno corto se adivina. */
@@ -153,7 +149,7 @@ export async function verificarPase(
   if (!pase) return { ok: false, motivo: 'sin-pase' };
   const [cuerpo, firma, sobra] = pase.split('.');
   const bytesFirma = firma ? de64(firma) : null;
-  if (!cuerpo || !bytesFirma || sobra !== undefined || pase.length > 2048) return { ok: false, motivo: 'roto' };
+  if (!cuerpo || !bytesFirma || sobra !== undefined || pase.length > 12000) return { ok: false, motivo: 'roto' };
   if (!(await crypto.subtle.verify('HMAC', k, bytesFirma, texto(cuerpo)))) return { ok: false, motivo: 'firma' };
   let datos: Pase;
   try {

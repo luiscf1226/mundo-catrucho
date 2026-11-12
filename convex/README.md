@@ -33,7 +33,7 @@ cambia `tokenDe`.
 - `tienda:equipar { itemId }` y `tienda:vestir { avatar }`: solo lo que tenés, cada pieza en su ranura.
 - `partidas:abrirPartida { motor, etapa, juegoId?, modo? }`: motor, etapas y tema salen del último catálogo
   publicado (o del empaquetado); guarda `inicio` con la hora del servidor y `dueno`. Cada jugador tiene como mucho
-  una partida abierta: abrir otra deja las anteriores `abandonada` sin pagar, y abrir dos en menos de
+  una partida abierta: abrir otra deja las anteriores `vencida` sin pagar, y abrir dos en menos de
   `APERTURA_MIN_MS` (1 s) se rechaza.
 - `partidas:cerrarPartida { partidaId, puntos, estrellas, gano }`: duración = ahora − inicio, `validarResultado`
   con la holgura de `HOLGURA_S`, y paga `premioPartida` + `ganarXp` una sola vez. Imposible → `rechazada`;
@@ -211,7 +211,7 @@ Las reglas (filtro, ritmo, topes, firma de mensajes, alfabeto del código) viven
 - `amigos:pedir { id }` (id público visto en una sala; si el otro ya te había pedido, quedan amigos),
   `amigos:responder { amistadId, aceptar }`, `amigos:quitar { amistadId }` (borra también sus directos).
 - `amigos:bloquear { id }` / `amigos:desbloquear { id }`: tabla `bloqueos`. Bloquear quita la amistad. Un bloqueo
-  corta en los dos sentidos: chat de sala (el pase lleva los últimos 32 bloqueados y la sala no reparte entre
+  corta en los dos sentidos: chat de sala (el pase lleva todos los bloqueados (máximo 200 por cuenta) y la sala no reparte entre
   ellos), directos, amistad y códigos.
 - `amigos:crearCodigo { sala }`: 5 letras de `ALFABETO_CODIGO`, vale 10 minutos. Si ya tenés uno vigente se reusa y
   se actualiza la sala (el juego lo vuelve a llamar al cambiar de sala).
@@ -243,7 +243,7 @@ Tablas nuevas: `bloqueos`, `publicos` y `directos`. Campos nuevos opcionales: `r
 ## Jugar con gente de la sala (MC-23, MC-25, MC-31)
 
 - `partidas:abrirJuntos { juegoId }`: partida entre dos (modo `duo`, primera etapa, solo motores del kit) con su
-  semilla y `sala = juego:<id>`. No tiene `dueno`, así que no choca con la partida sola. `partidas:unirseJuntos
+  semilla y `sala = juego:<id>`. Comparte el turno de apertura con la partida sola: abrir o unirse vence las anteriores de ese jugador sin pago. Hay una pausa de 1 s entre aperturas, aunque la anterior ya esté cerrada. Una tarea programada vence las invitaciones sin segundo jugador a los 3 min. `partidas:unirseJuntos
   { partidaId }` agrega al segundo (cupo `PARTIDA.cupo`, mientras esté abierta y no hayan pasado 3 min).
 - `salas:paseJuego { partidaId }`: pase para `juego:<id>` y un **acta** firmada (motor, etapa, semilla, cupo) que
   la sala necesita para llevar el reloj. Solo para jugadores de esa partida.
@@ -259,3 +259,21 @@ Tablas nuevas: `bloqueos`, `publicos` y `directos`. Campos nuevos opcionales: `r
   departamento y el mapa. La sala necesita `CONVEX_SITE_URL` (`https://<deployment>.convex.site`) en Cloudflare.
 
 Tablas: `partidas.pagos` y `salas.momento` (con el índice `por_visto`) son nuevos y opcionales.
+
+Confianza aceptada (ola 7): los puntajes, tanto solos como entre dos, los declara el navegador.
+La firma de la sala prueba el recibo y su reloj, no que cada acción del juego ocurrió. Ambos cierres usan
+`validarResultado`, con los mismos `TOPES`, mínimo de duración y `HOLGURA_S`; el dúo además acota cada
+puntaje según el tiempo transcurrido. No se convierte la simulación en autoritativa en esta ola.
+
+Los bloqueos tienen un límite duro de 200 en `amigos:bloquear` (`tope-bloqueos`, con aviso en el juego).
+La sala guarda las listas completas fuera del adjunto del WebSocket y corta chat e invitaciones en ambos sentidos.
+Los pases anteriores duran como máximo 60 s; una conexión ya abierta recibe los cambios del propio jugador.
+Los viajes compartidos registran todas las cuentas admitidas: se rechaza entrar si alguna bloqueó a la nueva
+cuenta o viceversa. Esa lista se conserva durante el viaje, incluso si alguien se baja.
+Los avisos de ocupación deben ser estrictamente posteriores al anterior, de hace menos de 75 s y como mucho
+5 s adelantados. La vigencia corre desde la hora firmada, aunque el aviso llegue tarde.
+
+Regresión de la segunda revisión (contra desarrollo, crea y borra invitados de prueba):
+`node scripts/test-revision-2.mjs`. Incluye 200 bloqueos y espera los 3 minutos reales del vencimiento
+programado. No la corras junto a publicaciones del panel. La prueba de navegador
+`test-partida-juntos.mjs` usa su servidor local simulado; esta regresión cubre las mutaciones de Convex real.

@@ -7,7 +7,7 @@
 export const CHAT = {
   /** largo máximo de un mensaje, después de limpiarlo */
   largoMax: 140,
-  /** cubeta por conexión en la sala: `rafaga` seguidos y luego uno cada `1 / porSegundo` s */
+  /** cubeta por id público en la sala: `rafaga` seguidos y luego uno cada `1 / porSegundo` s */
   ritmo: { rafaga: 5, porSegundo: 0.5 },
   /** mensajes directos por minuto por jugador (Convex) */
   directosMinuto: 8,
@@ -15,8 +15,8 @@ export const CHAT = {
   directosMax: 60,
   /** reportes por día de Honduras por jugador */
   reportesDia: 10,
-  /** bloqueos que viajan en el pase de sala (los más nuevos) */
-  bloqueosEnPase: 32,
+  /** límite duro de bloqueos por cuenta; todos viajan en el pase */
+  bloqueosEnPase: 200,
 } as const;
 
 /** Motivos para reportar. */
@@ -32,7 +32,7 @@ export function limpiarTexto(s: unknown): string {
   if (typeof s !== 'string') return '';
   return (
     s
-      .normalize('NFC')
+      .normalize('NFKC')
       .replace(/<[^>]*>/g, ' ')
       .replace(/[<>]/g, '')
       .replace(/\s+/g, ' ')
@@ -60,12 +60,12 @@ const FRASE_DATO = new RegExp(
 );
 const DATOS: RegExp[] = [
   // correos (también con «arroba» y «punto»)
-  /[\p{L}\p{N}._%+-]+\s*(@|\(at\)|\barroba\b)\s*[\p{L}\p{N}-]+(\s*(\.|\bpunto\b)\s*[\p{L}]{2,})+/giu,
+  /[\p{L}\p{N}._%+-]+\s*(@|\(at\)|[[({]\s*arroba\s*[\])}]|\barroba\b)\s*[\p{L}\p{N}-]+(\s*(\.|[[({]\s*punto\s*[\])}]|\bpunto\b)\s*[\p{L}]{2,})+/giu,
   // direcciones web
   /\b(https?:\/\/|www\.)\S+/giu,
   /\b[\p{L}\p{N}-]+(\.|\s+punto\s+)(com|net|org|hn|io|gg|me|ly|co|app|xyz|tv|info|biz|link)\b(\/\S*)?/giu,
   // teléfonos: 7 dígitos o más, con o sin +504, espacios, puntos, guiones o paréntesis entre ellos
-  /\+?\(?\d(?:[\s.()-]{0,2}\d){6,}\)?/gu,
+  /\+?\(?\d(?:[\s./_|()-]{0,4}\d){6,}\)?/gu,
 ];
 /** @usuarios de redes; guarda lo que había antes de la arroba */
 const ARROBA = /(^|[^\p{L}\p{N}])@[\p{L}\p{N}._]{2,}/gu;
@@ -168,7 +168,7 @@ export function filtrarChat(entrada: unknown): Filtrado | null {
     return `${antes}${TAPA}`;
   });
   // 3. groserías palabra por palabra, y letras sueltas seguidas («p u t a», «p.u.t.a»)
-  const partes = texto.split(/(\s+)/);
+  const partes = texto.split(/(\s+|[,;:¿?()«»]+)/);
   const palabras = partes.map((p, i) => ({ p, i })).filter((x) => x.p.trim() !== '');
   for (const { p, i } of palabras) {
     if (p === TAPA || !esGroseria(p)) continue;
@@ -246,7 +246,7 @@ declare const crypto: {
 declare const TextEncoder: new () => { encode(s: string): Uint8Array };
 const enBytes = (s: string) => new TextEncoder().encode(s);
 const hex = (b: ArrayBuffer) => [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, '0')).join('');
-const cuerpoMensaje = (m: MensajeSala) => `chat|${m.sala}|${m.id}|${m.de}|${m.ts}|${m.texto}`;
+const cuerpoMensaje = (m: MensajeSala) => JSON.stringify(['chat', m.sala, m.id, m.de, m.ts, m.texto]);
 
 /** Firma HMAC-SHA256 (hexadecimal) de un mensaje de sala. */
 export async function firmarMensaje(m: MensajeSala, secreto: string) {

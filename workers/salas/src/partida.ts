@@ -47,6 +47,7 @@ const vista = (e: EstadoPartida) => ({
   fin: e.fin ?? null,
   jugadores: Object.entries(e.jugadores).map(([id, j]) => ({ id, nombre: j.nombre, puntos: j.puntos, salio: j.salio })),
   recibo: e.recibo ?? null,
+  resultados: e.resultados ?? [],
 });
 
 export async function entrarPartida(

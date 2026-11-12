@@ -234,7 +234,7 @@ function recibir(m: Mensaje) {
     const p = (m.partida ?? {}) as Mensaje;
     usePartida.setState({ yo: String(m.id), jugadores: jugadoresDe(p.jugadores) });
     if (p.fase === 'juego') reloj({ ahora: m.ahora, inicio: p.inicio, fin: p.fin });
-    if (p.fase === 'fin' && typeof p.recibo === 'string') terminar(p.recibo, jugadoresDe(p.jugadores));
+    if (p.fase === 'fin' && typeof p.recibo === 'string') terminar(p.recibo, p.resultados);
     if (p.fase === 'cancelada') usePartida.setState({ estado: 'cancelada' });
   } else if (m.t === 'entra') {
     if (!s.jugadores.some((j) => j.id === m.id))
@@ -249,11 +249,7 @@ function recibir(m: Mensaje) {
     usePartida.setState({
       jugadores: s.jugadores.map((j) => (j.id === m.id ? { ...j, puntos: Number(m.puntos) || 0 } : j)),
     });
-  else if (m.t === 'fin' && typeof m.recibo === 'string')
-    terminar(
-      m.recibo,
-      (m.resultados as FilaRecibo[]).map((f) => ({ ...f })),
-    );
+  else if (m.t === 'fin' && typeof m.recibo === 'string') terminar(m.recibo, m.resultados);
   else if (m.t === 'cancelada') usePartida.setState({ estado: 'cancelada' });
 }
 
@@ -286,12 +282,23 @@ type Cobro =
   | { ok: true; ya: boolean; monedas: number; xp: number; saldo?: { monedas: number; xp: number; nivel: number } }
   | Fallo;
 /** Llegó el recibo: termina la partida propia con lo que contó la sala y lo cobra en Convex. */
-async function terminar(recibo: string, filas: JugadorJuntos[] | FilaRecibo[]) {
+async function terminar(recibo: string, filas: unknown) {
   const s = usePartida.getState();
   if (s.estado === 'fin' || !s.partidaId) return;
-  const jugadores = jugadoresDe(filas);
+  if (!Array.isArray(filas)) return;
+  const resultados = filas.filter(
+    (f): f is FilaRecibo =>
+      f &&
+      typeof f.id === 'string' &&
+      typeof f.gano === 'boolean' &&
+      Number.isFinite(f.puntos) &&
+      Number.isInteger(f.estrellas) &&
+      f.estrellas >= 0 &&
+      f.estrellas <= 3,
+  );
+  const jugadores = jugadoresDe(resultados);
   usePartida.setState({ estado: 'fin', jugadores, pago: 'pendiente' });
-  const mia = (filas as FilaRecibo[]).find((f) => f.id === s.yo);
+  const mia = resultados.find((f) => f.id === s.yo);
   const g = useGame.getState();
   // si este navegador se quedó atrás, la partida termina con lo que contó la sala
   if (g.mg?.juntos?.partidaId === s.partidaId && g.mg.phase === 'playing' && mia)

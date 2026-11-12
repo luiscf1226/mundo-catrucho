@@ -4,6 +4,7 @@ import { randomBytes } from 'node:crypto';
 import { test } from 'node:test';
 import {
   acotarPuntos,
+  decidirCierre,
   decidirRecibo,
   duracionPartida,
   filaDe,
@@ -166,4 +167,25 @@ test('acotarPuntos: nada negativo, nada que no quepa en el tiempo jugado', () =>
   const fila = filaDe(base, { id: 'ana', nombre: 'Ana', puntos: max, salio: false });
   const d = decidirRecibo({ partidaId: 'p123456', recibo: recibo({ resultados: [fila] }), partida: partida(), ahora });
   assert.ok(d.pagos[0].premio, d.pagos[0].motivos.join(', '));
+});
+
+test('solo y dúo comparten topes y mínimo de duración', () => {
+  for (const duracion of [0, 1, 2, 5, 10, dura])
+    for (const puntos of [0, 120, 999999]) {
+      const f = filaDe(base, { id: 'ana', nombre: 'Ana', puntos, salio: false });
+      const d = decidirRecibo({
+        partidaId: 'p123456',
+        partida: partida(),
+        recibo: recibo({ duracion, resultados: [f] }),
+        ahora,
+      });
+      const solo = decidirCierre({
+        partida: { ...partida(), jugadores: ['u-ana'], inicio: ahora - duracion * 1000 },
+        usuarioId: 'u-ana',
+        ahora,
+        cierre: f,
+        avance: { nivel: 1, xp: 0 },
+      });
+      assert.equal(!!d.pagos[0].premio, solo.tipo === 'pagada', `${duracion}s, ${puntos}pts`);
+    }
 });
