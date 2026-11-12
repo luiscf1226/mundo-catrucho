@@ -10,6 +10,7 @@ import { g, TEST, useOverview, usePad, useTouch } from './lib';
 
 let padHinted = false;
 
+import { AmigosPanel } from './panels/Amigos';
 import { MapPanel } from './panels/Map';
 import {
   AchievementsPanel,
@@ -42,6 +43,7 @@ const PANELS: Record<PanelId, () => ReactNode> = {
   logros: AchievementsPanel,
   clasificacion: LeaderboardPanel,
   salas: RoomsPanel,
+  amigos: AmigosPanel,
   controles: ControlsPanel,
   emotes: EmotesPanel,
   proyecto: ProjectPanel,

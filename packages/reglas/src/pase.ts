@@ -4,6 +4,7 @@
 //
 // Formato: `<datos>.<firma>`, los dos en base64url. `datos` es el JSON de `Pase`.
 
+import { CHAT } from './chat.ts';
 import { limpiarNombre, SALA, salaValida } from './sala.ts';
 
 interface Llave {
@@ -36,9 +37,20 @@ export interface Pase {
   vence: number;
   /** cómo se ve: piezas y colores del avatar, tal como los guarda Convex */
   avatar: Record<string, string>;
+  /** ids públicos que bloqueó (MC-22): la sala no le pasa sus mensajes ni le pasa los suyos */
+  bloqueados?: string[];
 }
 export type MotivoPase = 'sin-pase' | 'roto' | 'firma' | 'vencido' | 'otra-sala';
 export type Verificacion = { ok: true; pase: Pase } | { ok: false; motivo: MotivoPase };
+
+/** Ids públicos bloqueados: cortos, sin repetir y como mucho `CHAT.bloqueosEnPase` (los primeros). */
+export function bloqueadosDePase(b: unknown): string[] {
+  if (!Array.isArray(b)) return [];
+  return [...new Set(b.filter((x): x is string => typeof x === 'string' && /^[\w-]{1,24}$/.test(x)))].slice(
+    0,
+    CHAT.bloqueosEnPase,
+  );
+}
 
 /** El secreto tiene que ser largo; uno corto se adivina. */
 export const SECRETO_MIN = 32;
@@ -111,7 +123,7 @@ export async function idPublico(usuarioId: string, secreto: string) {
 
 /** Firma un pase para una sala. Vence en `SALA.paseMs`. Lo usa Convex (y las pruebas). */
 export async function firmarPase(
-  datos: { id: string; nombre: string; sala: string; avatar?: unknown },
+  datos: { id: string; nombre: string; sala: string; avatar?: unknown; bloqueados?: unknown },
   secreto: string,
   ahora = Date.now(),
 ) {
@@ -123,6 +135,8 @@ export async function firmarPase(
     vence: ahora + SALA.paseMs,
     avatar: avatarDePase(datos.avatar),
   };
+  const bloqueados = bloqueadosDePase(datos.bloqueados);
+  if (bloqueados.length) pase.bloqueados = bloqueados;
   const cuerpo = a64(texto(JSON.stringify(pase)));
   const firma = await crypto.subtle.sign('HMAC', await llave(secreto, ['sign']), texto(cuerpo));
   return `${cuerpo}.${a64(new Uint8Array(firma))}`;
@@ -160,6 +174,7 @@ export async function verificarPase(
       sala: datos.sala,
       vence: datos.vence,
       avatar: avatarDePase(datos.avatar),
+      bloqueados: bloqueadosDePase(datos.bloqueados),
     },
   };
 }

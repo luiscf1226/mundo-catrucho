@@ -199,3 +199,43 @@ vive en la mutación interna, de modo que otro llamador del script no puede omit
 Las pruebas anteriores que reemplacen el catálogo deben usar `subirCatalogo(datos, { forzar: true })`
 solo cuando restauren una copia conocida. Las versiones se conservan sin límite de retención
 por ahora; definir limpieza del historial queda para una operación administrativa posterior.
+
+## Chat moderado, amigos y código de invitación (MC-22, MC-24)
+
+Todo con la identidad de invitado. En el juego cada quien se conoce por su id público de sala (`idPublico`, el
+mismo del pase): no revela la cuenta. `publicos` lo traduce a la cuenta y se llena con `salas:pase` y los códigos.
+Las reglas (filtro, ritmo, topes, firma de mensajes, alfabeto del código) viven en `packages/reglas/src/chat.ts`.
+
+- `amigos:lista` (consulta): tu id público, amigos y pedidos (`amigos` | `enviada` | `recibida`), bloqueados y tu
+  código vigente.
+- `amigos:pedir { id }` (id público visto en una sala; si el otro ya te había pedido, quedan amigos),
+  `amigos:responder { amistadId, aceptar }`, `amigos:quitar { amistadId }` (borra también sus directos).
+- `amigos:bloquear { id }` / `amigos:desbloquear { id }`: tabla `bloqueos`. Bloquear quita la amistad. Un bloqueo
+  corta en los dos sentidos: chat de sala (el pase lleva los últimos 32 bloqueados y la sala no reparte entre
+  ellos), directos, amistad y códigos.
+- `amigos:crearCodigo { sala }`: 5 letras de `ALFABETO_CODIGO`, vale 10 minutos. Si ya tenés uno vigente se reusa y
+  se actualiza la sala (el juego lo vuelve a llamar al cambiar de sala).
+- `amigos:usarCodigo { codigo }`: devuelve la sala exacta, el nombre y el id público de quien lo creó. El juego
+  viaja a esa zona y entra a esa sala aunque no sea el primer tramo libre; si tiene sus 24, avisa (`llena`) y sigue
+  en el tramo que toque. Con bloqueo responde como si el código no existiera.
+- `chat:enviarDirecto { amistadId, texto }` y `chat:directos { amistadId }`: tabla `directos`. Solo entre amistades
+  aceptadas sin bloqueo, filtrados con `filtrarChat`, 8 por minuto y los últimos 60 por conversación. El juego hace
+  un sondeo cada 3 s mientras la conversación está abierta.
+- `moderacion:reportar { motivo, mensaje | directoId }`: tabla `reportes` (campos nuevos opcionales `sala`,
+  `mensajeId`, `directo`, `texto`, `estado`). Un mensaje de sala se cita como lo mandó la sala con su firma HMAC
+  (`SALA_SECRETO`): si no coincide se rechaza (`firma`). De un directo basta el id. Máximo 10 por día de Honduras
+  (`tope`), uno por mensaje (`ya`), nunca a uno mismo (`propio`).
+
+Cola de moderación (solo con permisos de administrador; no hay pantalla todavía):
+
+```bash
+npx convex run moderacion:cola '{}'                       # sin revisar, del más nuevo al más viejo
+npx convex run moderacion:cola '{"todos":true,"limite":100}'
+npx convex run moderacion:resolver '{"reporteId":"<id>"}'  # marcarlo como revisado
+```
+
+Cada fila trae cuándo, motivo, texto citado, dónde (`mapa:0`, `dept:olancho:1` o `directo`), quién reporta, a quién
+y cuántos reportes acumula ese jugador en la cola. `moderacion:olvidarSocial { invitado }` (interna) borra lo social
+de un invitado de prueba; `node apps/web/tools/test-chat-amigos.mjs` la usa junto a `progreso:olvidarInvitado`.
+
+Tablas nuevas: `bloqueos`, `publicos` y `directos`. Campos nuevos opcionales: `reportes.*` e `invitaciones.sala`.

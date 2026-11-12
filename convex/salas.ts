@@ -4,6 +4,7 @@
 import { firmarPase, idPublico, SECRETO_MIN, salaValida } from '@mundo-catrucho/reglas';
 import { type DataModelFromSchemaDefinition, type MutationBuilder, mutationGeneric } from 'convex/server';
 import { v } from 'convex/values';
+import { bloqueadosParaPase, registrarPublico } from './amigos';
 import { asegurarUsuario, quien } from './identidad';
 import type schema from './schema';
 
@@ -24,8 +25,11 @@ export const pase = mutation({
     if (!salaValida(args.sala)) return { ok: false as const, motivo: 'sala' };
     const { usuario, perfil } = await asegurarUsuario(ctx, args);
     const id = await idPublico(usuario._id, secreto);
+    // MC-22: el id público queda ligado a la cuenta (amistad y reportes) y el pase lleva a quiénes bloqueó
+    await registrarPublico(ctx, usuario._id, id);
+    const bloqueados = await bloqueadosParaPase(ctx, usuario._id, secreto);
     const firmado = await firmarPase(
-      { id, nombre: args.nombre ?? usuario.nombre, sala: args.sala, avatar: perfil.avatar },
+      { id, nombre: args.nombre ?? usuario.nombre, sala: args.sala, avatar: perfil.avatar, bloqueados },
       secreto,
     );
     return { ok: true as const, pase: firmado, id };

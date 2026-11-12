@@ -36,6 +36,9 @@ pnpm --filter @mundo-catrucho/reglas typecheck  # también corre en pnpm check
 | `acotarEje`, `animacionPermitida`, `limpiarNombre`, `emoteValido`, `cubetaNueva`, `permitirMensaje` | lo que la sala aplica a cada mensaje |
 | `partirSala`, `salaValida`, `zonaValida`, `nombreSala` | nombres de sala `mapa:N` y `dept:<id>:N` (N < `SALA.tramosMax`) |
 | `firmarPase`, `verificarPase`, `idPublico`, `avatarDePase`, `SECRETO_MIN` | pase de sala firmado con HMAC-SHA256 (Web Crypto: Convex, Worker y Node) |
+| `CHAT`, `filtrarChat`, `limpiarTexto`, `cubetaChat`, `permitirChat` | chat (MC-22): sin HTML, groserías y datos personales tapados con `***`, largo y ritmo |
+| `firmarMensaje`, `mensajeAutentico`, `MOTIVOS_REPORTE`, `bloqueadosDePase` | mensajes de sala firmados (para reportar), motivos de reporte y bloqueados en el pase |
+| `ALFABETO_CODIGO`, `CODIGO`, `codigoDe`, `normalizarCodigo` | código de invitación de 5 letras (MC-24) |
 
 ## Validar un resultado
 
