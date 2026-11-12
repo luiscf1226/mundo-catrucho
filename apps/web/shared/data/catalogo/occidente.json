@@ -406,42 +406,304 @@
     ]
   },
   "intibuca": {
-    "tipos": "🥔🍓🌫️🥁",
-    "lugares": [
-      ["esperanza", "La Esperanza", "ciudad", "La ciudad más alta y más fría de Honduras."],
-      ["gruta", "La Gruta", "iglesia", "Capilla tallada en la roca, mirando la ciudad."],
-      ["mercado", "Mercado lenca", "mercado", "Papas, fresas y pañuelos de colores."],
-      ["yamaranguila", "Yamaranguila", "pueblo", "Corazón lenca, con su cascada."],
-      ["chiligatoro", "Laguna de Chiligatoro", "lago", "Laguna entre pinos y neblina."],
-      ["sanjuan", "San Juan", "pueblo", "Café y artesanía en la Ruta Lenca."]
+  "tipos": "🥔🍓🌫️🥁",
+  "lugares": [
+    [
+      "esperanza",
+      "La Esperanza",
+      "ciudad",
+      "La ciudad más alta y más fría de Honduras."
     ],
-    "comidas": [
-      ["Fresas con crema", "mercado", "De la montaña, recién cortadas."],
-      ["Choros", "esperanza", "Hongos silvestres del pinar: salen con las lluvias y tienen su festival."],
-      ["Papas con cuajada", "mercado", "La papa de aquí es otra cosa."],
-      ["Atol de elote", "yamaranguila", "Para quitarse el frío."]
+    [
+      "gruta",
+      "La Gruta",
+      "iglesia",
+      "Capilla tallada en la roca, mirando la ciudad."
     ],
-    "palabras": [
-      ["choro", "hongo silvestre que se come"],
-      ["chicha", "bebida fermentada de maíz"],
-      ["compostura", "ofrenda lenca a la tierra"],
-      ["guancasco", "encuentro de paz entre dos pueblos"],
-      ["tanate", "bulto o montón"],
-      ["helado", "frío (hace helado)"]
+    [
+      "mercado",
+      "Mercado lenca",
+      "mercado",
+      "Papas, fresas y pañuelos de colores."
     ],
-    "juegos": [
-      ["papas", "Papas al saco", "atrapa", "mercado", "🥔", "Llená el saco de papas sin agarrar piedras.", "Casi toda la papa del país sale de aquí.", {"con": "saco", "fondo": "finca", "cae": [["Papa", "papa", "#c9a66b"], ["Papa morada", "papa", "#7a4a7a"]], "evita": [["Piedra", "piedra"]]}, 5],
-      ["fresas", "Fresas con crema", "cocina", "mercado", "🍓", "Armá los vasitos de fresas.", "Fresas en Honduras, sí: aquí hace frío de verdad.", {"plato": "Fresas con crema", "sirve": "vaso", "pasos": [["Fresas", "#e63946"], ["Lavar", "#bfe3f5"], ["Crema", "#ffffff"], ["Azúcar", "#fdf6e3"]]}, 4],
-      ["choros", "Buscando choros", "exploradores", "esperanza", "🍄", "Encontrá los hongos buenos en el pinar.", "Ojo: no todo hongo es choro.", {"sitios": ["intibuca"]}, 3],
-      ["neblina", "Neblina en La Esperanza", "ruta", "gruta", "🌫️", "Subí a La Gruta entre la neblina.", "Aquí la chumpa se usa todo el año.", {"estilo": "pueblo", "meta": "La Gruta"}, 5],
-      ["guancasco", "Guancasco de Yamaranguila", "ritmo", "yamaranguila", "🥁", "Seguí el tambor y el pito del encuentro.", "Dos pueblos se visitan con sus santos para sellar la paz.", {"estilo": "tambor", "toca": "tambor"}, 5],
-      ["cascada", "Cascada de Yamaranguila", "ruta", "yamaranguila", "💦", "Bajá por las piedras hasta la cascada.", "El agua baja helada.", {"estilo": "rio", "meta": "La cascada"}, 4],
-      ["puesto", "Puesto en el mercado lenca", "pulperia", "mercado", "🧣", "Atendé el puesto de verduras.", "Las vendedoras llevan pañuelos de colores en la cabeza.", {}, 3],
-      ["chorochicha", "¿Choro o chicha?", "trivia", "esperanza", "💬", "Palabras de la tierra lenca.", "El Festival del Choro y el Vino se celebra en junio.", {"de": "palabras"}, 4],
-      ["lena", "Leña para el frío", "corte", "esperanza", "🪓", "Rajá leña antes de que caiga la noche.", "De noche baja a casi cero.", {"arma": "hacha", "cosas": [["Leño de pino", "lena", "#b07a45"], ["Ocote", "lena", "#d98e32"]], "evita": [["Nudo", "piedra"]]}, 4],
-      ["chiligatoro", "Pesca en Chiligatoro", "pesca", "chiligatoro", "🎣", "Pescá entre la neblina.", "A veces no se ve ni la boya.", {"agua": "laguna", "desde": "orilla", "peces": [["Tilapia", 20, "#9aa7ad"], ["Carpa", 35, "#c98a3a"], ["Guapote", 50, "#5b7f4a"]], "basura": ["Bota"]}, 4],
-      ["bus", "Bus a La Esperanza", "manejo", "esperanza", "🚌", "Subí la cuesta con el bus lleno.", "Curvas, neblina y el ayudante colgado de la puerta.", {"veh": "bus", "via": "montana", "recoge": ["pasajeros"], "destino": "La Esperanza"}, 4],
-      ["feriapapa", "Festival de la papa", "feria", "esperanza", "🎯", "Los puestos del festival.", "El premio viene en saco.", {}, 3]
+    [
+      "yamaranguila",
+      "Yamaranguila",
+      "pueblo",
+      "Corazón lenca, con su cascada."
+    ],
+    [
+      "chiligatoro",
+      "Laguna de Chiligatoro",
+      "lago",
+      "Laguna entre pinos y neblina."
+    ],
+    [
+      "sanjuan",
+      "San Juan",
+      "pueblo",
+      "Café y artesanía en la Ruta Lenca."
+    ],
+    [
+      "plazas",
+      "Plazas gemelas",
+      "ciudad",
+      "Ubicá las plazas de La Esperanza e Intibucá en la maqueta. Conservá ambos municipios."
     ]
-  }
+  ],
+  "comidas": [
+    [
+      "Fresas con crema",
+      "mercado",
+      "De la montaña, recién cortadas."
+    ],
+    [
+      "Choros",
+      "esperanza",
+      "Hongos silvestres del pinar: salen con las lluvias y tienen su festival."
+    ],
+    [
+      "Papas con cuajada",
+      "mercado",
+      "La papa de aquí es otra cosa."
+    ],
+    [
+      "Atol de elote",
+      "yamaranguila",
+      "Para quitarse el frío."
+    ]
+  ],
+  "palabras": [
+    [
+      "choro",
+      "hongo del festival; su identificación requiere revisión profesional"
+    ],
+    [
+      "chicha",
+      "bebida fermentada de maíz"
+    ],
+    [
+      "compostura",
+      "ofrenda lenca a la tierra"
+    ],
+    [
+      "guancasco",
+      "encuentro de paz entre dos pueblos"
+    ],
+    [
+      "tanate",
+      "bulto o montón"
+    ],
+    [
+      "helado",
+      "frío (hace helado)"
+    ]
+  ],
+  "juegos": [
+    [
+      "carrera-entre-dos-plazas",
+      "Carrera entre dos plazas",
+      "intibuca.carrera",
+      "esperanza",
+      "🍄",
+      "Corré un circuito con puestos de abrigo intermedios.",
+      "El frío ya salió y vos ni te amarrás.",
+      {
+        "fondo": "montana",
+        "variante": "carrera-entre-dos-plazas",
+        "frases": [
+          "El frío ya salió y vos ni te amarrás."
+        ]
+      },
+      5
+    ],
+    [
+      "el-frio-va-ganando",
+      "El frío va ganando",
+      "intibuca.carrera",
+      "esperanza",
+      "🍄",
+      "Elegí entre carril soleado largo y carril frío corto con una reserva térmica limitada.",
+      "El frío ya salió y vos ni te amarrás.",
+      {
+        "fondo": "montana",
+        "variante": "el-frio-va-ganando",
+        "frases": [
+          "El frío ya salió y vos ni te amarrás."
+        ]
+      },
+      4
+    ],
+    [
+      "tela-del-mercado-lenca",
+      "Tela del mercado lenca",
+      "intibuca.telar",
+      "mercado",
+      "🧩",
+      "Tejé una franja conservando su motivo por ambas caras.",
+      "La bufanda tiene dos lados, no te hagás.",
+      {
+        "fondo": "montana",
+        "variante": "tela-del-mercado-lenca",
+        "frases": [
+          "La bufanda tiene dos lados, no te hagás."
+        ]
+      },
+      5
+    ],
+    [
+      "la-bufanda-abraza-el-puesto",
+      "La bufanda abraza el puesto",
+      "intibuca.telar",
+      "mercado",
+      "🧩",
+      "Repará hilos flotantes sin cortar urdimbre mientras una bufanda fantástica abraza el puesto y hay que encontrarle la punta por ambos lados.",
+      "La bufanda tiene dos lados, no te hagás.",
+      {
+        "fondo": "montana",
+        "variante": "la-bufanda-abraza-el-puesto",
+        "frases": [
+          "La bufanda tiene dos lados, no te hagás."
+        ]
+      },
+      4
+    ],
+    [
+      "choros-con-consulta",
+      "Choros con consulta",
+      "intibuca.hongos",
+      "esperanza",
+      "🍄",
+      "Clasificá expedientes de réplicas con una ficha completa.",
+      "Sin ficha completa, el choro espera al experto.",
+      {
+        "fondo": "montana",
+        "variante": "choros-con-consulta",
+        "frases": [
+          "Sin ficha completa, el choro espera al experto."
+        ]
+      },
+      5
+    ],
+    [
+      "el-choro-pidio-carnet",
+      "El choro pidió carnet",
+      "intibuca.hongos",
+      "esperanza",
+      "🍄",
+      "Detectá qué dato falta para consultar al experto mientras un choro de espuma presenta un carnet más grande que él, sin decidir consumo de hongos reales.",
+      "Sin ficha completa, el choro espera al experto.",
+      {
+        "fondo": "montana",
+        "variante": "el-choro-pidio-carnet",
+        "frases": [
+          "Sin ficha completa, el choro espera al experto."
+        ]
+      },
+      4
+    ],
+    [
+      "dos-ciudades--dos-plazas",
+      "Dos ciudades, dos plazas",
+      "intibuca.callejero",
+      "esperanza",
+      "🍄",
+      "Montá el callejero de ambas ciudades.",
+      "Queda a una cuadra, pero revisá de cuál plaza.",
+      {
+        "fondo": "montana",
+        "variante": "dos-ciudades--dos-plazas",
+        "frases": [
+          "Queda a una cuadra, pero revisá de cuál plaza."
+        ]
+      },
+      4
+    ],
+    [
+      "la-direccion-cambio-de-acera",
+      "La dirección cambió de acera",
+      "intibuca.callejero",
+      "esperanza",
+      "🍄",
+      "Corregí direcciones ambiguas con tres referencias urbanas y una sola consulta al plano.",
+      "Queda a una cuadra, pero revisá de cuál plaza.",
+      {
+        "fondo": "montana",
+        "variante": "la-direccion-cambio-de-acera",
+        "frases": [
+          "Queda a una cuadra, pero revisá de cuál plaza."
+        ]
+      },
+      4
+    ],
+    [
+      "papa-con-toda-su-familia",
+      "Papa con toda su familia",
+      "intibuca.papas",
+      "yamaranguila",
+      "🥔",
+      "Levantá una mata virtual por nodos de raíces midiendo tensión de sus uniones.",
+      "La chiquita también venía en la familia.",
+      {
+        "fondo": "montana",
+        "variante": "papa-con-toda-su-familia",
+        "frases": [
+          "La chiquita también venía en la familia."
+        ]
+      },
+      4
+    ],
+    [
+      "la-semilla-no-se-vende",
+      "La semilla no se vende",
+      "intibuca.semilla",
+      "yamaranguila",
+      "🥔",
+      "Girás papas de réplica y marcás ojos viables antes de asignarlas a lotes de semilla.",
+      "La venta de hoy no siembra la del otro año.",
+      {
+        "fondo": "montana",
+        "variante": "la-semilla-no-se-vende",
+        "frases": [
+          "La venta de hoy no siembra la del otro año."
+        ]
+      },
+      4
+    ],
+    [
+      "el-mensaje-se-hizo-humo",
+      "El mensaje se hizo humo",
+      "intibuca.vaho",
+      "sanjuan",
+      "🏁",
+      "Exhalá con un botón y dibujá sobre el vaho mientras administrás aire y visibilidad.",
+      "Soplaste tanto que ya ni mirás lo que escribiste.",
+      {
+        "fondo": "montana",
+        "variante": "el-mensaje-se-hizo-humo",
+        "frases": [
+          "Soplaste tanto que ya ni mirás lo que escribiste."
+        ]
+      },
+      4
+    ],
+    [
+      "chiligatoro-en-el-reflejo",
+      "Chiligatoro en el reflejo",
+      "intibuca.ondas",
+      "chiligatoro",
+      "🎣",
+      "Mové una plataforma virtual produciendo ondas circulares y calculá interferencias.",
+      "La foto se toma cuando el agua termina de hablar.",
+      {
+        "fondo": "montana",
+        "variante": "chiligatoro-en-el-reflejo",
+        "frases": [
+          "La foto se toma cuando el agua termina de hablar."
+        ]
+      },
+      4
+    ]
+  ]
+}
 }

@@ -19,6 +19,15 @@ function motor(load: () => Promise<{ default: FC; guia?: Guia }>) {
   };
 }
 const MOTORS = {
+  'intibuca.carrera': motor(() => import('./intibuca/Carrera').then((m) => ({ ...m, default: m.Carrera }))),
+  'intibuca.telar': motor(() => import('./intibuca/Telar').then((m) => ({ ...m, default: m.Telar }))),
+  'intibuca.hongos': motor(() => import('./intibuca/Hongos').then((m) => ({ ...m, default: m.Hongos }))),
+  'intibuca.callejero': motor(() => import('./intibuca/Callejero').then((m) => ({ ...m, default: m.Callejero }))),
+  'intibuca.papas': motor(() => import('./intibuca/Papas').then((m) => ({ ...m, default: m.Papas }))),
+  'intibuca.semilla': motor(() => import('./intibuca/Semilla').then((m) => ({ ...m, default: m.Semilla }))),
+  'intibuca.vaho': motor(() => import('./intibuca/Vaho').then((m) => ({ ...m, default: m.Vaho }))),
+  'intibuca.ondas': motor(() => import('./intibuca/Ondas').then((m) => ({ ...m, default: m.Ondas }))),
+
   'copan.cadera': motor(() => import('./copan/Cadera').then((m) => ({ ...m, default: m.Cadera }))),
   'copan.glifos': motor(() => import('./copan/Glifos').then((m) => ({ ...m, default: m.Glifos }))),
   'copan.guaras': motor(() => import('./copan/Guaras').then((m) => ({ ...m, default: m.Guaras }))),

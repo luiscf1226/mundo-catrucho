@@ -619,5 +619,69 @@
  "icon": "🎭",
  "desc": "Deslizá barras de frases musicales de bandas que avanzan por calles paralelas. Ganás si cierran juntas al cruce; un compás suelto obliga a detener una comparsa.",
  "rules": {}
+},
+{
+ "id": "intibuca.carrera",
+ "name": "Carrera del altiplano",
+ "place": "Intibucá",
+ "icon": "🧣",
+ "desc": "Con flechas corrés y con espacio saltás obstáculos en un circuito señalado de La Esperanza. Ganás al terminar dentro del tiempo; tropezar corta la velocidad y gasta abrigo virtual.",
+ "rules": {}
+},
+{
+ "id": "intibuca.telar",
+ "name": "Reverso del telar",
+ "place": "Intibucá",
+ "icon": "🧣",
+ "desc": "Accioná pedales digitales que elevan familias de hilos y pasá la lanzadera con el cursor. Ganás un motivo correcto en frente y reverso; un hilo flotante demasiado largo engancha la pieza.",
+ "rules": {}
+},
+{
+ "id": "intibuca.hongos",
+ "name": "Consulta del choro",
+ "place": "Intibucá",
+ "icon": "🧣",
+ "desc": "Contrastá réplicas dibujadas de hongos con fichas revisadas y enviá dudas al puesto experto. Ganás por separar casos seguros de pendientes; adivinar comestibilidad cancela la ronda sin cocinar nada.",
+ "rules": {}
+},
+{
+ "id": "intibuca.callejero",
+ "name": "Ciudades gemelas",
+ "place": "Intibucá",
+ "icon": "🧣",
+ "desc": "Ensamblá manzanas de La Esperanza e Intibucá conservando dos plazas y límites municipales. Ganás entregas bien dirigidas; una dirección con municipio equivocado no valida aunque quede cerca.",
+ "rules": {}
+},
+{
+ "id": "intibuca.papas",
+ "name": "Tubérculos unidos",
+ "place": "Intibucá",
+ "icon": "🧣",
+ "desc": "Levantá una mata virtual por nodos de raíces midiendo tensión de sus uniones. Ganás recuperando papas pequeñas junto a las grandes; sacudir desprende las que aún quedan bajo tierra.",
+ "rules": {}
+},
+{
+ "id": "intibuca.semilla",
+ "name": "Ojos para la próxima siembra",
+ "place": "Intibucá",
+ "icon": "🧣",
+ "desc": "Girás papas de réplica y marcás ojos viables antes de asignarlas a lotes de semilla. Ganás reservando futuras plantas; vender toda la cosecha deja sin siguiente temporada.",
+ "rules": {}
+},
+{
+ "id": "intibuca.vaho",
+ "name": "Dibujo con respiración",
+ "place": "Intibucá",
+ "icon": "🧣",
+ "desc": "Exhalá con un botón y dibujá sobre el vaho mientras administrás aire y visibilidad. Ganás un mensaje legible antes de que se borre; soplar de más tapa la guía.",
+ "rules": {}
+},
+{
+ "id": "intibuca.ondas",
+ "name": "Anillos de Chiligatoro",
+ "place": "Intibucá",
+ "icon": "🧣",
+ "desc": "Mové una plataforma virtual produciendo ondas circulares y calculá interferencias. Ganás una fotografía con reflejo completo; disparar mientras cruza un anillo deforma la silueta.",
+ "rules": {}
 }
 ]

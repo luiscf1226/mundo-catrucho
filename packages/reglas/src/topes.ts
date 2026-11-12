@@ -62,6 +62,10 @@ const conRitmo = (t: TopeMotor, puntosPorSegundo: number): TopeMotor => ({ ...t,
 const lineal = (a: number, b: number, c: number, k: number) => (d: number) =>
   [a + r(d * k), b + r(d * k), c + r(d * k)] as Metas;
 const taller = kit(lineal(80, 240, 400, 80), () => 75);
+const intibuca = kit(
+  (d) => [120 + Math.round(d * 120), 360, 600],
+  () => 75,
+);
 /** los ocho motores de Copán comparten metas y reloj (apps/web/src/game/minigames/copan/comun.tsx) */
 const copan = kit(
   (d) => [120 + r(d * 120), 360, 600],
@@ -173,6 +177,20 @@ export const TOPES: Record<string, TopeMotor> = {
   'olancho.cuajada': taller,
   'olancho.postura': taller,
   'olancho.tablas': taller,
+  'intibuca.telar': conRitmo(intibuca, 32),
+  'intibuca.hongos': conRitmo(intibuca, 28),
+  'intibuca.callejero': conRitmo(intibuca, 46),
+  'intibuca.papas': conRitmo(intibuca, 25),
+  'intibuca.semilla': conRitmo(intibuca, 24),
+  'intibuca.vaho': conRitmo(intibuca, 40),
+  'intibuca.ondas': conRitmo(intibuca, 25),
+  'intibuca.carrera': {
+    ganarPideMeta: true,
+    metas: () => [250, 500, 700],
+    puntosMax: () => 1200,
+    duracionMin: ({ puntos }) => 120 - puntos / 10,
+    puntosPorSegundo: 100,
+  },
   'copan.adoquin': copan,
   'copan.atol': copan,
   'copan.cadera': copan,

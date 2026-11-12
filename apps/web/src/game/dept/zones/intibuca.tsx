@@ -3,6 +3,7 @@ import { P } from '../../kit';
 import { bl, bx, cliff, cy, inR, PI, place } from '../lib';
 import { baranda, basket, casa, mont, puesto, stairs } from '../parts';
 import { ZB, type ZoneSpec } from '../zone';
+import { IntibucaDescubrimientos } from './IntibucaDescubrimientos';
 
 const LENCA = ['#7b2cbf', '#ffb703', '#e63946', '#00a3d7', '#ff5d9e', '#2ea44f'];
 /** Intibucá: el mercado lenca de La Esperanza, con puestos de papas y fresas, textiles de colores y La Gruta al fondo. */
@@ -20,6 +21,7 @@ export function mercado(d: Department): ZoneSpec {
       return Math.min(-24.8 - zz, zz + 34) * 1.2;
     });
   Z.stop(0, 42);
+  Z.n(<IntibucaDescubrimientos />);
   // dos filas de puestos
   const goods: string[][] = [
     ['#b98a55', '#c9a56b', '#a5744a'],
@@ -113,8 +115,8 @@ export function mercado(d: Department): ZoneSpec {
     .put(casa(6, 5, 3, '#fff3c4'), 21.5, -13, -PI / 2)
     .put(casa(7, 5, 3, '#d8f3dc'), -21.5, -6, PI / 2);
   for (const [x, z] of [
-    [-12.5, 30],
-    [12.5, 30],
+    [-18, 30],
+    [18, 30],
     [-12.5, -14],
     [12.5, -14],
   ])

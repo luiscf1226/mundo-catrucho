@@ -1,0 +1,62 @@
+[
+  {
+    "id": "intibuca.visita-1",
+    "nombre": "Mirador de La Gruta",
+    "texto": "Subí la escalinata virtual y tomá una foto del atardecer. La Gruta es un mirador emblemático de La Esperanza.",
+    "pos": [0, 3.84, -21]
+  },
+  {
+    "id": "intibuca.visita-2",
+    "nombre": "Laguna de Chiligatoro",
+    "texto": "Esperá a que se calme el reflejo y fotografiá la orilla. La laguna de Chiligatoro es un destino de montaña en Intibucá.",
+    "pos": [-13, 0, 29]
+  },
+  {
+    "id": "intibuca.visita-3",
+    "nombre": "Festival del Choro",
+    "texto": "Recorré puestos y probá una porción virtual identificada por el instructor. La Esperanza celebra el Festival del Choro con gastronomía y actividades culturales.",
+    "pos": [-13, 0, 22]
+  },
+  {
+    "id": "intibuca.visita-4",
+    "nombre": "Telares de El Cacao",
+    "texto": "Probá un telar digital explicando frente y reverso con una instructora. En El Cacao, Chiligatoro, hay telares visitados en recorridos culturales.",
+    "pos": [-13, 0, 15]
+  },
+  {
+    "id": "intibuca.visita-5",
+    "nombre": "El toro del relato",
+    "texto": "Escuchá una versión local y descubrí su animación opcional sobre una maqueta. Una leyenda de Chiligatoro cuenta la aparición de un toro negro en la laguna; se presenta como relato, no como hecho.",
+    "pos": [-13, 0, 8]
+  },
+  {
+    "id": "intibuca.visita-6",
+    "nombre": "Comparsas del festival",
+    "texto": "Ayudá a montar un decorado original y acompañá el desfile virtual. El festival de 2025 tuvo carrozas, comparsas y presentaciones folclóricas.",
+    "pos": [13, 0, 36]
+  },
+  {
+    "id": "intibuca.plazas",
+    "nombre": "Plazas gemelas",
+    "texto": "Ubicá las dos plazas en la maqueta. La Esperanza e Intibucá conservan sus municipios.",
+    "pos": [13, 0, 29]
+  },
+  {
+    "id": "intibuca.locura-0",
+    "nombre": "El toro del cuento se refleja",
+    "texto": "Un toro de sombra aparece únicamente sobre la maqueta del relato y saluda con una burbuja; se identifica como leyenda.",
+    "pos": [13, 0, 22]
+  },
+  {
+    "id": "intibuca.locura-1",
+    "nombre": "Choro con carnet",
+    "texto": "Un hongo de utilería presenta una ficha al experto; el juego nunca enseña a consumir hongos sin identificación profesional.",
+    "pos": [13, 0, 15]
+  },
+  {
+    "id": "intibuca.locura-2",
+    "nombre": "Bufanda que abraza el puesto",
+    "texto": "Una bufanda virtual se enrolla alrededor de la mesa al completar el patrón; no se parodia a tejedoras ni vestimenta tradicional.",
+    "pos": [13, 0, 8]
+  }
+]
