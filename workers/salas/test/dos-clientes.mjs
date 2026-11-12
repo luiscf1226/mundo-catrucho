@@ -235,7 +235,8 @@ try {
   const yoro = 'dept:yoro:0';
   const carla = await abrir(yoro, await pase(yoro, 'carla1', 'Carla'));
   await espera(carla, 'hola');
-  const dani = await abrir(yoro, await pase(yoro, 'dani1', 'Dani'));
+  const paseDani = await pase(yoro, 'dani1', 'Dani');
+  let dani = await abrir(yoro, paseDani);
   await espera(dani, 'hola');
   // Eli ya traía bloqueada a Carla desde Convex (en el pase)
   const eli = await abrir(
@@ -265,6 +266,8 @@ try {
   // Dani bloquea a Eli en vivo: ya no se leen; desbloquea y vuelve
   dani.ws.send(JSON.stringify({ t: 'bloquear', id: 'eli1', si: true }));
   await sleep(100);
+  dani = await abrir(yoro, paseDani);
+  await espera(dani, 'hola');
   eli.ws.send(JSON.stringify({ t: 'chat', texto: 'otra vez Eli' }));
   dani.ws.send(JSON.stringify({ t: 'chat', texto: 'solo Carla me lee' }));
   await sleep(300);

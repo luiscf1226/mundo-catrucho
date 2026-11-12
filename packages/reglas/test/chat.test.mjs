@@ -36,6 +36,11 @@ const tapa = (s, motivo) => {
 test('teléfonos hondureños: 8 dígitos, con o sin +504, guion, espacios o paréntesis', () => {
   for (const s of [
     '99887766',
+    '9988*7766',
+    '9988,7766',
+    '9988:7766',
+    '9988 . . 7766',
+    '٩٩٨٨٧٧٦٦',
     '9888 / 7777',
     '９８８８７７７７',
     '9888 _ 7777',
@@ -67,7 +72,14 @@ test('frases que anuncian datos se tapan hasta el final', () => {
 test('correos, webs y @usuarios', () => {
   assert.equal(t('escribí a juana.perez@gmail.com'), 'escribí a ***');
   assert.equal(t('juana arroba gmail punto com'), '***');
-  for (const s of ['ana [arroba] gmail [punto] com', 'ana (arroba) gmail {punto} com']) assert.equal(t(s), '***');
+  for (const s of [
+    'ana＠gmail。com',
+    'ana (@) gmail (.) com',
+    'ana@gmail,com',
+    'ana [arroba] gmail [punto] com',
+    'ana (arroba) gmail {punto} com',
+  ])
+    assert.equal(t(s), '***');
   assert.equal(t('entrá a www.algo.hn ya'), 'entrá a *** ya');
   assert.equal(t('mirá https://x.co/abc'), 'mirá ***');
   assert.equal(t('vamos a catrachos.com'), 'vamos a ***');
@@ -77,6 +89,9 @@ test('correos, webs y @usuarios', () => {
 
 test('groserías hondureñas, también con números, símbolos y letras repetidas o separadas', () => {
   for (const s of [
+    '¡puta!',
+    '¡mierda!',
+    '¡¡pendejo!!',
     'puta',
     'PUTA',
     'put4',
@@ -123,6 +138,9 @@ test('la puntuación alrededor de las groserías se queda', () => {
 
 test('falsos positivos que no hay que tapar', () => {
   for (const s of [
+    'fecha 12/11/2026 14:30',
+    'puntos 100/200/300/400',
+    'x=1_2_3_4_5_6_7',
     'mi computadora es lenta',
     'la disputa del clásico',
     'el diputado llegó a Comayagua',

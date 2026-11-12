@@ -67,6 +67,7 @@ export default defineSchema({
     sala: v.optional(v.string()),
     semilla: v.number(),
     jugadores: v.array(v.id('usuarios')),
+    abandonaron: v.optional(v.array(v.id('usuarios'))),
     estado: v.union(
       v.literal('abierta'),
       v.literal('cerrada'),
@@ -92,10 +93,16 @@ export default defineSchema({
   })
     .index('por_estado', ['estado'])
     .index('por_dueno_estado', ['dueno', 'estado']),
-  aperturas: defineTable({ usuarioId: v.id('usuarios'), momento: v.number() }).index('por_usuario', ['usuarioId']),
-  viajesCompartidos: defineTable({ sala: v.string(), jugadores: v.array(v.id('usuarios')) }).index('por_sala', [
-    'sala',
-  ]),
+  aperturas: defineTable({
+    usuarioId: v.id('usuarios'),
+    momento: v.number(),
+    partidaId: v.optional(v.id('partidas')),
+  }).index('por_usuario', ['usuarioId']),
+  viajesCompartidos: defineTable({
+    sala: v.string(),
+    jugadores: v.array(v.id('usuarios')),
+    vence: v.optional(v.number()),
+  }).index('por_sala', ['sala']),
   marcas: defineTable({
     juegoId: v.string(),
     deptId: v.string(),

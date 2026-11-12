@@ -1,13 +1,9 @@
 // Viaje compartido (MC-31): `viaje:<id>`. El primero que entra maneja: manda la ruta (vehículo, origen, destino y
 // semilla de los eventos) y el estado del vehículo; la sala se lo reparte a los pasajeros. Si el chofer se va, el
 // volante pasa al pasajero que lleva más tiempo. El pasaje y el bono los cobra Convex a cada uno.
-import { type Pase, SALA } from '@mundo-catrucho/reglas';
+import { type Pase, SALA, VIAJE } from '@mundo-catrucho/reglas';
 import { abiertas, aceptar, difundir, quien, rechazar } from './comun';
 
-export const VIAJE = {
-  /** gente por vehículo */
-  cupo: 8,
-} as const;
 interface Ruta {
   veh: string;
   de: string;

@@ -10,16 +10,19 @@ import {
   partirSalaCerrada,
   SECRETO_MIN,
   salaValida,
+  VIAJE,
 } from '@mundo-catrucho/reglas';
 import {
   type DataModelFromSchemaDefinition,
+  type FunctionReference,
   internalMutationGeneric,
   type MutationBuilder,
+  makeFunctionReference,
   mutationGeneric,
   type QueryBuilder,
   queryGeneric,
 } from 'convex/server';
-import { v } from 'convex/values';
+import { type GenericId, v } from 'convex/values';
 import { bloqueadosParaPase, hayBloqueo, registrarPublico } from './amigos';
 import { asegurarUsuario, quien } from './identidad';
 import type schema from './schema';
@@ -73,6 +76,8 @@ export const paseJuego = mutation({
     const pid = ctx.db.normalizeId('partidas', args.partidaId);
     const p = pid ? await ctx.db.get(pid) : null;
     if (!p?.sala || !p.motor || !p.jugadores.includes(usuario._id)) return { ok: false as const, motivo: 'ajena' };
+    if (p.estado !== 'abierta' && p.estado !== 'cerrada') return { ok: false as const, motivo: 'cerrada' };
+    if (p.abandonaron?.includes(usuario._id)) return { ok: false as const, motivo: 'abandonada' };
     const id = await idPublico(usuario._id, secreto);
     const pase = await firmarPase(
       { id, nombre: args.nombre ?? usuario.nombre, sala: p.sala, avatar: perfil.avatar },
@@ -102,15 +107,24 @@ export const paseViaje = mutation({
     if (!secreto) return { ok: false as const, motivo: 'sin-salas' };
     if (partirSalaCerrada(args.sala)?.tipo !== 'viaje') return { ok: false as const, motivo: 'sala' };
     const { usuario, perfil } = await asegurarUsuario(ctx, args);
-    const viaje = await ctx.db
+    let viaje = await ctx.db
       .query('viajesCompartidos')
       .withIndex('por_sala', (q) => q.eq('sala', args.sala))
       .unique();
+    if (viaje && Date.now() >= (viaje.vence ?? 0)) {
+      await ctx.db.delete(viaje._id);
+      viaje = null;
+    }
     for (const otro of viaje?.jugadores ?? [])
       if (await hayBloqueo(ctx, usuario._id, otro)) return { ok: false as const, motivo: 'bloqueado' };
-    if (!viaje) await ctx.db.insert('viajesCompartidos', { sala: args.sala, jugadores: [usuario._id] });
-    else if (!viaje.jugadores.includes(usuario._id))
+    if (!viaje) {
+      const vence = Date.now() + VIAJE.vigenciaMs;
+      const viajeId = await ctx.db.insert('viajesCompartidos', { sala: args.sala, jugadores: [usuario._id], vence });
+      await ctx.scheduler.runAfter(VIAJE.vigenciaMs, borrarViajeRef, { viajeId });
+    } else if (!viaje.jugadores.includes(usuario._id)) {
+      if (viaje.jugadores.length >= VIAJE.cupo) return { ok: false as const, motivo: 'llena' };
       await ctx.db.patch(viaje._id, { jugadores: [...viaje.jugadores, usuario._id] });
+    }
     const id = await idPublico(usuario._id, secreto);
     const pase = await firmarPase(
       { id, nombre: args.nombre ?? usuario.nombre, sala: args.sala, avatar: perfil.avatar },
@@ -170,5 +184,16 @@ export const conectados = query({
     }
     const total = mapa + Object.values(depts).reduce((a, b) => a + b, 0);
     return { mapa, depts, total };
+  },
+});
+
+const borrarViajeRef = makeFunctionReference<'mutation', { viajeId: GenericId<'viajesCompartidos'> }>(
+  'salas:borrarViaje',
+) as unknown as FunctionReference<'mutation', 'internal', { viajeId: GenericId<'viajesCompartidos'> }>;
+export const borrarViaje = internalMutation({
+  args: { viajeId: v.id('viajesCompartidos') },
+  handler: async (ctx, { viajeId }) => {
+    const viaje = await ctx.db.get(viajeId);
+    if (viaje && Date.now() >= (viaje.vence ?? 0)) await ctx.db.delete(viajeId);
   },
 });
