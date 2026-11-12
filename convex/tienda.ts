@@ -3,12 +3,14 @@
 import { decidirCompra, decidirEquipar, limpiarAvatar } from '@mundo-catrucho/reglas';
 import {
   type DataModelFromSchemaDefinition,
+  type GenericMutationCtx,
   type MutationBuilder,
   mutationGeneric,
   type QueryBuilder,
   queryGeneric,
 } from 'convex/server';
-import { v } from 'convex/values';
+import { type GenericId, v } from 'convex/values';
+import { asegurarContadores, sesion, terminar } from './avance';
 import { asegurarUsuario, compradosDe, quien, usuarioActual, vista } from './identidad';
 import type schema from './schema';
 
@@ -17,12 +19,43 @@ const mutation: MutationBuilder<Modelo, 'public'> = mutationGeneric;
 const query: QueryBuilder<Modelo, 'public'> = queryGeneric;
 const avatarParcial = v.record(v.string(), v.string());
 
-/** Entra como invitado (lo crea la primera vez con el nombre y el avatar que traiga) y devuelve su perfil. */
+/** Después de comprar o vestirse: «A la moda» y «Traje típico» los da el servidor (MC-16). */
+async function logrosDeTienda(ctx: GenericMutationCtx<Modelo>, args: { invitado: string }) {
+  const s = await sesion(ctx, { invitado: args.invitado });
+  return (await terminar(s)).logros;
+}
+async function perfilDe(
+  ctx: GenericMutationCtx<Modelo>,
+  usuarioId: GenericId<'usuarios'>,
+  perfilId: GenericId<'perfiles'>,
+) {
+  const perfil = await ctx.db.get(perfilId);
+  if (!perfil) throw new Error('Sin perfil.');
+  return vista(perfil, await compradosDe(ctx, usuarioId));
+}
+
+/**
+ * Entra como invitado (lo crea la primera vez con el nombre y el avatar que traiga) y devuelve su perfil. Con
+ * `nombre` lo actualiza (la clasificación lo muestra limpio); con `creado` (ya terminó su personaje) gana
+ * «Primeros pasos». `logros` trae lo que pagó.
+ */
 export const entrar = mutation({
-  args: { ...quien, nombre: v.optional(v.string()), avatar: v.optional(avatarParcial) },
+  args: {
+    ...quien,
+    nombre: v.optional(v.string()),
+    avatar: v.optional(avatarParcial),
+    creado: v.optional(v.boolean()),
+  },
   handler: async (ctx, args) => {
-    const { usuario, perfil } = await asegurarUsuario(ctx, args);
-    return vista(perfil, await compradosDe(ctx, usuario._id));
+    const s = await sesion(ctx, args);
+    if (args.creado) {
+      const c = await asegurarContadores(ctx, s.usuarioId);
+      if (!c.entro) await ctx.db.patch(c._id, { entro: true });
+    }
+    const { logros } = await terminar(s);
+    const perfil = await ctx.db.get(s.perfilId);
+    if (!perfil) throw new Error('Sin perfil.');
+    return { ...vista(perfil, await compradosDe(ctx, s.usuarioId)), logros };
   },
 });
 
@@ -49,7 +82,8 @@ export const comprar = mutation({
     const puesto = args.equipar ? decidirEquipar({ comprados, itemId: args.itemId }) : null;
     if (puesto?.ok) avatar = { ...avatar, ...puesto.cambios };
     await ctx.db.patch(perfil._id, { monedas: compra.saldo, avatar });
-    return { ok: true as const, perfil: vista({ ...perfil, monedas: compra.saldo, avatar }, comprados) };
+    const logros = await logrosDeTienda(ctx, args);
+    return { ok: true as const, perfil: await perfilDe(ctx, usuario._id, perfil._id), logros };
   },
 });
 
@@ -63,7 +97,8 @@ export const equipar = mutation({
     if (!r.ok) return { ok: false as const, motivo: r.motivo, perfil: vista(perfil, comprados) };
     const avatar = { ...perfil.avatar, ...r.cambios };
     await ctx.db.patch(perfil._id, { avatar });
-    return { ok: true as const, perfil: vista({ ...perfil, avatar }, comprados) };
+    const logros = await logrosDeTienda(ctx, args);
+    return { ok: true as const, perfil: await perfilDe(ctx, usuario._id, perfil._id), logros };
   },
 });
 
@@ -75,6 +110,7 @@ export const vestir = mutation({
       comprados = await compradosDe(ctx, usuario._id);
     const avatar = { ...perfil.avatar, ...limpiarAvatar(args.avatar, comprados) };
     await ctx.db.patch(perfil._id, { avatar });
-    return { ok: true as const, perfil: vista({ ...perfil, avatar }, comprados) };
+    const logros = await logrosDeTienda(ctx, args);
+    return { ok: true as const, perfil: await perfilDe(ctx, usuario._id, perfil._id), logros };
   },
 });

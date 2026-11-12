@@ -134,4 +134,31 @@ export default defineSchema({
     reglas: v.any(),
   }),
   reportes: defineTable({ de: v.id('usuarios'), a: v.id('usuarios'), motivo: v.string() }),
+  // MC-15, MC-16: lo que el servidor cuenta del jugador fuera de las partidas
+  contadores: defineTable({
+    usuarioId: v.id('usuarios'),
+    /** terminó de crear su personaje (logro «Primeros pasos») */
+    entro: v.boolean(),
+    /** emotes contados (con pausa entre uno y otro) */
+    emotes: v.number(),
+    ultimoEmote: v.optional(v.number()),
+    /** ritmo y tope del día de las monedas sueltas */
+    monedas: v.optional(v.object({ fecha: v.string(), hoy: v.number(), fichas: v.number(), t: v.number() })),
+    /** ya subió (o no tenía) avance guardado en el navegador */
+    migrado: v.boolean(),
+  }).index('por_usuario', ['usuarioId']),
+  // las misiones de cada día de Honduras; las reparte el cron de las 06:00 UTC
+  misionesGlobales: defineTable({ fecha: v.string(), ids: v.array(v.string()) }).index('por_fecha', ['fecha']),
+  // un viaje por carretera: se cobra el pasaje al salir y el bono al llegar, con la hora del servidor
+  viajes: defineTable({
+    usuarioId: v.id('usuarios'),
+    veh: v.string(),
+    de: v.string(),
+    a: v.string(),
+    precio: v.number(),
+    inicio: v.number(),
+    estado: v.union(v.literal('en-camino'), v.literal('llego'), v.literal('abandonado')),
+    llegada: v.optional(v.number()),
+    bono: v.optional(v.number()),
+  }).index('por_usuario_estado', ['usuarioId', 'estado']),
 });

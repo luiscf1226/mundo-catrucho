@@ -48,7 +48,15 @@ export async function asegurarUsuario(
   args: { invitado: string; nombre?: string; avatar?: Record<string, unknown> },
 ) {
   const actual = await usuarioActual(ctx, args);
-  if (actual) return actual;
+  if (actual) {
+    // el nombre se cambia al terminar el personaje; la clasificación lo muestra limpio
+    const nombre = args.nombre === undefined ? null : nombreLimpio(args.nombre);
+    if (nombre && nombre !== actual.usuario.nombre) {
+      await ctx.db.patch(actual.usuario._id, { nombre });
+      return { ...actual, usuario: { ...actual.usuario, nombre } };
+    }
+    return actual;
+  }
   const token = await tokenDe(args);
   const existente = await ctx.db
     .query('usuarios')

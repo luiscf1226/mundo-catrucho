@@ -360,13 +360,19 @@ regresos, duración, kilómetros, cambios visibles de paisaje y salto. Capturas 
 Sin `VITE_CONVEX_URL` todo sigue local y sin red: `buy`, `equip` y `finishMinigame` pagan al instante como antes.
 Con la variable, `core/servidor.ts` habla con Convex y el perfil local solo refleja lo que respondió el servidor:
 
-- Lempiritas, XP, nivel, lo comprado y lo puesto los manda Convex. `gainCoins` y `gainXp` no hacen nada: monedas
-  sueltas, visitas, recuerdos, misiones, logros y pasajes no tocan el saldo hasta que MC-15 y MC-16 los pasen al servidor.
+- Lempiritas, XP, nivel, lo comprado y lo puesto los manda Convex. `gainCoins` y `gainXp` no hacen nada; monedas
+  sueltas (en tandas), visitas, recuerdos, misiones, logros, emotes, pasajes, comida y bono de viaje se mandan a
+  `convex/progreso.ts` y el perfil copia lo que responda (MC-15, MC-16). Los avisos de logros y de la primera
+  visita salen cuando el servidor confirma, con lo que de verdad pagó.
+- Las etapas de cada juego (`profile.juegos`) las guarda `cerrarPartida`; el navegador no las avanza solo.
+- Al entrar, el avance guardado en el navegador sube una vez sin premios (`subirAvanceLocal`, MC-08).
+- El panel `clasificacion` muestra las tablas del servidor (MC-17): `lb-modo-juego`, `lb-modo-depto`, `lb-depto`,
+  `lb-juego`, `lb-list` (con `data-fuente="servidor"`), `lb-row`, `lb-you`, `lb-cargando`, `lb-error`, `lb-vacia`.
 - La pulpería usa `comprar(id)` (asíncrono: compra y se lo pone). `equip` y `setAvatar` se aplican al momento y
   Convex los confirma o los revierte.
 - Al montar un minijuego (intro) se abre la partida; al terminar se cierra y los premios del resultado quedan en 0
   hasta que el servidor confirma (`mg.pago`: `pendiente`, `pagado`, `rechazado`, `sin-conexion`).
 - Si Convex no responde en 6 s: no se compra y la partida no paga. Nunca se inventa saldo en el navegador.
 
-Prueba real contra el Convex de desarrollo: `node tools/test-tienda-servidor.mjs` (necesita `.env.local`; deja
-capturas en `capturas/mc-13/`).
+Pruebas reales contra el Convex de desarrollo: `node tools/test-tienda-servidor.mjs` y
+`node tools/test-progreso-servidor.mjs` (necesitan `.env.local`; dejan capturas en `capturas/mc-13/` y `capturas/mc-17/`).

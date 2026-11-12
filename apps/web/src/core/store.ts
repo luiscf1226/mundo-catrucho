@@ -1,15 +1,18 @@
 // Estado del juego (Zustand). Todo el progreso vive en `profile` y se guarda en localStorage.
 // Sin VITE_CONVEX_URL este módulo es la "capa de servidor" del prototipo: aquí se validan compras y recompensas.
 // Con VITE_CONVEX_URL (ver servidor.ts) las Lempiritas, la XP, el nivel, lo comprado y lo puesto los manda
-// Convex: el perfil local solo refleja lo último que respondió y nada aquí suma saldo por su cuenta.
+// Convex: el perfil local solo refleja lo último que respondió y nada aquí suma saldo por su cuenta. Visitas,
+// recuerdos, etapas, misiones y logros también los decide el servidor (MC-15, MC-16); aquí solo se muestran.
 import {
   bonoViaje,
   cambiosDe,
   decidirCompra,
+  fechaHonduras,
   ganarXp,
   MONEDA,
   MONEDA_SUELTA,
   MONEDAS_INICIALES,
+  misionesDelDia,
   PREMIO_PRIMERA_VISITA,
   PREMIO_RECUERDO,
   poseidos,
@@ -28,8 +31,9 @@ import {
   minigameById,
   SHOP,
 } from './data';
+import { scoreLabel } from './leaderboard';
 import { player } from './player';
-import { alVencer, type PerfilServidor, SERVIDOR, servidor } from './servidor';
+import { type Avance, alVencer, type EstadoServidor, type PerfilServidor, SERVIDOR, servidor } from './servidor';
 import type { AvatarConfig, MinigameId, MinigameResult, Modo, PanelId, Rewards, Scene, V3, Vehiculo } from './types';
 
 const SAVE_KEY = 'mundo-catrucho-v1';
@@ -123,11 +127,15 @@ export interface MgHud {
   lines?: string[];
 }
 
+/** Día de las misiones. Con Convex es el de Honduras, igual que en el servidor. */
 const today = () => {
+  if (SERVIDOR) return fechaHonduras(Date.now());
   const d = new Date();
   return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
 };
 function pickDaily(date: string): DailyMission[] {
+  // con Convex, las mismas que reparte el servidor ese día (hasta que responda)
+  if (SERVIDOR) return misionesDelDia(date).map((id) => ({ id, progress: 0, claimed: false }));
   let h = 0;
   for (const c of date) h = (h * 31 + c.charCodeAt(0)) >>> 0;
   const pool = MISSIONS.map((m) => m.id),
@@ -256,6 +264,12 @@ type Compra = 'ok' | 'ya' | 'caro' | 'no';
 let toastId = 0;
 /** Partida abierta en Convex para el minijuego en curso (id, o null si no se pudo abrir). */
 let partidaEnCurso: Promise<string | null> | null = null;
+/** Viaje abierto en Convex (id, o null si no se pudo cobrar el pasaje). */
+let viajeEnCurso: Promise<string | null> | null = null;
+/** Monedas sueltas recogidas que todavía no se mandan a Convex (van en tandas). */
+let monedasPendientes = 0,
+  timerMonedas: ReturnType<typeof setTimeout> | undefined;
+const TANDA_MONEDAS_MS = 1200;
 /** Cambios de avatar mandados a Convex que todavía no responden: mientras haya, no se pisa lo local. */
 let vistiendo = 0;
 /** Etapa que toca jugar: la siguiente sin ganar; si ya las ganó todas, la última. */
@@ -325,6 +339,8 @@ export const useGame = create<Game>((set, get) => {
     if (n > 0) p.stats.coinsEarned += n;
   };
   const checkAchievements = (p: Profile): string[] => {
+    // con Convex los logros los da el servidor (llegan en cada respuesta)
+    if (SERVIDOR) return [];
     const has = (id: string) => p.achievements.includes(id),
       b = p.best,
       fresh: string[] = [];
@@ -353,6 +369,8 @@ export const useGame = create<Game>((set, get) => {
     return fresh;
   };
   const bumpMissions = (p: Profile, type: string, amount: number, target?: string) => {
+    // con Convex las misiones avanzan en el servidor
+    if (SERVIDOR) return;
     for (const dm of p.daily.missions) {
       const m = MISSIONS.find((x) => x.id === dm.id)!;
       if (m.type !== type || (m.target && m.target !== target)) continue;
@@ -369,12 +387,86 @@ export const useGame = create<Game>((set, get) => {
       p.emotes = p.owned.filter((id) => itemById(id)?.cat === 'emote');
       if (vistiendo === 0) p.avatar = { ...p.avatar, ...sv.avatar };
     });
+  /** Avisa los logros que pagó el servidor, con lo que de verdad pagó. */
+  const avisarLogros = (logros: Avance['logros'] | undefined) => {
+    for (const l of logros ?? []) {
+      const a = ACHIEVEMENTS.find((x) => x.id === l.id);
+      if (a) get().toast(`Logro: ${a.name} (+${l.monedas})`, a.icon);
+    }
+  };
+  /**
+   * Copia al perfil local lo que respondió Convex después de mover el avance: saldo, misiones de hoy y logros.
+   * Con `avisar` muestra un aviso por logro (los resultados de un minijuego los muestran ellos).
+   */
+  const aplicarAvance = (r: Partial<Avance> | null | undefined, avisar = true) => {
+    if (!r) return;
+    commit((p) => {
+      if (r.saldo) {
+        p.coins = r.saldo.monedas;
+        p.xp = r.saldo.xp;
+        p.level = r.saldo.nivel;
+      }
+      if (r.misiones)
+        p.daily = {
+          date: r.misiones.fecha,
+          missions: r.misiones.misiones.map((m) => ({ id: m.id, progress: m.progreso, claimed: m.cobrada })),
+        };
+      for (const l of r.logros ?? []) if (!p.achievements.includes(l.id)) p.achievements.push(l.id);
+    });
+    if (avisar) avisarLogros(r.logros);
+  };
+  /** Avance de un juego según el servidor (la etiqueta local se conserva si es la misma marca). */
+  const juegoDeServidor = (
+    p: Profile,
+    j: { juegoId: string; etapa: number; estrellas: number[]; mejor: number; veces: number },
+  ) => {
+    const prev = p.juegos[j.juegoId],
+      motor = juegoById(j.juegoId)?.motor;
+    p.juegos[j.juegoId] = {
+      etapa: j.etapa,
+      stars: [...j.estrellas],
+      best: j.mejor,
+      label:
+        prev && prev.best === j.mejor && prev.label
+          ? prev.label
+          : motor
+            ? scoreLabel(motor, j.mejor)
+            : `${j.mejor} pts`,
+      veces: j.veces,
+    };
+  };
+  /** Copia todo el avance del servidor: visitas, recuerdos, logros, misiones y etapas. */
+  const aplicarEstado = (e: EstadoServidor) =>
+    commit((p) => {
+      p.visited = [...e.visitas];
+      p.collected = [...e.recuerdos];
+      p.achievements = [...e.logros];
+      p.daily = {
+        date: e.misiones.fecha,
+        missions: e.misiones.misiones.map((m) => ({ id: m.id, progress: m.progreso, claimed: m.cobrada })),
+      };
+      const antes = p.juegos;
+      p.juegos = {};
+      for (const j of e.juegos)
+        if (juegoById(j.juegoId)) {
+          if (antes[j.juegoId]) p.juegos[j.juegoId] = antes[j.juegoId];
+          juegoDeServidor(p, j);
+        }
+    });
+  /** Manda las monedas sueltas juntadas; el servidor paga lo que quepa en su ritmo. */
+  const mandarMonedas = () => {
+    timerMonedas = undefined;
+    const n = monedasPendientes;
+    monedasPendientes = 0;
+    if (n > 0) void servidor.monedas(n).then((r) => aplicarAvance(r));
+  };
   /** Manda a Convex un cambio de avatar ya aplicado aquí; si lo rechaza, vuelve a lo que diga el servidor. */
-  const vestirEnServidor = (llamada: Promise<{ ok: boolean; perfil?: PerfilServidor }>) => {
+  const vestirEnServidor = (llamada: Promise<{ ok: boolean; perfil?: PerfilServidor; logros?: Avance['logros'] }>) => {
     vistiendo++;
     void llamada.then((r) => {
       vistiendo--;
       if (r.perfil) aplicar(r.perfil);
+      aplicarAvance({ logros: r.logros });
     });
   };
   /** Con Convex, abre la partida del minijuego que se acaba de montar (desde la intro, con la hora del servidor). */
@@ -400,19 +492,23 @@ export const useGame = create<Game>((set, get) => {
       return m && m.run === mg.run && m.juego === mg.juego && m.id === mg.id && m.phase === 'ended' ? m : null;
     };
     if (res.ok) {
-      const { monedas, xp, nivel } = res.saldo;
-      commit((p) => {
-        p.coins = monedas;
-        p.xp = xp;
-        p.level = nivel;
-      });
       const m = misma();
+      // los logros los muestran los resultados; si ya se fue de ahí, un aviso
+      aplicarAvance(res, !m?.rewards);
+      if (juegoById(res.progreso.juegoId)) commit((p) => juegoDeServidor(p, res.progreso));
       if (m?.rewards)
         set({
           mg: {
             ...m,
             pago: 'pagado',
-            rewards: { ...m.rewards, coins: res.monedas, xp: res.xp, leveledUp: res.subidas > 0 },
+            avance: res.progreso.avance,
+            rewards: {
+              ...m.rewards,
+              coins: res.monedas,
+              xp: res.xp,
+              leveledUp: res.subidas > 0,
+              newAchievements: res.logros.map((l) => l.id),
+            },
           },
         });
       return;
@@ -484,8 +580,13 @@ export const useGame = create<Game>((set, get) => {
           bumpMissions(p, 'visit', 1);
         }
       });
-      if (first)
-        get().toast(SERVIDOR ? 'Primera visita' : `Primera visita: +${PREMIO_PRIMERA_VISITA.monedas} ${MONEDA}`, '🚌');
+      if (first && SERVIDOR)
+        // el premio lo paga el servidor (una sola vez); el aviso sale cuando confirma
+        void servidor.visitar(id).then((r) => {
+          aplicarAvance(r);
+          if (r.ok && r.primera) get().toast(`Primera visita: +${PREMIO_PRIMERA_VISITA.monedas} ${MONEDA}`, '🚌');
+        });
+      else if (first) get().toast(`Primera visita: +${PREMIO_PRIMERA_VISITA.monedas} ${MONEDA}`, '🚌');
     },
     openPanel: (panel) => set({ panel }),
     closePanel: () => set({ panel: null }),
@@ -570,6 +671,18 @@ export const useGame = create<Game>((set, get) => {
         return false;
       }
       commit((p) => gainCoins(p, -t.precio));
+      // con Convex el pasaje lo cobra el servidor con su precio; sin cobro no hay bono al llegar
+      viajeEnCurso = SERVIDOR
+        ? servidor.salir({ veh, de: from, a: to }).then((r) => {
+            aplicarAvance(r.ok ? r : { saldo: r.saldo });
+            if (!r.ok)
+              get().toast(
+                r.motivo === 'caro' ? 'No ajusta el pisto para el pasaje' : 'El servidor no cobró el pasaje: sin bono',
+                '🪙',
+              );
+            return r.ok ? r.viajeId : null;
+          })
+        : null;
       set((s) => ({
         screen: 'world',
         scene: { kind: 'viaje', veh, to, from },
@@ -585,6 +698,15 @@ export const useGame = create<Game>((set, get) => {
       const sc = get().scene;
       if (sc.kind !== 'viaje') return;
       if (bonus > 0) commit((p) => gainCoins(p, bonoViaje(bonus)));
+      const viaje = viajeEnCurso;
+      viajeEnCurso = null;
+      if (SERVIDOR && viaje)
+        void viaje.then(async (viajeId) => {
+          if (!viajeId) return;
+          const r = await servidor.llegar({ viajeId, bono: bonus });
+          aplicarAvance(r);
+          if (r.ok && r.bono > 0) get().toast(`Bono del viaje: +${r.bono} ${MONEDA}`, '🚌');
+        });
       get().travel(sc.to);
     },
     tomarLlegada: () => {
@@ -616,7 +738,8 @@ export const useGame = create<Game>((set, get) => {
         }
         if (r.stats?.goals) bumpMissions(p, 'goals', r.stats.goals);
         bumpMissions(p, 'score', r.score, mg.id);
-        const j = mg.juego ? juegoById(mg.juego) : undefined;
+        // con Convex el avance del juego lo guarda el servidor al cerrar la partida
+        const j = mg.juego && !SERVIDOR ? juegoById(mg.juego) : undefined;
         if (j) {
           const g = (p.juegos[j.id] ??= { etapa: 0, stars: [], best: 0, label: '', veces: 0 });
           g.veces++;
@@ -699,6 +822,11 @@ export const useGame = create<Game>((set, get) => {
     },
 
     addCoins: (n) => {
+      // con Convex solo se puede gastar (comida y peaje del viaje); sumar no hace nada
+      if (SERVIDOR) {
+        if (n < 0) void servidor.gastar(-n, 'viaje').then((r) => aplicarAvance(r));
+        return;
+      }
       commit((p) => gainCoins(p, n));
     },
     addXp: (n) => {
@@ -712,6 +840,10 @@ export const useGame = create<Game>((set, get) => {
         p.stats.pickups += 1;
         bumpMissions(p, 'pickup', 1);
       });
+      if (SERVIDOR) {
+        monedasPendientes++;
+        timerMonedas ??= setTimeout(mandarMonedas, TANDA_MONEDAS_MS);
+      }
     },
     collect: (deptId) => {
       if (get().profile.collected.includes(deptId)) return false;
@@ -721,6 +853,8 @@ export const useGame = create<Game>((set, get) => {
         gainXp(p, PREMIO_RECUERDO.xp);
         bumpMissions(p, 'collect', 1);
       });
+      // con Convex el recuerdo paga en el servidor (si visitó el departamento, una sola vez)
+      if (SERVIDOR) void servidor.recoger(deptId).then((r) => aplicarAvance(r));
       return true;
     },
     buy: (itemId) => {
@@ -798,6 +932,8 @@ export const useGame = create<Game>((set, get) => {
         p.created = true;
       });
       set({ panel: null });
+      // con Convex: nombre para la clasificación y el logro «Primeros pasos»
+      if (SERVIDOR) void get().sincronizar();
     },
     useEmote: (id) => {
       if (!get().profile.emotes.includes(id)) return false;
@@ -805,6 +941,7 @@ export const useGame = create<Game>((set, get) => {
         p.stats.emotes++;
         bumpMissions(p, 'emote', 1);
       });
+      if (SERVIDOR) void servidor.emote().then((r) => aplicarAvance(r));
       return true;
     },
     bump: (type, amount = 1, target) => {
@@ -814,6 +951,20 @@ export const useGame = create<Game>((set, get) => {
       const dm = get().profile.daily.missions.find((m) => m.id === id),
         m = MISSIONS.find((x) => x.id === id);
       if (!dm || !m || dm.claimed || dm.progress < m.count) return false;
+      if (SERVIDOR) {
+        // cobra el servidor: valida que esté completa y sin cobrar
+        void servidor.cobrarMision(id).then((r) => {
+          aplicarAvance(r);
+          if (!r.ok)
+            get().toast(
+              r.motivo === 'sin-conexion'
+                ? 'Sin conexión con el servidor: no se cobró'
+                : 'Esa misión no se puede cobrar',
+              '⚠️',
+            );
+        });
+        return true;
+      }
       commit((p) => {
         p.daily.missions.find((x) => x.id === id)!.claimed = true;
         gainCoins(p, m.coins);
@@ -841,9 +992,28 @@ export const useGame = create<Game>((set, get) => {
     sincronizar: async () => {
       if (!SERVIDOR) return false;
       const p = get().profile,
-        sv = await servidor.entrar(p.name, p.avatar);
-      if (sv) aplicar(sv);
-      return !!sv;
+        sv = await servidor.entrar(p.name, p.avatar, p.created);
+      if (!sv) return false;
+      aplicar(sv);
+      avisarLogros(sv.logros);
+      let e = await servidor.estado();
+      // la primera vez, el avance guardado en el navegador sube sin premios (MC-08)
+      if (e && !e.migrado) {
+        const local = get().profile;
+        await servidor.subirAvance({
+          visitados: local.visited,
+          recuerdos: local.collected,
+          juegos: Object.entries(local.juegos).map(([juegoId, g]) => ({
+            juegoId,
+            etapa: g.etapa,
+            stars: g.stars.map((x) => x ?? 0),
+            veces: g.veces,
+          })),
+        });
+        e = await servidor.estado();
+      }
+      if (e) aplicarEstado(e);
+      return true;
     },
   };
 });

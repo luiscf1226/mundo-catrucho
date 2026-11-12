@@ -1,4 +1,5 @@
-// Cliente de Convex para la tienda y las partidas (MC-13, MC-14). Solo existe si la compilación trae
+// Cliente de Convex para la tienda, las partidas (MC-13, MC-14) y el avance: visitas, recuerdos, misiones, logros,
+// viajes y clasificación (MC-15, MC-16, MC-17). Solo existe si la compilación trae
 // VITE_CONVEX_URL; sin ella `SERVIDOR` es false y el juego no hace ninguna petición.
 // Identidad de invitado hasta que lleguen las cuentas (MC-07): un secreto aleatorio en localStorage; Convex
 // guarda solo su hash.
@@ -26,27 +27,79 @@ export interface PerfilServidor {
   comprados: string[];
 }
 type Quien = { invitado: string };
-type Fallo = { ok: false; motivo: string; motivos?: string[]; perfil?: PerfilServidor };
+export interface Saldo {
+  monedas: number;
+  xp: number;
+  nivel: number;
+}
+export interface MisionServidor {
+  id: string;
+  progreso: number;
+  cobrada: boolean;
+}
+/** Lo que responde cada mutación que mueve el avance: saldo, logros que pagó y misiones de hoy. */
+export interface Avance {
+  saldo: Saldo;
+  subidas: number;
+  logros: { id: string; monedas: number }[];
+  misiones: { fecha: string; misiones: MisionServidor[] };
+}
+export interface ProgresoJuegoServidor {
+  juegoId: string;
+  etapa: number;
+  estrellas: number[];
+  mejor: number;
+  veces: number;
+}
+export interface EstadoServidor {
+  visitas: string[];
+  recuerdos: string[];
+  logros: string[];
+  misiones: Avance['misiones'];
+  juegos: ProgresoJuegoServidor[];
+  migrado: boolean;
+}
+export interface FilaClasificacion {
+  nombre: string;
+  juegoId: string;
+  puntos: number;
+  etapa: number;
+  tu: boolean;
+}
+export interface Clasificacion {
+  filas: FilaClasificacion[];
+  tuya: FilaClasificacion | null;
+}
+type Fallo = {
+  ok: false;
+  motivo: string;
+  motivos?: string[];
+  perfil?: PerfilServidor;
+  saldo?: Saldo;
+} & Partial<Avance>;
 export type Respuesta<T> = ({ ok: true } & T) | Fallo;
+type Logros = { logros?: Avance['logros'] };
 
 const fn = {
   entrar: makeFunctionReference<
     'mutation',
-    Quien & { nombre?: string; avatar?: Record<string, string> },
-    PerfilServidor
+    Quien & { nombre?: string; avatar?: Record<string, string>; creado?: boolean },
+    PerfilServidor & Logros
   >('tienda:entrar'),
   comprar: makeFunctionReference<
     'mutation',
     Quien & { itemId: string; equipar?: boolean },
-    Respuesta<{ perfil: PerfilServidor }>
+    Respuesta<{ perfil: PerfilServidor } & Logros>
   >('tienda:comprar'),
-  equipar: makeFunctionReference<'mutation', Quien & { itemId: string }, Respuesta<{ perfil: PerfilServidor }>>(
-    'tienda:equipar',
-  ),
+  equipar: makeFunctionReference<
+    'mutation',
+    Quien & { itemId: string },
+    Respuesta<{ perfil: PerfilServidor } & Logros>
+  >('tienda:equipar'),
   vestir: makeFunctionReference<
     'mutation',
     Quien & { avatar: Record<string, string> },
-    Respuesta<{ perfil: PerfilServidor }>
+    Respuesta<{ perfil: PerfilServidor } & Logros>
   >('tienda:vestir'),
   abrir: makeFunctionReference<
     'mutation',
@@ -56,14 +109,50 @@ const fn = {
   cerrar: makeFunctionReference<
     'mutation',
     Quien & { partidaId: string; puntos: number; estrellas: number; gano: boolean },
-    Respuesta<{
-      monedas: number;
-      bono: number;
-      xp: number;
-      subidas: number;
-      saldo: { monedas: number; xp: number; nivel: number };
-    }>
+    Respuesta<
+      { monedas: number; bono: number; xp: number; progreso: ProgresoJuegoServidor & { avance: boolean } } & Avance
+    >
   >('partidas:cerrarPartida'),
+  visitar: makeFunctionReference<'mutation', Quien & { deptId: string }, Respuesta<{ primera: boolean } & Avance>>(
+    'progreso:visitar',
+  ),
+  recoger: makeFunctionReference<'mutation', Quien & { deptId: string }, Respuesta<Avance>>('progreso:recoger'),
+  monedas: makeFunctionReference<'mutation', Quien & { cantidad: number }, Respuesta<{ pagadas: number } & Avance>>(
+    'progreso:recogerMonedas',
+  ),
+  emote: makeFunctionReference<'mutation', Quien, Respuesta<{ cuenta: boolean } & Avance>>('progreso:registrarEmote'),
+  cobrarMision: makeFunctionReference<
+    'mutation',
+    Quien & { misionId: string },
+    Respuesta<{ premio: { monedas: number; xp: number } } & Avance>
+  >('progreso:cobrarMision'),
+  salir: makeFunctionReference<
+    'mutation',
+    Quien & { veh: string; de: string; a: string },
+    Respuesta<{ viajeId: string; precio: number } & Avance>
+  >('progreso:salirDeViaje'),
+  llegar: makeFunctionReference<
+    'mutation',
+    Quien & { viajeId: string; bono: number },
+    Respuesta<{ bono: number; motivo?: string } & Avance>
+  >('progreso:llegarViaje'),
+  gastar: makeFunctionReference<'mutation', Quien & { monto: number; concepto: string }, Respuesta<Avance>>(
+    'progreso:gastar',
+  ),
+  subirAvance: makeFunctionReference<
+    'mutation',
+    Quien & {
+      visitados: string[];
+      recuerdos: string[];
+      juegos: { juegoId: string; etapa?: number; stars?: number[]; veces?: number }[];
+    },
+    Respuesta<{ visitas: number; recuerdos: number; juegos: number }>
+  >('progreso:subirAvanceLocal'),
+};
+const consultas = {
+  estado: makeFunctionReference<'query', Quien, EstadoServidor | null>('progreso:estado'),
+  porJuego: makeFunctionReference<'query', Quien & { juegoId: string }, Clasificacion>('clasificacion:porJuego'),
+  porDepto: makeFunctionReference<'query', Quien & { deptId: string }, Clasificacion>('clasificacion:porDepto'),
 };
 
 let memoria = '';
@@ -139,10 +228,33 @@ function llamar<F extends Ref>(ref: F, args: Omit<FunctionArgs<F>, 'invitado'>):
   return turno as Promise<FunctionReturnType<F> | null>;
 }
 const conFallo = <T>(r: T | null): T | Fallo => r ?? SIN_CONEXION;
+type RefConsulta = (typeof consultas)[keyof typeof consultas];
+/** Una consulta con plazo, fuera de la cola de mutaciones. `null` si no hubo respuesta. */
+async function consultar<F extends RefConsulta>(
+  ref: F,
+  args: Omit<FunctionArgs<F>, 'invitado'>,
+): Promise<FunctionReturnType<F> | null> {
+  if (!URL_CONVEX) return null;
+  cliente ??= new ConvexHttpClient(URL_CONVEX, { logger: false });
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      cliente.query(ref as FunctionReference<'query'>, { ...args, invitado: secretoInvitado() }),
+      new Promise<null>((resolve) => {
+        timer = setTimeout(() => resolve(null), PLAZO_MS);
+      }),
+    ]);
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 export const servidor = {
   /** null si no hubo respuesta */
-  entrar: (nombre: string, avatar: AvatarConfig) => llamar(fn.entrar, { nombre, avatar: avatarTexto(avatar) }),
+  entrar: (nombre: string, avatar: AvatarConfig, creado: boolean) =>
+    llamar(fn.entrar, { nombre, avatar: avatarTexto(avatar), creado }),
   comprar: async (itemId: string) => conFallo(await llamar(fn.comprar, { itemId, equipar: true })),
   equipar: async (itemId: string) => conFallo(await llamar(fn.equipar, { itemId })),
   vestir: async (avatar: Partial<AvatarConfig>) => conFallo(await llamar(fn.vestir, { avatar: avatarTexto(avatar) })),
@@ -150,6 +262,20 @@ export const servidor = {
     conFallo(await llamar(fn.abrir, a)),
   cerrar: async (c: { partidaId: string; puntos: number; estrellas: number; gano: boolean }) =>
     conFallo(await llamar(fn.cerrar, c)),
+  visitar: async (deptId: string) => conFallo(await llamar(fn.visitar, { deptId })),
+  recoger: async (deptId: string) => conFallo(await llamar(fn.recoger, { deptId })),
+  monedas: async (cantidad: number) => conFallo(await llamar(fn.monedas, { cantidad })),
+  emote: async () => conFallo(await llamar(fn.emote, {})),
+  cobrarMision: async (misionId: string) => conFallo(await llamar(fn.cobrarMision, { misionId })),
+  salir: async (v: { veh: string; de: string; a: string }) => conFallo(await llamar(fn.salir, v)),
+  llegar: async (v: { viajeId: string; bono: number }) => conFallo(await llamar(fn.llegar, v)),
+  gastar: async (monto: number, concepto: string) => conFallo(await llamar(fn.gastar, { monto, concepto })),
+  subirAvance: async (a: FunctionArgs<typeof fn.subirAvance> extends infer A ? Omit<A, 'invitado'> : never) =>
+    conFallo(await llamar(fn.subirAvance, a)),
+  /** null si no hubo respuesta; con respuesta `null` el invitado todavía no existe */
+  estado: () => consultar(consultas.estado, {}),
+  porJuego: (juegoId: string) => consultar(consultas.porJuego, { juegoId }),
+  porDepto: (deptId: string) => consultar(consultas.porDepto, { deptId }),
 };
 /** El avatar sin campos vacíos, como lo acepta Convex (`Record<string, string>`). */
 function avatarTexto(a: Partial<AvatarConfig>) {

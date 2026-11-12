@@ -1,9 +1,10 @@
 // Paneles sencillos: minijuegos, misiones, logros, clasificación, salas, ajustes, controles, emotes y pausa.
 import { type CSSProperties, type ReactNode, useEffect, useState } from 'react';
 import { audio } from '../../core/audio';
-import { ACHIEVEMENTS, MINIGAMES, MISSIONS, SHOP } from '../../core/data';
-import { leaderboard } from '../../core/leaderboard';
+import { ACHIEVEMENTS, catDe, DEPARTMENTS, juegoById, MINIGAMES, MISSIONS, minigameById, SHOP } from '../../core/data';
+import { leaderboard, scoreLabel } from '../../core/leaderboard';
 import { net, type RoomInfo } from '../../core/net';
+import { type Clasificacion, type FilaClasificacion, SERVIDOR, servidor } from '../../core/servidor';
 import { useGame } from '../../core/store';
 import type { MinigameId } from '../../core/types';
 import { playEmote } from '../../game/PlayerController';
@@ -136,6 +137,9 @@ export function AchievementsPanel() {
 
 // ------------------------------------------------------------------ clasificación
 export function LeaderboardPanel() {
+  return SERVIDOR ? <LeaderboardServidor /> : <LeaderboardLocal />;
+}
+function LeaderboardLocal() {
   const p = useGame((s) => s.profile),
     mg = useGame((s) => s.mg),
     [id, setId] = useState<MinigameId>(mg?.id ?? 'carrera');
@@ -182,6 +186,142 @@ export function LeaderboardPanel() {
         </div>
       )}
       <Note cls="mt-3">Los rivales son simulados. La tabla en línea llega con el multijugador.</Note>
+    </Panel>
+  );
+}
+
+/** Etiqueta de una marca del servidor con el formato de su motor (tiempo, goles, objetos o puntos). */
+const etiquetaDe = (juegoId: string, puntos: number) =>
+  scoreLabel(juegoById(juegoId)?.motor ?? (juegoId as MinigameId), puntos);
+const nombreDeJuego = (juegoId: string) =>
+  juegoById(juegoId)?.name ?? (juegoId.includes('.') ? juegoId : minigameById(juegoId as MinigameId)?.name) ?? juegoId;
+const LOBBY = 'lobby';
+
+/** Con Convex: los mejores de verdad por juego y por departamento (MC-17). */
+function LeaderboardServidor() {
+  const scene = useGame((s) => s.scene),
+    mg = useGame((s) => s.mg);
+  const inicial = () => {
+    const j = mg?.juego ? juegoById(mg.juego) : undefined;
+    if (j) return { dept: j.dept, juego: j.id };
+    if (mg) return { dept: LOBBY, juego: mg.id as string };
+    const dept = scene.kind === 'dept' ? scene.id : LOBBY;
+    return { dept, juego: dept === LOBBY ? 'carrera' : (catDe(dept).juegos[0]?.id ?? 'carrera') };
+  };
+  const [modo, setModo] = useState<'juego' | 'depto'>('juego'),
+    [dept, setDept] = useState(() => inicial().dept),
+    [juego, setJuego] = useState(() => inicial().juego),
+    [datos, setDatos] = useState<Clasificacion | 'cargando' | 'error'>('cargando');
+  const juegos =
+    dept === LOBBY
+      ? MINIGAMES.map((m) => ({ id: m.id as string, name: m.name }))
+      : catDe(dept).juegos.map((j) => ({ id: j.id, name: j.name }));
+  const elegirDept = (d: string) => {
+    setDept(d);
+    setJuego(d === LOBBY ? 'carrera' : (catDe(d).juegos[0]?.id ?? 'carrera'));
+  };
+  const porDepto = modo === 'depto' && dept !== LOBBY;
+  useEffect(() => {
+    let vivo = true;
+    setDatos('cargando');
+    void (porDepto ? servidor.porDepto(dept) : servidor.porJuego(juego)).then((r) => {
+      if (vivo) setDatos(r ?? 'error');
+    });
+    return () => {
+      vivo = false;
+    };
+  }, [porDepto, dept, juego]);
+  const fila = (r: FilaClasificacion, puesto: number | null) => (
+    <li
+      key={`${r.nombre}-${r.juegoId}-${puesto ?? 'tu'}`}
+      data-testid={r.tu ? 'lb-you' : 'lb-row'}
+      data-rank={puesto ?? undefined}
+      data-puntos={r.puntos}
+      data-on={r.tu}
+      className={cx('mc-card mc-lbrow flex items-center gap-2.5 px-2.5 py-1.5', r.tu && 'is-you')}
+    >
+      <span className={cx('mc-rank mc-num flex-none', puesto !== null && puesto <= 3 && `is-top${puesto}`)}>
+        {puesto ?? '—'}
+      </span>
+      <span className="min-w-0 flex-1 leading-tight">
+        <span className="block truncate font-bold">
+          {r.nombre}
+          {r.tu && (
+            <span className="ml-1.5">
+              <Tag>Vos</Tag>
+            </span>
+          )}
+        </span>
+        {porDepto && <span className="block truncate text-xs text-muted">{nombreDeJuego(r.juegoId)}</span>}
+      </span>
+      <b className="mc-num font-display text-[15px]">{etiquetaDe(r.juegoId, r.puntos)}</b>
+    </li>
+  );
+  return (
+    <Panel id="clasificacion" title="Clasificación" icon="trophy" size="md">
+      <Tabs
+        items={[
+          { id: 'juego', label: 'Por juego', icon: 'play' },
+          { id: 'depto', label: 'Por departamento', icon: 'map' },
+        ]}
+        value={modo}
+        onChange={setModo}
+        testid={(i) => `lb-modo-${i}`}
+        cls="mb-2"
+      />
+      <div className="mb-3 grid gap-2 sm:grid-cols-2">
+        <label className="grid gap-1 text-xs font-bold text-muted">
+          Departamento
+          <select data-testid="lb-depto" className="mc-input" value={dept} onChange={(e) => elegirDept(e.target.value)}>
+            <option value={LOBBY}>Lobby (minijuegos)</option>
+            {DEPARTMENTS.map((d) => (
+              <option key={d.id} value={d.id}>
+                {d.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        {!porDepto && (
+          <label className="grid gap-1 text-xs font-bold text-muted">
+            Juego
+            <select
+              data-testid="lb-juego"
+              className="mc-input"
+              value={juego}
+              onChange={(e) => setJuego(e.target.value)}
+            >
+              {juegos.map((j) => (
+                <option key={j.id} value={j.id}>
+                  {j.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+      </div>
+      {datos === 'cargando' ? (
+        <p data-testid="lb-cargando" className="mc-label py-4 text-center">
+          Cargando la tabla…
+        </p>
+      ) : datos === 'error' ? (
+        <p data-testid="lb-error" className="mc-label py-4 text-center">
+          Sin conexión con el servidor. Probá otra vez en un rato.
+        </p>
+      ) : datos.filas.length === 0 ? (
+        <p data-testid="lb-vacia" className="mc-label py-4 text-center">
+          Nadie tiene marca todavía. ¡Estrená la tabla!
+        </p>
+      ) : (
+        <ol className="grid gap-1.5" data-testid="lb-list" data-fuente="servidor">
+          {datos.filas.map((r, i) => fila(r, i + 1))}
+          {datos.tuya && fila(datos.tuya, null)}
+        </ol>
+      )}
+      <Note cls="mt-3">
+        {porDepto
+          ? 'La mejor marca de cada jugador en los juegos de este departamento.'
+          : 'Jugadores de verdad: solo cuentan las partidas que validó el servidor.'}
+      </Note>
     </Panel>
   );
 }

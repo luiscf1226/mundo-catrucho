@@ -2,6 +2,7 @@
 // TypeScript puro: sin navegador, sin React y sin dependencias.
 export * from './partidas.ts';
 export * from './premios.ts';
+export * from './progreso.ts';
 export * from './sala.ts';
 export * from './tienda.ts';
 export * from './topes.ts';
