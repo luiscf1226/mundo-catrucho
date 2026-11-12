@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { BOT_NAMES, SHOP } from '../../core/data';
 import { type Interaction, interactions } from '../../core/interact';
+import { net, useSala } from '../../core/net';
 import { player } from '../../core/player';
 import { useGame } from '../../core/store';
 import type { AvatarConfig, AvatarState, V3 } from '../../core/types';
@@ -111,7 +112,9 @@ function Bot({ i }: { i: number }) {
 }
 export function Social() {
   const mode = useGame((s) => s.profile.room.mode),
-    count = mode === 'solo' ? 0 : mode === 'privada' ? 2 : 8;
+    enSala = useSala((s) => s.estado === 'en-sala'),
+    // en una sala en vivo la plaza la llenan los demás jugadores; los bots quedan para cuando no hay conexión
+    count = mode === 'solo' || enSala ? 0 : mode === 'privada' ? 2 : 8;
   return (
     <>
       {Array.from({ length: count }, (_, i) => (
@@ -143,7 +146,7 @@ export function Social() {
         onUse={() => {
           player.emote = { anim: 'dance', until: performance.now() + 10000 };
           social.danceUntil = performance.now() + 10000;
-          useGame.getState().useEmote('emote_punta');
+          if (useGame.getState().useEmote('emote_punta')) net.sendEmote('emote_punta');
         }}
       />
       {[-1, 1].map((s) => (

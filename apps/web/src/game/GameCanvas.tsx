@@ -13,6 +13,7 @@ import type { MinigameId } from '../core/types';
 import { LoadingScreen } from '../ui/LoadingScreen';
 
 import { Gallery } from './dev/Gallery';
+import { EnVivo } from './EnVivo';
 import { art } from './kit/art';
 import { Lobby } from './lobby/Lobby';
 import { MINIGAME_SCENES } from './minigames';
@@ -120,6 +121,7 @@ export function GameCanvas() {
           <Effects>
             <ActiveScene />
             <PlayerController />
+            <EnVivo />
           </Effects>
         </Suspense>
       </Canvas>

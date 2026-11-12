@@ -7,6 +7,7 @@ import * as THREE from 'three';
 import { audio } from '../core/audio';
 import { input } from '../core/input';
 import { nearest } from '../core/interact';
+import { net } from '../core/net';
 import { phys, stepBody } from '../core/phys';
 import { player } from '../core/player';
 import { isPaused, useGame } from '../core/store';
@@ -28,7 +29,8 @@ function overviewFit(cam: THREE.PerspectiveCamera) {
   return { dist: Math.max(across / 2 / th, along / 2 / tv), yaw: portrait ? -Math.PI / 2 : 0 };
 }
 const angLerp = (a: number, b: number, k: number) => a + Math.atan2(Math.sin(b - a), Math.cos(b - a)) * k;
-const EMOTE_ANIM: Record<string, Anim> = {
+/** Animación de cada emote (también la usan los avatares remotos). */
+export const EMOTE_ANIM: Record<string, Anim> = {
   emote_saludar: 'wave',
   emote_punta: 'dance',
   emote_celebrar: 'celebrate',
@@ -40,6 +42,7 @@ const EMOTE_ANIM: Record<string, Anim> = {
 export function playEmote(id: string) {
   if (!useGame.getState().useEmote(id)) return false;
   player.emote = { anim: EMOTE_ANIM[id] ?? 'dance', until: performance.now() + 4200 };
+  net.sendEmote(id);
   return true;
 }
 
