@@ -5,6 +5,7 @@ import { useFrame } from '@react-three/fiber';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type * as THREE from 'three';
 import { type Muestra, muestraEn, net, RETRASO_MS, type RemotePlayer, useSala, zonaDeEscena } from '../core/net';
+import { phys } from '../core/phys';
 import { player } from '../core/player';
 import { useGame } from '../core/store';
 import type { AvatarState } from '../core/types';
@@ -12,6 +13,33 @@ import { EMOTE_ICON } from '../ui/lib';
 import { art, Label } from './kit';
 
 const EMOTE_MS = 4200;
+
+/** MC-23: dónde va un bot de relleno: recorre su circuito (relativo al punto de aparición) con la hora del reloj. */
+function puntoDeBot(b: NonNullable<RemotePlayer['bot']>, out: Muestra) {
+  const pts = b.ruta,
+    tramos = pts.map((p, i) => {
+      const q = pts[(i + 1) % pts.length];
+      return Math.hypot(q[0] - p[0], q[1] - p[1]);
+    }),
+    largo = tramos.reduce((a, c) => a + c, 0) || 1;
+  let d = ((Date.now() / 1000 + b.fase) * b.vel) % largo;
+  for (let i = 0; i < pts.length; i++) {
+    if (d > tramos[i]) {
+      d -= tramos[i];
+      continue;
+    }
+    const p = pts[i],
+      q = pts[(i + 1) % pts.length],
+      k = tramos[i] ? d / tramos[i] : 0;
+    out.x = player.spawn[0] + p[0] + (q[0] - p[0]) * k;
+    out.z = player.spawn[2] + p[1] + (q[1] - p[1]) * k;
+    out.y = phys.ground(out.x, out.z);
+    // yaw = 0 mira a −Z
+    out.yaw = Math.atan2(-(q[0] - p[0]), -(q[1] - p[1]));
+    break;
+  }
+  return out;
+}
 
 function Remoto({ r }: { r: RemotePlayer }) {
   const g = useRef<THREE.Group>(null);
@@ -35,7 +63,7 @@ function Remoto({ r }: { r: RemotePlayer }) {
     const o = g.current;
     if (!o) return;
     o.visible = r.listo;
-    const m = muestraEn(r.muestras, performance.now() - RETRASO_MS, s.m);
+    const m = r.bot ? puntoDeBot(r.bot, s.m) : muestraEn(r.muestras, performance.now() - RETRASO_MS, s.m);
     const v = dt > 0 ? Math.hypot(m.x - s.px, m.z - s.pz) / dt : 0;
     s.v += (v - s.v) * Math.min(1, dt * 10);
     s.px = m.x;
@@ -46,9 +74,9 @@ function Remoto({ r }: { r: RemotePlayer }) {
     state.speed = s.v;
   });
   return (
-    <group ref={g} name="remoto" userData={{ id: r.id }} visible={false}>
+    <group ref={g} name="remoto" userData={{ id: r.id, bot: !!r.bot }} visible={false}>
       <art.Avatar config={r.avatar} state={state} />
-      <Label pos={[0, 2.2, 0]} text={r.name} h={0.32} bg="rgba(23,120,90,0.88)" />
+      <Label pos={[0, 2.2, 0]} text={r.name} h={0.32} bg={r.bot ? 'rgba(84,88,110,0.9)' : 'rgba(23,120,90,0.88)'} />
       {burbuja && <Label pos={[0, 2.68, 0]} text={burbuja} h={0.5} bg="rgba(255,255,255,0.92)" />}
     </group>
   );

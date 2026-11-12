@@ -57,7 +57,8 @@ export function partida(): Partida {
     dif: etapas > 1 ? etapa / (etapas - 1) : 0.35,
     modo: mg?.modo ?? 'solo',
     dept: j ? deptById(j.dept) : null,
-    seed: h,
+    // MC-25: entre dos, la semilla de la partida (la misma para los dos)
+    seed: mg?.juntos?.semilla ?? h,
   };
 }
 /** Generador pseudoaleatorio con semilla (mulberry32). */

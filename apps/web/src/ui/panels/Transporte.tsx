@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { catDe, DEPARTMENTS } from '../../core/data';
 import { useGame } from '../../core/store';
 import type { Vehiculo } from '../../core/types';
+import { salirDeViajeCompartido } from '../../core/viajeJuntos';
 import { OPCIONES, rutaParaVehiculo } from '../../game/viaje/opciones';
 import { Btn, Panel } from '../components/kit';
 export function TransportePanel() {
@@ -49,7 +50,7 @@ export function TransportePanel() {
             tone="play"
             size="lg"
             cls="w-full"
-            onClick={() => elegido && useGame.getState().startViaje(elegido.id, to)}
+            onClick={() => elegido && salirDeViajeCompartido(elegido.id, to)}
           >
             ¡Vámonos! · L {fare} · Tenés L {coins}
           </Btn>

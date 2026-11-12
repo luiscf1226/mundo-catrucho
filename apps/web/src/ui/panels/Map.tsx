@@ -1,6 +1,7 @@
 // Mapa de Honduras: los 18 departamentos con su contorno real (Natural Earth), marcas de visitado y recuerdo,
 // alfiler de dónde estás y una ficha del departamento elegido con el botón de viaje.
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { preguntarConectados, useConectados } from '../../core/conectados';
 import { catDe, DEPARTMENTS, deptById, MAP_CREDIT, MAP_VIEWBOX, REWARDS } from '../../core/data';
 import { useGame } from '../../core/store';
 import type { Department } from '../../core/types';
@@ -70,7 +71,9 @@ export function MapPanel() {
     seen = visited.includes(d.id),
     got = collected.includes(d.id),
     cat = catDe(d.id),
-    prog = useGame((s) => s.profile.juegos);
+    prog = useGame((s) => s.profile.juegos),
+    vivos = useConectados();
+  useEffect(preguntarConectados, []);
   const etapas = cat.juegos.reduce((n, j) => n + j.etapas, 0),
     hechas = cat.juegos.reduce((n, j) => n + Math.min(j.etapas, prog[j.id]?.etapa ?? 0), 0);
   const paths = useMemo(() => DEPARTMENTS.map((x) => ({ d: x, path: pathOf(x) })), []);
@@ -303,8 +306,12 @@ export function MapPanel() {
               </Row>
             )}
             <Row icon="user" label="Conectados ahora">
-              <span data-testid="map-online">🟢 {conectados(d.id)}</span>{' '}
-              <span className="text-xs font-normal text-muted">(bots en este prototipo)</span>
+              <span data-testid="map-online" data-fuente={vivos ? 'servidor' : 'simulado'}>
+                🟢 {vivos ? (vivos.depts[d.id] ?? 0) : conectados(d.id)}
+              </span>{' '}
+              <span className="text-xs font-normal text-muted">
+                {vivos ? '(gente de verdad, sin bots)' : '(bots en este prototipo)'}
+              </span>
             </Row>
             {cat.lugares.length > 0 && (
               <div className="flex flex-wrap gap-1" data-testid="map-lugares">

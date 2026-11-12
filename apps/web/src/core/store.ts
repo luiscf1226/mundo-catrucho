@@ -119,6 +119,8 @@ export interface MgState {
   avance?: boolean;
   /** con Convex: en qué va el pago de `rewards` (sin Convex no existe: se paga al instante) */
   pago?: 'pendiente' | 'pagado' | 'rechazado' | 'sin-conexion';
+  /** MC-25: partida con alguien de la sala; la paga el recibo de la sala (`core/juntos.ts`), no `cerrarPartida` */
+  juntos?: { partidaId: string; semilla: number };
 }
 export interface MgHud {
   timer?: number;
@@ -227,10 +229,10 @@ export interface Game {
   startMinigame(id: MinigameId): void;
   beginMinigame(): void;
   /** Entra a un juego del catálogo ('depto.juego'). Es el camino normal desde los puestos de los departamentos. */
-  startJuego(juegoId: string): void;
+  startJuego(juegoId: string, juntos?: MgState['juntos'] & { etapa: number }): void;
   setModo(m: Modo): void;
   /** Viaje simulado desde la terminal. Devuelve false si no ajusta el pisto. */
-  startViaje(veh: Vehiculo, to: string): boolean;
+  startViaje(veh: Vehiculo, to: string, de?: string): boolean;
   llegarViaje(bonus?: number): void;
   tomarLlegada(): Game['llegada'];
   finishMinigame(r: MinigameResult): void;
@@ -473,7 +475,7 @@ export const useGame = create<Game>((set, get) => {
   const abrirPartida = () => {
     const mg = get().mg;
     partidaEnCurso =
-      SERVIDOR && mg
+      SERVIDOR && mg && !mg.juntos
         ? servidor
             .abrir({ motor: mg.id, etapa: mg.etapa, juegoId: mg.juego, modo: mg.modo })
             .then((r) => (r.ok ? r.id : null))
@@ -626,7 +628,7 @@ export const useGame = create<Game>((set, get) => {
       }));
       abrirPartida();
     },
-    startJuego: (juegoId) => {
+    startJuego: (juegoId, juntos) => {
       const j = juegoById(juegoId);
       if (!j) return;
       set((s) => ({
@@ -641,8 +643,10 @@ export const useGame = create<Game>((set, get) => {
           juego: j.id,
           run: 0,
           phase: 'intro',
-          etapa: etapaDe(s.profile, j.id),
-          modo: s.profile.modo,
+          etapa: juntos ? juntos.etapa : etapaDe(s.profile, j.id),
+          // entre dos cada uno juega su escena con la misma semilla; el otro se ve en el marcador
+          modo: juntos ? 'solo' : s.profile.modo,
+          juntos: juntos && { partidaId: juntos.partidaId, semilla: juntos.semilla },
           origen: s.scene.kind === 'dept' ? s.scene : { kind: 'dept', id: j.dept },
           origenPos: s.scene.kind === 'dept' ? { pos: [...player.pos] as V3, yaw: player.yaw } : undefined,
         },
@@ -657,10 +661,10 @@ export const useGame = create<Game>((set, get) => {
         s.mg && s.mg.phase === 'intro' && s.mg.modo !== m ? { mg: { ...s.mg, modo: m }, sceneKey: s.sceneKey + 1 } : {},
       );
     }, // la escena se vuelve a montar para que el motor lea el modo nuevo
-    startViaje: (veh, to) => {
+    startViaje: (veh, to, de) => {
       const t = OPCIONES.find((x) => x.id === veh);
       const origen = get().scene;
-      const from = origen.kind === 'dept' ? origen.id : 'franciscomorazan';
+      const from = de ?? (origen.kind === 'dept' ? origen.id : 'franciscomorazan');
       if (!rutaParaVehiculo(veh, from, to)) {
         get().toast('Ocupás otra conexión para llegar. Escogé otro destino.', '🧭');
         return false;
@@ -769,7 +773,7 @@ export const useGame = create<Game>((set, get) => {
         pago: SERVIDOR ? 'pendiente' : undefined,
       };
       set({ mg: ended });
-      if (SERVIDOR) void cobrarPartida(ended, { ...r, stars });
+      if (SERVIDOR && !mg.juntos) void cobrarPartida(ended, { ...r, stars });
     },
     replayMinigame: () => {
       set((s) =>
