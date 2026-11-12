@@ -59,7 +59,7 @@ export default defineSchema({
     'usuarioId',
     'logroId',
   ]),
-  // una partida se abre antes de jugar y solo la cierra el recibo firmado de la sala
+  // una partida se abre antes de jugar; la cierra `partidas:cerrarPartida` (y más adelante el recibo firmado de la sala)
   partidas: defineTable({
     juegoId: v.string(),
     etapa: v.number(),
@@ -67,10 +67,18 @@ export default defineSchema({
     sala: v.optional(v.string()),
     semilla: v.number(),
     jugadores: v.array(v.id('usuarios')),
-    estado: v.union(v.literal('abierta'), v.literal('cerrada'), v.literal('vencida')),
+    estado: v.union(v.literal('abierta'), v.literal('cerrada'), v.literal('vencida'), v.literal('rechazada')),
     resultado: v.optional(
       v.array(v.object({ usuarioId: v.id('usuarios'), puntos: v.number(), estrellas: v.number(), gano: v.boolean() })),
     ),
+    // MC-14: lo que el servidor guardó al abrir y lo que decidió al cerrar
+    motor: v.optional(v.string()),
+    etapas: v.optional(v.number()),
+    /** milisegundos Unix del servidor */
+    inicio: v.optional(v.number()),
+    cierre: v.optional(v.number()),
+    motivos: v.optional(v.array(v.string())),
+    pago: v.optional(v.object({ monedas: v.number(), xp: v.number() })),
   }).index('por_estado', ['estado']),
   marcas: defineTable({
     juegoId: v.string(),

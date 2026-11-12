@@ -378,6 +378,15 @@ export function MgResults() {
             </div>
           )}
         </div>
+        {mg.pago && mg.pago !== 'pagado' && (
+          <p data-testid="mg-result-pago" data-pago={mg.pago} role="status" className="mc-label">
+            {mg.pago === 'pendiente'
+              ? 'Validando la partida…'
+              : mg.pago === 'rechazado'
+                ? 'El servidor no aceptó esta partida: no paga'
+                : 'Sin conexión: esta partida no paga'}
+          </p>
+        )}
         {w.leveledUp && (
           <div
             data-testid="mg-levelup"
