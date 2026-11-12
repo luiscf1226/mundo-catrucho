@@ -51,6 +51,23 @@ npx convex run tienda:entrar '{"invitado":"<64 hex>"}'
 node apps/web/tools/test-tienda-servidor.mjs   # de punta a punta contra el entorno de desarrollo
 ```
 
+## Pase de sala en vivo (MC-18)
+
+`salas:pase { invitado, sala, nombre? }` identifica al invitado (lo crea si hace falta, como `tienda:entrar`) y
+devuelve `{ ok: true, pase, id }`: un pase firmado con HMAC-SHA256 que vale 60 s solo para esa sala (`mapa:N` o
+`dept:<id>:N`). Lleva un id público derivado de la cuenta con el secreto (nunca el secreto de invitado), el nombre
+limpio y el avatar guardado en el perfil. Firmar y verificar viven en `packages/reglas/src/pase.ts`; la sala
+(`workers/salas`) verifica con la misma función.
+
+Necesita `SALA_SECRETO` (mínimo 32 caracteres) en el entorno de Convex y el **mismo** valor en Cloudflare:
+
+```bash
+npx convex env set SALA_SECRETO <valor>          # Convex
+cd workers/salas && npx wrangler secret put SALA_SECRETO   # Cloudflare; en local va en workers/salas/.dev.vars
+```
+
+Sin el secreto responde `{ ok: false, motivo: 'sin-salas' }` y el juego sigue sin sala.
+
 ## Catálogo público
 
 ```bash

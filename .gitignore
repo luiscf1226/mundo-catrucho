@@ -10,3 +10,6 @@ convex/_generated/
 docs/generador/*.html
 docs/generador/*.md
 capturas/
+
+# secretos locales de wrangler dev (SALA_SECRETO)
+.dev.vars
