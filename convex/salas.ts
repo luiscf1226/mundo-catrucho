@@ -20,7 +20,7 @@ import {
   queryGeneric,
 } from 'convex/server';
 import { v } from 'convex/values';
-import { bloqueadosParaPase, registrarPublico } from './amigos';
+import { bloqueadosParaPase, hayBloqueo, registrarPublico } from './amigos';
 import { asegurarUsuario, quien } from './identidad';
 import type schema from './schema';
 
@@ -102,6 +102,15 @@ export const paseViaje = mutation({
     if (!secreto) return { ok: false as const, motivo: 'sin-salas' };
     if (partirSalaCerrada(args.sala)?.tipo !== 'viaje') return { ok: false as const, motivo: 'sala' };
     const { usuario, perfil } = await asegurarUsuario(ctx, args);
+    const viaje = await ctx.db
+      .query('viajesCompartidos')
+      .withIndex('por_sala', (q) => q.eq('sala', args.sala))
+      .unique();
+    for (const otro of viaje?.jugadores ?? [])
+      if (await hayBloqueo(ctx, usuario._id, otro)) return { ok: false as const, motivo: 'bloqueado' };
+    if (!viaje) await ctx.db.insert('viajesCompartidos', { sala: args.sala, jugadores: [usuario._id] });
+    else if (!viaje.jugadores.includes(usuario._id))
+      await ctx.db.patch(viaje._id, { jugadores: [...viaje.jugadores, usuario._id] });
     const id = await idPublico(usuario._id, secreto);
     const pase = await firmarPase(
       { id, nombre: args.nombre ?? usuario.nombre, sala: args.sala, avatar: perfil.avatar },
@@ -120,7 +129,13 @@ export const reportar = internalMutation({
   args: { sala: v.string(), ocupacion: v.number(), momento: v.number() },
   handler: async (ctx, args) => {
     const p = partirSala(args.sala);
-    if (!p) return;
+    if (
+      !p ||
+      !Number.isFinite(args.momento) ||
+      args.momento > Date.now() + 5000 ||
+      Date.now() - args.momento > OCUPACION_VIGENTE_MS
+    )
+      return;
     const tipo = p.zona === 'mapa' ? ('mapa' as const) : ('dept' as const),
       deptId = tipo === 'dept' ? p.zona.slice(5) : undefined;
     const filas = await ctx.db
@@ -130,11 +145,11 @@ export const reportar = internalMutation({
     const fila = filas.find((f) => f.tipo === tipo && f.tramo === p.tramo);
     const datos = {
       ocupacion: Math.max(0, Math.min(1000, Math.round(args.ocupacion))),
-      visto: Date.now(),
+      visto: args.momento,
       momento: args.momento,
     };
     if (!fila) await ctx.db.insert('salas', { tipo, deptId, tramo: p.tramo, ...datos });
-    else if ((fila.momento ?? 0) <= args.momento) await ctx.db.patch(fila._id, datos);
+    else if ((fila.momento ?? 0) < args.momento) await ctx.db.patch(fila._id, datos);
   },
 });
 

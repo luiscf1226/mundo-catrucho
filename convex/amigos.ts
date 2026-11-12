@@ -100,7 +100,7 @@ export async function bloqueadosParaPase(ctx: Lectura, usuarioId: IdUsuario, sec
     .query('bloqueos')
     .withIndex('por_de', (q) => q.eq('de', usuarioId))
     .order('desc')
-    .take(CHAT.bloqueosEnPase);
+    .collect();
   return Promise.all(filas.map((f) => idPublico(f.a, secreto)));
 }
 const nombreDe = async (ctx: Lectura, id: IdUsuario) => (await ctx.db.get(id))?.nombre ?? 'Catracho';
@@ -238,7 +238,14 @@ export const bloquear = mutation({
       .query('bloqueos')
       .withIndex('por_de', (q) => q.eq('de', usuario._id).eq('a', otro))
       .first();
-    if (!ya) await ctx.db.insert('bloqueos', { de: usuario._id, a: otro });
+    if (!ya) {
+      const filas = await ctx.db
+        .query('bloqueos')
+        .withIndex('por_de', (q) => q.eq('de', usuario._id))
+        .take(CHAT.bloqueosEnPase);
+      if (filas.length >= CHAT.bloqueosEnPase) return { ok: false as const, motivo: 'tope-bloqueos' };
+      await ctx.db.insert('bloqueos', { de: usuario._id, a: otro });
+    }
     const amistad = await amistadEntre(ctx, usuario._id, otro);
     if (amistad) await borrarAmistad(ctx, amistad._id);
     return { ok: true as const };

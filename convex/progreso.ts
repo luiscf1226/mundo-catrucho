@@ -301,7 +301,18 @@ export const olvidarInvitado = internalMutation({
       .unique();
     if (!usuario) return 0;
     const id = usuario._id;
+    const viajesCompartidos = await ctx.db.query('viajesCompartidos').collect();
+    for (const viaje of viajesCompartidos)
+      if (viaje.jugadores.includes(id)) {
+        const jugadores = viaje.jugadores.filter((j) => j !== id);
+        if (jugadores.length) await ctx.db.patch(viaje._id, { jugadores });
+        else await ctx.db.delete(viaje._id);
+      }
     const filas = [
+      ...(await ctx.db
+        .query('aperturas')
+        .withIndex('por_usuario', (q) => q.eq('usuarioId', id))
+        .collect()),
       ...(await ctx.db
         .query('perfiles')
         .withIndex('por_usuario', (q) => q.eq('usuarioId', id))

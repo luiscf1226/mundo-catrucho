@@ -15,7 +15,7 @@ const reportar = makeFunctionReference<'mutation', Aviso>('salas:reportar') as u
   Aviso
 >;
 /** Un aviso más viejo (o adelantado) que esto no se acepta: así no sirve repetir uno viejo. */
-const AVISO_MAX_MS = 2 * 60_000;
+const AVISO_MAX_MS = 75_000;
 
 const http = httpRouter();
 http.route({
@@ -27,7 +27,13 @@ http.route({
     const d = (await leerFirmado('ocupacion', await req.text(), secreto, 1024)) as Partial<Aviso> | null;
     if (!d || typeof d.sala !== 'string' || typeof d.ocupacion !== 'number' || typeof d.momento !== 'number')
       return new Response('firma', { status: 401 });
-    if (Math.abs(Date.now() - d.momento) > AVISO_MAX_MS) return new Response('vencido', { status: 401 });
+    if (
+      !Number.isFinite(d.momento) ||
+      !Number.isFinite(d.ocupacion) ||
+      Date.now() - d.momento > AVISO_MAX_MS ||
+      d.momento > Date.now() + 5000
+    )
+      return new Response('vencido', { status: 401 });
     await ctx.runMutation(reportar, { sala: d.sala, ocupacion: d.ocupacion, momento: d.momento });
     return new Response(null, { status: 204 });
   }),

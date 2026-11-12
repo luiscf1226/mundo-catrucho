@@ -1,6 +1,7 @@
 // Partidas (MC-14). `abrirPartida` guarda motor, etapa y la hora del servidor; `cerrarPartida` mide la duración
 // con ese reloj, valida el resultado con @mundo-catrucho/reglas y paga una sola vez.
 import {
+  APERTURA_MIN_MS,
   avanzarJuego,
   decidirApertura,
   decidirCierre,
@@ -14,14 +15,17 @@ import {
   PARTIDA,
   SECRETO_MIN,
   type Tema,
-  turnoDeApertura,
   validarResultado,
   verificarRecibo,
 } from '@mundo-catrucho/reglas';
 import {
   type DataModelFromSchemaDefinition,
+  type FunctionReference,
+  type GenericMutationCtx,
   type GenericQueryCtx,
+  internalMutationGeneric,
   type MutationBuilder,
+  makeFunctionReference,
   mutationGeneric,
   type QueryBuilder,
   queryGeneric,
@@ -32,6 +36,7 @@ import catNorte from '../apps/web/shared/data/catalogo/norte.json' with { type: 
 import catOccidente from '../apps/web/shared/data/catalogo/occidente.json' with { type: 'json' };
 import catSurOriente from '../apps/web/shared/data/catalogo/sur-oriente.json' with { type: 'json' };
 import minigames from '../apps/web/shared/data/minigames.json' with { type: 'json' };
+import { hayBloqueo } from './amigos';
 import { avanzar, pagar, type Sesion, sesion, terminar, visitar } from './avance';
 import { asegurarUsuario, quien } from './identidad';
 import type schema from './schema';
@@ -121,16 +126,9 @@ export const abrirPartida = mutation({
     // solo se juega hasta la etapa desbloqueada (MC-15)
     if (args.juegoId && a.etapa > etapaAbierta(await progresoDe(ctx, usuario._id, args.juegoId), a.etapas))
       return { ok: false as const, motivo: 'etapa bloqueada' };
-    // una sola abierta por jugador: las anteriores quedan abandonadas sin pagar
-    const ahora = Date.now(),
-      abiertas = await ctx.db
-        .query('partidas')
-        .withIndex('por_dueno_estado', (q) => q.eq('dueno', usuario._id).eq('estado', 'abierta'))
-        .collect();
-    const turno = turnoDeApertura({ abiertas: abiertas.map((p) => ({ id: p._id, inicio: p.inicio ?? 0 })), ahora });
+    const ahora = Date.now();
+    const turno = await reservarApertura(ctx, usuario._id, ahora);
     if (!turno.ok) return turno;
-    for (const p of abiertas)
-      await ctx.db.patch(p._id, { estado: 'abandonada', cierre: ahora, motivos: ['se abrió otra partida'] });
     const id = await ctx.db.insert('partidas', {
       juegoId: args.juegoId ?? a.motor,
       motor: a.motor,
@@ -247,7 +245,7 @@ const datosJuntos = (p: { _id: string; juegoId: string; motor?: string; etapa: n
 
 /**
  * Abre una partida para jugar con alguien de la sala: un juego del catálogo con motor del kit, modo `duo`, la
- * semilla de los dos y la sala `juego:<id>`. Sin `dueno`: no choca con la partida sola de cada uno. Solo la cierra
+ * semilla de los dos y la sala `juego:<id>`. Comparte el turno de apertura con la partida sola de cada uno. Solo la cierra
  * `cerrarJuntos` con el recibo firmado de la sala.
  */
 export const abrirJuntos = mutation({
@@ -257,6 +255,9 @@ export const abrirJuntos = mutation({
     const juego = await juegoDelCatalogo(ctx, args.juegoId);
     if (!juego) return { ok: false as const, motivo: 'juego desconocido' };
     if (!motorJuntos(juego.motor)) return { ok: false as const, motivo: 'ese juego no se juega entre dos' };
+    const ahora = Date.now();
+    const turno = await reservarApertura(ctx, usuario._id, ahora);
+    if (!turno.ok) return turno;
     const id = await ctx.db.insert('partidas', {
       juegoId: args.juegoId,
       motor: juego.motor,
@@ -270,6 +271,7 @@ export const abrirJuntos = mutation({
       inicio: Date.now(),
     });
     await ctx.db.patch(id, { sala: `juego:${id}` });
+    await ctx.scheduler.runAfter(PARTIDA.esperaMaxMs, vencerEsperaRef, { partidaId: id });
     const p = await ctx.db.get(id);
     return p ? datosJuntos(p) : { ok: false as const, motivo: 'no se abrió' };
   },
@@ -285,7 +287,14 @@ export const unirseJuntos = mutation({
     if (!p?.sala || p.estado !== 'abierta') return { ok: false as const, motivo: 'ya no está' };
     if (p.jugadores.includes(usuario._id)) return datosJuntos(p);
     if (p.jugadores.length >= PARTIDA.cupo) return { ok: false as const, motivo: 'llena' };
-    if (Date.now() - (p.inicio ?? 0) > PARTIDA.esperaMaxMs) return { ok: false as const, motivo: 'ya no está' };
+    if (Date.now() - (p.inicio ?? 0) >= PARTIDA.esperaMaxMs) {
+      await ctx.db.patch(p._id, { estado: 'vencida', cierre: Date.now() });
+      return { ok: false as const, motivo: 'ya no está' };
+    }
+    for (const otro of p.jugadores)
+      if (await hayBloqueo(ctx, usuario._id, otro)) return { ok: false as const, motivo: 'bloqueado' };
+    const turno = await reservarApertura(ctx, usuario._id, Date.now(), p._id);
+    if (!turno.ok) return turno;
     await ctx.db.patch(p._id, { jugadores: [...p.jugadores, usuario._id] });
     return datosJuntos(p);
   },
@@ -371,3 +380,44 @@ export const cerrarJuntos = mutation({
     return { ok: true as const, ya: false, ...mia, ...(await terminar(s, r && yo?.premio ? { partida: r } : {})) };
   },
 });
+
+const vencerEsperaRef = makeFunctionReference<'mutation', { partidaId: GenericId<'partidas'> }>(
+  'partidas:vencerEspera',
+) as unknown as FunctionReference<'mutation', 'internal', { partidaId: GenericId<'partidas'> }>;
+const internalMutation: MutationBuilder<Modelo, 'internal'> = internalMutationGeneric;
+export const vencerEspera = internalMutation({
+  args: { partidaId: v.id('partidas') },
+  handler: async (ctx, { partidaId }) => {
+    const p = await ctx.db.get(partidaId);
+    if (
+      p?.estado === 'abierta' &&
+      p.sala &&
+      p.jugadores.length < PARTIDA.cupo &&
+      Date.now() >= (p.inicio ?? 0) + PARTIDA.esperaMaxMs
+    )
+      await ctx.db.patch(p._id, { estado: 'vencida', cierre: Date.now() });
+  },
+});
+
+async function reservarApertura(
+  ctx: GenericMutationCtx<Modelo>,
+  usuarioId: GenericId<'usuarios'>,
+  ahora: number,
+  conservar?: GenericId<'partidas'>,
+) {
+  const ultima = await ctx.db
+    .query('aperturas')
+    .withIndex('por_usuario', (q) => q.eq('usuarioId', usuarioId))
+    .unique();
+  if (ultima && ahora - ultima.momento < APERTURA_MIN_MS) return { ok: false as const, motivo: 'muy seguido' };
+  if (ultima) await ctx.db.patch(ultima._id, { momento: ahora });
+  else await ctx.db.insert('aperturas', { usuarioId, momento: ahora });
+  const abiertas = await ctx.db
+    .query('partidas')
+    .withIndex('por_estado', (q) => q.eq('estado', 'abierta'))
+    .collect();
+  for (const p of abiertas)
+    if (p._id !== conservar && p.jugadores.includes(usuarioId))
+      await ctx.db.patch(p._id, { estado: 'vencida', cierre: ahora, motivos: ['se abrió otra partida'] });
+  return { ok: true as const };
+}

@@ -116,9 +116,13 @@ export const social = {
   quitar: (amistadId: string) => conRelectura(llamar('mutation', 'amigos:quitar', { amistadId })),
   /** bloquea en Convex y en la sala de una vez (deja de verse al momento) */
   bloquear: async (id: string) => {
-    net.bloquearEnSala(id, true);
-    useChat.setState((s) => ({ mensajes: s.mensajes.filter((m) => m.de !== id) }));
-    return conRelectura(llamar('mutation', 'amigos:bloquear', { id }));
+    const r = await conRelectura(llamar('mutation', 'amigos:bloquear', { id }));
+    if (r.ok) {
+      net.bloquearEnSala(id, true);
+      useChat.setState((s) => ({ mensajes: s.mensajes.filter((m) => m.de !== id) }));
+    } else if (r.motivo === 'tope-bloqueos')
+      useGame.getState().toast('Ya tenés 200 bloqueados. Quitá uno para agregar otro.', '⚠️');
+    return r;
   },
   desbloquear: async (id: string) => {
     net.bloquearEnSala(id, false);

@@ -14,12 +14,9 @@ import { DurableObject } from 'cloudflare:workers';
 import {
   acotarEje,
   animacionPermitida,
-  type Cubeta,
-  cubetaNueva,
   emoteValido,
   nombreSala,
   partirSalaCerrada,
-  permitirMensaje,
   SALA,
   SECRETO_MIN,
   salaValida,
@@ -27,10 +24,11 @@ import {
   zonaValida,
 } from '@mundo-catrucho/reglas';
 import { botsDe, cambiosDeBots, cuantosBots } from './bots';
-import { esDeChat, recibirChat } from './chat';
+import { bloqueadosEntre, esDeChat, recibirChat } from './chat';
 import { invitacionValida } from './comun';
 import { alarmaOcupacion, type EnvOcupacion, programarOcupacion } from './ocupacion';
 import { alarmaPartida, entrarPartida, mensajePartida, salirPartida } from './partida';
+import { gastarRitmo } from './ritmo';
 import { entrarViaje, mensajeViaje, salirViaje } from './viaje';
 
 export interface Env extends EnvOcupacion {
@@ -64,8 +62,6 @@ function rechazar(codigo: number, motivo: string) {
 }
 
 export class Sala extends DurableObject<Env> {
-  /** ritmo de mensajes por conexión; si la sala hiberna se vuelve a llenar, que es lo justo */
-  private ritmo = new WeakMap<WebSocket, Cubeta>();
   private conectados() {
     return this.ctx.getWebSockets().filter((w) => w.readyState === WebSocket.OPEN);
   }
@@ -120,7 +116,8 @@ export class Sala extends DurableObject<Env> {
     const antes = this.conectados().filter((w) => w.deserializeAttachment()).length;
     if (antes >= SALA.cupo) return rechazar(CIERRE.llena, 'llena');
     const { id, nombre, avatar, bloqueados = [] } = v.pase;
-    const yo: Jugador = { id, nombre, avatar, x: 0, y: 0, z: 0, yaw: 0, anim: 'idle', sala, bloqueados };
+    await this.ctx.storage.put(`bloqueos:${id}`, bloqueados);
+    const yo: Jugador = { id, nombre, avatar, x: 0, y: 0, z: 0, yaw: 0, anim: 'idle', sala, bloqueados: [] };
     const [cliente, servidor] = Object.values(new WebSocketPair());
     this.ctx.acceptWebSocket(servidor);
     servidor.serializeAttachment(yo);
@@ -145,9 +142,7 @@ export class Sala extends DurableObject<Env> {
     if (typeof raw !== 'string' || raw.length > SALA.mensajeMax) return;
     const yo = ws.deserializeAttachment() as Jugador | null;
     if (!yo) return;
-    let cubeta = this.ritmo.get(ws);
-    if (!cubeta) this.ritmo.set(ws, (cubeta = cubetaNueva(Date.now())));
-    if (!permitirMensaje(cubeta, Date.now())) return;
+    if (!(await gastarRitmo(this.ctx, yo.id, 'general'))) return;
     let m: Record<string, unknown>;
     try {
       m = JSON.parse(raw);
@@ -168,10 +163,15 @@ export class Sala extends DurableObject<Env> {
     } else if (m.t === 'emote' && emoteValido(m.id)) {
       this.difundir({ t: 'emote', id: yo.id, emote: m.id }, ws);
     } else if (esDeChat(m)) {
-      return recibirChat(this.ctx.getWebSockets(), ws, yo, m, this.env.SALA_SECRETO);
+      return recibirChat(this.ctx, this.ctx.getWebSockets(), ws, yo, m, this.env.SALA_SECRETO);
     } else if (m.t === 'invita') {
       const inv = invitacionValida(m);
-      if (inv) this.difundir({ t: 'invita', id: yo.id, ...inv }, ws);
+      if (inv)
+        for (const w of this.conectados()) {
+          const otro = w.deserializeAttachment() as Jugador | null;
+          if (w !== ws && otro && !(await bloqueadosEntre(this.ctx, yo, otro)))
+            w.send(JSON.stringify({ t: 'invita', id: yo.id, ...inv }));
+        }
     }
   }
   async webSocketClose(ws: WebSocket) {

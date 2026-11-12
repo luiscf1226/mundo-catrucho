@@ -238,7 +238,12 @@ try {
   const dani = await abrir(yoro, await pase(yoro, 'dani1', 'Dani'));
   await espera(dani, 'hola');
   // Eli ya traía bloqueada a Carla desde Convex (en el pase)
-  const eli = await abrir(yoro, await pase(yoro, 'eli1', 'Eli', { bloqueados: ['carla1'] }));
+  const eli = await abrir(
+    yoro,
+    await pase(yoro, 'eli1', 'Eli', {
+      bloqueados: ['carla1', ...Array.from({ length: 199 }, (_, i) => `bloqueado${i}`)],
+    }),
+  );
   const holaEli = await espera(eli, 'hola');
   if (JSON.stringify(holaEli).includes('bloqueados'))
     throw new Error('la bienvenida cuenta a quién bloqueó cada quien');
@@ -279,6 +284,21 @@ try {
   const pasaron = chats(carla).length - antesChat;
   if (pasaron !== CHAT.ritmo.rafaga) throw new Error(`ritmo del chat: pasaron ${pasaron} de 15`);
   if (!dani.cola.some((m) => m.t === 'chat-no' && m.motivo === 'ritmo')) throw new Error('sin aviso de ritmo');
+  const dani2 = await abrir(yoro, await pase(yoro, 'dani1', 'Dani'));
+  dani2.ws.send(JSON.stringify({ t: 'chat', texto: 'reconecté para saltarme el ritmo' }));
+  await espera(dani2, 'chat-no');
+  if (chats(carla).some((m) => m.texto === 'reconecté para saltarme el ritmo'))
+    throw new Error('reconectar llenó la cubeta');
+  carla.ws.send(JSON.stringify({ t: 'invita', tipo: 'viaje', sala: 'viaje:prueba123' }));
+  eli.ws.send(JSON.stringify({ t: 'invita', tipo: 'viaje', sala: 'viaje:prueba456' }));
+  await sleep(200);
+  if (
+    eli.cola.some((m) => m.t === 'invita' && m.id === 'carla1') ||
+    carla.cola.some((m) => m.t === 'invita' && m.id === 'eli1')
+  )
+    throw new Error('invitación entre bloqueados');
+  if (!dani2.cola.some((m) => m.t === 'invita')) throw new Error('no llegó invitación permitida');
+  dani2.ws.close();
   for (const c of [carla, dani, eli]) c.ws.close();
 
   // --- MC-23: con poca gente hay bots marcados; se van cuando entra gente y vuelven cuando se va
@@ -373,7 +393,10 @@ try {
   if (await verificarRecibo(finA.recibo, randomBytes(32).toString('hex'))) throw new Error('verificó con otra llave');
   // quien vuelve después del fin recibe el mismo recibo
   const pb2 = await abrir(juego, await pase(juego, 'beto2', 'Beto'), await conActa());
-  if ((await espera(pb2, 'hola')).partida.recibo !== finA.recibo) throw new Error('sin recibo al volver');
+  const finalVuelta = (await espera(pb2, 'hola')).partida;
+  if (finalVuelta.recibo !== finA.recibo) throw new Error('sin recibo al volver');
+  if (JSON.stringify(finalVuelta.resultados) !== JSON.stringify(finA.resultados))
+    throw new Error('sin resultados completos al volver');
   pa.ws.close();
   pb2.ws.close();
   if (duracionPartida(motor, 0, 4) < 60) throw new Error('el reloj de verdad es de 60 s o más');
