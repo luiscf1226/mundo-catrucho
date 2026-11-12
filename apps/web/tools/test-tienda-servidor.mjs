@@ -133,6 +133,17 @@ try {
       gano: false,
     });
     assert.deepEqual(r, { ok: false, motivo: 'ajena' });
+
+    // 8. una sola partida abierta: abrir otra deja la primera abandonada y ya no paga; abrir de seguido se rechaza
+    const yo = `${'0'.repeat(63)}2`;
+    const a = await convex.mutation(abrir, { invitado: yo, motor: 'trivia', etapa: 0 });
+    assert(a.ok);
+    assert.equal((await convex.mutation(abrir, { invitado: yo, motor: 'trivia', etapa: 0 })).ok, false, 'muy seguido');
+    await t.sleep(1200);
+    const b = await convex.mutation(abrir, { invitado: yo, motor: 'trivia', etapa: 0 });
+    assert(b.ok);
+    const ra = await convex.mutation(cerrar, { invitado: yo, partidaId: a.id, puntos: 0, estrellas: 0, gano: false });
+    assert.deepEqual(ra, { ok: false, motivo: 'cerrada' });
   });
 } finally {
   rmSync(out, { recursive: true, force: true });

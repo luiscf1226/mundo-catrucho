@@ -1,11 +1,30 @@
 // Abrir y cerrar una partida. El servidor mide la duración con su propio reloj, valida el resultado con
 // `validarResultado` y paga una sola vez con `premioPartida` y `ganarXp`. Funciones puras: Convex las llama.
 import { type Avance, ganarXp, premioPartida } from './premios.ts';
-import { DURACION_MAX_S, validarResultado } from './topes.ts';
+import { DURACION_MAX_S, type Tema, validarResultado } from './topes.ts';
 
 export interface JuegoDeCatalogo {
   motor: string;
   etapas: number;
+  tema?: Tema;
+}
+
+/** Entre dos aperturas del mismo jugador tiene que pasar al menos esto (ms). */
+export const APERTURA_MIN_MS = 1000;
+export type Turno = { ok: true; abandonar: string[] } | { ok: false; motivo: string };
+/**
+ * Un jugador tiene como mucho una partida abierta. Al abrir otra, las anteriores quedan «abandonada» sin pagar
+ * (también las que dejó al salir de un minijuego). Abrir más seguido que `APERTURA_MIN_MS` se rechaza.
+ */
+export function turnoDeApertura({
+  abiertas,
+  ahora,
+}: {
+  abiertas: readonly { id: string; inicio: number }[];
+  ahora: number;
+}): Turno {
+  if (abiertas.some((p) => ahora - p.inicio < APERTURA_MIN_MS)) return { ok: false, motivo: 'muy seguido' };
+  return { ok: true, abandonar: abiertas.map((p) => p.id) };
 }
 export type Apertura = { ok: true; motor: string; etapa: number; etapas: number } | { ok: false; motivo: string };
 /**
@@ -42,6 +61,8 @@ export interface PartidaAbierta {
   etapas: number;
   /** milisegundos Unix del servidor al abrir */
   inicio: number;
+  /** tema del juego en el catálogo, para los motores que sacan de ahí sus metas */
+  tema?: Tema;
 }
 export interface Cierre {
   puntos: number;
@@ -91,8 +112,11 @@ export function decidirCierre({
     duracion,
     etapa: partida.etapa,
     etapas: partida.etapas,
+    tema: partida.tema,
   });
   if (!v.ok) return { tipo: 'rechazada', motivos: v.motivos, duracion };
+  // un motor sin tope no se puede validar: no paga
+  if (!v.conocido) return { tipo: 'rechazada', motivos: ['motor sin tope'], duracion };
   const premio = premioPartida({ gano: cierre.gano, estrellas: cierre.estrellas }),
     nuevo = ganarXp(avance, premio.xp);
   return {

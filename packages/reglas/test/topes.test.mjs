@@ -1,5 +1,6 @@
 // validarResultado: un puntaje normal pasa y uno imposible se rechaza, con las metas reales de cada motor.
 import assert from 'node:assert/strict';
+import { readdirSync, readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { difDe, estrellasPara, TOPES, validarResultado } from '../src/index.ts';
 
@@ -135,8 +136,8 @@ test('Copán e Islas: un puntaje imposible para el reloj real no pasa', () => {
 });
 
 test('Comayagua: el reloj y las metas de sus motores también se cuidan', () => {
-  // 80 s de reloj en la primera etapa: más de 20 pts por segundo no cabe
-  falla({ motor: 'comayagua.aserrin', puntos: 2000, estrellas: 3, duracion: 82, etapa: 0, gano: true }, 'no caben');
+  // 80 s de reloj en la primera etapa: el aserrín admite 35 pts/s (un jugador fino hace ~24), 3000 no cabe
+  falla({ motor: 'comayagua.aserrin', puntos: 3000, estrellas: 3, duracion: 82, etapa: 0, gano: true }, 'no caben');
   falla({ motor: 'comayagua.eco', puntos: 340, estrellas: 3, duracion: 40, etapa: 0, gano: true }, 'no se puede');
   falla({ motor: 'comayagua.mantas', puntos: 150, estrellas: 2, duracion: 82, etapa: 0, gano: true }, 'estrellas');
   pasa({ motor: 'comayagua.reloj', puntos: 460, estrellas: 3, duracion: 82, etapa: 0, gano: true });
@@ -160,4 +161,84 @@ test('Atlántida: cada motor tiene tope y un puntaje imposible no pasa', () => {
   falla({ motor: 'atlantida.pancoco', puntos: 700, estrellas: 3, duracion: 40, etapa: 0, gano: true }, 'no se puede');
   falla({ motor: 'atlantida.lancetilla', puntos: 450, estrellas: 3, duracion: 81, etapa: 0, gano: true }, 'estrellas');
   falla({ motor: 'atlantida.canopy', puntos: 0, estrellas: 0, duracion: 81, etapa: 0, gano: true }, 'ganó con 0');
+});
+
+const datos = (f) => JSON.parse(readFileSync(new URL(`../../../apps/web/shared/data/${f}`, import.meta.url), 'utf8'));
+
+test('ningún motor queda sin tope: todos los de minigames.json y del catálogo tienen fila con metas', () => {
+  const catalogo = readdirSync(new URL('../../../apps/web/shared/data/catalogo/', import.meta.url))
+    .filter((f) => f.endsWith('.json'))
+    .flatMap((f) => Object.values(datos(`catalogo/${f}`)).flatMap((d) => (d.juegos ?? []).map((j) => j[2])));
+  const motores = new Set([...datos('minigames.json').map((m) => m.id), ...catalogo]);
+  const sinTope = [...motores].filter((m) => !TOPES[m]?.metas);
+  assert.deepEqual(sinTope, [], `motores sin tope: ${sinTope.join(', ')}`);
+});
+
+test('ganar a los 3 s con 0 puntos y 3 estrellas no pasa en ningún motor', () => {
+  for (const motor of Object.keys(TOPES))
+    for (const etapa of [0, 2]) falla({ motor, puntos: 0, estrellas: 3, duracion: 3, etapa, etapas: 3, gano: true });
+});
+
+test('ganar con 0 puntos y 0 estrellas no pasa en ningún motor (salvo la carrera, que gana por tiempo)', () => {
+  for (const motor of Object.keys(TOPES)) {
+    if (motor === 'carrera') continue;
+    falla({ motor, puntos: 0, estrellas: 0, duracion: 200, etapa: 0, etapas: 3, gano: true });
+  }
+  // la carrera sí: llegar en 100 s (más que el bronce) gana sin estrellas, pero no más rápido de lo que dicen los puntos
+  pasa({ motor: 'carrera', puntos: 200, estrellas: 0, duracion: 101, etapa: 0, gano: true });
+  falla({ motor: 'carrera', puntos: 200, estrellas: 0, duracion: 30, etapa: 0, gano: true }, 'no se puede');
+});
+
+test('ruta: las estrellas van por el tiempo que sobra y perder es agotar el reloj', () => {
+  // etapa 0 de 3: límite 70 s; 3 estrellas dejan 55 % (≥ 385 pts) y no se cruza en menos de 15 s
+  pasa({ motor: 'ruta', puntos: 520, estrellas: 3, duracion: 30, etapa: 0, etapas: 3, gano: true });
+  falla({ motor: 'ruta', puntos: 300, estrellas: 3, duracion: 40, etapa: 0, etapas: 3, gano: true }, 'estrellas');
+  falla({ motor: 'ruta', puntos: 700, estrellas: 3, duracion: 8, etapa: 0, etapas: 3, gano: true }, 'no se puede');
+  pasa({ motor: 'ruta', puntos: 80, estrellas: 0, duracion: 72, etapa: 0, etapas: 3, gano: false });
+  falla({ motor: 'ruta', puntos: 80, estrellas: 0, duracion: 30, etapa: 0, etapas: 3, gano: false }, 'no se puede');
+  falla({ motor: 'ruta', puntos: 100, estrellas: 0, duracion: 40, etapa: 0, etapas: 3, gano: true }, 'sin estrellas');
+});
+
+test('ritmo, corte, monta y pesca: metas y duración reales', () => {
+  // ritmo: la canción dura ≥ 58 s; las metas mínimas (14 000 de máximo) piden 2100 pts para ganar en la etapa 1
+  assert.deepEqual(TOPES.ritmo.metas(0, {}), [2100, 4200, 6300]);
+  pasa({ motor: 'ritmo', puntos: 9000, estrellas: 2, duracion: 66, etapa: 0, etapas: 3, gano: true });
+  falla({ motor: 'ritmo', puntos: 9000, estrellas: 2, duracion: 40, etapa: 0, etapas: 3, gano: true }, 'no se puede');
+  falla({ motor: 'ritmo', puntos: 1000, estrellas: 1, duracion: 66, etapa: 0, etapas: 3, gano: true }, 'estrellas');
+  // corte: reloj 70–100 s y se gana con la primera meta (200 en la etapa 1)
+  pasa({ motor: 'corte', puntos: 900, estrellas: 3, duracion: 72, etapa: 0, etapas: 3, gano: true });
+  falla({ motor: 'corte', puntos: 150, estrellas: 0, duracion: 72, etapa: 0, etapas: 3, gano: true }, 'ganó con 150');
+  falla({ motor: 'corte', puntos: 900, estrellas: 3, duracion: 30, etapa: 0, etapas: 3, gano: true }, 'no se puede');
+  // monta: ganar es aguantar 60 s; derribado puede ser antes
+  pasa({ motor: 'monta', puntos: 1500, estrellas: 2, duracion: 62, etapa: 0, etapas: 3, gano: true });
+  falla({ motor: 'monta', puntos: 1500, estrellas: 2, duracion: 40, etapa: 0, etapas: 3, gano: true }, 'no se puede');
+  pasa({ motor: 'monta', puntos: 300, estrellas: 0, duracion: 20, etapa: 0, etapas: 3, gano: false });
+  // pesca: metas por los peces del tema; con peces caros las metas suben
+  assert.deepEqual(TOPES.pesca.metas(0, {}), [105, 195, 245]);
+  const caros = {
+    peces: [
+      ['Marlín', 200, '#000'],
+      ['Atún', 100, '#000'],
+    ],
+  };
+  assert.deepEqual(TOPES.pesca.metas(0, caros), [450, 825, 1050]);
+  pasa({ motor: 'pesca', puntos: 200, estrellas: 2, duracion: 88, etapa: 0, etapas: 3, gano: true });
+  falla(
+    { motor: 'pesca', puntos: 200, estrellas: 2, duracion: 88, etapa: 0, etapas: 3, gano: true, tema: caros },
+    'ganó con 200',
+  );
+  falla({ motor: 'pesca', puntos: 200, estrellas: 2, duracion: 20, etapa: 0, etapas: 3, gano: true }, 'no se puede');
+});
+
+test('jugadores finos de Vagón, Aserrín, Pan de coco y Lancetilla cobran', () => {
+  pasa({ motor: 'atlantida.vagon', puntos: 1993, estrellas: 3, duracion: 97, etapa: 2, etapas: 3, gano: true });
+  pasa({ motor: 'atlantida.vagon', puntos: 2400, estrellas: 3, duracion: 97, etapa: 2, etapas: 3, gano: true });
+  pasa({ motor: 'comayagua.aserrin', puntos: 1900, estrellas: 3, duracion: 82, etapa: 0, etapas: 3, gano: true });
+  pasa({ motor: 'atlantida.pancoco', puntos: 2500, estrellas: 3, duracion: 82, etapa: 0, etapas: 3, gano: true });
+  pasa({ motor: 'atlantida.lancetilla', puntos: 2200, estrellas: 3, duracion: 82, etapa: 0, etapas: 3, gano: true });
+  // el resto del kit sigue en 20 pts/s
+  falla(
+    { motor: 'atlantida.balsa', puntos: 1700, estrellas: 3, duracion: 82, etapa: 0, etapas: 3, gano: true },
+    'no caben',
+  );
 });

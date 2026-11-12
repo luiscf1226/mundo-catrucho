@@ -89,7 +89,24 @@ export function secretoInvitado() {
 }
 
 const SIN_CONEXION: Fallo = { ok: false, motivo: 'sin-conexion' };
+/** Espera tras un plazo vencido antes de volver a leer el perfil: la llamada vencida pudo aplicarse después. */
+const RELEER_MS = 2500;
 let cliente: ConvexHttpClient | null = null;
+let releyendo = false;
+/**
+ * Qué hacer cuando una llamada vence: el store vuelve a leer el perfil (`entrar`) para que el saldo que se ve sea
+ * el del servidor aunque la compra o el pago sí se hayan aplicado.
+ */
+export const alVencer: { releer: (() => Promise<unknown>) | null } = { releer: null };
+function releerDespues() {
+  if (releyendo || !alVencer.releer) return;
+  releyendo = true;
+  setTimeout(() => {
+    void (alVencer.releer?.() ?? Promise.resolve()).finally(() => {
+      releyendo = false;
+    });
+  }, RELEER_MS);
+}
 let cola: Promise<unknown> = Promise.resolve();
 type Ref = (typeof fn)[keyof typeof fn];
 /**
@@ -103,12 +120,15 @@ function llamar<F extends Ref>(ref: F, args: Omit<FunctionArgs<F>, 'invitado'>):
   const turno = cola.then(async () => {
     let timer: ReturnType<typeof setTimeout> | undefined;
     try {
-      return await Promise.race([
+      const r = await Promise.race([
         c.mutation(ref as FunctionReference<'mutation'>, { ...args, invitado: secretoInvitado() }, { skipQueue: true }),
         new Promise<null>((resolve) => {
           timer = setTimeout(() => resolve(null), PLAZO_MS);
         }),
       ]);
+      // venció el plazo: la mutación pudo llegar igual; se relee el perfil (sin encadenar relecturas)
+      if (r === null && ref !== fn.entrar) releerDespues();
+      return r;
     } catch {
       return null;
     } finally {

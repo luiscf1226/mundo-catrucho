@@ -1,6 +1,13 @@
 // Partidas (MC-14). `abrirPartida` guarda motor, etapa y la hora del servidor; `cerrarPartida` mide la duración
 // con ese reloj, valida el resultado con @mundo-catrucho/reglas y paga una sola vez.
-import { decidirApertura, decidirCierre, type JuegoDeCatalogo, validarResultado } from '@mundo-catrucho/reglas';
+import {
+  decidirApertura,
+  decidirCierre,
+  type JuegoDeCatalogo,
+  type Tema,
+  turnoDeApertura,
+  validarResultado,
+} from '@mundo-catrucho/reglas';
 import {
   type DataModelFromSchemaDefinition,
   type GenericQueryCtx,
@@ -44,7 +51,7 @@ const EMPAQUETADO = { ...catCentro, ...catNorte, ...catOccidente, ...catSurOrien
   { juegos?: Tupla[] }
 >;
 
-/** Motor y etapas de un juego 'depto.juego': del último catálogo publicado o, si no hay, del empaquetado. */
+/** Motor, etapas y tema de un juego 'depto.juego': del último catálogo publicado o, si no hay, del empaquetado. */
 async function juegoDelCatalogo(ctx: GenericQueryCtx<Modelo>, juegoId: string): Promise<JuegoDeCatalogo | null> {
   const deptId = juegoId.split('.')[0];
   const ultima = await ctx.db.query('catalogo').withIndex('por_version').order('desc').first();
@@ -53,12 +60,17 @@ async function juegoDelCatalogo(ctx: GenericQueryCtx<Modelo>, juegoId: string): 
       .query('catalogo')
       .withIndex('por_version', (q) => q.eq('version', ultima.version).eq('deptId', deptId))
       .first();
-    const juegos = (fila?.datos?.catalogo?.juegos ?? []) as { id: string; motor: string; etapas: number }[];
+    const juegos = (fila?.datos?.catalogo?.juegos ?? []) as {
+      id: string;
+      motor: string;
+      etapas: number;
+      tema?: Tema;
+    }[];
     const j = juegos.find((x) => x.id === juegoId);
-    return j ? { motor: j.motor, etapas: j.etapas } : null;
+    return j ? { motor: j.motor, etapas: j.etapas, tema: j.tema ?? {} } : null;
   }
   const t = EMPAQUETADO[deptId]?.juegos?.find((x) => `${deptId}.${x[0]}` === juegoId);
-  return t ? { motor: t[2], etapas: typeof t[8] === 'number' ? t[8] : 3 } : null;
+  return t ? { motor: t[2], etapas: typeof t[8] === 'number' ? t[8] : 3, tema: (t[7] ?? {}) as Tema } : null;
 }
 
 /** Abre una partida antes de jugar. Devuelve su id; sin él no se paga nada al terminar. */
@@ -70,6 +82,16 @@ export const abrirPartida = mutation({
     if (args.juegoId && !juego) return { ok: false as const, motivo: 'juego desconocido' };
     const a = decidirApertura({ motor: args.motor, etapa: args.etapa, juego, motoresSueltos: MOTORES_SUELTOS });
     if (!a.ok) return a;
+    // una sola abierta por jugador: las anteriores quedan abandonadas sin pagar
+    const ahora = Date.now(),
+      abiertas = await ctx.db
+        .query('partidas')
+        .withIndex('por_dueno_estado', (q) => q.eq('dueno', usuario._id).eq('estado', 'abierta'))
+        .collect();
+    const turno = turnoDeApertura({ abiertas: abiertas.map((p) => ({ id: p._id, inicio: p.inicio ?? 0 })), ahora });
+    if (!turno.ok) return turno;
+    for (const p of abiertas)
+      await ctx.db.patch(p._id, { estado: 'abandonada', cierre: ahora, motivos: ['se abrió otra partida'] });
     const id = await ctx.db.insert('partidas', {
       juegoId: args.juegoId ?? a.motor,
       motor: a.motor,
@@ -78,8 +100,9 @@ export const abrirPartida = mutation({
       modo: args.modo ?? 'solo',
       semilla: Math.floor(Math.random() * 2 ** 31),
       jugadores: [usuario._id],
+      dueno: usuario._id,
       estado: 'abierta',
-      inicio: Date.now(),
+      inicio: ahora,
     });
     return { ok: true as const, id };
   },
@@ -95,7 +118,8 @@ export const cerrarPartida = mutation({
     const { usuario, perfil } = await asegurarUsuario(ctx, args),
       partida = await ctx.db.get(args.partidaId);
     if (!partida?.motor || partida.inicio === undefined) return { ok: false as const, motivo: 'ajena' as const };
-    const ahora = Date.now();
+    const ahora = Date.now(),
+      juego = partida.juegoId !== partida.motor ? await juegoDelCatalogo(ctx, partida.juegoId) : null;
     const d = decidirCierre({
       partida: {
         estado: partida.estado,
@@ -104,6 +128,7 @@ export const cerrarPartida = mutation({
         etapa: partida.etapa,
         etapas: partida.etapas ?? 1,
         inicio: partida.inicio,
+        tema: juego?.tema,
       },
       usuarioId: usuario._id,
       ahora,

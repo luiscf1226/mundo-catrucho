@@ -145,12 +145,12 @@ const ok = await run('reglas', file, { hash: '#test', width: 1280, height: 800 }
     .filter((f) => f.endsWith('.json'))
     .flatMap((f) =>
       Object.entries(JSON.parse(readFileSync(resolve(raiz, 'shared/data/catalogo', f), 'utf8'))).flatMap(([dept, c]) =>
-        c.juegos.map((j) => ({ id: `${dept}.${j[0]}`, motor: j[2], etapas: j[8] ?? 3 })),
+        c.juegos.map((j) => ({ id: `${dept}.${j[0]}`, motor: j[2], etapas: j[8] ?? 3, tema: j[7] ?? {} })),
       ),
     );
   let revisadas = 0;
   for (const [motor, tope] of Object.entries(TOPES)) {
-    if (!tope.reloj) continue;
+    if (!tope.kit) continue;
     const j = juegos.find((x) => x.motor === motor);
     assert.ok(j, `${motor} no tiene juego en el catálogo`);
     for (const etapa of sinGpu ? [0] : [0, j.etapas - 1]) {
@@ -174,6 +174,52 @@ const ok = await run('reglas', file, { hash: '#test', width: 1280, height: 800 }
   }
   await t.ev('window.__mc.store.getState().goLobby()');
   console.log(`PASA metas y reloj de ${revisadas} etapas de motores del kit iguales a TOPES`);
+
+  // motores propios con metas en la intro: corte, ritmo y pesca dicen «N pts»; monta y ruta, segundos y estilo.
+  // Ritmo y pesca dependen del tema: se revisan todos sus juegos. Las de ritmo en TOPES son una cota inferior.
+  const metasIntro = async (j, etapa) => {
+    await t.ev('window.__mc.store.getState().goLobby()');
+    await t.waitFor(`!document.querySelector('[data-testid=mg-intro]')`);
+    await t.ev(`(() => {
+      const s = window.__mc.store;
+      s.setState((st) => ({ profile: { ...st.profile, juegos: { ...st.profile.juegos,
+        ${JSON.stringify(j.id)}: { etapa: ${etapa}, stars: [], best: 0, label: '', veces: 0 } } } }));
+      s.getState().startJuego(${JSON.stringify(j.id)});
+    })()`);
+    await t.waitFor(
+      `!!document.querySelector('[data-testid=mg-meta-2]') && window.__mc.store.getState().mg?.etapa === ${etapa}`,
+    );
+    return t.ev(
+      `[0, 1, 2].map((i) => Number(document.querySelector('[data-testid=mg-meta-' + i + ']').innerText.match(/[\\d.]+/g).pop()))`,
+    );
+  };
+  let propias = 0;
+  for (const motor of ['corte', 'ritmo', 'pesca', 'monta', 'ruta']) {
+    const deMotor = juegos.filter((x) => x.motor === motor);
+    for (const j of ['ritmo', 'pesca'].includes(motor) ? deMotor : deMotor.slice(0, 1))
+      for (const etapa of sinGpu ? [0] : [0, j.etapas - 1]) {
+        const intro = await metasIntro(j, etapa),
+          dif = difDe(etapa, j.etapas),
+          tope = TOPES[motor];
+        if (motor === 'monta') {
+          // «Aguantar N s», «m2 pts de estilo», «m3 pts de estilo»
+          const [, m2, m3] = tope.metas(dif, j.tema);
+          assert.deepEqual([intro[1], intro[2]], [m2, m3], `${j.id} etapa ${etapa}: estilo`);
+          assert.equal(tope.duracionMin({ puntos: 0, dif, gano: true }), intro[0], `${j.id}: aguantar`);
+        } else if (motor === 'ruta') {
+          // «Llegar a la meta en TL s»: perder es agotar ese reloj
+          assert.equal(tope.duracionMin({ puntos: 0, dif, gano: false }), intro[0], `${j.id}: límite`);
+        } else {
+          const m = tope.metas(dif, j.tema);
+          if (motor === 'ritmo')
+            m.forEach((x, i) => assert.ok(x <= intro[i], `${j.id} etapa ${etapa}: meta ${i} ${x} > ${intro[i]}`));
+          else assert.deepEqual(m, intro, `${j.id} etapa ${etapa}: metas`);
+        }
+        propias++;
+      }
+  }
+  await t.ev('window.__mc.store.getState().goLobby()');
+  console.log(`PASA metas de ${propias} etapas de corte, ritmo, pesca, monta y ruta cuadran con TOPES`);
   assert.equal(t.errors.length, 0, 'Sin excepciones ni red no permitida');
 });
 process.exitCode = ok ? 0 : 1;

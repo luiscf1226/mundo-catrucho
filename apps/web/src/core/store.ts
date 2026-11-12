@@ -29,7 +29,7 @@ import {
   SHOP,
 } from './data';
 import { player } from './player';
-import { type PerfilServidor, SERVIDOR, servidor } from './servidor';
+import { alVencer, type PerfilServidor, SERVIDOR, servidor } from './servidor';
 import type { AvatarConfig, MinigameId, MinigameResult, Modo, PanelId, Rewards, Scene, V3, Vehiculo } from './types';
 
 const SAVE_KEY = 'mundo-catrucho-v1';
@@ -848,8 +848,12 @@ export const useGame = create<Game>((set, get) => {
   };
 });
 
-// con Convex, al abrir el juego se trae el perfil del servidor (sin Convex no hay ninguna petición)
-if (SERVIDOR) void useGame.getState().sincronizar();
+// con Convex, al abrir el juego se trae el perfil del servidor (sin Convex no hay ninguna petición); si una
+// llamada vence, se vuelve a leer para corregir el saldo que se ve
+if (SERVIDOR) {
+  alVencer.releer = () => useGame.getState().sincronizar();
+  void useGame.getState().sincronizar();
+}
 
 /** El juego se detiene mientras hay un panel o un diálogo abierto, o antes y después de un minijuego. */
 export const isPaused = () => {

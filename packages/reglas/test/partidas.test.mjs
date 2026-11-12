@@ -1,7 +1,15 @@
 // Abrir y cerrar partidas: duración medida por el servidor, puntajes imposibles, cerrar dos veces, partidas ajenas.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { DURACION_MAX_S, decidirApertura, decidirCierre, PREMIOS, xpParaNivel } from '../src/index.ts';
+import {
+  APERTURA_MIN_MS,
+  DURACION_MAX_S,
+  decidirApertura,
+  decidirCierre,
+  PREMIOS,
+  turnoDeApertura,
+  xpParaNivel,
+} from '../src/index.ts';
 
 const SUELTOS = ['carrera', 'futbol', 'trivia'];
 const T0 = 1_700_000_000_000;
@@ -112,4 +120,40 @@ test('una partida ajena no se toca', () => {
     tipo: 'error',
     motivo: 'ajena',
   });
+});
+
+test('una sola partida abierta: abrir otra abandona las anteriores', () => {
+  assert.deepEqual(turnoDeApertura({ abiertas: [], ahora: T0 }), { ok: true, abandonar: [] });
+  assert.deepEqual(turnoDeApertura({ abiertas: [{ id: 'p1', inicio: T0 }], ahora: T0 + 5000 }), {
+    ok: true,
+    abandonar: ['p1'],
+  });
+  // abrir más seguido que APERTURA_MIN_MS se rechaza
+  assert.equal(turnoDeApertura({ abiertas: [{ id: 'p1', inicio: T0 }], ahora: T0 + APERTURA_MIN_MS - 1 }).ok, false);
+});
+
+test('abrir dos y cerrar la primera no paga', () => {
+  // la primera se abre; la segunda la deja «abandonada»
+  const primera = abierta(),
+    turno = turnoDeApertura({ abiertas: [{ id: 'p1', inicio: primera.inicio }], ahora: T0 + 2000 });
+  assert.deepEqual(turno.abandonar, ['p1']);
+  const abandonada = { ...primera, estado: 'abandonada' };
+  assert.deepEqual(cerrar({ partida: abandonada }), { tipo: 'error', motivo: 'cerrada' });
+  // la segunda sí se cobra
+  assert.equal(cerrar({ partida: abierta({ inicio: T0 + 2000 }), segundos: 77 }).tipo, 'pagada');
+});
+
+test('un motor sin tope no paga aunque el resultado parezca posible', () => {
+  const d = cerrar({ partida: abierta({ motor: 'copan.nuevo' }), puntos: 300, estrellas: 1 });
+  assert.equal(d.tipo, 'rechazada');
+  assert.deepEqual(d.motivos, ['motor sin tope']);
+});
+
+test('motores sin reloj fijo: ganar con 3 estrellas a los 3 s no paga', () => {
+  for (const motor of ['ruta', 'ritmo', 'corte', 'monta', 'pesca', 'trivia', 'futbol', 'atrapa'])
+    assert.equal(
+      cerrar({ partida: abierta({ motor }), segundos: 3, puntos: 0, estrellas: 3 }).tipo,
+      'rechazada',
+      motor,
+    );
 });

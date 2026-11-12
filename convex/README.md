@@ -31,11 +31,18 @@ cambia `tokenDe`.
 - `tienda:comprar { itemId, equipar? }`: precio de `shop.json`, nunca del cliente; rechaza `no` (no existe o solo
   viene en un atuendo), `ya` y `caro`.
 - `tienda:equipar { itemId }` y `tienda:vestir { avatar }`: solo lo que tenés, cada pieza en su ranura.
-- `partidas:abrirPartida { motor, etapa, juegoId?, modo? }`: motor y etapas salen del último catálogo publicado
-  (o del empaquetado); guarda `inicio` con la hora del servidor.
+- `partidas:abrirPartida { motor, etapa, juegoId?, modo? }`: motor, etapas y tema salen del último catálogo
+  publicado (o del empaquetado); guarda `inicio` con la hora del servidor y `dueno`. Cada jugador tiene como mucho
+  una partida abierta: abrir otra deja las anteriores `abandonada` sin pagar, y abrir dos en menos de
+  `APERTURA_MIN_MS` (1 s) se rechaza.
 - `partidas:cerrarPartida { partidaId, puntos, estrellas, gano }`: duración = ahora − inicio, `validarResultado`
   con la holgura de `HOLGURA_S`, y paga `premioPartida` + `ganarXp` una sola vez. Imposible → `rechazada`;
-  más de 30 min → `vencida`; ajena o ya cerrada → no se toca.
+  motor sin fila en `TOPES` → `rechazada`; más de 30 min → `vencida`; ajena, ya cerrada o abandonada → no se toca.
+  Todo motor de `minigames.json` y del catálogo tiene que tener fila en `TOPES` (lo revisa `topes.test.mjs`).
+
+Pendiente para MC-15 y MC-16: con Convex, el juego no suma Lempiritas ni XP por monedas sueltas, primera visita,
+recuerdos, misiones, logros ni bono de viaje, y no cobra pasajes ni comida del viaje (`gainCoins`/`gainXp` no hacen
+nada con `VITE_CONVEX_URL`). Solo pagan las partidas validadas y solo cobra la tienda.
 
 La lógica pura vive en `packages/reglas` (`tienda.ts`, `partidas.ts`) y se prueba con `node --test`.
 
