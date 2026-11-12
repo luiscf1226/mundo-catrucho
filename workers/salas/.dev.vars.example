@@ -1,0 +1,4 @@
+# Copiá este archivo a .dev.vars (ignorado por git) para `pnpm dev`. El valor tiene que ser el mismo que
+# SALA_SECRETO en el Convex con que compilás el juego; mínimo 32 caracteres. Generalo con:
+#   node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+SALA_SECRETO=

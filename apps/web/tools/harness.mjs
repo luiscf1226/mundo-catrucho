@@ -10,7 +10,8 @@
 //   await t.close();                       // SIEMPRE cerrar (mata Chromium)
 // Variables: CHROME_BIN (por defecto `chromium`), MC_GPU=0 para dibujar sin GPU (en GitHub Actions no hay),
 // MC_LENTO=N multiplica por N el tiempo máximo de cada espera (sin GPU el juego puede ir a menos de 1 cuadro por segundo).
-// t.errors acumula excepciones, console.error y peticiones de red no permitidas.
+// t.errors acumula excepciones, console.error y peticiones de red no permitidas. `red: /regex/` permite además las
+// direcciones que la prueba pide a propósito (el Convex o la sala en vivo de esa prueba, nunca otra cosa).
 import { execFileSync, spawn } from 'node:child_process';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';

@@ -376,3 +376,28 @@ Con la variable, `core/servidor.ts` habla con Convex y el perfil local solo refl
 
 Pruebas reales contra el Convex de desarrollo: `node tools/test-tienda-servidor.mjs` y
 `node tools/test-progreso-servidor.mjs` (necesitan `.env.local`; dejan capturas en `capturas/mc-13/` y `capturas/mc-17/`).
+
+## Salas en vivo (MC-18 a MC-21)
+
+Sin `VITE_SALAS_URL` y `VITE_CONVEX_URL` el juego usa `LocalNet` y no hace ninguna petición. Con las dos:
+
+- `core/net.ts` → `SalaNet`. La zona sale de la escena (`zonaDeEscena`): lobby = `mapa`, departamento = `dept:<id>`,
+  minijuego, viaje, menú o «Jugar solo» = sin sala. Al cambiar de zona cambia de sala solo.
+- Entrar: `GET <sala>/libre/<zona>` dice el primer tramo con espacio (`mapa:0`, `dept:olancho:1`; cupo
+  `SALA.cupo` = 24) → Convex `salas:pase { invitado, sala, nombre }` firma un pase de 60 s para esa sala exacta →
+  WebSocket `/sala/<sala>?pase=…`. Si se llenó en medio (cierre `SALA.cierre.llena`) prueba el tramo siguiente.
+  Sin conexión reintenta cada vez más despacio (hasta 30 s). La misma cuenta en otra pestaña cierra la vieja.
+- `game/EnVivo.tsx` (montado en `GameCanvas`) manda la posición a `SALA.envioHz` (15 Hz; quieto, una por segundo)
+  y dibuja a los demás con `art.Avatar` + `Label` verde con su nombre, interpolando entre las dos últimas posiciones
+  (`muestraEn`, `RETRASO_MS`). El avatar remoto es el que guarda Convex (viene en el pase). Con 24 en una sala
+  son ~240 llamadas de dibujo en el mapa.
+- Emotes: `playEmote` (y el baile de punta del lobby) llaman `net.sendEmote(id)`; los demás ven la animación y
+  el ícono del emote encima por 4 s. La sala solo reparte ids `emote_*` (`emoteValido`).
+- Con sala en vivo el lobby no pone bots simulados; el panel `salas` muestra la sala, cuántos hay y quiénes
+  (`room-estado` con `data-estado`, `room-current`, `room-ocupacion`, `room-solo`, `room-vivo`, `room-gente`).
+- En `window.__mc` quedan `net` y `sala` (estado: `apagada | buscando | en-sala | sin-conexion | otra-pestana`).
+
+`node tools/test-salas-vivo.mjs` levanta `wrangler dev` con un secreto aleatorio y un Convex de mentira que firma
+con `firmarPase` de `@mundo-catrucho/reglas`, compila el juego con las dos variables y juega con dos pestañas:
+24 en el mapa (llamadas de dibujo), el tramo 2, Olancho, moverse a 15 Hz, el emote y salir al entrar a un minijuego.
+Capturas en `capturas/mc-19/`.

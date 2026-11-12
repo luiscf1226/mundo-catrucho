@@ -12,7 +12,7 @@ se juegan minijuegos hechos con cosas de ahí.
 |---|---|---|
 | `apps/web/` | El juego: React, TypeScript, React Three Fiber, Zustand, Tailwind, Vite | Prototipo completo; todo vive en el navegador |
 | `convex/` | Modelo de datos (`schema.ts`) | Solo el esquema; faltan las funciones y conectar un proyecto de Convex |
-| `workers/salas/` | Sala en vivo (Cloudflare Durable Object con WebSocket) | Reparte posiciones y emotes en local; sin pase firmado todavía |
+| `workers/salas/` | Sala en vivo (Cloudflare Durable Object con WebSocket) | Pase firmado de Convex, tramos de 24, posiciones y emotes (MC-18 a MC-21) |
 | `packages/reglas/` | Reglas compartidas (premios, niveles, validación) | Vacío: se llena en la ola 5 |
 | `docs/` | Plan, tickets y su generador | `docs/generador/catrucho.mjs` regenera el plan; `contenido.json` y `viajes.json` son el contenido nuevo |
 

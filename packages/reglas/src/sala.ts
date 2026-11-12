@@ -38,7 +38,38 @@ export const SALA = {
   },
   /** cubeta de mensajes por jugador: `rafaga` de golpe y `porSegundo` sostenidos; lo demás se ignora */
   ritmo: { porSegundo: 20, rafaga: 40 },
+  /** veces por segundo que el juego manda su posición (cabe en el ritmo y deja aire para emotes) */
+  envioHz: 15,
+  /** cuánto dura un pase firmado: solo tiene que servir para conectarse */
+  paseMs: 60_000,
+  /** tramos por zona: `mapa:0` … `mapa:39` */
+  tramosMax: 40,
+  /** códigos con que la sala cierra el WebSocket al rechazar (el navegador no deja leer el estado HTTP) */
+  cierre: {
+    /** pase ausente, roto, con otra firma o vencido */
+    pase: 4001,
+    /** pase de otra sala */
+    otraSala: 4003,
+    /** tramo lleno: probá el siguiente */
+    llena: 4009,
+    /** el mismo jugador entró desde otra pestaña */
+    reemplazado: 4010,
+  },
 } as const;
+
+/** Nombres de sala: `mapa:N` o `dept:<id>:N`, con N entre 0 y `tramosMax - 1`. */
+const NOMBRE_SALA = /^(mapa|dept:[a-z]{2,24}):(\d{1,2})$/;
+/** Zona de una sala (`mapa` o `dept:<id>`) y su tramo, o null si el nombre no vale. */
+export function partirSala(nombre: unknown): { zona: string; tramo: number } | null {
+  const m = typeof nombre === 'string' ? NOMBRE_SALA.exec(nombre) : null;
+  if (!m) return null;
+  const tramo = Number(m[2]);
+  return tramo < SALA.tramosMax && String(tramo) === m[2] ? { zona: m[1], tramo } : null;
+}
+export const salaValida = (nombre: unknown): nombre is string => partirSala(nombre) !== null;
+/** Zona válida para pedir tramo: `mapa` o `dept:<id>`. */
+export const zonaValida = (zona: unknown): zona is string => typeof zona === 'string' && salaValida(`${zona}:0`);
+export const nombreSala = (zona: string, tramo: number) => `${zona}:${tramo}`;
 
 const PERMITIDAS: ReadonlySet<string> = new Set(ANIMACIONES);
 /** Animación válida o 'idle'. */
@@ -55,8 +86,9 @@ export function acotarEje(eje: keyof typeof SALA.limites, v: unknown): number {
 export const limpiarNombre = (n: string | null | undefined) =>
   (n ?? 'Catracho').replace(/[^\p{L}\p{N} _-]/gu, '').slice(0, SALA.nombreMax) || 'Catracho';
 
-/** Emote aceptable: un id corto. */
-export const emoteValido = (id: unknown): id is string => typeof id === 'string' && id.length <= SALA.emoteMax;
+/** Emote aceptable: un id corto de la forma `emote_algo`. */
+export const emoteValido = (id: unknown): id is string =>
+  typeof id === 'string' && id.length <= SALA.emoteMax && /^emote_[a-z0-9_]{1,26}$/.test(id);
 
 export interface Cubeta {
   fichas: number;

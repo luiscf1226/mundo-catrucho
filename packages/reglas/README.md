@@ -34,6 +34,8 @@ pnpm --filter @mundo-catrucho/reglas typecheck  # también corre en pnpm check
 | `TOPES`, `difDe`, `estrellasPara` | metas, reloj y puntos máximos por motor; dificultad de una etapa |
 | `SALA`, `ANIMACIONES` | cupo, largo de mensajes, límites de posición, animaciones, ritmo |
 | `acotarEje`, `animacionPermitida`, `limpiarNombre`, `emoteValido`, `cubetaNueva`, `permitirMensaje` | lo que la sala aplica a cada mensaje |
+| `partirSala`, `salaValida`, `zonaValida`, `nombreSala` | nombres de sala `mapa:N` y `dept:<id>:N` (N < `SALA.tramosMax`) |
+| `firmarPase`, `verificarPase`, `idPublico`, `avatarDePase`, `SECRETO_MIN` | pase de sala firmado con HMAC-SHA256 (Web Crypto: Convex, Worker y Node) |
 
 ## Validar un resultado
 

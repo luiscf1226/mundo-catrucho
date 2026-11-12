@@ -1,9 +1,10 @@
 // Paneles sencillos: minijuegos, misiones, logros, clasificación, salas, ajustes, controles, emotes y pausa.
+import { SALA } from '@mundo-catrucho/reglas';
 import { type CSSProperties, type ReactNode, useEffect, useState } from 'react';
 import { audio } from '../../core/audio';
 import { ACHIEVEMENTS, catDe, DEPARTMENTS, juegoById, MINIGAMES, MISSIONS, minigameById, SHOP } from '../../core/data';
 import { leaderboard, scoreLabel } from '../../core/leaderboard';
-import { net, type RoomInfo } from '../../core/net';
+import { net, nombreDeSala, type RoomInfo, useSala } from '../../core/net';
 import { type Clasificacion, type FilaClasificacion, SERVIDOR, servidor } from '../../core/servidor';
 import { useGame } from '../../core/store';
 import type { MinigameId } from '../../core/types';
@@ -327,7 +328,80 @@ function LeaderboardServidor() {
 }
 
 // ------------------------------------------------------------------ salas
+const ESTADO_SALA = {
+  apagada: 'Jugando solo',
+  buscando: 'Buscando sala…',
+  'en-sala': 'En vivo',
+  'sin-conexion': 'Sin conexión: reintentando',
+  'otra-pestana': 'Abriste el juego en otra pestaña',
+} as const;
+const deptName = (id: string) => DEPARTMENTS.find((d) => d.id === id)?.name ?? id;
+/** Salas en vivo (MC-20): se reparten solas por zona y tramos de 24; aquí solo se elige jugar solo o con gente. */
+function SalasEnVivo() {
+  const room = useGame((s) => s.profile.room),
+    { estado, sala, otros } = useSala(),
+    gente = net.players().filter((p) => p.listo);
+  const solo = room.mode === 'solo';
+  return (
+    <Panel id="salas" title="Salas" icon="users" size="md">
+      <div className="mc-card mc-roomnow flex flex-wrap items-center gap-3 p-3" data-on="true">
+        <span className="mc-check is-on flex-none">
+          <Icon name={solo ? 'user' : 'globe'} size={22} />
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="mc-label" data-testid="room-estado" data-estado={estado}>
+            {ESTADO_SALA[estado]}
+          </div>
+          <b data-testid="room-current" className="block truncate font-display text-xl font-semibold">
+            {solo ? 'Solo' : sala ? nombreDeSala(sala, deptName) : 'Sala en vivo'}
+          </b>
+        </div>
+        {sala && (
+          <span className="mc-num flex items-center gap-1 text-sm font-bold" data-testid="room-ocupacion">
+            <Icon name="users" size={15} />
+            {otros + 1}/{SALA.cupo}
+          </span>
+        )}
+      </div>
+      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+        <Btn id="room-solo" tone={solo ? 'good' : 'neutral'} icon="user" onClick={() => g().setRoom('solo')}>
+          Jugar solo
+        </Btn>
+        <Btn
+          id="room-vivo"
+          tone={solo ? 'primary' : 'good'}
+          icon="globe"
+          onClick={() => {
+            g().setRoom('publica');
+            net.reconnect();
+          }}
+        >
+          Jugar con gente
+        </Btn>
+      </div>
+      {!solo && gente.length > 0 && (
+        <>
+          <div className="mc-label mb-1 mt-4">Aquí con vos</div>
+          <div className="flex flex-wrap gap-1.5" data-testid="room-gente">
+            {gente.map((p) => (
+              <Tag key={p.id} color="#17785a" fg="#fff">
+                {p.name}
+              </Tag>
+            ))}
+          </div>
+        </>
+      )}
+      <Note cls="mt-3">
+        Cada zona (el mapa y cada departamento) tiene salas de {SALA.cupo}. Si una se llena, entrás a la siguiente. Al
+        viajar cambiás de sala solo.
+      </Note>
+    </Panel>
+  );
+}
 export function RoomsPanel() {
+  return net.online ? <SalasEnVivo /> : <RoomsLocal />;
+}
+function RoomsLocal() {
   const room = useGame((s) => s.profile.room),
     [rooms, setRooms] = useState<RoomInfo[]>([]),
     [code, setCode] = useState(''),
