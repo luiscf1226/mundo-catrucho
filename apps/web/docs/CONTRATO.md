@@ -229,7 +229,7 @@ futbol    equipo: [nombre, color]   rival: [nombre, color]            explorador
 ```
 
 ## Pruebas de la segunda vuelta
-`__mc.store.getState().startJuego('comayagua.mangos')` abre un juego del catálogo en su tarjeta de inicio;
+`__mc.store.getState().startJuego('lapaz.cortecafe')` abre un juego del catálogo en su tarjeta de inicio;
 `[data-testid=mg-start]` lo empieza. `mg-modo-solo|duo|abierto` cambian el modo. Tu prueba (`tools/test-<algo>.mjs`)
 debe jugar de verdad al menos una etapa hasta `mg-result`, probar un tema del catálogo y el motor sin tema, y mirar
 capturas con ojo crítico. Construí siempre con tu propio `--out`. **Tiempo: unos 40 minutos; no pulas de más.**

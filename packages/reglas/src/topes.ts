@@ -57,6 +57,8 @@ const copan = kit(
 );
 const islas = (a: number, b: number, c: number, k: number, base: number, extra: number) =>
   kit(lineal(a, b, c, k), (d) => base + r(d * extra));
+/** Comayagua: `metasLineales` y `reloj` de apps/web/src/game/minigames/comayagua/comun.tsx */
+const comayagua = (a: number, b: number, c: number, k: number) => kit(lineal(a, b, c, k), (d) => 80 + r(d * 10));
 
 const carrera = reglasDe('carrera'),
   limite = num(carrera.timeLimit, 120),
@@ -128,6 +130,14 @@ export const TOPES: Record<string, TopeMotor> = {
   'islas.coral': islas(120, 260, 400, 80, 80, 15),
   'islas.estela': islas(120, 260, 400, 80, 80, 15),
   'islas.flotacion': islas(100, 220, 340, 60, 80, 15),
+  'comayagua.aserrin': comayagua(140, 300, 460, 60),
+  'comayagua.reloj': comayagua(120, 300, 460, 60),
+  'comayagua.eco': comayagua(100, 220, 340, 40),
+  'comayagua.pilon': comayagua(120, 260, 400, 60),
+  'comayagua.tenampua': comayagua(100, 220, 340, 40),
+  'comayagua.anden': comayagua(80, 180, 280, 40),
+  'comayagua.mantas': comayagua(120, 300, 480, 120),
+  'comayagua.fachadas': comayagua(90, 210, 330, 50),
   // motores propios: el reloj puede acortarse (golpes, errores), así que solo se acotan metas y puntos
   atrapa: {
     metas: (d) => [r10(120 + 180 * d), r10(300 + 300 * d), r10(500 + 400 * d)],

@@ -133,3 +133,17 @@ test('Copán e Islas: un puntaje imposible para el reloj real no pasa', () => {
   falla({ motor: 'copan.cadera', puntos: 5000, estrellas: 3, duracion: 76, etapa: 0, gano: true }, 'no caben');
   falla({ motor: 'islas.coral', puntos: 400, estrellas: 3, duracion: 30, etapa: 0, gano: true }, 'no se puede');
 });
+
+test('Comayagua: el reloj y las metas de sus motores también se cuidan', () => {
+  // 80 s de reloj en la primera etapa: más de 20 pts por segundo no cabe
+  falla({ motor: 'comayagua.aserrin', puntos: 2000, estrellas: 3, duracion: 82, etapa: 0, gano: true }, 'no caben');
+  falla({ motor: 'comayagua.eco', puntos: 340, estrellas: 3, duracion: 40, etapa: 0, gano: true }, 'no se puede');
+  falla({ motor: 'comayagua.mantas', puntos: 150, estrellas: 2, duracion: 82, etapa: 0, gano: true }, 'estrellas');
+  pasa({ motor: 'comayagua.reloj', puntos: 460, estrellas: 3, duracion: 82, etapa: 0, gano: true });
+  // la última etapa sube metas y reloj: 90 s y 180 pts para ganar el reloj
+  falla(
+    { motor: 'comayagua.reloj', puntos: 170, estrellas: 1, duracion: 91, etapa: 3, etapas: 4, gano: true },
+    'ganó con 170',
+  );
+  pasa({ motor: 'comayagua.reloj', puntos: 180, estrellas: 1, duracion: 91, etapa: 3, etapas: 4, gano: true });
+});
