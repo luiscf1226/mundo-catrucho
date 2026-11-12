@@ -583,7 +583,12 @@ export const useGame = create<Game>((set, get) => {
       if (first && SERVIDOR)
         // el premio lo paga el servidor (una sola vez); el aviso sale cuando confirma
         void servidor.visitar(id).then((r) => {
-          aplicarAvance(r);
+          // si no llegó, se quita la marca: la próxima entrada al departamento la vuelve a mandar
+          if (!r.ok && r.motivo === 'sin-conexion')
+            commit((p) => {
+              p.visited = p.visited.filter((d) => d !== id);
+            });
+          else aplicarAvance(r);
           if (r.ok && r.primera) get().toast(`Primera visita: +${PREMIO_PRIMERA_VISITA.monedas} ${MONEDA}`, '🚌');
         });
       else if (first) get().toast(`Primera visita: +${PREMIO_PRIMERA_VISITA.monedas} ${MONEDA}`, '🚌');
@@ -853,8 +858,16 @@ export const useGame = create<Game>((set, get) => {
         gainXp(p, PREMIO_RECUERDO.xp);
         bumpMissions(p, 'collect', 1);
       });
-      // con Convex el recuerdo paga en el servidor (si visitó el departamento, una sola vez)
-      if (SERVIDOR) void servidor.recoger(deptId).then((r) => aplicarAvance(r));
+      // con Convex el recuerdo paga en el servidor (si visitó el departamento, una sola vez); si no llegó, se
+      // quita la marca para poder intentarlo otra vez
+      if (SERVIDOR)
+        void servidor.recoger(deptId).then((r) => {
+          if (!r.ok && r.motivo === 'sin-conexion')
+            commit((p) => {
+              p.collected = p.collected.filter((d) => d !== deptId);
+            });
+          else aplicarAvance(r);
+        });
       return true;
     },
     buy: (itemId) => {

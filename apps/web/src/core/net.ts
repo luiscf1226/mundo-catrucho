@@ -245,8 +245,14 @@ export class SalaNet implements NetAdapter {
         /* ya estaba cerrado */
       }
     }
-    for (const r of this.remotos.values()) this.emitir('leave', r);
+    this.vaciarRemotos();
+  }
+
+  /** Vacía la lista antes de avisar: quien escucha `leave` relee `players()` y no debe ver a nadie. */
+  private vaciarRemotos() {
+    const idos = [...this.remotos.values()];
     this.remotos.clear();
+    for (const r of idos) this.emitir('leave', r);
   }
 
   private async conectar() {
@@ -266,19 +272,20 @@ export class SalaNet implements NetAdapter {
         ),
       );
       if (turno !== this.turno) return;
-      if (!libre?.sala) return this.fallar(turno, !libre);
+      // sin respuesta o con todo lleno: reintenta más tarde (se puede liberar espacio)
+      if (!libre?.sala) return this.fallar(turno);
       const r = await conPlazo(
         this.convex.mutation(paseRef, { invitado: secretoInvitado(), sala: libre.sala, nombre: this.nombre() }),
       );
       if (turno !== this.turno) return;
-      if (!r?.ok) return this.fallar(turno, true);
+      if (!r?.ok) return this.fallar(turno);
       const fin = await this.abrir(turno, libre.sala, r.pase);
       if (fin === 'ok' || turno !== this.turno) return;
-      if (fin !== SALA.cierre.llena) return this.fallar(turno, true);
+      if (fin !== SALA.cierre.llena) return this.fallar(turno);
       // se llenó entre la pregunta y la entrada: el siguiente tramo
       desde = (partirSala(libre.sala)?.tramo ?? 0) + 1;
     }
-    if (turno === this.turno) this.fallar(turno, false);
+    if (turno === this.turno) this.fallar(turno);
   }
 
   /** Abre el WebSocket; devuelve 'ok' al recibir la bienvenida o el código con que la sala cerró. */
@@ -317,22 +324,20 @@ export class SalaNet implements NetAdapter {
         if (!dentro) return res(e.code);
         if (turno !== this.turno) return;
         this.ws = null;
-        for (const r of this.remotos.values()) this.emitir('leave', r);
-        this.remotos.clear();
+        this.vaciarRemotos();
         if (e.code === SALA.cierre.reemplazado) {
           useSala.setState({ estado: 'otra-pestana', sala: null, otros: 0 });
           return;
         }
-        this.fallar(turno, true);
+        this.fallar(turno);
       };
     });
   }
 
   /** Sin sala: avisa y reintenta más tarde (cada vez más despacio, hasta 30 s). */
-  private fallar(turno: number, reintentar: boolean) {
+  private fallar(turno: number) {
     if (turno !== this.turno) return;
     useSala.setState({ estado: 'sin-conexion', sala: null, otros: 0 });
-    if (!reintentar) return;
     clearTimeout(this.reintento);
     this.reintento = setTimeout(() => {
       if (turno === this.turno) void this.conectar();

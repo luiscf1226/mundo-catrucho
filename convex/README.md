@@ -61,12 +61,13 @@ Todo responde `{ ok, saldo, subidas, logros, misiones }` además de lo propio. L
 - `progreso:cobrarMision { misionId }`: valida que sea de hoy, esté completa y sin cobrar (`incompleta`, `cobrada`,
   `no`); paga lo de `progress.json`.
 - `progreso:salirDeViaje { veh, de, a }`: cobra `PASAJES[veh]` (copia de los precios del juego; `progreso.test.mjs`
-  revisa que no se desfasen). `progreso:llegarViaje { viajeId, bono }`: paga `bonoViaje` solo si pasaron
-  `VIAJE_MIN_S` (40 s, de `viajes.json`) según el servidor, una vez. `progreso:gastar { monto, concepto }`: comida y
+  revisa que no se desfasen); el destino tiene que ser otro departamento. `progreso:llegarViaje { viajeId, bono }`:
+  cierra el viaje y **no paga bono** (`motivo: 'sin verificar'`): el bono sale de los choques, que solo ve el
+  navegador. Vuelve cuando la sala del viaje firme lo que pasó (MC-31). `progreso:gastar { monto, concepto }`: comida y
   peaje del camino (1–50, con saldo).
 - `progreso:subirAvanceLocal { visitados, recuerdos, juegos }` (MC-08): una sola vez por jugador sube lo guardado en
-  el navegador sin dar premios: departamentos que existen, recuerdos de departamentos visitados y etapas y estrellas
-  dentro de cada juego del catálogo. Las marcas no suben y los logros que ya cumpla quedan marcados sin pagar.
+  el navegador sin dar premios: departamentos que existen, recuerdos de departamentos visitados y cuántas veces jugó
+  cada juego del catálogo. Etapas y estrellas no suben: solo una partida validada desbloquea. Las marcas no suben y los logros que ya cumpla quedan marcados sin pagar.
 - `misiones:repartir` (interna): la corre `crons.ts` a las 06:00 UTC (medianoche de Honduras) y guarda en
   `misionesGlobales` las misiones del día, sorteadas con la fecha (las mismas para todos). Cada jugador recibe su
   copia en `misionesDia` la primera vez que hace algo ese día.
@@ -85,13 +86,11 @@ npx convex run misiones:repartir '{}'
 node apps/web/tools/test-progreso-servidor.mjs   # de punta a punta; capturas en capturas/mc-17/
 ```
 
-El bono de viaje lo calcula el navegador (choques), así que además de la duración mínima tiene tope por día de
-Honduras (`BONOS_VIAJE_DIA`, 90).
+El tope por día del bono de viaje (`BONOS_VIAJE_DIA`, 90) queda listo para cuando el bono vuelva a pagarse.
 
 Confianza aceptada mientras todos sean invitados (cualquiera puede crear identidades nuevas): la primera visita y
 el recuerdo de cada departamento se pagan sin probar que estuvo ahí (como el mapa, que deja viajar gratis), y
-«Primeros pasos» y los emotes los declara el navegador. Todo eso paga una sola vez o con pausa. El avance local que
-sube puede desbloquear etapas (no paga, pero las etapas difíciles permiten más puntos en la tabla).
+«Primeros pasos» y los emotes los declara el navegador. Todo eso paga una sola vez o con pausa.
 
 Pendiente:
 - Las monedas, lo comprado y lo puesto del navegador no suben al servidor (eso pagaría sin validar). El nombre de

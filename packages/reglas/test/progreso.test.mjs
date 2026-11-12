@@ -197,17 +197,22 @@ test('los pasajes copian los precios del juego', () => {
   assert.deepEqual(juego, { ...PASAJES });
 });
 
-test('bono de viaje: solo si duró lo mínimo, con tope', () => {
+test('bono de viaje: con servidor no se paga lo que dice el navegador', () => {
   const inicio = 1_000_000;
   assert.deepEqual(decidirLlegada({ inicio, ahora: inicio + 5_000, bono: 30, bonoMax: 30 }), {
     bono: 0,
     motivo: 'llegó antes de tiempo',
   });
-  assert.deepEqual(decidirLlegada({ inicio, ahora: inicio + VIAJE_MIN_S * 1000, bono: 99, bonoMax: 30 }), { bono: 30 });
-  assert.deepEqual(decidirLlegada({ inicio, ahora: inicio + VIAJE_MIN_S * 1000, bono: 12.4, bonoMax: 30 }), {
-    bono: 12,
+  assert.deepEqual(decidirLlegada({ inicio, ahora: inicio + VIAJE_MIN_S * 1000, bono: 30, bonoMax: 30 }), {
+    bono: 0,
+    motivo: 'sin verificar',
   });
   assert.equal(decidirLlegada({ inicio, ahora: inicio + 3_600_000, bono: 30, bonoMax: 30 }).bono, 0);
+  assert.equal(
+    decidirSalida({ veh: 'bicitaxi', de: 'copan', a: 'copan', saldo: 99 }).ok,
+    false,
+    'ir y volver al mismo',
+  );
 });
 
 test('gastos del viaje: enteros, chicos y con saldo', () => {
@@ -236,8 +241,8 @@ test('avance local: se acepta lo posible y nada más', () => {
   assert.deepEqual(limpio.visitas, ['lapaz', 'cortes']);
   assert.deepEqual(limpio.recuerdos, ['lapaz'], 'sin recuerdo de un departamento no visitado');
   assert.deepEqual(limpio.juegos, [
-    { juegoId: 'lapaz.catacion', etapa: 4, estrellas: [3, 3, 0, 2], veces: 500 },
-    { juegoId: 'cortes.pollo-chuco-en-equilibrio', etapa: 1, estrellas: [2], veces: 1 },
+    { juegoId: 'lapaz.catacion', etapa: 0, estrellas: [], veces: 500 },
+    { juegoId: 'cortes.pollo-chuco-en-equilibrio', etapa: 0, estrellas: [], veces: 1 },
   ]);
   assert.deepEqual(limpiarAvanceLocal({ visitados: 'x', juegos: null }, etapas), {
     visitas: [],

@@ -2,7 +2,6 @@
 // viajes y el avance que trae el navegador la primera vez (MC-08). Cada mutación valida con @mundo-catrucho/reglas
 // y responde el saldo del servidor, los logros que pagó y las misiones de hoy.
 import {
-  BONO_VIAJE_MAX,
   decidirCobroMision,
   decidirLlegada,
   decidirMonedas,
@@ -182,7 +181,7 @@ export const salirDeViaje = mutation({
   },
 });
 
-/** Llega del viaje: el bono solo si el viaje duró lo mínimo según el servidor, una sola vez y con tope. */
+/** Llega del viaje y cierra el viaje. El bono no se paga hasta que la sala del viaje firme lo que pasó. */
 export const llegarViaje = mutation({
   args: { ...quien, viajeId: v.id('viajes'), bono: v.number() },
   handler: async (ctx, args) => {
@@ -190,7 +189,7 @@ export const llegarViaje = mutation({
       viaje = await ctx.db.get(args.viajeId);
     if (!viaje || viaje.usuarioId !== s.usuarioId) return { ok: false as const, motivo: 'ajeno' };
     if (viaje.estado !== 'en-camino') return { ok: false as const, motivo: 'cerrado' };
-    const d = decidirLlegada({ inicio: viaje.inicio, ahora: s.ahora, bono: args.bono, bonoMax: BONO_VIAJE_MAX });
+    const d = decidirLlegada({ inicio: viaje.inicio, ahora: s.ahora });
     let bono = d.bono,
       motivo = d.motivo;
     if (bono > 0) {
@@ -225,8 +224,8 @@ const juegoLocal = v.object({
   veces: v.optional(v.number()),
 });
 /**
- * La primera vez que un invitado entra con avance guardado en el navegador, sube visitas, recuerdos y etapas
- * validadas. No paga nada: los logros que ya cumpla quedan marcados sin pagar, y las marcas no suben (la
+ * La primera vez que un invitado entra con avance guardado en el navegador, sube visitas, recuerdos y cuántas
+ * veces jugó cada juego (las etapas no: solo una partida validada desbloquea). No paga nada: los logros que ya cumpla quedan marcados sin pagar, y las marcas no suben (la
  * clasificación es solo de partidas validadas). Una sola vez por jugador.
  */
 export const subirAvanceLocal = mutation({

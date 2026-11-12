@@ -148,14 +148,15 @@ try {
     assert.equal(e1.migrado, true);
     assert.deepEqual(e1.visitas.sort(), ['cortes', 'lapaz']);
     assert.deepEqual(e1.recuerdos, ['lapaz']);
-    assert.deepEqual(e1.juegos, [{ juegoId: 'lapaz.catacion', etapa: 2, estrellas: [3, 3], mejor: 0, veces: 500 }]);
+    // el avance local no desbloquea etapas en el servidor: solo cuenta las veces
+    assert.deepEqual(e1.juegos, [{ juegoId: 'lapaz.catacion', etapa: 0, estrellas: [], mejor: 0, veces: 500 }]);
     assert.deepEqual(e1.logros, ['primer_paso'], 'solo el logro de entrar; nada del avance inventado');
     const p1 = await q(fn.perfil, { invitado: secretoA });
     assert.equal(p1.monedas, 100 + coins('primer_paso'), 'el saldo inventado no sube');
     assert.equal(p1.nivel, 1);
     assert.equal(await st('s.profile.coins'), p1.monedas);
     assert.deepEqual(await st('s.profile.achievements'), ['primer_paso']);
-    assert.equal(await st(`s.profile.juegos['lapaz.catacion'].etapa`), 2);
+    assert.equal(await st(`s.profile.juegos['lapaz.catacion'].etapa`), 0);
     assert.equal(await st(`s.profile.juegos['inventado.juego'] ?? null`), null);
     assert.equal(
       (await q(fn.porJuego, { juegoId: 'lapaz.catacion' })).filas.some((f) => f.nombre === nombreA),

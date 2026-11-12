@@ -263,26 +263,23 @@ export type Salida = { ok: true; precio: number; saldo: number } | { ok: false; 
 /** ¿Puede salir de viaje? El pasaje sale de `PASAJES`; el destino tiene que ser un departamento. */
 export function decidirSalida({ veh, de, a, saldo }: { veh: string; de: string; a: string; saldo: number }): Salida {
   const precio = PASAJES[veh];
-  if (precio === undefined || !esDepto(de) || !esDepto(a)) return { ok: false, motivo: 'no' };
+  if (precio === undefined || !esDepto(de) || !esDepto(a) || de === a) return { ok: false, motivo: 'no' };
   if (!(saldo >= precio)) return { ok: false, motivo: 'caro', falta: precio - saldo };
   return { ok: true, precio, saldo: saldo - precio };
 }
-/** Bono al llegar: solo si el viaje duró lo mínimo (medido por el servidor), redondeado y con su tope. */
-export function decidirLlegada({
-  inicio,
-  ahora,
-  bono,
-  bonoMax,
-}: {
-  inicio: number;
-  ahora: number;
+/**
+ * Bono al llegar. El navegador lo calcula con los choques y el servidor no los puede ver, así que con servidor el
+ * bono no se paga hasta que la sala del viaje firme lo que pasó (como el recibo de partida). Por ahora solo se
+ * valida la duración, para que el motivo diga por qué no pagó.
+ */
+export function decidirLlegada({ inicio, ahora }: { inicio: number; ahora: number; bono?: number; bonoMax?: number }): {
   bono: number;
-  bonoMax: number;
-}): { bono: number; motivo?: string } {
+  motivo?: string;
+} {
   const s = (ahora - inicio) / 1000;
   if (s > VIAJE_MAX_S) return { bono: 0, motivo: 'viaje vencido' };
   if (s < VIAJE_MIN_S - 2) return { bono: 0, motivo: 'llegó antes de tiempo' };
-  return { bono: Number.isFinite(bono) && bono > 0 ? Math.min(bonoMax, Math.round(bono)) : 0 };
+  return { bono: 0, motivo: 'sin verificar' };
 }
 /**
  * Tope de bonos de viaje por día de Honduras. El bono lo calcula el navegador (choques), así que sin tope un viaje
@@ -319,8 +316,8 @@ export interface AvanceLimpio {
 export const VECES_MAX_LOCAL = 500;
 /**
  * Lo que se acepta del avance guardado en el navegador: departamentos que existen, recuerdos de departamentos
- * visitados y, por juego del catálogo, etapas y estrellas dentro del juego. Las marcas no suben: la clasificación
- * solo tiene partidas validadas. Nada de esto paga.
+ * visitados y, por juego del catálogo, cuántas veces jugó. Etapas, estrellas y marcas no suben: solo una partida
+ * validada desbloquea o entra a la clasificación. Nada de esto paga.
  */
 export function limpiarAvanceLocal(local: AvanceLocal, etapasDe: (juegoId: string) => number | null): AvanceLimpio {
   const lista = (x: unknown) => (Array.isArray(x) ? x : []);
@@ -331,15 +328,13 @@ export function limpiarAvanceLocal(local: AvanceLocal, etapasDe: (juegoId: strin
   for (const [juegoId, g] of crudos.slice(0, 1000)) {
     const etapas = etapasDe(juegoId);
     if (!etapas || !g || typeof g !== 'object') continue;
-    const { etapa, stars, veces } = g as { etapa?: unknown; stars?: unknown; veces?: unknown };
+    const { etapa, veces } = g as { etapa?: unknown; veces?: unknown };
     const e = Number.isInteger(etapa) ? Math.max(0, Math.min(etapas, etapa as number)) : 0;
-    // solo hay estrellas en etapas ganadas
-    const estrellas = lista(stars)
-      .slice(0, e)
-      .map((s) => (Number.isInteger(s) ? acotarEstrellas(s as number) : 0));
     const v = Number.isInteger(veces) ? Math.max(0, Math.min(VECES_MAX_LOCAL, veces as number)) : 0;
     if (e === 0 && v === 0) continue;
-    juegos.push({ juegoId, etapa: e, estrellas, veces: Math.max(v, e) });
+    // las etapas y estrellas del navegador no se pueden probar: no desbloquean nada en el servidor (solo la
+    // partida validada lo hace). Se guarda cuántas veces jugó, que no paga ni abre etapas.
+    juegos.push({ juegoId, etapa: 0, estrellas: [], veces: Math.max(v, e) });
   }
   return { visitas, recuerdos, juegos };
 }
