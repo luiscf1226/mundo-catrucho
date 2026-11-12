@@ -523,7 +523,7 @@ export function ShopPanel() {
     setShort(null);
     if (i.cat === 'emote') play(EMOTE_ANIM[i.id] ?? 'dance');
   };
-  const action = (i: ShopItem) => {
+  const action = async (i: ShopItem) => {
     if (has(i.id)) {
       if (i.cat === 'emote') {
         play(EMOTE_ANIM[i.id] ?? 'dance');
@@ -536,10 +536,9 @@ export function ShopPanel() {
       setShort(null);
       return;
     }
-    const r = g().buy(i.id);
+    const r = await g().comprar(i.id);
     if (r === 'ok') {
       audio.sfx('buy');
-      g().equip(i.id);
       g().toast(`¡Compraste ${nombre(i)}!`, '🛍️');
       setTryId(null);
       setShort(null);
@@ -691,7 +690,7 @@ export function ShopPanel() {
                       onClick={(e) => {
                         e.stopPropagation();
                         audio.init();
-                        action(i);
+                        void action(i);
                       }}
                       className="mc-btn w-full"
                       data-size="sm"
