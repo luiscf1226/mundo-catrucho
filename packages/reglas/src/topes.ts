@@ -5,19 +5,28 @@ import minigames from '../../../apps/web/shared/data/minigames.json' with { type
 import type { Estrellas } from './premios.ts';
 
 type Metas = [number, number, number];
+/** Tema del juego en el catálogo (`juego.tema`): algunos motores sacan de ahí sus metas. */
+export type Tema = Record<string, unknown>;
 export interface TopeMotor {
-  /** metas de 1, 2 y 3 estrellas según la dificultad (0..1); mayor es mejor */
-  metas?: (dif: number) => Metas;
+  /**
+   * metas de 1, 2 y 3 estrellas según la dificultad (0..1); mayor es mejor. Si el motor las calcula con datos que
+   * el servidor no tiene (semilla, canción), son una cota inferior: nunca más altas que las reales.
+   */
+  metas?: (dif: number, tema: Tema) => Metas;
   /** reloj fijo del motor en segundos: la partida no puede durar menos */
   reloj?: (dif: number) => number;
-  /** duración mínima según el puntaje (motores donde terminar rápido da más puntos) */
-  duracionMin?: (puntos: number) => number;
+  /** duración mínima según el resultado (motores sin reloj fijo, o donde terminar rápido da más puntos) */
+  duracionMin?: (r: { puntos: number; dif: number; gano: boolean | undefined }) => number;
   /** puntaje máximo absoluto */
   puntosMax?: (dif: number) => number;
   /** puntos por segundo que nadie supera (sobre el reloj si existe; si no, sobre la duración reportada) */
-  puntosPorSegundo: number;
+  puntosPorSegundo: number | ((dif: number, tema: Tema) => number);
   /** se gana exactamente al llegar a la primera meta (motores del kit) */
   ganaConMeta?: boolean;
+  /** ganar pide al menos la primera meta y una estrella (perder con puntos sí se puede) */
+  ganarPideMeta?: boolean;
+  /** motor del kit (`defineMotor`): test-reglas.mjs compara sus metas y reloj con el juego */
+  kit?: boolean;
 }
 
 /** Segundos de holgura por latencia al medir la duración de una partida. */
@@ -46,7 +55,10 @@ const kit = (metas: TopeMotor['metas'], reloj: TopeMotor['reloj']): TopeMotor =>
   reloj,
   puntosPorSegundo: 20,
   ganaConMeta: true,
+  kit: true,
 });
+/** El mismo tope con otro ritmo máximo (motores donde un jugador fino pasa de 20 pts/s). */
+const conRitmo = (t: TopeMotor, puntosPorSegundo: number): TopeMotor => ({ ...t, puntosPorSegundo });
 const lineal = (a: number, b: number, c: number, k: number) => (d: number) =>
   [a + r(d * k), b + r(d * k), c + r(d * k)] as Metas;
 const taller = kit(lineal(80, 240, 400, 80), () => 75);
@@ -73,6 +85,53 @@ const fijas = (g: Record<string, number | undefined>, b: number, s: number, o: n
   num(g.gold, o),
 ];
 const preguntas = (d: number) => 8 + r(d * 2);
+
+// ------------------------------------------------------------------ motores propios sin tabla en minigames.json
+/** Ritmo (Ritmo.tsx, ritmo/musica.ts): la canción dura L = 60 + 26·dif s y las metas son 15–52 % del máximo. */
+const largoCancion = (d: number) => 60 + 26 * d;
+/**
+ * Cota inferior del máximo de la canción: el estilo más lento (84 bpm) con respuesta «copia» y la menor cantidad
+ * de acentos es la que menos notas trae; cada nota vale 100 × (1 + racha/10, hasta ×4).
+ */
+function maxCancionMin(d: number) {
+  const step = 60 / 84 / 2,
+    frases = Math.max(4, Math.floor(largoCancion(d) / (step * 16))),
+    notas = frases * (4 + Math.min(4, 1 + r(d * 2)));
+  let max = 0;
+  for (let i = 0; i < notas; i++) max += 100 * (1 + Math.min(3, Math.floor(i / 10)));
+  return max;
+}
+const metasRitmo = (d: number): Metas => {
+  const m = maxCancionMin(d),
+    f = (k: number) => r((m * k) / 10) * 10;
+  return [f(0.15 + 0.08 * d), f(0.3 + 0.1 * d), f(0.45 + 0.07 * d)];
+};
+/** Pesca (Pesca.tsx): metas por el valor promedio de los peces del tema; reloj 85–100 s que los errores acortan. */
+const PECES_PESCA = [10, 20, 30, 45, 70];
+const valoresPeces = (tema: Tema) => {
+  const l = Array.isArray(tema.peces) && tema.peces.length ? (tema.peces as unknown[]) : null;
+  const v = l?.map((p) => (Array.isArray(p) && typeof p[1] === 'number' ? p[1] : Number.NaN));
+  return v && v.every(Number.isFinite) ? v : PECES_PESCA;
+};
+const metasPesca = (d: number, tema: Tema): Metas => {
+  const v = valoresPeces(tema ?? {}),
+    avg = v.reduce((a, b) => a + b, 0) / v.length,
+    k = 1 + 0.15 * d,
+    m = (n: number) => Math.max(30, r((avg * n * k) / 5) * 5);
+  return [m(3), m(5.5), m(7)];
+};
+const segPesca = (d: number) => r(85 + 15 * d);
+/** Ruta (Ruta.tsx): límite 70–110 s; ganar paga 10 por segundo que sobra + 40 por gema; las estrellas van por el
+ * tiempo que sobra (30 % y 55 %). */
+const limiteRuta = (d: number) => r(70 + 40 * d);
+/** Nadie cruza la ruta (más de 90 m con saltos) en menos de esto, aunque corra todo el camino. */
+const RUTA_MIN_S = 15;
+/** Monta (Monta.tsx): se gana aguantando 60–90 s; las estrellas 2 y 3 piden puntos de estilo. */
+const montaDur = (d: number) => r(60 + 30 * d);
+const montaMetas = (d: number): Metas => {
+  const dur = montaDur(d);
+  return [0, r((dur * 60 * (0.35 + 0.1 * d)) / 10) * 10, r((dur * 60 * (0.7 + 0.1 * d)) / 10) * 10];
+};
 
 export const TOPES: Record<string, TopeMotor> = {
   'cortes.garitas': kit(
@@ -130,7 +189,8 @@ export const TOPES: Record<string, TopeMotor> = {
   'islas.coral': islas(120, 260, 400, 80, 80, 15),
   'islas.estela': islas(120, 260, 400, 80, 80, 15),
   'islas.flotacion': islas(100, 220, 340, 60, 80, 15),
-  'comayagua.aserrin': comayagua(140, 300, 460, 60),
+  // alfombra de 8–16 plantillas: 5 por celda + 10 por borde limpio + 5 × plantillas al terminarla (~24 pts/s fino)
+  'comayagua.aserrin': conRitmo(comayagua(140, 300, 460, 60), 35),
   'comayagua.reloj': comayagua(120, 300, 460, 60),
   'comayagua.eco': comayagua(100, 220, 340, 40),
   'comayagua.pilon': comayagua(120, 260, 400, 60),
@@ -140,20 +200,67 @@ export const TOPES: Record<string, TopeMotor> = {
   'comayagua.fachadas': comayagua(90, 210, 330, 50),
   // Atlántida (apps/web/src/game/minigames/atlantida): metas lineales y reloj de 80 + 15 × dificultad
   'atlantida.balsa': islas(120, 260, 400, 80, 80, 15),
-  'atlantida.pancoco': islas(200, 450, 700, 100, 80, 15),
-  'atlantida.vagon': islas(150, 400, 650, 100, 80, 15),
+  // bandejas de hasta ~12 bollos (20 c/u + 30) cada ~5 s con el horno de 3,1 s
+  'atlantida.pancoco': conRitmo(islas(200, 450, 700, 100, 80, 15), 45),
+  // cada viaje paga 10 + carga (67–93 pts) cada ~3,6 s: ~26 pts/s jugando fino
+  'atlantida.vagon': conRitmo(islas(150, 400, 650, 100, 80, 15), 35),
   'atlantida.manati': islas(100, 220, 340, 60, 80, 15),
-  'atlantida.lancetilla': islas(200, 450, 700, 100, 80, 15),
+  // 50 por unión buena (tres elecciones) + 20 por gaveta
+  'atlantida.lancetilla': conRitmo(islas(200, 450, 700, 100, 80, 15), 35),
   'atlantida.canopy': islas(150, 320, 500, 80, 80, 15),
   'atlantida.carnaval': islas(120, 280, 440, 80, 80, 15),
+  // Corte (Corte.tsx): reloj fijo 70–100 s, se gana con la primera meta; el combo (hasta ×5) dispara el puntaje
+  corte: {
+    metas: (d) => [r((200 + 800 * d) / 10) * 10, r((450 + 1950 * d) / 10) * 10, r((800 + 3700 * d) / 10) * 10],
+    reloj: (d) => r(70 + 30 * d),
+    puntosPorSegundo: 150,
+    ganaConMeta: true,
+  },
+  ritmo: {
+    metas: metasRitmo,
+    // la canción siempre se toca entera (la respuesta puede cortar hasta una frase de ~5,7 s)
+    duracionMin: ({ dif }) => largoCancion(dif) - 2,
+    // ~4 notas por segundo como mucho, 100 × 4 cada una
+    puntosPorSegundo: 2000,
+    ganarPideMeta: true,
+  },
+  monta: {
+    metas: montaMetas,
+    // derribado se pierde en cualquier momento; ganar es aguantar todo el reloj
+    duracionMin: ({ dif, gano }) => (gano ? montaDur(dif) : DURACION_MIN_S),
+    // ~60 por segundo de estilo + 150 por brinco
+    puntosPorSegundo: 100,
+    ganarPideMeta: true,
+  },
+  pesca: {
+    metas: metasPesca,
+    // castigos de 0,5–1,5 s por error acortan el reloj: ni así se llega a la mitad
+    duracionMin: ({ dif }) => segPesca(dif) / 2,
+    // el pez más caro con racha (×1,5) más la mitad de lo del compa en dúo, cada ~2 s
+    puntosPorSegundo: (_d, tema) => Math.max(60, (Math.max(...valoresPeces(tema ?? {})) * 1.5 * 1.5) / 2),
+    ganarPideMeta: true,
+  },
+  ruta: {
+    // ganar con k estrellas deja al menos 0 %, 30 % o 55 % del tiempo: 10 pts por segundo que sobra
+    metas: (d) => [0, 3 * limiteRuta(d), Math.floor(5.5 * limiteRuta(d))],
+    // perder es agotar el reloj; ganar tarda al menos lo que no sobró (las gemas solo hacen la cota más suelta)
+    duracionMin: ({ puntos, dif, gano }) =>
+      gano ? Math.max(RUTA_MIN_S, limiteRuta(dif) - puntos / 10) : limiteRuta(dif),
+    // menos de 80 gemas por recorrido
+    puntosMax: (d) => limiteRuta(d) * 10 + 80 * 40,
+    puntosPorSegundo: 1000,
+    ganarPideMeta: true,
+  },
   // motores propios: el reloj puede acortarse (golpes, errores), así que solo se acotan metas y puntos
   atrapa: {
     metas: (d) => [r10(120 + 180 * d), r10(300 + 300 * d), r10(500 + 400 * d)],
     puntosPorSegundo: 40,
+    ganarPideMeta: true,
   },
   cocina: {
     metas: (d) => [r10(150 + 50 * d), r10(350 + 150 * d), r10(600 + 250 * d)],
     puntosPorSegundo: 40,
+    ganarPideMeta: true,
   },
   trivia: {
     // acertar vale 100 + 8 × segundos que sobran (10 como mucho)
@@ -163,28 +270,42 @@ export const TOPES: Record<string, TopeMotor> = {
     },
     puntosMax: (d) => preguntas(d) * 180,
     puntosPorSegundo: 60,
+    ganarPideMeta: true,
   },
-  manejo: { metas: () => [120, 240, 360], puntosPorSegundo: 40 },
+  // ganar pide recorrer la distancia y que pasen 60 s (Manejo.tsx)
+  manejo: {
+    metas: () => [120, 240, 360],
+    duracionMin: ({ gano }) => (gano ? 60 : DURACION_MIN_S),
+    puntosPorSegundo: 40,
+    ganarPideMeta: true,
+  },
   feria: {
     metas: fijas(feria, 150, 280, 400),
     // 3 puestos × tiros por puesto × 60 pts del blanco más caro
     puntosMax: () => 3 * num(feria.shotsPerBooth, 6) * 60,
     puntosPorSegundo: 60,
+    ganarPideMeta: true,
   },
-  pulperia: { metas: fijas(pulperia, 100, 180, 260), puntosPorSegundo: 20 },
+  pulperia: { metas: fijas(pulperia, 100, 180, 260), puntosPorSegundo: 20, ganarPideMeta: true },
   exploradores: {
     metas: fijas(exploradores, 8, 12, 15),
     puntosMax: () => 3 * num(exploradores.objectsPerSite, 5),
     puntosPorSegundo: 1,
+    ganarPideMeta: true,
   },
   carrera: {
     metas: () => [aPuntos(carrera.bronze, 95), aPuntos(carrera.silver, 70), aPuntos(carrera.gold, 50)],
     puntosMax: () => limite * 10,
-    duracionMin: (puntos) => limite - puntos / 10,
+    duracionMin: ({ puntos }) => limite - puntos / 10,
     puntosPorSegundo: 100,
   },
   // goles: 1 estrella al ganar, 2 con dos de diferencia, 3 con los goles de oro
-  futbol: { metas: () => [1, 2, num(reglasDe('futbol').goldGoals, 3)], puntosMax: () => 30, puntosPorSegundo: 1 },
+  futbol: {
+    metas: () => [1, 2, num(reglasDe('futbol').goldGoals, 3)],
+    puntosMax: () => 30,
+    puntosPorSegundo: 1,
+    ganarPideMeta: true,
+  },
 };
 
 export interface Resultado {
@@ -198,6 +319,8 @@ export interface Resultado {
   /** etapas del juego en el catálogo; sin catálogo se toma 3 */
   etapas?: number;
   gano?: boolean;
+  /** tema del juego en el catálogo (lo usan las metas de algunos motores) */
+  tema?: Tema;
 }
 export interface Veredicto {
   ok: boolean;
@@ -217,7 +340,8 @@ export function validarResultado(res: Resultado): Veredicto {
     tope = TOPES[res.motor],
     t = tope ?? TOPE_GENERICO,
     etapas = res.etapas ?? 3;
-  const { puntos, estrellas, duracion, etapa } = res;
+  const { puntos, estrellas, duracion, etapa } = res,
+    tema = res.tema ?? {};
   if (!finito(puntos) || puntos < 0) motivos.push('puntos inválidos');
   if (!Number.isInteger(estrellas) || estrellas < 0 || estrellas > 3) motivos.push('estrellas fuera de 0–3');
   if (!finito(duracion) || duracion <= 0) motivos.push('duración inválida');
@@ -227,13 +351,14 @@ export function validarResultado(res: Resultado): Veredicto {
 
   const dif = difDe(etapa, etapas),
     reloj = t.reloj?.(dif);
-  const minimo = Math.max(DURACION_MIN_S, reloj ?? 0, t.duracionMin?.(puntos) ?? 0);
+  const minimo = Math.max(DURACION_MIN_S, reloj ?? 0, t.duracionMin?.({ puntos, dif, gano: res.gano }) ?? 0);
   if (duracion < minimo - HOLGURA_S) motivos.push(`duró ${r(duracion)} s; no se puede en menos de ${r(minimo)} s`);
   if (duracion > DURACION_MAX_S) motivos.push('partida abandonada');
   const segundos = reloj ?? Math.min(duracion, DURACION_MAX_S),
-    maximo = Math.min(t.puntosMax?.(dif) ?? Number.POSITIVE_INFINITY, t.puntosPorSegundo * segundos);
+    pps = typeof t.puntosPorSegundo === 'function' ? t.puntosPorSegundo(dif, tema) : t.puntosPorSegundo,
+    maximo = Math.min(t.puntosMax?.(dif) ?? Number.POSITIVE_INFINITY, pps * segundos);
   if (puntos > maximo) motivos.push(`${puntos} pts no caben en ${r(segundos)} s (máximo ${r(maximo)})`);
-  const metas = t.metas?.(dif),
+  const metas = t.metas?.(dif, tema),
     posibles = metas ? estrellasPara(puntos, metas) : null;
   if (posibles !== null && estrellas > posibles)
     motivos.push(`${estrellas} estrellas con ${puntos} pts; la meta da ${posibles}`);
@@ -243,5 +368,9 @@ export function validarResultado(res: Resultado): Veredicto {
     motivos.push(`ganó con ${puntos} pts; la meta es ${metas[0]}`);
   if (metas && t.ganaConMeta && res.gano === false && puntos >= metas[0])
     motivos.push(`perdió con ${puntos} pts; la meta es ${metas[0]}`);
+  // en los demás, ganar también pide la primera meta y al menos una estrella
+  if (metas && t.ganarPideMeta && res.gano === true && puntos < metas[0])
+    motivos.push(`ganó con ${puntos} pts; la meta es ${metas[0]}`);
+  if (t.ganarPideMeta && res.gano === true && estrellas < 1) motivos.push('ganó sin estrellas');
   return { ok: motivos.length === 0, motivos, estrellasPosibles: posibles, conocido: !!tope };
 }

@@ -67,19 +67,29 @@ export default defineSchema({
     sala: v.optional(v.string()),
     semilla: v.number(),
     jugadores: v.array(v.id('usuarios')),
-    estado: v.union(v.literal('abierta'), v.literal('cerrada'), v.literal('vencida'), v.literal('rechazada')),
+    estado: v.union(
+      v.literal('abierta'),
+      v.literal('cerrada'),
+      v.literal('vencida'),
+      v.literal('rechazada'),
+      v.literal('abandonada'),
+    ),
     resultado: v.optional(
       v.array(v.object({ usuarioId: v.id('usuarios'), puntos: v.number(), estrellas: v.number(), gano: v.boolean() })),
     ),
     // MC-14: lo que el servidor guardó al abrir y lo que decidió al cerrar
     motor: v.optional(v.string()),
     etapas: v.optional(v.number()),
+    /** quien la abrió: tiene como mucho una abierta (las anteriores quedan «abandonada») */
+    dueno: v.optional(v.id('usuarios')),
     /** milisegundos Unix del servidor */
     inicio: v.optional(v.number()),
     cierre: v.optional(v.number()),
     motivos: v.optional(v.array(v.string())),
     pago: v.optional(v.object({ monedas: v.number(), xp: v.number() })),
-  }).index('por_estado', ['estado']),
+  })
+    .index('por_estado', ['estado'])
+    .index('por_dueno_estado', ['dueno', 'estado']),
   marcas: defineTable({
     juegoId: v.string(),
     deptId: v.string(),
