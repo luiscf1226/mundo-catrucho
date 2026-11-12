@@ -2,6 +2,13 @@ export type V3 = [number, number, number];
 
 /** Motores de minijuego. Cada juego del catálogo (shared/data/catalogo) es un motor + un tema del departamento. */
 export type MinigameId =
+  | 'lempira.barro'
+  | 'lempira.opalo'
+  | 'lempira.cuencas'
+  | 'lempira.rebote'
+  | 'lempira.pigmentos'
+  | 'lempira.trapiche'
+  | 'lempira.termal'
   | 'copan.cadera'
   | 'copan.glifos'
   | 'copan.guaras'

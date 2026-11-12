@@ -67,6 +67,11 @@ const copan = kit(
   (d) => [120 + r(d * 120), 360, 600],
   () => 75,
 );
+/** Lempira: metas y reloj de minigames/lempira/comun.tsx. */
+const lempira = kit(
+  (d) => [120 + r(d * 120), 360, 600],
+  () => 75,
+);
 const islas = (a: number, b: number, c: number, k: number, base: number, extra: number) =>
   kit(lineal(a, b, c, k), (d) => base + r(d * extra));
 /** Comayagua: `metasLineales` y `reloj` de apps/web/src/game/minigames/comayagua/comun.tsx */
@@ -175,6 +180,13 @@ export const TOPES: Record<string, TopeMotor> = {
   'olancho.tablas': taller,
   'copan.adoquin': copan,
   'copan.atol': copan,
+  'lempira.barro': lempira,
+  'lempira.opalo': conRitmo(lempira, 40),
+  'lempira.cuencas': conRitmo(lempira, 40),
+  'lempira.rebote': conRitmo(lempira, 60),
+  'lempira.pigmentos': conRitmo(lempira, 40),
+  'lempira.trapiche': conRitmo(lempira, 30),
+  'lempira.termal': lempira,
   'copan.cadera': copan,
   'copan.estelas': copan,
   'copan.estratigrafia': copan,

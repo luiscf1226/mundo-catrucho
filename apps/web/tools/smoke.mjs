@@ -26,6 +26,13 @@ const JUEGOS = [
   'lapaz.pintadas',
   'franciscomorazan.pulperia',
   'carrera',
+  'lempira.barro-de-la-campa',
+  'lempira.opalo-de-erandique',
+  'lempira.la-montana-reparte-agua',
+  'lempira.geometria-del-fuerte-san-cristobal',
+  'lempira.colohete-por-capas',
+  'lempira.cana-al-trapiche',
+  'lempira.la-pausa-tambien-cuenta',
 ];
 const ok = await run('smoke', file, { hash: '#test' }, async (t) => {
   await t.ev(`localStorage.clear()`);

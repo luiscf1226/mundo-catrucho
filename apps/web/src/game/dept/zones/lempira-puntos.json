@@ -1,0 +1,68 @@
+[
+  {
+    "id": "lempira.visita-1",
+    "nombre": "Taller de alfarería",
+    "texto": "Levantá una vasija de barro virtual con una instructora. La Campa es reconocida por la alfarería de sus artesanas.",
+    "pos": [-19, 44]
+  },
+  {
+    "id": "lempira.visita-2",
+    "nombre": "San Matías",
+    "texto": "Ayudá a preparar una decoración temporal fuera del templo. La festividad de San Matías en La Campa se celebra en febrero.",
+    "pos": [-19, 38]
+  },
+  {
+    "id": "lempira.visita-3",
+    "nombre": "Canopy del cañón",
+    "texto": "Recorré el circuito virtual con guía y fotografiá el cañón. La Campa ofrece una actividad turística de canopy sobre el cañón.",
+    "pos": [-19, 32]
+  },
+  {
+    "id": "lempira.visita-4",
+    "nombre": "Pozas de Gracias",
+    "texto": "Probá una secuencia de descanso y baños virtuales. Gracias cuenta con aguas termales entre sus atractivos.",
+    "pos": [-19, 18]
+  },
+  {
+    "id": "lempira.visita-5",
+    "nombre": "Fuerte San Cristóbal",
+    "texto": "Subí al recorrido virtual y buscá un ángulo de la ciudad. El Fuerte San Cristóbal forma parte del patrimonio turístico de Gracias.",
+    "pos": [-19, 12]
+  },
+  {
+    "id": "lempira.visita-6",
+    "nombre": "Gracias Convoca",
+    "texto": "Pintá una copia digital de un mural en un taller abierto. Gracias Convoca reúne actividades de arte y cultura en la ciudad.",
+    "pos": [-19, 6]
+  },
+  {
+    "id": "lempira.visita-7",
+    "nombre": "Cerro Las Minas",
+    "texto": "Armá una ruta virtual con campamentos y observá la cumbre desde el mirador educativo. El Cerro Las Minas, en Celaque, alcanza 2.849 metros y es la mayor elevación de Honduras.",
+    "pos": [19, 44]
+  },
+  {
+    "id": "lempira.visita-8",
+    "nombre": "Taller de ópalo de Erandique",
+    "texto": "Girá una muestra virtual para encontrar destellos y ayudá a dibujar una ficha de origen, sin extraer mineral. Erandique tiene tradición de comercio y trabajo artesanal del ópalo.",
+    "pos": [19, 38]
+  },
+  {
+    "id": "lempira.locura-0",
+    "nombre": "Olla con cintura",
+    "texto": "Una vasija de práctica se estira como resorte al modelarla; la broma es de la física, no de las artesanas.",
+    "pos": [19, 32]
+  },
+  {
+    "id": "lempira.locura-1",
+    "nombre": "Descanso que da medalla",
+    "texto": "El avatar recibe una medalla de jabón por completar su pausa; animación original.",
+    "pos": [19, 18]
+  },
+  {
+    "id": "lempira.locura-2",
+    "nombre": "Mural que pide otra brocha",
+    "texto": "Un mural digital de taller saca una brocha de caricatura al terminar; no se modifica una obra real.",
+    "pos": [19, 12]
+  }
+]
