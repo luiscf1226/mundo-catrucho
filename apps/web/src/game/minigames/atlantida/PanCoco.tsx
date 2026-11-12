@@ -31,6 +31,8 @@ const CX = -2.6;
 const CZ = -1.2;
 const LEVA = 1.8;
 const MUESTRA = 1.3;
+/** Tope de bollos en la bandeja: más ya no caben sueltos y cada uno cuesta llamadas de dibujo. */
+const TOPE = 24;
 
 function nuevoBollo(s: Estado, p: Param): { r: number; g: number } {
   if (p.alquiler && s.puestos % 4 === 3) return { r: 0.78, g: 2.4 };
@@ -49,6 +51,10 @@ const enBandeja = (m: Sesion, c: ReturnType<typeof cursor>, r: number) => {
 function poner(m: Sesion) {
   const s = m.datos;
   if (s.levado > 0 || s.muestra > 0) return;
+  if (s.bandeja.length >= TOPE) {
+    s.aviso = 'La bandeja ya está llena: horneá.';
+    return;
+  }
   const b = s.cola.shift();
   if (!b) return;
   const { x, z } = enBandeja(m, s.c, b.r);
@@ -185,7 +191,7 @@ const motor = defineMotor({
     const sig = s.cola[0];
     m.objetivo = s.aviso;
     m.lineas = [
-      `Bollo: crece ×${sig.g.toFixed(1)}${sig.r > 0.7 ? ' (gigante: dividilo)' : ''} · En bandeja ${s.bandeja.length}`,
+      `Bollo: crece ×${sig.g.toFixed(1)}${sig.r > 0.7 ? ' (gigante: dividilo)' : ''} · En bandeja ${s.bandeja.length}/${TOPE}`,
       `Piezas sueltas ${s.piezas} · Pegados ${s.pegados} · F poner · E hornear · Espacio dividir`,
     ];
     m.stats = {
@@ -224,7 +230,7 @@ const motor = defineMotor({
         for (const o of s.bandeja) h = Math.min(h, Math.hypot(o.x - x, o.z - z) - R - o.r * o.g);
         if (h > mejor.h) mejor = { x: c.x, y: c.y, h };
       }
-    if (mejor.h > 0.04) {
+    if (mejor.h > 0.04 && s.bandeja.length < TOPE) {
       s.c.x = mejor.x;
       s.c.y = mejor.y;
       poner(m);
@@ -267,8 +273,9 @@ const motor = defineMotor({
           const color = k > 0.5 ? '#d9a35b' : '#f3dcae';
           return (
             <group key={i}>
-              <group position={[b.x, 1, b.z]} scale={[1, 0.45, 1]}>
-                <Ball pos={[0, 0.2, 0]} r={R} color={color} mat="plastic" />
+              {/* esfera de radio 1 escalada: el radio cambia en cada cuadro del levado */}
+              <group position={[b.x, 1.09, b.z]} scale={[R, 0.45 * R, R]}>
+                <Ball pos={[0, 0, 0]} r={1} color={color} mat="plastic" />
               </group>
               {s.muestra > 0 && (
                 <Cyl
@@ -312,13 +319,9 @@ const motor = defineMotor({
         {p.alquiler && (
           <group position={[2.6, 0, -4.4]}>
             <Plate pos={[0, 2.3, 0]} text="📜 Contrato de alquiler de bandeja" h={0.34} bg="#fefae0" fg="#5c3d2e" />
-            <Block
-              pos={[0, 1.3, 0]}
-              size={[1.6, 1.4 + Math.sin(m.tiempo * 2) * 0.1, 0.04]}
-              color="#fefae0"
-              mat="cloth"
-              solid={false}
-            />
+            <group position={[0, 1.3, 0]} scale={[1, 1 + Math.sin(m.tiempo * 2) * 0.07, 1]}>
+              <Block pos={[0, 0, 0]} size={[1.6, 1.4, 0.04]} color="#fefae0" mat="cloth" solid={false} />
+            </group>
             <Label pos={[0, 1.3, 0.1]} text="El bollo grande no invade" h={0.26} fg="#5c3d2e" bg="#fefae0" />
           </group>
         )}
