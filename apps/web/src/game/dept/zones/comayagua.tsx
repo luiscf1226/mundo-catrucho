@@ -3,6 +3,7 @@ import { P } from '../../kit';
 import { bl, bx, cy, inR, PI, place, py } from '../lib';
 import { casa, mont, stairs } from '../parts';
 import { ZB, type ZoneSpec } from '../zone';
+import { ComayaguaDescubrimientos } from './ComayaguaDescubrimientos';
 
 /** Comayagua: plaza colonial con la catedral y su torre del reloj; el engranaje está detrás de la torre, arriba. */
 export function catedral(d: Department): ZoneSpec {
@@ -17,6 +18,7 @@ export function catedral(d: Department): ZoneSpec {
       Math.max(Math.min(21 - Math.abs(x), 17 - Math.abs(z - 6)), Math.min(3 - Math.abs(x), z - 20, 52 - z)) * 1.5,
   );
   Z.stop(0, 42);
+  Z.n(<ComayaguaDescubrimientos />);
   // nave, cúpula y fachada escalonada
   Z.add(
     bx(0, 5, -27, 16, 10, 28, 'stucco', W),

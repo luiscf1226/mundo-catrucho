@@ -49,7 +49,15 @@ export type MinigameId =
   | 'islas.flotacion'
   | 'islas.colorprofundo'
   | 'islas.cangrejo'
-  | 'islas.absorcion';
+  | 'islas.absorcion'
+  | 'comayagua.aserrin'
+  | 'comayagua.reloj'
+  | 'comayagua.eco'
+  | 'comayagua.pilon'
+  | 'comayagua.tenampua'
+  | 'comayagua.anden'
+  | 'comayagua.mantas'
+  | 'comayagua.fachadas';
 /** solo = vos contra bots · duo = vos y un compa contra parejas · abierto = sala abierta (se llena con bots si no hay gente) */
 export type Modo = 'solo' | 'duo' | 'abierto';
 export type Vehiculo =

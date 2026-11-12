@@ -254,13 +254,13 @@ const peces = [
   ['Pez vela', 90, '#3f6fd1'],
 ];
 const res = [];
-res.push(await pruebaAtrapa('atrapa-catalogo-mangos', { juego: 'comayagua.mangos', motor: 'atrapa', golpe: true }));
+res.push(await pruebaAtrapa('atrapa-catalogo-hortalizas', { juego: 'lapaz.hortalizas', motor: 'atrapa', golpe: true }));
 res.push(await pruebaAtrapa('atrapa-catalogo-cafe-duo', { juego: 'lapaz.cortecafe', motor: 'atrapa', modo: 'duo' }));
 res.push(await pruebaAtrapa('atrapa-sin-tema', { motor: 'atrapa', modo: 'solo' }));
 res.push(await pruebaCocina('cocina-catalogo-baleadas', { juego: 'lapaz.ticucos', motor: 'cocina', modo: 'duo' }));
 res.push(
-  await pruebaCocina('cocina-catalogo-alfombras', {
-    juego: 'comayagua.alfombras',
+  await pruebaCocina('cocina-catalogo-tostado', {
+    juego: 'lapaz.tostado',
     motor: 'cocina',
     modo: 'solo',
     pedidos: 1,
@@ -285,8 +285,8 @@ res.push(
 // vistas con GPU real (sin #test) para las capturas
 res.push(
   await pruebaAtrapa(
-    'captura-atrapa-mangos',
-    { juego: 'comayagua.mangos', motor: 'atrapa', shot: 'atrapa-mangos', sinFin: true },
+    'captura-atrapa-hortalizas',
+    { juego: 'lapaz.hortalizas', motor: 'atrapa', shot: 'atrapa-hortalizas', sinFin: true },
     '#go',
   ),
 );
@@ -327,8 +327,8 @@ res.push(
 );
 res.push(
   await pruebaCocina(
-    'captura-cocina-alfombras',
-    { juego: 'comayagua.alfombras', motor: 'cocina', modo: 'solo', pedidos: 1, shot: 'cocina-alfombras', sinFin: true },
+    'captura-cocina-tostado',
+    { juego: 'lapaz.tostado', motor: 'cocina', modo: 'solo', pedidos: 1, shot: 'cocina-tostado', sinFin: true },
     '#go',
   ),
 );

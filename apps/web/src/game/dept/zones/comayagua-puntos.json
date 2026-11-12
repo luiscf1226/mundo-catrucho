@@ -1,0 +1,82 @@
+[
+  {
+    "id": "comayagua.visita-1",
+    "nombre": "Alfombras de Semana Santa",
+    "texto": "En Semana Santa, en Comayagua se hacen alfombras de aserrín teñido. Ayudá a poner el esténcil y tomale foto antes de que pase la procesión.",
+    "x": 20,
+    "z": -2,
+    "fuente": "https://visitacomayagua.com/descubre"
+  },
+  {
+    "id": "comayagua.visita-2",
+    "nombre": "La hora en la torre",
+    "texto": "La catedral de Comayagua guarda un reloj histórico de origen árabe. Aquí ves una réplica del mecanismo: esperá la campanada y anotala.",
+    "x": -21,
+    "z": -2,
+    "fuente": "https://visitacomayagua.com/descubre"
+  },
+  {
+    "id": "comayagua.visita-3",
+    "nombre": "Galería de Taulabé",
+    "texto": "Las Cuevas de Taulabé están junto a la CA-5, en el kilómetro 140. Iluminá las formaciones con tu visor, sin tocarlas.",
+    "x": -21,
+    "z": 22,
+    "fuente": "https://sinit.hn/2024/10/22/cuevas-de-taulabe/"
+  },
+  {
+    "id": "comayagua.visita-4",
+    "nombre": "Pasamanos de la cueva",
+    "texto": "En Taulabé hay un tramo con gradas y pasamanos para visitantes. Seguilo y anotá las curvas en tu libreta.",
+    "x": -9,
+    "z": 26,
+    "fuente": "https://sinit.hn/2024/10/22/cuevas-de-taulabe/"
+  },
+  {
+    "id": "comayagua.visita-5",
+    "nombre": "Dulces artesanales",
+    "texto": "En Comayagua todavía se hacen dulces tradicionales a mano. Probá una porción y ayudá a envolver los dulces en el puesto.",
+    "x": 20,
+    "z": 14,
+    "fuente": "https://www.elheraldo.hn/honduras/una-dulce-tradicion-que-cautiva-AKEH612828"
+  },
+  {
+    "id": "comayagua.visita-6",
+    "nombre": "Centro de antigua capital",
+    "texto": "Comayagua fue capital de Honduras antes del traslado a Tegucigalpa. Caminá entre la plaza y la catedral y completá tu postal.",
+    "x": -21,
+    "z": 6,
+    "fuente": "https://visitacomayagua.com/descubre"
+  },
+  {
+    "id": "comayagua.visita-7",
+    "nombre": "Pinares de Siguatepeque",
+    "texto": "Siguatepeque es la ciudad de la zona montañosa de Comayagua, entre pinos. Desde esta parada compará el valle con la altura.",
+    "x": 20,
+    "z": 22,
+    "fuente": "https://www.ecohonduras.net/node/67"
+  },
+  {
+    "id": "comayagua.locura-1",
+    "nombre": "Viento con pincel",
+    "texto": "Este es un esténcil de práctica, lejos de la procesión. Una ráfaga traviesa le pintó bigotes al dibujo. ¡Qué viento más artista!",
+    "x": 20,
+    "z": 6,
+    "fuente": "https://visitacomayagua.com/descubre"
+  },
+  {
+    "id": "comayagua.locura-2",
+    "nombre": "Reloj con recreo",
+    "texto": "La réplica del taller estira las agujas como brazos y pide recreo. Tranquilo: el reloj de la catedral ni se entera.",
+    "x": -21,
+    "z": 14,
+    "fuente": "https://visitacomayagua.com/descubre"
+  },
+  {
+    "id": "comayagua.locura-3",
+    "nombre": "La cueva devuelve el chisme",
+    "texto": "Saludaste a la cueva y el eco te devolvió el «¡hola!» tres veces, cada vez más grande. Puro eco: nadie más habló.",
+    "x": 9,
+    "z": 26,
+    "fuente": "https://sinit.hn/2024/10/22/cuevas-de-taulabe/"
+  }
+]
