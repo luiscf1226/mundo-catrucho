@@ -25,6 +25,10 @@ const RAZONES = [1.5, 2, 0.75];
 const HORA = 5;
 const BANDEJA = 6;
 const EJES_X = [-6.4, -4.6, -2.8];
+// Modo loco: cada rueda mala hay que diagnosticarla a puro desfase y eso cuesta dos o tres horas. Con la paga
+// normal un buen jugador simulado no llegaba al oro (0–1 %); con estas, entre 12 % (dif 1) y 54 % (dif 0).
+const HORA_LOCA = 35;
+const ARREGLO = 40;
 type Rueda = { dientes: number; eje: number };
 type Estado = {
   c: ReturnType<typeof cursor>;
@@ -39,6 +43,8 @@ type Estado = {
   racha: number;
   ultimo: number | null;
   azar: () => number;
+  /** eje donde se coló la rueda mala (−1: ninguno); corregirlo en el modo loco paga el diagnóstico */
+  danado: number;
   espera: number;
   ayuda: boolean;
   aciertos: number;
@@ -67,6 +73,7 @@ function danar(s: Estado) {
   if (mala < 0 || buena < 0) return;
   s.ruedas[buena].eje = -1;
   s.ruedas[mala].eje = e;
+  s.danado = e;
 }
 function encajar(m: Sesion) {
   const s = m.datos;
@@ -82,6 +89,13 @@ function encajar(m: Sesion) {
   if (vieja >= 0) s.ruedas[vieja].eje = -1;
   r.eje = s.sel;
   s.aviso = `Rueda de ${r.dientes} dientes en el eje ${s.sel + 1}.`;
+  if (s.danado === s.sel && r.dientes === s.pide[s.sel]) {
+    s.danado = -1;
+    if (m.parametros.loco) {
+      m.sumar(ARREGLO);
+      s.aviso = `¡Diste con la rueda mala del eje ${s.sel + 1}! +${ARREGLO}`;
+    }
+  }
   s.sel = (s.sel + 1) % 3;
 }
 function cambiarEje(m: Sesion) {
@@ -105,8 +119,9 @@ function campanada(m: Sesion) {
   if (Math.abs(error) <= tol) {
     s.aciertos++;
     s.racha++;
-    m.sumar(30);
-    s.aviso = '¡Aguja y campana juntas! +30';
+    const pago = m.parametros.loco ? HORA_LOCA : 30;
+    m.sumar(pago);
+    s.aviso = `¡Aguja y campana juntas! +${pago}`;
     audio.tone(660, 0.5, { type: 'sine', gain: 0.12 });
     if (s.racha % 3 === 0) {
       m.sumar(50);
@@ -179,6 +194,7 @@ const motor = defineMotor({
       racha: 0,
       ultimo: null,
       azar,
+      danado: -1,
       espera: 0.5,
       ayuda: false,
       aciertos: 0,

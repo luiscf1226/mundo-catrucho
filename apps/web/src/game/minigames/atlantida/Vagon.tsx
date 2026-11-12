@@ -104,6 +104,11 @@ function partir(m: Sesion) {
 function soltar(m: Sesion) {
   const s = m.datos;
   if (s.anima > 0 || !s.tren.length) return;
+  // vaciar el tren sería cambiarlo gratis por uno nuevo: la burra sale al menos con un vagón
+  if (s.tren.length === 1) {
+    s.aviso = 'La burra no sale sin carga: dejá al menos un vagón.';
+    return;
+  }
   const c = s.tren.pop();
   if (c) s.andén.push(c);
   s.soltados++;
@@ -174,12 +179,13 @@ const motor = defineMotor({
     const p = m.parametros;
     if (!s.tren.length && !s.anima) ronda(s, m);
     moverCursor(s.c, dt, 1.6);
-    // W/S: un empujón de la palanca gira el orden una vez
-    const y = s.c.y;
+    // W/S: un empujón de la palanca gira el orden una vez. Solo la palanca o el teclado: el puntero
+    // elige apartadero y no debe reordenar el tren si pasa por arriba o por abajo de la pantalla
+    s.c.y = 0;
+    const y = -input.mz;
     if (!s.arriba && Math.abs(y) > 0.6) {
       s.arriba = true;
       girar(m, y > 0 ? 1 : -1);
-      if (!s.c.auto) s.c.y = 0;
     } else if (Math.abs(y) < 0.3) s.arriba = false;
     if (input.take('use')) soltar(m);
     if (input.take('fire')) partir(m);
@@ -236,7 +242,8 @@ const motor = defineMotor({
     const n = s.tren.length;
     let mejor = { i: 0, quita: -1, valor: -1, costo: 99 };
     for (let i = 0; i < 3; i++)
-      for (let mask = 0; mask < 1 << n; mask++) {
+      // sin vaciar el tren: siempre queda al menos un vagón
+      for (let mask = 0; mask < (1 << n) - 1; mask++) {
         const queda = s.tren.filter((_, k) => !(mask & (1 << k)));
         const tele = queda.findIndex((c) => c.tele);
         const orden = p.tele && tele >= 0 ? [...queda.filter((_, k) => k !== tele), queda[tele]] : queda;

@@ -27,6 +27,8 @@ type Estado = {
   combo: boolean;
   brazo: number[];
   reversa: number;
+  /** ya cumpliste el aviso de reversa que está en pantalla (paga una vez por aviso, no por palada) */
+  reversaCumplida: boolean;
   bot: number;
   r: () => number;
   calma: boolean;
@@ -85,9 +87,10 @@ function remar(m: Sesion, dir: 1 | -1) {
     s.combo = true;
     s.aviso = '¡Giro combinado! Adelante de un lado, atrás del otro.';
   }
-  if (m.parametros.reversa && s.reversa > 0 && dir === -1) {
-    m.sumar(5);
-    s.aviso = '¡Reversa, como pidió la balsa!';
+  if (m.parametros.reversa && s.reversa > 0 && dir === -1 && !s.reversaCumplida) {
+    s.reversaCumplida = true;
+    m.sumar(15);
+    s.aviso = '¡Reversa, como pidió la balsa! +15';
   }
   s.h = limitar(s.h + dh, -1.2, 1.2);
   s.ultima = { t: m.tiempo, lado, dir, dh };
@@ -97,7 +100,7 @@ const motor = defineMotor({
   id: 'atlantida.balsa',
   fondo: 'selva',
   guia: {
-    goal: 'Elegí remero y dá paladas para meter la balsa en los remansos verdes sin pegarle a las rocas.',
+    goal: 'Elegí remero y da paladas para meter la balsa en los remansos verdes sin pegarle a las rocas.',
     keys: [
       ['WASD / mouse', 'elegir remero (A/D lado, W/S proa o popa)'],
       ['F / clic / RT', 'palada adelante'],
@@ -134,6 +137,7 @@ const motor = defineMotor({
     combo: false,
     brazo: [0, 0, 0, 0],
     reversa: 0,
+    reversaCumplida: false,
     bot: 0,
     calma: false,
     paladas: 0,
@@ -163,7 +167,10 @@ const motor = defineMotor({
     s.x = Math.max(X0 + 0.7, Math.min(X1 - 0.7, s.x));
     if (p.reversa) {
       s.reversa -= dt;
-      if (s.reversa < -6) s.reversa = 2.5;
+      if (s.reversa < -6) {
+        s.reversa = 2.5;
+        s.reversaCumplida = false;
+      }
     }
     // remansos y rocas que bajan con la corriente
     s.sale -= dt;
@@ -328,7 +335,14 @@ const motor = defineMotor({
         <Label pos={[s.x, 2.4, ZB]} text={ASIENTOS[sel]} h={0.24} bg="#1d3557" />
         {p.reversa && (
           <>
-            {s.reversa > 0 && <Label pos={[s.x + 1.4, 3.1, ZB]} text="💬 ¡Reversa!" h={0.34} bg="#ef476f" />}
+            {s.reversa > 0 && (
+              <Label
+                pos={[s.x + 1.4, 3.1, ZB]}
+                text={s.reversaCumplida ? '✓ ¡Así mero!' : '💬 ¡Reversa!'}
+                h={0.34}
+                bg={s.reversaCumplida ? '#2d6a4f' : '#ef476f'}
+              />
+            )}
             {[-1, 1].map((l) => (
               <Palo
                 key={l}

@@ -24,6 +24,9 @@ const SONIDO = 12;
 const UMBRAL = 0.9;
 const ESCALA = 0.62;
 const CENTRO: [number, number] = [-1.8, 3];
+/** Galería dibujada sin medir su eco ni poder deducirla. Con ~1,75 galerías y ~1,9 paredes por cruce, marcar
+ *  al azar rinde −18 por cruce en promedio (con +30 rendía +17 y el oro salía sin chasquear). */
+const A_CIEGAS = 10;
 type Rumbo = { lejos: number; abierto: boolean; eco: number | null; marca: 0 | 1 | -1 };
 type Pulso = { rumbo: number; t: number; vuelta: number; oido: boolean };
 type Estado = {
@@ -63,6 +66,8 @@ function cruceNuevo(s: Estado, p: Param) {
   });
   s.errados = 0;
   s.cruce++;
+  // un pulso en vuelo es del cruce anterior: su eco no se escribe en los rumbos nuevos
+  s.pulso = null;
 }
 function chasquido(m: Sesion) {
   const s = m.datos;
@@ -82,11 +87,17 @@ function marcar(m: Sesion) {
   if (s.pasar > 0) return;
   const r = s.rumbos[indice(s.c.x, N)];
   if (r.marca) return;
+  // sin oír su eco, el rumbo solo es seguro si todo lo que falta por medir tiene que ser galería
+  const sinMedir = s.rumbos.filter((x) => x.eco === null && !x.marca).length;
+  const pendientes = s.rumbos.filter((x) => x.abierto && x.marca !== 1).length;
+  const sabido = r.eco !== null || sinMedir === pendientes;
   if (r.abierto) {
     r.marca = 1;
     s.galerias++;
-    m.sumar(30);
-    s.aviso = '¡Galería dibujada en el plano! +30';
+    // dibujar a ciegas paga poco: marcar al azar no conviene
+    const pago = sabido ? 30 : A_CIEGAS;
+    m.sumar(pago);
+    s.aviso = sabido ? `¡Galería dibujada en el plano! +${pago}` : `Le atinaste sin medir: +${pago}.`;
   } else {
     r.marca = -1;
     s.paredes++;
@@ -205,12 +216,15 @@ const motor = defineMotor({
     }
     if (s.pulso || s.pasar > 0) return;
     const encontradas = s.rumbos.filter((r) => r.eco !== null && r.eco > UMBRAL).length;
-    // marca lo que ya oyó largo; si faltan, mide rumbos nuevos; sin pulsos, se la juega al centro
+    // marca lo que ya oyó largo; si faltan, mide rumbos nuevos, salvo que lo que queda sin medir tenga que ser
+    // galería; sin pulsos, se la juega
     let i = s.rumbos.findIndex((r) => r.eco !== null && r.eco > UMBRAL && !r.marca);
     let accion: 'marcar' | 'medir' = 'marcar';
     if (i < 0 && encontradas < abiertas(s)) {
       i = s.rumbos.findIndex((r) => r.eco === null && !r.marca);
-      accion = s.pulsos > 0 ? 'medir' : 'marcar';
+      const sinMedir = s.rumbos.filter((r) => r.eco === null && !r.marca).length;
+      const pendientes = s.rumbos.filter((r) => r.abierto && r.marca !== 1).length;
+      accion = s.pulsos > 0 && sinMedir > pendientes ? 'medir' : 'marcar';
     }
     if (i < 0) return;
     const x = haciaIndice(i, N);

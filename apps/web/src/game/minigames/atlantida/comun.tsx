@@ -110,14 +110,18 @@ export function Barra({
         solid={false}
         cast={false}
       />
-      <Block
-        pos={[-ancho / 2 + (ancho * v) / 2, 0, 0.05]}
-        size={[Math.max(0.02, ancho * v), 0.22, 0.08]}
-        color={alerta !== undefined && v >= alerta ? '#ef476f' : color}
-        mat="neon"
-        solid={false}
-        cast={false}
-      />
+      {/* relleno de tamaño fijo escalado desde el borde izquierdo: un tamaño nuevo por cuadro sería una
+          geometría nueva por cuadro en el caché del arte HD */}
+      <group position={[-ancho / 2, 0, 0.05]} scale={[Math.max(0.007, v), 1, 1]}>
+        <Block
+          pos={[ancho / 2, 0, 0]}
+          size={[ancho, 0.22, 0.08]}
+          color={alerta !== undefined && v >= alerta ? '#ef476f' : color}
+          mat="neon"
+          solid={false}
+          cast={false}
+        />
+      </group>
       {alerta !== undefined && (
         <Block
           pos={[-ancho / 2 + ancho * alerta, 0, 0.1]}
