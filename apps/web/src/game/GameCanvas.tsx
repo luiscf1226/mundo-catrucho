@@ -6,12 +6,12 @@ import type { Track } from '../core/audio';
 import { audio } from '../core/audio';
 import { bindPointer } from '../core/input';
 import { interactions } from '../core/interact';
+import { net } from '../core/net';
 import { phys } from '../core/phys';
 import { player } from '../core/player';
 import { useGame } from '../core/store';
 import type { MinigameId } from '../core/types';
 import { LoadingScreen } from '../ui/LoadingScreen';
-
 import { Gallery } from './dev/Gallery';
 import { EnVivo } from './EnVivo';
 import { art } from './kit/art';
@@ -103,6 +103,9 @@ export function GameCanvas() {
     wrap = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(false);
   useEffect(() => (wrap.current ? bindPointer(wrap.current) : undefined), []);
+  // al volver al menú se desmonta el lienzo: cerrá la sala en vivo para no dejar el cupo ocupado. Va aquí y no en
+  // EnVivo porque EnVivo está dentro de Suspense y se desmonta un momento al cargar cada escena.
+  useEffect(() => () => net.setZone(null), []);
   const Effects = art.Effects ?? (({ children }: { children?: ReactNode }) => <>{children}</>);
   const test = typeof location !== 'undefined' && location.hash.includes('test');
   return (

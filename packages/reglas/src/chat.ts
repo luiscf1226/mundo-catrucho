@@ -270,7 +270,22 @@ export const CODIGO = {
   largo: 5,
   /** cuánto vale un código */
   vigenciaMs: 10 * 60_000,
+  /** códigos fallidos por jugador en cada ventana: adivinar 32⁵ códigos a mano no sale a cuenta */
+  fallosMax: 10,
+  ventanaFallosMs: 10 * 60_000,
 } as const;
+export interface FallosCodigo {
+  desde: number;
+  n: number;
+}
+/** ¿Puede probar otro código? Los fallos se cuentan por ventana; al pasar la ventana vuelven a cero. */
+export function puedeProbarCodigo(f: FallosCodigo | undefined, ahora: number) {
+  return !f || ahora - f.desde >= CODIGO.ventanaFallosMs || f.n < CODIGO.fallosMax;
+}
+/** Suma un código fallido. */
+export function sumarFalloCodigo(f: FallosCodigo | undefined, ahora: number): FallosCodigo {
+  return !f || ahora - f.desde >= CODIGO.ventanaFallosMs ? { desde: ahora, n: 1 } : { desde: f.desde, n: f.n + 1 };
+}
 /** Código en mayúsculas y sin espacios, o null si no puede ser un código. */
 export function normalizarCodigo(c: unknown): string | null {
   if (typeof c !== 'string') return null;

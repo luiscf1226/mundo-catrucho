@@ -48,7 +48,7 @@ interface EstadoChat {
   /** cómo terminó el último código usado (el viaje cierra el panel; al volver a abrirlo se ve) */
   union: { r: ResultadoCodigo; nombre?: string } | null;
 }
-export type ResultadoCodigo = Union | 'codigo' | 'vencido' | 'propio' | 'sin-conexion' | 'sin-sala';
+export type ResultadoCodigo = Union | 'codigo' | 'vencido' | 'propio' | 'espera' | 'sin-conexion' | 'sin-sala';
 export const useChat = create<EstadoChat>(() => ({
   mensajes: [],
   silenciados: [],
@@ -161,7 +161,9 @@ async function unirse(codigo: string): Promise<NonNullable<EstadoChat['union']>>
     nombre: nombreJuego(),
   });
   if (!u.ok)
-    return { r: (['codigo', 'vencido', 'propio', 'sin-sala'] as const).find((m) => m === u.motivo) ?? 'sin-conexion' };
+    return {
+      r: (['codigo', 'vencido', 'propio', 'espera', 'sin-sala'] as const).find((m) => m === u.motivo) ?? 'sin-conexion',
+    };
   useChat.setState({ conocido: { id: u.id, nombre: u.nombre } });
   const g = useGame.getState();
   const zona = partirSala(u.sala)?.zona;

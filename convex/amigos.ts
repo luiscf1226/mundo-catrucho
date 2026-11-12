@@ -3,7 +3,17 @@
 // En el juego cada quien se conoce por su id público de sala (`idPublico`, el mismo del pase): no revela la
 // cuenta. La tabla `publicos` lo traduce a la cuenta y se llena al pedir un pase o un código.
 // Un bloqueo corta todo en los dos sentidos: chat (la sala lo sabe por el pase), directos, amistad y códigos.
-import { CHAT, CODIGO, codigoDe, idPublico, normalizarCodigo, SECRETO_MIN, salaValida } from '@mundo-catrucho/reglas';
+import {
+  CHAT,
+  CODIGO,
+  codigoDe,
+  idPublico,
+  normalizarCodigo,
+  puedeProbarCodigo,
+  SECRETO_MIN,
+  salaValida,
+  sumarFalloCodigo,
+} from '@mundo-catrucho/reglas';
 import {
   type DataModelFromSchemaDefinition,
   type GenericMutationCtx,
@@ -14,6 +24,7 @@ import {
   queryGeneric,
 } from 'convex/server';
 import { type GenericId, v } from 'convex/values';
+import { asegurarContadores } from './avance';
 import { asegurarUsuario, quien, usuarioActual } from './identidad';
 import type schema from './schema';
 
@@ -303,13 +314,20 @@ export const usarCodigo = mutation({
     const codigo = normalizarCodigo(args.codigo);
     if (!codigo) return { ok: false as const, motivo: 'codigo' };
     const { usuario } = await asegurarUsuario(ctx, { invitado: args.invitado, nombre: args.nombre });
+    const ahora = Date.now(),
+      c = await asegurarContadores(ctx, usuario._id);
+    if (!puedeProbarCodigo(c.fallosCodigo, ahora)) return { ok: false as const, motivo: 'espera' };
+    const fallo = async (motivo: 'codigo' | 'vencido') => {
+      await ctx.db.patch(c._id, { fallosCodigo: sumarFalloCodigo(c.fallosCodigo, ahora) });
+      return { ok: false as const, motivo };
+    };
     const filas = await ctx.db
       .query('invitaciones')
       .withIndex('por_codigo', (q) => q.eq('codigo', codigo))
       .collect();
-    if (!filas.length) return { ok: false as const, motivo: 'codigo' };
-    const inv = filas.find((i) => i.vence > Date.now());
-    if (!inv) return { ok: false as const, motivo: 'vencido' };
+    if (!filas.length) return await fallo('codigo');
+    const inv = filas.find((i) => i.vence > ahora);
+    if (!inv) return await fallo('vencido');
     if (inv.de === usuario._id) return { ok: false as const, motivo: 'propio' };
     // un bloqueado no te puede invitar (ni vos usar su código): el mismo aviso que un código que no existe
     if (await hayBloqueo(ctx, usuario._id, inv.de)) return { ok: false as const, motivo: 'codigo' };

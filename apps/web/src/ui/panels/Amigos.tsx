@@ -284,6 +284,7 @@ const AVISO_CODIGO = {
   codigo: () => 'Ese código no existe.',
   vencido: () => 'Ese código ya venció. Pedile otro.',
   propio: () => 'Ese código es tuyo: pasáselo a un amigo.',
+  espera: () => 'Probaste muchos códigos. Esperá unos minutos.',
   'sin-sala': () => 'Tu amigo no está en una sala en vivo ahorita.',
   'sin-conexion': () => 'Sin conexión. Probá otra vez.',
 } as const;

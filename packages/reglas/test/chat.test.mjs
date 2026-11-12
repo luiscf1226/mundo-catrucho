@@ -15,6 +15,8 @@ import {
   motivoValido,
   normalizarCodigo,
   permitirChat,
+  puedeProbarCodigo,
+  sumarFalloCodigo,
   verificarPase,
 } from '../src/index.ts';
 
@@ -224,4 +226,15 @@ test('el pase lleva los bloqueados (como mucho 32) y sigue cabiendo en la URL', 
     'mapa:0',
   );
   assert.deepEqual(sin.pase.bloqueados, []);
+});
+
+test('código de amigo: 10 fallos por ventana y después vuelve', () => {
+  let f;
+  for (let i = 0; i < CODIGO.fallosMax; i++) {
+    assert(puedeProbarCodigo(f, 1000 + i));
+    f = sumarFalloCodigo(f, 1000 + i);
+  }
+  assert(!puedeProbarCodigo(f, 2000), 'el 11 espera');
+  assert(puedeProbarCodigo(f, 1000 + CODIGO.ventanaFallosMs), 'pasada la ventana vuelve');
+  assert.deepEqual(sumarFalloCodigo(f, 1000 + CODIGO.ventanaFallosMs), { desde: 1000 + CODIGO.ventanaFallosMs, n: 1 });
 });

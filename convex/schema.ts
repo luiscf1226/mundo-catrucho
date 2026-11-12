@@ -183,6 +183,8 @@ export default defineSchema({
     bonosViaje: v.optional(v.object({ fecha: v.string(), suma: v.number() })),
     /** ya subió (o no tenía) avance guardado en el navegador */
     migrado: v.boolean(),
+    /** códigos de amigo fallidos en la ventana actual (contra adivinar códigos) */
+    fallosCodigo: v.optional(v.object({ desde: v.number(), n: v.number() })),
   }).index('por_usuario', ['usuarioId']),
   // las misiones de cada día de Honduras; las reparte el cron de las 06:00 UTC
   misionesGlobales: defineTable({ fecha: v.string(), ids: v.array(v.string()) }).index('por_fecha', ['fecha']),

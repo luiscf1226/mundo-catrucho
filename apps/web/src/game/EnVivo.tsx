@@ -79,8 +79,6 @@ export function EnVivo() {
   useEffect(() => {
     net.setZone(zona);
   }, [zona]);
-  // al volver al menú se desmonta el lienzo: sin esto la sala quedaba abierta con el cupo ocupado
-  useEffect(() => () => net.setZone(null), []);
   useFrame(() => {
     if (zona) net.sendState(player.pos, player.yaw, player.state.anim);
   });
