@@ -230,7 +230,9 @@ function LoadedIntro() {
                         <Star key={k} on={k <= i} size={16} />
                       ))}
                     </span>
-                    <b className="mc-num">{s}</b>
+                    <b data-testid={`mg-meta-${i}`} className="mc-num">
+                      {s}
+                    </b>
                   </li>
                 ))}
               </ul>
@@ -378,6 +380,15 @@ export function MgResults() {
             </div>
           )}
         </div>
+        {mg.pago && mg.pago !== 'pagado' && (
+          <p data-testid="mg-result-pago" data-pago={mg.pago} role="status" className="mc-label">
+            {mg.pago === 'pendiente'
+              ? 'Validando la partida…'
+              : mg.pago === 'rechazado'
+                ? 'El servidor no aceptó esta partida: no paga'
+                : 'Sin respuesta del servidor: esta partida no se pudo cobrar'}
+          </p>
+        )}
         {w.leveledUp && (
           <div
             data-testid="mg-levelup"

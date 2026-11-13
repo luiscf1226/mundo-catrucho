@@ -1,13 +1,18 @@
 // Estado del juego (Zustand). Todo el progreso vive en `profile` y se guarda en localStorage.
-// Este módulo es la "capa de servidor" del prototipo: aquí se validan compras y recompensas. En la versión de
-// Roblox el mismo papel lo cumplen los servicios de ServerScriptService (ver roblox/).
+// Sin VITE_CONVEX_URL este módulo es la "capa de servidor" del prototipo: aquí se validan compras y recompensas.
+// Con VITE_CONVEX_URL (ver servidor.ts) las Lempiritas, la XP, el nivel, lo comprado y lo puesto los manda
+// Convex: el perfil local solo refleja lo último que respondió y nada aquí suma saldo por su cuenta.
 import {
   bonoViaje,
+  cambiosDe,
+  decidirCompra,
   ganarXp,
   MONEDA,
   MONEDA_SUELTA,
+  MONEDAS_INICIALES,
   PREMIO_PRIMERA_VISITA,
   PREMIO_RECUERDO,
+  poseidos,
   premioPartida,
 } from '@mundo-catrucho/reglas';
 import { create } from 'zustand';
@@ -24,6 +29,7 @@ import {
   SHOP,
 } from './data';
 import { player } from './player';
+import { alVencer, type PerfilServidor, SERVIDOR, servidor } from './servidor';
 import type { AvatarConfig, MinigameId, MinigameResult, Modo, PanelId, Rewards, Scene, V3, Vehiculo } from './types';
 
 const SAVE_KEY = 'mundo-catrucho-v1';
@@ -107,6 +113,8 @@ export interface MgState {
   origenPos?: { pos: V3; yaw: number };
   /** posiciones contra bots, al terminar */ ranking?: RankRow[] /** ganó una etapa nueva */;
   avance?: boolean;
+  /** con Convex: en qué va el pago de `rewards` (sin Convex no existe: se paga al instante) */
+  pago?: 'pendiente' | 'pagado' | 'rechazado' | 'sin-conexion';
 }
 export interface MgHud {
   timer?: number;
@@ -134,7 +142,7 @@ const freshProfile = (): Profile => ({
   name: 'Catracho',
   created: false,
   avatar: { ...SHOP.defaultAvatar },
-  coins: 100,
+  coins: MONEDAS_INICIALES,
   xp: 0,
   level: 1,
   owned: [...FREE],
@@ -226,7 +234,10 @@ export interface Game {
   addXp(n: number): void;
   pickupCoin(n?: number): void;
   collect(deptId: string): boolean;
-  buy(itemId: string): 'ok' | 'ya' | 'caro' | 'no';
+  /** Compra local e inmediata. Con Convex solo dispara `comprar` y responde 'espera'. */
+  buy(itemId: string): Compra | 'espera';
+  /** Compra y se pone el artículo. Con Convex espera la respuesta; sin conexión no compra. */
+  comprar(itemId: string): Promise<Compra | 'sin-conexion'>;
   equip(itemId: string): boolean;
   setAvatar(a: Partial<AvatarConfig>): void;
   setName(n: string): void;
@@ -237,9 +248,16 @@ export interface Game {
   setSettings(s: Partial<Settings>): void;
   setRoom(mode: Profile['room']['mode'], code?: string): void;
   resetProgress(): void;
+  /** Con Convex: entra como invitado y trae saldo, nivel, lo comprado y lo puesto. Sin Convex no hace nada. */
+  sincronizar(): Promise<boolean>;
 }
 
+type Compra = 'ok' | 'ya' | 'caro' | 'no';
 let toastId = 0;
+/** Partida abierta en Convex para el minijuego en curso (id, o null si no se pudo abrir). */
+let partidaEnCurso: Promise<string | null> | null = null;
+/** Cambios de avatar mandados a Convex que todavía no responden: mientras haya, no se pisa lo local. */
+let vistiendo = 0;
 /** Etapa que toca jugar: la siguiente sin ganar; si ya las ganó todas, la última. */
 const etapaDe = (p: Profile, juegoId: string) => {
   const j = juegoById(juegoId);
@@ -275,14 +293,6 @@ function rankingDe(mg: MgState, r: MinigameResult, name: string): RankRow[] {
   }
   return rows.sort((a, b) => b.score - a.score);
 }
-const SLOT: Record<string, keyof AvatarConfig> = {
-  cabello: 'hair',
-  rostro: 'face',
-  camisa: 'shirt',
-  pantalon: 'pants',
-  sombrero: 'hat',
-  accesorio: 'acc',
-};
 
 export const useGame = create<Game>((set, get) => {
   /** Aplica cambios al perfil, revisa logros y guarda. Es el único camino para modificar el progreso. */
@@ -294,12 +304,14 @@ export const useGame = create<Game>((set, get) => {
     save(p);
     for (const id of fresh) {
       const a = ACHIEVEMENTS.find((x) => x.id === id)!;
-      get().toast(`Logro: ${a.name} (+${a.coins})`, a.icon);
+      get().toast(SERVIDOR ? `Logro: ${a.name}` : `Logro: ${a.name} (+${a.coins})`, a.icon);
     }
     return fresh;
   };
-  /** Suma XP con las reglas compartidas; cada nivel nuevo paga su premio. Devuelve si subió. */
+  /** Suma XP con las reglas compartidas; cada nivel nuevo paga su premio. Devuelve si subió. Con Convex no hace
+   * nada: XP, nivel y Lempiritas solo cambian con lo que responde el servidor. */
   const gainXp = (p: Profile, n: number) => {
+    if (SERVIDOR) return false;
     const a = ganarXp({ nivel: p.level, xp: p.xp }, n);
     p.level = a.nivel;
     p.xp = a.xp;
@@ -308,6 +320,7 @@ export const useGame = create<Game>((set, get) => {
     return a.subidas > 0;
   };
   const gainCoins = (p: Profile, n: number) => {
+    if (SERVIDOR) return;
     p.coins += n;
     if (n > 0) p.stats.coinsEarned += n;
   };
@@ -345,6 +358,76 @@ export const useGame = create<Game>((set, get) => {
       if (m.type !== type || (m.target && m.target !== target)) continue;
       dm.progress = type === 'score' ? Math.max(dm.progress, amount) : Math.min(m.count, dm.progress + amount);
     }
+  };
+  /** Copia al perfil local lo que respondió Convex. El avatar no se pisa mientras haya cambios en camino. */
+  const aplicar = (sv: PerfilServidor) =>
+    commit((p) => {
+      p.coins = sv.monedas;
+      p.xp = sv.xp;
+      p.level = sv.nivel;
+      p.owned = [...poseidos(sv.comprados)];
+      p.emotes = p.owned.filter((id) => itemById(id)?.cat === 'emote');
+      if (vistiendo === 0) p.avatar = { ...p.avatar, ...sv.avatar };
+    });
+  /** Manda a Convex un cambio de avatar ya aplicado aquí; si lo rechaza, vuelve a lo que diga el servidor. */
+  const vestirEnServidor = (llamada: Promise<{ ok: boolean; perfil?: PerfilServidor }>) => {
+    vistiendo++;
+    void llamada.then((r) => {
+      vistiendo--;
+      if (r.perfil) aplicar(r.perfil);
+    });
+  };
+  /** Con Convex, abre la partida del minijuego que se acaba de montar (desde la intro, con la hora del servidor). */
+  const abrirPartida = () => {
+    const mg = get().mg;
+    partidaEnCurso =
+      SERVIDOR && mg
+        ? servidor
+            .abrir({ motor: mg.id, etapa: mg.etapa, juegoId: mg.juego, modo: mg.modo })
+            .then((r) => (r.ok ? r.id : null))
+        : null;
+  };
+  /** Con Convex, cierra la partida y muestra lo que de verdad pagó el servidor. */
+  const cobrarPartida = async (mg: MgState, r: MinigameResult) => {
+    const abierta = partidaEnCurso;
+    partidaEnCurso = null;
+    const id = abierta ? await abierta : null;
+    const res = id
+      ? await servidor.cerrar({ partidaId: id, puntos: r.score, estrellas: r.stars, gano: r.won })
+      : ({ ok: false, motivo: 'sin-conexion' } as const);
+    const misma = () => {
+      const m = get().mg;
+      return m && m.run === mg.run && m.juego === mg.juego && m.id === mg.id && m.phase === 'ended' ? m : null;
+    };
+    if (res.ok) {
+      const { monedas, xp, nivel } = res.saldo;
+      commit((p) => {
+        p.coins = monedas;
+        p.xp = xp;
+        p.level = nivel;
+      });
+      const m = misma();
+      if (m?.rewards)
+        set({
+          mg: {
+            ...m,
+            pago: 'pagado',
+            rewards: { ...m.rewards, coins: res.monedas, xp: res.xp, leveledUp: res.subidas > 0 },
+          },
+        });
+      return;
+    }
+    const sinConexion = res.motivo === 'sin-conexion';
+    const m = misma();
+    // en los resultados lo dice `mg-result-pago`; si ya se fue de ahí, un aviso
+    if (m) set({ mg: { ...m, pago: sinConexion ? 'sin-conexion' : 'rechazado' } });
+    else
+      get().toast(
+        sinConexion
+          ? 'Sin conexión con el servidor: esa partida no pagó'
+          : 'El servidor no aceptó esa partida: no pagó',
+        '⚠️',
+      );
   };
 
   return {
@@ -401,7 +484,8 @@ export const useGame = create<Game>((set, get) => {
           bumpMissions(p, 'visit', 1);
         }
       });
-      if (first) get().toast(`Primera visita: +${PREMIO_PRIMERA_VISITA.monedas} ${MONEDA}`, '🚌');
+      if (first)
+        get().toast(SERVIDOR ? 'Primera visita' : `Primera visita: +${PREMIO_PRIMERA_VISITA.monedas} ${MONEDA}`, '🚌');
     },
     openPanel: (panel) => set({ panel }),
     closePanel: () => set({ panel: null }),
@@ -422,7 +506,7 @@ export const useGame = create<Game>((set, get) => {
     },
     dropToast: (id) => set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) })),
 
-    startMinigame: (id) =>
+    startMinigame: (id) => {
       set((s) => ({
         screen: 'world',
         scene: { kind: 'minigame', id },
@@ -438,7 +522,9 @@ export const useGame = create<Game>((set, get) => {
           modo: s.profile.modo,
           origen: s.scene.kind === 'dept' ? s.scene : { kind: 'lobby' },
         },
-      })),
+      }));
+      abrirPartida();
+    },
     startJuego: (juegoId) => {
       const j = juegoById(juegoId);
       if (!j) return;
@@ -460,6 +546,7 @@ export const useGame = create<Game>((set, get) => {
           origenPos: s.scene.kind === 'dept' ? { pos: [...player.pos] as V3, yaw: player.yaw } : undefined,
         },
       }));
+      abrirPartida();
     },
     setModo: (m) => {
       commit((p) => {
@@ -482,9 +569,7 @@ export const useGame = create<Game>((set, get) => {
         get().toast('No ajusta el pisto para el pasaje', '🪙');
         return false;
       }
-      commit((p) => {
-        p.coins -= t.precio;
-      });
+      commit((p) => gainCoins(p, -t.precio));
       set((s) => ({
         screen: 'world',
         scene: { kind: 'viaje', veh, to, from },
@@ -548,18 +633,22 @@ export const useGame = create<Game>((set, get) => {
           }
         }
       });
-      set({
-        mg: {
-          ...mg,
-          phase: 'ended',
-          avance,
-          ranking: rankingDe(mg, r, get().profile.name),
-          result: { ...r, stars },
-          rewards: { coins, xp, leveledUp, newAchievements: fresh },
-        },
-      });
+      // con Convex se muestra 0 hasta que el servidor confirme lo que pagó
+      const ended: MgState = {
+        ...mg,
+        phase: 'ended',
+        avance,
+        ranking: rankingDe(mg, r, get().profile.name),
+        result: { ...r, stars },
+        rewards: SERVIDOR
+          ? { coins: 0, xp: 0, leveledUp: false, newAchievements: fresh }
+          : { coins, xp, leveledUp, newAchievements: fresh },
+        pago: SERVIDOR ? 'pendiente' : undefined,
+      };
+      set({ mg: ended });
+      if (SERVIDOR) void cobrarPartida(ended, { ...r, stars });
     },
-    replayMinigame: () =>
+    replayMinigame: () => {
       set((s) =>
         s.mg
           ? {
@@ -578,7 +667,9 @@ export const useGame = create<Game>((set, get) => {
               panel: null,
             }
           : {},
-      ),
+      );
+      abrirPartida();
+    },
     exitMinigame: () => {
       const mg = get().mg;
       if (mg?.origen.kind !== 'dept') {
@@ -637,7 +728,13 @@ export const useGame = create<Game>((set, get) => {
         p0 = get().profile;
       if (!item) return 'no';
       if (p0.owned.includes(itemId) || p0.emotes.includes(itemId)) return 'ya';
-      if (p0.coins < item.price) return 'caro';
+      if (SERVIDOR) {
+        void get().comprar(itemId);
+        return 'espera';
+      }
+      // `owned` ya se revisó arriba; aquí solo cuentan existencia, venta suelta y saldo
+      const c = decidirCompra({ saldo: p0.coins, comprados: [], itemId });
+      if (!c.ok) return c.motivo;
       commit((p) => {
         p.coins -= item.price;
         p.stats.purchases++;
@@ -650,16 +747,34 @@ export const useGame = create<Game>((set, get) => {
       });
       return 'ok';
     },
+    comprar: async (itemId) => {
+      if (!SERVIDOR) {
+        const r = get().buy(itemId);
+        if (r === 'ok') get().equip(itemId);
+        return r === 'espera' ? 'no' : r;
+      }
+      const r = await servidor.comprar(itemId);
+      if (r.perfil) aplicar(r.perfil);
+      if (r.ok) {
+        commit((p) => {
+          p.stats.purchases++;
+        });
+        return 'ok';
+      }
+      if (r.motivo === 'ya' || r.motivo === 'caro' || r.motivo === 'no') return r.motivo;
+      get().toast('Sin conexión con el servidor: no se pudo comprar', '⚠️');
+      return 'sin-conexion';
+    },
     equip: (itemId) => {
       const item = itemById(itemId),
         p0 = get().profile;
       if (!item || item.cat === 'emote' || !p0.owned.includes(itemId)) return false;
+      const cambios = cambiosDe(itemId);
+      if (!cambios) return false;
       commit((p) => {
-        if (item.cat === 'atuendo') {
-          const { body: _b, skin: _s, ...piezas } = item.set ?? {};
-          Object.assign(p.avatar, piezas);
-        } else (p.avatar as any)[SLOT[item.cat]] = itemId;
+        Object.assign(p.avatar, cambios);
       });
+      if (SERVIDOR) vestirEnServidor(servidor.equipar(itemId));
       return true;
     },
     setAvatar: (a) => {
@@ -671,6 +786,7 @@ export const useGame = create<Game>((set, get) => {
       commit((p) => {
         Object.assign(p.avatar, clean);
       });
+      if (SERVIDOR) vestirEnServidor(servidor.vestir(clean));
     },
     setName: (n) => {
       commit((p) => {
@@ -719,9 +835,25 @@ export const useGame = create<Game>((set, get) => {
       const p = freshProfile();
       save(p);
       set({ profile: p, screen: 'menu', panel: null, mg: null, scene: { kind: 'lobby' } });
+      // con Convex el saldo y lo comprado no se borran: se vuelven a leer del servidor
+      if (SERVIDOR) void get().sincronizar();
+    },
+    sincronizar: async () => {
+      if (!SERVIDOR) return false;
+      const p = get().profile,
+        sv = await servidor.entrar(p.name, p.avatar);
+      if (sv) aplicar(sv);
+      return !!sv;
     },
   };
 });
+
+// con Convex, al abrir el juego se trae el perfil del servidor (sin Convex no hay ninguna petición); si una
+// llamada vence, se vuelve a leer para corregir el saldo que se ve
+if (SERVIDOR) {
+  alVencer.releer = () => useGame.getState().sincronizar();
+  void useGame.getState().sincronizar();
+}
 
 /** El juego se detiene mientras hay un panel o un diálogo abierto, o antes y después de un minijuego. */
 export const isPaused = () => {

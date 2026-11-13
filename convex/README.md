@@ -19,8 +19,37 @@ tablas; la usará `cerrarPartida` (MC-14).
 npx convex run partidas:validar '{"motor":"cortes.chuco","puntos":320,"estrellas":2,"duracion":74,"etapa":0}'
 ```
 
-Falta escribir las funciones que lista `docs/plan.html` (sección «Datos»): `miPerfil`, `comprar`, `abrirPartida`,
-`cerrarPartida`, etc.
+## Tienda y partidas (MC-13, MC-14)
+
+Identidad de invitado mientras no exista Clerk (MC-07): el juego genera un secreto de 32 bytes, lo guarda en
+`localStorage` y lo manda como `invitado` en cada llamada. Convex guarda solo `invitado:<sha256>` en
+`usuarios.tokenIdentifier`. Todo pasa por `usuarioActual` / `asegurarUsuario` de `identidad.ts`; con Clerk solo
+cambia `tokenDe`.
+
+- `tienda:entrar`, `tienda:miPerfil`: crea o lee al invitado (100 Lempiritas, avatar inicial) y devuelve
+  `{ monedas, xp, nivel, avatar, comprados }`.
+- `tienda:comprar { itemId, equipar? }`: precio de `shop.json`, nunca del cliente; rechaza `no` (no existe o solo
+  viene en un atuendo), `ya` y `caro`.
+- `tienda:equipar { itemId }` y `tienda:vestir { avatar }`: solo lo que tenés, cada pieza en su ranura.
+- `partidas:abrirPartida { motor, etapa, juegoId?, modo? }`: motor, etapas y tema salen del último catálogo
+  publicado (o del empaquetado); guarda `inicio` con la hora del servidor y `dueno`. Cada jugador tiene como mucho
+  una partida abierta: abrir otra deja las anteriores `abandonada` sin pagar, y abrir dos en menos de
+  `APERTURA_MIN_MS` (1 s) se rechaza.
+- `partidas:cerrarPartida { partidaId, puntos, estrellas, gano }`: duración = ahora − inicio, `validarResultado`
+  con la holgura de `HOLGURA_S`, y paga `premioPartida` + `ganarXp` una sola vez. Imposible → `rechazada`;
+  motor sin fila en `TOPES` → `rechazada`; más de 30 min → `vencida`; ajena, ya cerrada o abandonada → no se toca.
+  Todo motor de `minigames.json` y del catálogo tiene que tener fila en `TOPES` (lo revisa `topes.test.mjs`).
+
+Pendiente para MC-15 y MC-16: con Convex, el juego no suma Lempiritas ni XP por monedas sueltas, primera visita,
+recuerdos, misiones, logros ni bono de viaje, y no cobra pasajes ni comida del viaje (`gainCoins`/`gainXp` no hacen
+nada con `VITE_CONVEX_URL`). Solo pagan las partidas validadas y solo cobra la tienda.
+
+La lógica pura vive en `packages/reglas` (`tienda.ts`, `partidas.ts`) y se prueba con `node --test`.
+
+```bash
+npx convex run tienda:entrar '{"invitado":"<64 hex>"}'
+node apps/web/tools/test-tienda-servidor.mjs   # de punta a punta contra el entorno de desarrollo
+```
 
 ## Catálogo público
 

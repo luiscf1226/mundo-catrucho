@@ -135,7 +135,7 @@ Reglas y umbrales: `rulesOf('carrera')` lee `shared/data/minigames.json`.
 Los `data-testid` de `src/ui/UIRoot.tsx` son contrato: `menu`, `btn-jugar|explorar|minijuegos|personaje|tienda`,
 `hud`, `hud-coins`, `hud-level`, `hud-xp`, `hud-btn-<panel>`, `panel-<id>`, `panel-close`, `map-dept-<id>`, `map-go`,
 `map-lobby`, `mg-card-<id>`, `mg-intro`, `mg-start`, `mg-back`, `mg-hud`, `mg-timer`, `mg-score`, `mg-result`
-(con `data-won`), `mg-result-label`, `mg-replay`, `mg-exit`, `shop-tab-<cat>`, `shop-item-<id>`, `ed-name`,
+(con `data-won`), `mg-result-label`, `mg-result-pago` (con `data-pago`, solo con Convex), `mg-replay`, `mg-exit`, `shop-tab-<cat>`, `shop-item-<id>`, `ed-name`,
 `ed-skin-<i>`, `ed-done`, `prompt`, `dialog`, `dialog-close`, `toast`, `pause-*`, `set-*`, `mission-*`, `room-*`,
 `emote-<id>`, `touch-joy|jump|use|fire`.
 
@@ -229,7 +229,7 @@ futbol    equipo: [nombre, color]   rival: [nombre, color]            explorador
 ```
 
 ## Pruebas de la segunda vuelta
-`__mc.store.getState().startJuego('comayagua.mangos')` abre un juego del catálogo en su tarjeta de inicio;
+`__mc.store.getState().startJuego('lapaz.cortecafe')` abre un juego del catálogo en su tarjeta de inicio;
 `[data-testid=mg-start]` lo empieza. `mg-modo-solo|duo|abierto` cambian el modo. Tu prueba (`tools/test-<algo>.mjs`)
 debe jugar de verdad al menos una etapa hasta `mg-result`, probar un tema del catálogo y el motor sin tema, y mirar
 capturas con ojo crítico. Construí siempre con tu propio `--out`. **Tiempo: unos 40 minutos; no pulas de más.**
@@ -354,3 +354,19 @@ Gracias a Dios requieren los medios de MC-30. El modelo ya admite sus rutas y ki
 
 `node apps/web/tools/test-rutas.mjs apps/web/dist/mundo-catrucho-hd.html` verifica la red completa, límites,
 regresos, duración, kilómetros, cambios visibles de paisaje y salto. Capturas en `capturas/mc-27/`.
+
+## Tienda y partidas en Convex (MC-13, MC-14)
+
+Sin `VITE_CONVEX_URL` todo sigue local y sin red: `buy`, `equip` y `finishMinigame` pagan al instante como antes.
+Con la variable, `core/servidor.ts` habla con Convex y el perfil local solo refleja lo que respondió el servidor:
+
+- Lempiritas, XP, nivel, lo comprado y lo puesto los manda Convex. `gainCoins` y `gainXp` no hacen nada: monedas
+  sueltas, visitas, recuerdos, misiones, logros y pasajes no tocan el saldo hasta que MC-15 y MC-16 los pasen al servidor.
+- La pulpería usa `comprar(id)` (asíncrono: compra y se lo pone). `equip` y `setAvatar` se aplican al momento y
+  Convex los confirma o los revierte.
+- Al montar un minijuego (intro) se abre la partida; al terminar se cierra y los premios del resultado quedan en 0
+  hasta que el servidor confirma (`mg.pago`: `pendiente`, `pagado`, `rechazado`, `sin-conexion`).
+- Si Convex no responde en 6 s: no se compra y la partida no paga. Nunca se inventa saldo en el navegador.
+
+Prueba real contra el Convex de desarrollo: `node tools/test-tienda-servidor.mjs` (necesita `.env.local`; deja
+capturas en `capturas/mc-13/`).

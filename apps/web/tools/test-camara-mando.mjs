@@ -186,7 +186,7 @@ const ok = await run('camara-mando', file, { hash: '#go' }, async (t) => {
   await tap('A');
   await t.waitFor(`${S}.screen==='world'`, 5000, 'A en Jugar entra al mundo');
   // minijuego: A enfoca Empezar, A otra vez lo empieza; el stick llega a input
-  await t.ev(`${S}.startJuego('comayagua.mangos')`);
+  await t.ev(`${S}.startJuego('comayagua.mangos-con-escala')`);
   await t.waitFor(`!!document.querySelector('[data-testid=mg-intro]')`, 8000);
   await tap('A');
   await t.waitFor(`${focused}==='mg-start'`, 3000, 'A enfoca Empezar');

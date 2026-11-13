@@ -44,9 +44,9 @@ const BOT_MONTA = `(()=>{ const T=window.__mcTest.monta, I=window.__mc.input; if
 if (!only || only === 'corte')
   all =
     (await run('corte', file, { hash: '#go' }, async (t) => {
-      await abre(t, 'comayagua.lena', 'corte', 'solo');
+      await abre(t, 'lapaz.hornilla', 'corte', 'solo');
       const g = await t.ev(`window.__mc.store.getState().mg.juego`);
-      assert.equal(g, 'comayagua.lena');
+      assert.equal(g, 'lapaz.hornilla');
       await t.ev(BOT_CORTE);
       await sleep(14000);
       const s1 = await t.ev(
@@ -73,7 +73,7 @@ if (!only || only === 'corte')
 if (!only || only === 'monta')
   all =
     (await run('monta', file, { hash: '#go' }, async (t) => {
-      await abre(t, 'comayagua.cintas', 'monta', 'solo');
+      await abre(t, 'choluteca.doma', 'monta', 'solo');
       await t.ev(BOT_MONTA);
       await sleep(14000);
       const s1 = await t.ev(
@@ -119,11 +119,11 @@ if (!only || only === 'ritmo')
       assert(r.res.won, 'autoplay perfecto gana');
       await t.ev(`window.__mcTest.ritmo.stop(); window.__mc.store.getState().goLobby()`);
       await sleep(500);
-      await abre(t, 'comayagua.reloj', 'ritmo', 'abierto');
+      await abre(t, 'valle.marimba', 'ritmo', 'abierto');
       await t.ev(`window.__mcTest.ritmo.auto(20)`);
       await sleep(8000);
-      await t.shot(`${out}/ritmo-campanas.png`);
-      assert(await t.ev(`window.__mcTest.ritmo.st.score>0`), 'campanas puntúan');
+      await t.shot(`${out}/ritmo-marimba.png`);
+      assert(await t.ev(`window.__mcTest.ritmo.st.score>0`), 'marimba puntúa');
       await t.ev(`window.__mcTest.ritmo.stop(); window.__mc.store.getState().goLobby()`);
       await sleep(500);
       await abre(t, null, 'ritmo', 'duo');
@@ -138,7 +138,7 @@ const PILOTO_RUTA = `(()=>{ const T=window.__mcTest.ruta, M=window.__mc, g=T.G; 
 if (!only || only === 'ruta')
   all =
     (await run('ruta', file, { hash: '#go' }, async (t) => {
-      await abre(t, 'comayagua.taulabe', 'ruta', 'solo');
+      await abre(t, 'lapaz.estanzuela', 'ruta', 'solo');
       await t.press(' ');
       await sleep(200);
       assert(await t.ev(`window.__mc.player.pos[1]>0.3`), 'Espacio salta');
@@ -165,12 +165,12 @@ if (!only || only === 'ruta')
       assert(r.res.won, 'llegó a la meta');
       await t.ev(`clearInterval(window.__b); window.__mc.store.getState().goLobby()`);
       await sleep(500);
-      await abre(t, 'comayagua.taulabe', 'ruta', 'abierto');
+      await abre(t, 'santabarbara.pencaligue', 'ruta', 'abierto');
       await sleep(1500);
       await t.hold('w', 800);
-      await t.shot(`${out}/ruta-taulabe.png`);
+      await t.shot(`${out}/ruta-pencaligue.png`);
       await t.ev(`window.__mcTest.ruta.warp(window.__mcTest.ruta.TL+1)`);
-      const r2 = await resultado(t, 'ruta taulabe (se acaba el tiempo)');
+      const r2 = await resultado(t, 'ruta pencaligue (se acaba el tiempo)');
       assert(!r2.res.won, 'sin llegar, pierde');
       await t.ev(`window.__mc.store.getState().goLobby()`);
       await sleep(500);

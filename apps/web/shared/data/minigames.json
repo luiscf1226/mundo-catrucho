@@ -410,6 +410,70 @@
   "icon": "🍛",
   "desc": "Distribuí líquido entre dos compartimentos de cocción que se comunican por absorción. Ganás cuando arroz y frijoles terminan simultáneamente; revolver altera la porosidad y reinicia el cálculo.",
   "rules": {}
+ },
+ {
+  "id": "comayagua.aserrin",
+  "name": "Alfombra por esténcil",
+  "place": "Comayagua",
+  "icon": "🎨",
+  "desc": "Sujetá plantillas con el cursor y soplá aserrín coloreado con el botón. Ganás por bordes limpios y continuidad del dibujo; el viento invade los huecos sin sujetar.",
+  "rules": {}
+ },
+ {
+  "id": "comayagua.reloj",
+  "name": "Escape del reloj",
+  "place": "Comayagua",
+  "icon": "🕰️",
+  "desc": "Encajá ruedas dentadas y ajustá el péndulo con una perilla entre campanadas. Ganás cuando aguja y campana coinciden tres horas simuladas; dientes extra adelantan el reloj.",
+  "rules": {}
+ },
+ {
+  "id": "comayagua.eco",
+  "name": "Eco de Taulabé",
+  "place": "Comayagua",
+  "icon": "🦇",
+  "desc": "Pulsá para emitir un chasquido y escuchá el retardo en auriculares o su señal visual equivalente. Ganás al dibujar las bifurcaciones correctas; gastar los pulsos deja el plano incompleto.",
+  "rules": {}
+ },
+ {
+  "id": "comayagua.pilon",
+  "name": "Cadena de frío colonial",
+  "place": "Comayagua",
+  "icon": "🍦",
+  "desc": "Arrastrá divisores aislantes dentro de un carrito y abrí solo la tapa del pedido. Ganás si los pilones llegan sólidos; cada apertura calienta los compartimentos vecinos.",
+  "rules": {}
+ },
+ {
+  "id": "comayagua.tenampua",
+  "name": "Terrazas en sombra",
+  "place": "Comayagua",
+  "icon": "🏺",
+  "desc": "Deslizá bloques de réplica sobre plataformas hasta que su sombra encaje con un relieve de referencia. Ganás con todas las terrazas estables; no podés transferir material entre niveles.",
+  "rules": {}
+ },
+ {
+  "id": "comayagua.anden",
+  "name": "Trasbordo de Siguatepeque",
+  "place": "Comayagua",
+  "icon": "🚌",
+  "desc": "Asigná ventanas de llegada en un diagrama horario de un único andén. Ganás con conexiones que respetan el tiempo de equipaje; solapar dos buses cancela el trasbordo.",
+  "rules": {}
+ },
+ {
+  "id": "comayagua.mantas",
+  "name": "Rebotes del valle",
+  "place": "Comayagua",
+  "icon": "🥭",
+  "desc": "Incliná dos mantas enlazadas con teclas opuestas para transferir mangos por rebote. Ganás entregando fruta sin golpes; cada mango maduro reduce la elasticidad del apoyo.",
+  "rules": {}
+ },
+ {
+  "id": "comayagua.fachadas",
+  "name": "Alzado colonial",
+  "place": "Comayagua",
+  "icon": "🏛️",
+  "desc": "Recortá balcones de fotografías y ubicá sus cotas en una fachada plana. Ganás si el alzado coincide con dos vistas; repetir una ventana invalida la reconstrucción.",
+  "rules": {}
  }
 ,
 {
@@ -515,5 +579,61 @@
   "silver": 360,
   "gold": 600
  }
+},
+{
+ "id": "atlantida.balsa",
+ "name": "Remadas del Cangrejal",
+ "place": "Atlántida",
+ "icon": "🚣",
+ "desc": "Dibujá paladas para proa y popa de una balsa de cuatro plazas. Ganás entrando a remansos señalados; fuerzas iguales en ambos lados impiden girar y te sacan de la línea.",
+ "rules": {}
+},
+{
+ "id": "atlantida.pancoco",
+ "name": "Expansión del pan de coco",
+ "place": "Atlántida",
+ "icon": "🥥",
+ "desc": "Reservá espacio en bandejas según cuánto crecerá cada bollo durante el levado. Ganás piezas separadas del tamaño pedido; bollos que chocan forman una sola pieza.",
+ "rules": {}
+},
+{
+ "id": "atlantida.vagon",
+ "name": "Apartaderos de Cuero y Salado",
+ "place": "Atlántida",
+ "icon": "🛶",
+ "desc": "Planificá el movimiento de un vagón en una vía angosta con apartaderos cortos. Ganás dando paso al convoy contrario; dejar una carga demasiado larga bloquea el retorno.",
+ "rules": {}
+},
+{
+ "id": "atlantida.manati",
+ "name": "Canales de silencio",
+ "place": "Atlántida",
+ "icon": "🛶",
+ "desc": "Pulsá remadas silenciosas y detenelas al detectar presencia de fauna en el hidrófono virtual. Ganás llegando por canales alternos sin aproximarte al manatí; ruido repetido obliga a retroceder.",
+ "rules": {}
+},
+{
+ "id": "atlantida.lancetilla",
+ "name": "Fruto, semilla, árbol",
+ "place": "Atlántida",
+ "icon": "🍈",
+ "desc": "Conectá tríos botánicos arrastrando fruto, semilla y placa de colección. Ganás descartando hipótesis por parentesco; una unión errónea ocupa tres ranuras hasta revisarla.",
+ "rules": {}
+},
+{
+ "id": "atlantida.canopy",
+ "name": "Panza del cable",
+ "place": "Atlántida",
+ "icon": "🚣",
+ "desc": "Soltá y frená con el botón leyendo la energía potencial de un cable cóncavo. Ganás llegando a la plataforma con velocidad baja; frenar antes del punto bajo te deja sin alcance.",
+ "rules": {}
+},
+{
+ "id": "atlantida.carnaval",
+ "name": "Empalme de comparsas",
+ "place": "Atlántida",
+ "icon": "🎭",
+ "desc": "Deslizá barras de frases musicales de bandas que avanzan por calles paralelas. Ganás si cierran juntas al cruce; un compás suelto obliga a detener una comparsa.",
+ "rules": {}
 }
 ]
