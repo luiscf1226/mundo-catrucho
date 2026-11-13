@@ -13,9 +13,11 @@ export const useCamino = create<{
   inicio: number;
   velocidad: number;
 }>(() => ({ agenda: [], activa: null, atendidas: [], compradas: [], energia: 0, inicio: 0, velocidad: 0 }));
-export function iniciarCamino(ruta: RutaViaje | null) {
+/** `semilla`: la del viaje compartido (MC-31), para que todos vean los mismos eventos. */
+export function iniciarCamino(ruta: RutaViaje | null, semilla?: number) {
+  const s = semilla ?? (location.hash.includes('test') ? 0 : Math.floor(Math.random() * 20));
   useCamino.setState({
-    agenda: ruta ? crearAgenda(ruta, location.hash.includes('test') ? 0 : Math.floor(Math.random() * 20)) : [],
+    agenda: ruta ? crearAgenda(ruta, s) : [],
     activa: null,
     atendidas: [],
     compradas: [],

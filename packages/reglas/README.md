@@ -24,10 +24,21 @@ pnpm --filter @mundo-catrucho/reglas typecheck  # también corre en pnpm check
 | `ganarXp({ nivel, xp }, n)` | `{ nivel, xp, subidas, monedas }`; `monedas` = premio por los niveles subidos |
 | `PREMIO_PRIMERA_VISITA`, `PREMIO_RECUERDO`, `MONEDA_SUELTA` | premios del mundo |
 | `bonoViaje(b)`, `BONO_VIAJE_MAX` | bono al llegar de un viaje (redondeado, máximo 30) |
+| `avanzarJuego`, `etapaAbierta`, `deptoDeJuego` | avance de un juego al cerrar una partida (MC-15) |
+| `fechaHonduras`, `misionesDelDia`, `avanzarMisiones`, `eventosDePartida`, `decidirCobroMision` | misiones del día (MC-16) |
+| `LOGROS`, `logrosNuevos`, `prendasTipicas` | logros por estado y por partida |
+| `decidirMonedas`, `MONEDAS_SUELTAS`, `emoteCuenta` | ritmo y tope de monedas sueltas; pausa entre emotes |
+| `PASAJES`, `decidirSalida`, `decidirLlegada`, `VIAJE_MIN_S`, `gastoValido` | viajes: pasaje, bono y gastos |
+| `limpiarAvanceLocal` | lo que se acepta del avance guardado en el navegador (MC-08) |
 | `validarResultado({ motor, puntos, estrellas, duracion, etapa, etapas?, gano? })` | `{ ok, motivos, estrellasPosibles, conocido }` |
 | `TOPES`, `difDe`, `estrellasPara` | metas, reloj y puntos máximos por motor; dificultad de una etapa |
 | `SALA`, `ANIMACIONES` | cupo, largo de mensajes, límites de posición, animaciones, ritmo |
 | `acotarEje`, `animacionPermitida`, `limpiarNombre`, `emoteValido`, `cubetaNueva`, `permitirMensaje` | lo que la sala aplica a cada mensaje |
+| `partirSala`, `salaValida`, `zonaValida`, `nombreSala` | nombres de sala `mapa:N` y `dept:<id>:N` (N < `SALA.tramosMax`) |
+| `firmarPase`, `verificarPase`, `idPublico`, `avatarDePase`, `SECRETO_MIN` | pase de sala firmado con HMAC-SHA256 (Web Crypto: Convex, Worker y Node) |
+| `CHAT`, `filtrarChat`, `limpiarTexto`, `cubetaChat`, `permitirChat` | chat (MC-22): sin HTML, groserías y datos personales tapados con `***`, largo y ritmo |
+| `firmarMensaje`, `mensajeAutentico`, `MOTIVOS_REPORTE`, `bloqueadosDePase` | mensajes de sala firmados (para reportar), motivos de reporte y bloqueados en el pase |
+| `ALFABETO_CODIGO`, `CODIGO`, `codigoDe`, `normalizarCodigo` | código de invitación de 5 letras (MC-24) |
 
 ## Validar un resultado
 

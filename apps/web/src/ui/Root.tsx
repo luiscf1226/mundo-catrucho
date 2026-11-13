@@ -10,7 +10,10 @@ import { g, TEST, useOverview, usePad, useTouch } from './lib';
 
 let padHinted = false;
 
+import { Invitaciones, JuntosEspera, MarcadorJuntos, ViajeJuntosHud } from './Juntos';
+import { AmigosPanel } from './panels/Amigos';
 import { MapPanel } from './panels/Map';
+import { MemesPanel } from './panels/Memes';
 import {
   AchievementsPanel,
   ControlsPanel,
@@ -25,6 +28,7 @@ import { ProjectPanel } from './panels/Project';
 import { TransportePanel } from './panels/Transporte';
 import { CharacterPanel, ShopPanel } from './panels/Wardrobe';
 import { Hud, Toasts } from './screens/Hud';
+import { MemeTicker } from './screens/MemeTicker';
 import { MainMenu } from './screens/Menu';
 import { MgIntro, MgResults } from './screens/Minigame';
 import { TouchControls } from './screens/Touch';
@@ -42,8 +46,10 @@ const PANELS: Record<PanelId, () => ReactNode> = {
   logros: AchievementsPanel,
   clasificacion: LeaderboardPanel,
   salas: RoomsPanel,
+  amigos: AmigosPanel,
   controles: ControlsPanel,
   emotes: EmotesPanel,
+  memes: MemesPanel,
   proyecto: ProjectPanel,
 };
 
@@ -134,7 +140,11 @@ export function GameUI() {
       {screen === 'world' && touch && !panel && !dialog && !overview && (!mg || mg.phase === 'playing') && (
         <TouchControls />
       )}
-      {screen === 'world' && mg?.phase === 'intro' && !panel && <MgIntro />}
+      {screen === 'world' && viaje && !panel && <ViajeJuntosHud />}
+      {screen === 'world' && !mg && !viaje && !dialog && <Invitaciones />}
+      {screen === 'world' && mg?.phase === 'intro' && !panel && (mg.juntos ? <JuntosEspera /> : <MgIntro />)}
+      {screen === 'world' && mg?.juntos && mg.phase === 'playing' && <MarcadorJuntos />}
+      {screen === 'world' && mg?.phase === 'playing' && <MemeTicker />}
       {screen === 'world' && mg?.phase === 'ended' && !panel && <MgResults />}
       {ActivePanel && <ActivePanel key={panel} />}
       {dialog && <Dialog />}

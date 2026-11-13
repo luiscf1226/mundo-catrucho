@@ -10,7 +10,7 @@
     "dev": "pnpm --parallel --filter @mundo-catrucho/web --filter @mundo-catrucho/salas dev",
     "build": "pnpm -r build",
     "test": "pnpm build && pnpm -r --workspace-concurrency=1 test",
-    "check": "biome check --diagnostic-level=error . && pnpm -r typecheck && tsc --noEmit -p convex && node apps/web/tools/check-motores.mjs && node docs/generador/validar-contenido.mjs",
+    "check": "biome check --diagnostic-level=error . && pnpm -r typecheck && tsc --noEmit -p convex && node apps/web/tools/check-motores.mjs && node apps/web/tools/test-memes.mjs --datos && node docs/generador/validar-contenido.mjs",
     "fix": "biome check --write .",
     "avisos": "biome check .",
     "capturas": "pnpm --filter @mundo-catrucho/web build && pnpm --filter @mundo-catrucho/web capturas",

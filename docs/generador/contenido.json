@@ -57,6 +57,20 @@
         "mecanica": "Rotá una bandeja circular entre zonas térmicas del horno usando el ratón. Ganás al sacar rosquillas parejas; el anillo exterior se quema antes de que termine el centro.",
         "porQueAqui": "Las tandas de rosquillas de Sabanagrande salen de horno artesanal, con calor distinto entre borde y centro.",
         "reutiliza": null
+      },
+      {
+        "id": "franciscomorazan.taxi",
+        "nombre": "Taxi a toda mecha",
+        "mecanica": "Con WASD manejás un taxi libre por una cuadrícula de calles capitalinas. Subís pasajeros frenando dentro de su columna de luz y los dejás en su destino antes de que se les agote la paciencia; la racha de entregas paga más y chocar la corta.",
+        "porQueAqui": "El taxi capitalino vive de cruzar Tegus a la carrera entre el Estadio, la Kennedy, la UNAH y el Centro.",
+        "reutiliza": null
+      },
+      {
+        "id": "franciscomorazan.asalto",
+        "nombre": "¡Corré, que viene la chepa!",
+        "mecanica": "A pie y de noche jugás de asaltante de caricatura: juntás bolsas de pisto tiradas por las cuadras y las guardás en la guarida. Cada bolsa cargada te vuelve más lento; si un chepo te ve, te persigue y al agarrarte perdés lo que llevabas.",
+        "porQueAqui": "Persecución de policías y ladrones por las cuadras del Centro y Comayagüela, en clave de caricatura.",
+        "reutiliza": null
       }
     ],
     "juegos": [
@@ -201,6 +215,30 @@
         "tipo": "normal",
         "deQueVa": "Rotá una bandeja circular entre zonas térmicas del horno usando el ratón.",
         "guino": "La bolsa del camino al sur nunca llega llena.",
+        "etapas": 4,
+        "origen": null
+      },
+      {
+        "id": "franciscomorazan.taxi-a-toda-mecha",
+        "nombre": "Taxi a toda mecha",
+        "lugar": "centro",
+        "icono": "🚕",
+        "motor": "franciscomorazan.taxi",
+        "tipo": "estrella",
+        "deQueVa": "Subí pasajeros y llevalos por la capital antes de que se aburran.",
+        "guino": "¿Cuánto me cobra al Estadio, jefe?",
+        "etapas": 5,
+        "origen": null
+      },
+      {
+        "id": "franciscomorazan.corre-que-viene-la-chepa",
+        "nombre": "¡Corré, que viene la chepa!",
+        "lugar": "comayaguela",
+        "icono": "🦹",
+        "motor": "franciscomorazan.asalto",
+        "tipo": "loco",
+        "deQueVa": "Jugá de asaltante: juntá bolsas de pisto y escondelas sin que te agarren los chepos.",
+        "guino": "Aquí no pasó nada, chepo… solo andaba haciendo ejercicio.",
         "etapas": 4,
         "origen": null
       }

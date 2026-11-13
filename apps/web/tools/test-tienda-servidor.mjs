@@ -24,6 +24,12 @@ const out = mkdtempSync(join(tmpdir(), 'mc-tienda-'));
 const convex = new ConvexHttpClient(CONVEX_URL, { logger: false });
 const miPerfil = makeFunctionReference('tienda:miPerfil');
 const cerrar = makeFunctionReference('partidas:cerrarPartida');
+// MC-16: los logros los paga el servidor. Con #go el personaje ya está creado («Primeros pasos») y la trivia
+// ganada da «Primera victoria».
+const logros = JSON.parse(readFileSync(join(raiz, 'apps/web/shared/data/progress.json'), 'utf8')).achievements;
+const premioLogro = (id) => logros.find((l) => l.id === id).coins;
+const base = 100 + premioLogro('primer_paso');
+let secreto = '';
 
 let ok = false;
 try {
@@ -39,11 +45,12 @@ try {
     const st = async (e) => JSON.parse(await t.ev(`(()=>{const s=${S};return JSON.stringify(${e})})()`));
     // 1. entra como invitado: secreto de 32 bytes en localStorage y perfil nuevo del servidor
     await t.waitFor(`${S}.sincronizar().then(Boolean)`, 20000, 'entrar al servidor');
-    const secreto = await t.ev(`localStorage.getItem('mundo-catrucho-invitado')`);
+    secreto = await t.ev(`localStorage.getItem('mundo-catrucho-invitado')`);
     assert.match(secreto, /^[0-9a-f]{64}$/);
     const perfil = () => convex.query(miPerfil, { invitado: secreto });
-    assert.equal((await perfil()).monedas, 100);
-    assert.equal(await st('s.profile.coins'), 100);
+    await t.waitFor(`${S}.profile.achievements.includes('primer_paso')`, 20000, 'logro de entrar');
+    assert.equal((await perfil()).monedas, base);
+    assert.equal(await st('s.profile.coins'), base);
     assert(
       t.requests.some((u) => u.startsWith(`${origen}/api/mutation`)),
       'debe hablar con Convex',
@@ -52,7 +59,7 @@ try {
     // 2. no se puede comprar sin Lempiritas, aunque el navegador se invente saldo
     await t.ev(`window.__mc.store.setState((s) => ({ profile: { ...s.profile, coins: 99999 } }))`);
     assert.equal(await t.ev(`${S}.comprar('corona_carnaval')`), 'caro');
-    assert.equal(await st('s.profile.coins'), 100, 'el saldo vuelve al del servidor');
+    assert.equal(await st('s.profile.coins'), base, 'el saldo vuelve al del servidor');
     assert.equal((await perfil()).comprados.includes('corona_carnaval'), false);
 
     // 3. la pulpería: sin fondos muestra lo que falta; la gorra se compra y queda puesta
@@ -61,13 +68,14 @@ try {
     await t.click('shop-tab-sombrero');
     await t.click('shop-item-corona_carnaval');
     await t.waitFor(`!!document.querySelector('[data-testid=shop-short]')`, 15000, 'aviso de que no alcanza');
-    assert.equal(await t.text('shop-missing'), '100');
+    assert.equal(await t.text('shop-missing'), String(200 - base));
     await t.shot(join(capturas, '01-no-alcanza.png'));
     await t.click('shop-item-gorra');
-    await t.waitFor(`${S}.profile.coins === 50`, 15000, 'cobrar la gorra');
+    const trasGorra = base - 50;
+    await t.waitFor(`${S}.profile.coins === ${trasGorra}`, 15000, 'cobrar la gorra');
     assert.equal(await st('s.profile.avatar.hat'), 'gorra');
     const p1 = await perfil();
-    assert.equal(p1.monedas, 50);
+    assert.equal(p1.monedas, trasGorra);
     assert(p1.comprados.includes('gorra'));
     assert.equal(p1.avatar.hat, 'gorra');
     await t.shot(join(capturas, '02-gorra-comprada.png'));
@@ -86,12 +94,31 @@ try {
     await t.ev(`${S}.finishMinigame({ won: true, stars: 3, score: 999999, label: '999999 pts' })`);
     await t.waitFor(`${S}.mg?.pago === 'rechazado'`, 20000, 'rechazo del servidor');
     assert.equal(await st('s.mg.rewards.coins'), 0);
-    assert.equal(await st('s.profile.coins'), 50);
+    assert.equal(await st('s.profile.coins'), trasGorra);
     await t.waitFor(`!!document.querySelector('[data-testid=mg-result-pago]')`);
     await t.shot(join(capturas, '03-partida-rechazada.png'));
 
     // 5. partida posible (trivia suelta, sin reloj fijo): paga lo que dice premioPartida, una sola vez
     await t.ev(`${S}.exitMinigame()`);
+    // Reserva justo antes de montar la trivia: obliga al cliente a reintentar «muy seguido».
+    const abrirRapido = makeFunctionReference('partidas:abrirPartida');
+    let reserva = await convex.mutation(abrirRapido, { invitado: secreto, motor: 'trivia', etapa: 0 });
+    if (!reserva.ok && reserva.motivo === 'muy seguido') {
+      await t.sleep(reserva.reintentarMs + 50);
+      reserva = await convex.mutation(abrirRapido, { invitado: secreto, motor: 'trivia', etapa: 0 });
+    }
+    assert(reserva.ok);
+    await t.ev(`(() => {
+      const original = window.fetch;
+      window.__aperturasPrueba = [];
+      window.fetch = async (...args) => {
+        const res = await original(...args);
+        if (String(args[0]).includes('/api/mutation')) {
+          window.__aperturasPrueba.push(await res.clone().json());
+        }
+        return res;
+      };
+    })()`);
     await t.ev(`${S}.startMinigame('trivia')`);
     await t.waitFor(`${S}.mg?.phase === 'intro'`);
     const desde = Date.now();
@@ -100,11 +127,18 @@ try {
     while (Date.now() - desde < 10_000) await t.sleep(250);
     await t.ev(`${S}.finishMinigame({ won: true, stars: 1, score: 480, label: '480 pts' })`);
     await t.waitFor(`${S}.mg?.pago === 'pagado'`, 20000, 'pago del servidor');
+    assert.equal(
+      await t.ev(`window.__aperturasPrueba.some(r => r.value?.motivo === 'muy seguido')`),
+      true,
+      'se probó el reintento real tras una apertura seguida',
+    );
     const R = JSON.parse(readFileSync(join(raiz, 'apps/web/shared/data/rewards.json'), 'utf8')).minigame;
-    const premio = R.win.coins + R.perStar.coins;
+    const premio = R.win.coins + R.perStar.coins,
+      saldo = trasGorra + premio + premioLogro('primera_victoria');
     assert.equal(await st('s.mg.rewards.coins'), premio);
-    assert.equal(await st('s.profile.coins'), 50 + premio);
-    assert.equal((await perfil()).monedas, 50 + premio);
+    assert.deepEqual(await st('s.mg.rewards.newAchievements'), ['primera_victoria']);
+    assert.equal(await st('s.profile.coins'), saldo);
+    assert.equal((await perfil()).monedas, saldo);
     await t.waitFor(`document.querySelector('[data-testid=mg-result-rewards]')?.dataset.coins === '${premio}'`);
     await t.shot(join(capturas, '04-partida-pagada.png'));
 
@@ -112,13 +146,13 @@ try {
     await t.ev(`${S}.exitMinigame()`);
     await t.ev(`window.fetch = () => Promise.reject(new Error('sin red'))`);
     assert.equal(await t.ev(`${S}.comprar('mochila')`), 'sin-conexion');
-    assert.equal(await st('s.profile.coins'), 50 + premio);
+    assert.equal(await st('s.profile.coins'), saldo);
     await t.ev(`${S}.startMinigame('trivia')`);
     await t.waitFor(`${S}.mg?.phase === 'intro'`);
     await t.ev(`${S}.beginMinigame()`);
     await t.ev(`${S}.finishMinigame({ won: false, stars: 0, score: 0, label: '0 pts' })`);
     await t.waitFor(`${S}.mg?.pago === 'sin-conexion'`, 20000, 'partida sin conexión');
-    assert.equal(await st('s.profile.coins'), 50 + premio);
+    assert.equal(await st('s.profile.coins'), saldo);
     await t.shot(join(capturas, '05-sin-conexion.png'));
 
     // 7. otra persona no puede cerrar una partida ajena (directo a Convex, sin navegador)
@@ -147,5 +181,11 @@ try {
   });
 } finally {
   rmSync(out, { recursive: true, force: true });
+  // no deja marcas de prueba en la clasificación de desarrollo
+  if (secreto)
+    execFileSync('npx', ['convex', 'run', 'progreso:olvidarInvitado', JSON.stringify({ invitado: secreto })], {
+      cwd: raiz,
+      stdio: 'ignore',
+    });
 }
 if (!ok) process.exitCode = 1;

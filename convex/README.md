@@ -33,16 +33,73 @@ cambia `tokenDe`.
 - `tienda:equipar { itemId }` y `tienda:vestir { avatar }`: solo lo que tenés, cada pieza en su ranura.
 - `partidas:abrirPartida { motor, etapa, juegoId?, modo? }`: motor, etapas y tema salen del último catálogo
   publicado (o del empaquetado); guarda `inicio` con la hora del servidor y `dueno`. Cada jugador tiene como mucho
-  una partida abierta: abrir otra deja las anteriores `abandonada` sin pagar, y abrir dos en menos de
-  `APERTURA_MIN_MS` (1 s) se rechaza.
+  una partida activa, referida en `aperturas.partidaId`: abrir otra retira a ese jugador del cobro anterior.
+  Si no queda nadie, la anterior queda `vencida`; en un dúo el compañero conserva su cobro. Abrir dos en menos de
+  `APERTURA_MIN_MS` (1 s) se rechaza con el plazo restante; el cliente reintenta una vez. Cada apertura programa
+  su vencimiento a los 30 min, aunque nadie vuelva a abrir.
 - `partidas:cerrarPartida { partidaId, puntos, estrellas, gano }`: duración = ahora − inicio, `validarResultado`
   con la holgura de `HOLGURA_S`, y paga `premioPartida` + `ganarXp` una sola vez. Imposible → `rechazada`;
   motor sin fila en `TOPES` → `rechazada`; más de 30 min → `vencida`; ajena, ya cerrada o abandonada → no se toca.
   Todo motor de `minigames.json` y del catálogo tiene que tener fila en `TOPES` (lo revisa `topes.test.mjs`).
 
-Pendiente para MC-15 y MC-16: con Convex, el juego no suma Lempiritas ni XP por monedas sueltas, primera visita,
-recuerdos, misiones, logros ni bono de viaje, y no cobra pasajes ni comida del viaje (`gainCoins`/`gainXp` no hacen
-nada con `VITE_CONVEX_URL`). Solo pagan las partidas validadas y solo cobra la tienda.
+Si la partida paga, `cerrarPartida` también guarda el avance (MC-15): `progresoJuegos` (etapa desbloqueada,
+estrellas por etapa, mejor puntaje y veces; también para los minijuegos sueltos, con el motor como id), la visita
+del departamento del juego (la primera paga) y la mejor marca del jugador en `marcas`. Avanza las misiones de hoy y
+da los logros que se cumplan. `abrirPartida` rechaza una etapa que todavía no está desbloqueada (`etapa bloqueada`).
+La respuesta trae `saldo`, `logros` (lo que pagó cada uno), `misiones` y `progreso`.
+
+## Avance, misiones, logros y clasificación (MC-15, MC-16, MC-17)
+
+Todo responde `{ ok, saldo, subidas, logros, misiones }` además de lo propio. Las cantidades salen de
+`packages/reglas` (`progreso.ts`), `rewards.json`, `progress.json` y `shop.json`; nunca del navegador.
+
+- `progreso:estado` (consulta): visitas, recuerdos, logros, misiones de hoy, avance por juego y si ya subió el
+  avance local.
+- `progreso:visitar { deptId }`: la primera visita paga. `progreso:recoger { deptId }`: el recuerdo, una sola vez y
+  solo si visitó el departamento (`sin-visita`, `ya`).
+- `progreso:recogerMonedas { cantidad }`: monedas sueltas en tandas, con cubeta (20 de golpe, una cada 1,5 s) y tope
+  de 300 por día de Honduras. Lo demás se ignora.
+- `progreso:registrarEmote`: cuenta un emote cada 2 s como mucho (logro «Bailarín» y misión de emotes).
+- `progreso:cobrarMision { misionId }`: valida que sea de hoy, esté completa y sin cobrar (`incompleta`, `cobrada`,
+  `no`); paga lo de `progress.json`.
+- `progreso:salirDeViaje { veh, de, a }`: cobra `PASAJES[veh]` (copia de los precios del juego; `progreso.test.mjs`
+  revisa que no se desfasen); el destino tiene que ser otro departamento. `progreso:llegarViaje { viajeId, bono }`:
+  cierra el viaje y **no paga bono** (`motivo: 'sin verificar'`): el bono sale de los choques, que solo ve el
+  navegador. Vuelve cuando la sala del viaje firme lo que pasó (MC-31). `progreso:gastar { monto, concepto }`: comida y
+  peaje del camino (1–50, con saldo).
+- `progreso:subirAvanceLocal { visitados, recuerdos, juegos }` (MC-08): una sola vez por jugador sube lo guardado en
+  el navegador sin dar premios: departamentos que existen, recuerdos de departamentos visitados y cuántas veces jugó
+  cada juego del catálogo. Etapas y estrellas no suben: solo una partida validada desbloquea. Las marcas no suben y los logros que ya cumpla quedan marcados sin pagar.
+- `misiones:repartir` (interna): la corre `crons.ts` a las 06:00 UTC (medianoche de Honduras) y guarda en
+  `misionesGlobales` las misiones del día, sorteadas con la fecha (las mismas para todos). Cada jugador recibe su
+  copia en `misionesDia` la primera vez que hace algo ese día.
+- Logros: los da el servidor una sola vez (`logros`), por partida (`primera_victoria`, `goleador`, `punteria`,
+  `explorador`, `pulpero`) o por estado (visitas, recuerdos, compras, prendas típicas puestas, nivel, emotes).
+  «Primeros pasos» llega con `tienda:entrar { creado: true }`; «A la moda» y «Traje típico» con la tienda.
+- `clasificacion:porJuego { juegoId, invitado? }` y `clasificacion:porDepto { deptId, invitado? }`: los 10 mejores
+  (índices `por_juego` y `por_dept` de `marcas`), la mejor marca por jugador y su nombre limpio; `tuya` si no entraste.
+- `progreso:olvidarInvitado { invitado }` (interna): borra a un invitado y todo lo suyo. Las pruebas la usan para
+  no dejar marcas en la clasificación de desarrollo.
+
+Tablas nuevas: `contadores` (emotes, ritmo de monedas, «entró», avance local subido), `misionesGlobales` y `viajes`.
+
+```bash
+npx convex run misiones:repartir '{}'
+node apps/web/tools/test-progreso-servidor.mjs   # de punta a punta; capturas en capturas/mc-17/
+```
+
+El tope por día del bono de viaje (`BONOS_VIAJE_DIA`, 90) queda listo para cuando el bono vuelva a pagarse.
+
+Confianza aceptada mientras todos sean invitados (cualquiera puede crear identidades nuevas): la primera visita y
+el recuerdo de cada departamento se pagan sin probar que estuvo ahí (como el mapa, que deja viajar gratis), y
+«Primeros pasos» y los emotes los declara el navegador. Todo eso paga una sola vez o con pausa.
+
+Pendiente:
+- Las monedas, lo comprado y lo puesto del navegador no suben al servidor (eso pagaría sin validar). El nombre de
+  invitado se puede repetir hasta que lleguen las cuentas (MC-07).
+- La tabla por departamento compara puntos de juegos distintos (escalas distintas); `tuya` solo se busca entre las
+  400 mejores marcas del departamento.
+- La ruta del viaje (`rutaParaVehiculo`) solo la revisa el navegador.
 
 La lógica pura vive en `packages/reglas` (`tienda.ts`, `partidas.ts`) y se prueba con `node --test`.
 
@@ -50,6 +107,23 @@ La lógica pura vive en `packages/reglas` (`tienda.ts`, `partidas.ts`) y se prue
 npx convex run tienda:entrar '{"invitado":"<64 hex>"}'
 node apps/web/tools/test-tienda-servidor.mjs   # de punta a punta contra el entorno de desarrollo
 ```
+
+## Pase de sala en vivo (MC-18)
+
+`salas:pase { invitado, sala, nombre? }` identifica al invitado (lo crea si hace falta, como `tienda:entrar`) y
+devuelve `{ ok: true, pase, id }`: un pase firmado con HMAC-SHA256 que vale 60 s solo para esa sala (`mapa:N` o
+`dept:<id>:N`). Lleva un id público derivado de la cuenta con el secreto (nunca el secreto de invitado), el nombre
+limpio y el avatar guardado en el perfil. Firmar y verificar viven en `packages/reglas/src/pase.ts`; la sala
+(`workers/salas`) verifica con la misma función.
+
+Necesita `SALA_SECRETO` (mínimo 32 caracteres) en el entorno de Convex y el **mismo** valor en Cloudflare:
+
+```bash
+npx convex env set SALA_SECRETO <valor>          # Convex
+cd workers/salas && npx wrangler secret put SALA_SECRETO   # Cloudflare; en local va en workers/salas/.dev.vars
+```
+
+Sin el secreto responde `{ ok: false, motivo: 'sin-salas' }` y el juego sigue sin sala.
 
 ## Catálogo público
 
@@ -127,3 +201,97 @@ vive en la mutación interna, de modo que otro llamador del script no puede omit
 Las pruebas anteriores que reemplacen el catálogo deben usar `subirCatalogo(datos, { forzar: true })`
 solo cuando restauren una copia conocida. Las versiones se conservan sin límite de retención
 por ahora; definir limpieza del historial queda para una operación administrativa posterior.
+
+## Chat moderado, amigos y código de invitación (MC-22, MC-24)
+
+Todo con la identidad de invitado. En el juego cada quien se conoce por su id público de sala (`idPublico`, el
+mismo del pase): no revela la cuenta. `publicos` lo traduce a la cuenta y se llena con `salas:pase` y los códigos.
+Las reglas (filtro, ritmo, topes, firma de mensajes, alfabeto del código) viven en `packages/reglas/src/chat.ts`.
+
+- `amigos:lista` (consulta): tu id público, amigos y pedidos (`amigos` | `enviada` | `recibida`), bloqueados y tu
+  código vigente.
+- `amigos:pedir { id }` (id público visto en una sala; si el otro ya te había pedido, quedan amigos),
+  `amigos:responder { amistadId, aceptar }`, `amigos:quitar { amistadId }` (borra también sus directos).
+- `amigos:bloquear { id }` / `amigos:desbloquear { id }`: tabla `bloqueos`. Bloquear quita la amistad. Un bloqueo
+  corta en los dos sentidos: chat de sala (el pase lleva todos los bloqueados (máximo 200 por cuenta) y la sala no reparte entre
+  ellos), directos, amistad y códigos.
+- `amigos:crearCodigo { sala }`: 5 letras de `ALFABETO_CODIGO`, vale 10 minutos. Si ya tenés uno vigente se reusa y
+  se actualiza la sala (el juego lo vuelve a llamar al cambiar de sala).
+- `amigos:usarCodigo { codigo }`: devuelve la sala exacta, el nombre y el id público de quien lo creó. El juego
+  viaja a esa zona y entra a esa sala aunque no sea el primer tramo libre; si tiene sus 24, avisa (`llena`) y sigue
+  en el tramo que toque. Con bloqueo responde como si el código no existiera.
+- `chat:enviarDirecto { amistadId, texto }` y `chat:directos { amistadId }`: tabla `directos`. Solo entre amistades
+  aceptadas sin bloqueo, filtrados con `filtrarChat`, 8 por minuto y los últimos 60 por conversación. El juego hace
+  un sondeo cada 3 s mientras la conversación está abierta.
+- `moderacion:reportar { motivo, mensaje | directoId }`: tabla `reportes` (campos nuevos opcionales `sala`,
+  `mensajeId`, `directo`, `texto`, `estado`). Un mensaje de sala se cita como lo mandó la sala con su firma HMAC
+  (`SALA_SECRETO`): si no coincide se rechaza (`firma`). De un directo basta el id. Máximo 10 por día de Honduras
+  (`tope`), uno por mensaje (`ya`), nunca a uno mismo (`propio`).
+
+Cola de moderación (solo con permisos de administrador; no hay pantalla todavía):
+
+```bash
+npx convex run moderacion:cola '{}'                       # sin revisar, del más nuevo al más viejo
+npx convex run moderacion:cola '{"todos":true,"limite":100}'
+npx convex run moderacion:resolver '{"reporteId":"<id>"}'  # marcarlo como revisado
+```
+
+Cada fila trae cuándo, motivo, texto citado, dónde (`mapa:0`, `dept:olancho:1` o `directo`), quién reporta, a quién
+y cuántos reportes acumula ese jugador en la cola. `moderacion:olvidarSocial { invitado }` (interna) borra lo social
+de un invitado de prueba; `node apps/web/tools/test-chat-amigos.mjs` la usa junto a `progreso:olvidarInvitado`.
+
+Tablas nuevas: `bloqueos`, `publicos` y `directos`. Campos nuevos opcionales: `reportes.*` e `invitaciones.sala`.
+
+## Jugar con gente de la sala (MC-23, MC-25, MC-31)
+
+- `partidas:abrirJuntos { juegoId }`: partida entre dos (modo `duo`, primera etapa, solo motores del kit) con su
+  semilla y `sala = juego:<id>`. Comparte el turno de apertura con la partida sola: abrir o unirse retira solo a ese jugador del cobro anterior. Hay una pausa de 1 s entre aperturas, aunque la anterior ya esté cerrada. Una tarea programada vence las invitaciones sin segundo jugador a los 3 min. `partidas:unirseJuntos
+  { partidaId }` agrega al segundo (cupo `PARTIDA.cupo`, mientras esté abierta y no hayan pasado 3 min).
+- `salas:paseJuego { partidaId }`: pase para `juego:<id>` y un **acta** firmada (motor, etapa, semilla, cupo) que
+  la sala necesita para llevar el reloj. Solo para jugadores de esa partida.
+- La sala firma un **recibo** al terminar (`packages/reglas/src/recibo.ts`). `partidas:cerrarJuntos { partidaId,
+  recibo }` lo verifica con `SALA_SECRETO`, lo valida con `decidirRecibo` (misma partida y motor, no vencido, la
+  partida lleva abierta al menos lo que dice el recibo, cada fila con `validarResultado`) y le paga a **cada**
+  jugador una sola vez con `premioPartida`, misiones y logros. El que llega después recibe `{ ya: true }` con lo que
+  le tocó. `cerrarPartida` no cierra estas partidas.
+- `salas:paseViaje { sala }`: pase para un viaje compartido `viaje:<id>`. El pasaje y el bono siguen en
+  `progreso:salirDeViaje` / `llegarViaje` para cada uno.
+- `POST /salas/ocupacion` (`http.ts`): aviso firmado de cada sala de zona cada 30 s → `salas:reportar` (interna)
+  guarda la fila en `salas`. `salas:conectados` (consulta pública) suma los avisos de los últimos 75 s por
+  departamento y el mapa. La sala necesita `CONVEX_SITE_URL` (`https://<deployment>.convex.site`) en Cloudflare.
+
+Tablas: `partidas.pagos` y `salas.momento` (con el índice `por_visto`) son nuevos y opcionales.
+
+Confianza aceptada (ola 7): los puntajes, tanto solos como entre dos, los declara el navegador.
+La firma de la sala prueba el recibo y su reloj, no que cada acción del juego ocurrió. Ambos cierres usan
+`validarResultado`, con los mismos `TOPES`, mínimo de duración y `HOLGURA_S`; el dúo además acota cada
+puntaje según el tiempo transcurrido. No se convierte la simulación en autoritativa en esta ola.
+
+Los bloqueos tienen un límite duro de 200 en `amigos:bloquear` (`tope-bloqueos`, con aviso en el juego).
+La sala guarda las listas completas fuera del adjunto del WebSocket y corta chat e invitaciones en ambos sentidos.
+Los pases anteriores duran como máximo 60 s; una conexión ya abierta recibe los cambios del propio jugador.
+Los viajes compartidos registran todas las cuentas admitidas: se rechaza entrar si alguna bloqueó a la nueva
+cuenta o viceversa. Esa lista admite como máximo 8 jugadores y vence a los 30 min, con borrado programado.
+Pendiente: quien bloqueó a un participante ya admitido tampoco puede reconectar hasta desbloquearlo, aunque
+el otro se haya bajado. Convex no recibe la presencia de la sala del viaje para distinguir ese caso.
+Los avisos de ocupación deben ser estrictamente posteriores al anterior, de hace menos de 75 s y como mucho
+5 s adelantados. La vigencia corre desde la hora firmada, aunque el aviso llegue tarde.
+
+Regresión de la segunda revisión (contra desarrollo, crea y borra invitados de prueba):
+`node scripts/test-revision-2.mjs`. Incluye 200 bloqueos y espera los 3 minutos reales del vencimiento
+programado. No la corras junto a publicaciones del panel. La prueba de navegador
+`test-partida-juntos.mjs` usa su servidor local simulado; esta regresión cubre las mutaciones de Convex real.
+
+Regresión de verificación: `node scripts/test-revision-3.mjs`. Crea invitados, comprueba el abandono individual,
+el cobro único del compañero con recibo firmado, los estados admitidos por `paseJuego`, el cupo del viaje y
+los vencimientos del scheduler. `pruebasVerificacion` contiene solo mutaciones internas administrativas que
+adelantan fechas de esas filas de prueba o marcan una como rechazada; no están disponibles para jugadores.
+La prueba borra sus invitados al terminar.
+
+Tras desplegar sobre datos anteriores, `partidas:migrarAbiertas { "cursor": null }` programa los vencimientos y
+completa las referencias de `aperturas` en tandas de 50. Repetí con el cursor devuelto hasta `listo: true`.
+La migración es interna y se puede repetir.
+
+Las cubetas de sala viven en memoria y se conservan al reemplazar un socket. Al cerrar el último socket de una
+cuenta se borran su cubeta y sus bloqueos almacenados. Un pase anterior a un cambio de bloqueo no pisa ese cambio;
+un pase nuevo sí actualiza la lista. Despertar de hibernación vuelve a llenar las cubetas.

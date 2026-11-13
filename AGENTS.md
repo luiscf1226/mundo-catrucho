@@ -22,7 +22,7 @@ también van en español.
 
 ```bash
 pnpm install       # instala todo el espacio de trabajo (Node 22.18 o más, pnpm 12)
-pnpm dev           # juego en http://localhost:5173 y sala en ws://localhost:8799
+pnpm dev           # juego en http://localhost:5173 y sala en ws://localhost:8799 (pide workers/salas/.dev.vars)
 pnpm check         # Biome (lint y formato) + tipos de todo + validar que el contenido no se repita
 pnpm test          # compila y juega solo de punta a punta en Chromium; la sala conecta dos jugadores; pruebas de reglas
 pnpm --filter @mundo-catrucho/reglas test   # solo las pruebas unitarias de packages/reglas (node --test)
@@ -54,6 +54,9 @@ llaves por índice en listas fijas. Código nuevo: sin `any` ni `!` si se puede 
    Texto 3D con `Label`/`Plate` del kit, texturas con lienzo. Excepción: si se compila con `VITE_CONVEX_URL`,
    el juego consulta el catálogo público de ese Convex al iniciar (máximo 3 s; respaldo empaquetado si falla).
    Sin esa variable no hay peticiones a Convex. El arnés solo permite ese dominio cuando la prueba lo pide explícitamente.
+   Segunda excepción: si se compila con `VITE_SALAS_URL` **y** `VITE_CONVEX_URL`, el juego pide a Convex un pase
+   (`salas:pase`), pregunta a la sala qué tramo tiene espacio y se conecta por WebSocket (MC-18 a MC-21). Sin las dos
+   variables sigue `LocalNet`, sin red. Las pruebas permiten esa sala con la opción `red` del arnés.
 2. **Cada motor de juego existe en un solo departamento.** `node docs/generador/validar-contenido.mjs` lo revisa.
 3. **Marcas, clubes y la Selección van con apodos**, nunca con logotipos ni nombres oficiales.
 4. **Rendimiento:** menos de ~350 llamadas de dibujo por escena y una sola luz con sombras.

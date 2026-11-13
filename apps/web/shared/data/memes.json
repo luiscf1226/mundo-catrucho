@@ -1,0 +1,1717 @@
+[
+  {
+    "id": "vaya-pues",
+    "dept": null,
+    "tipo": "frase",
+    "nombre": "¡Vaya pues!",
+    "frase": "¡Vaya pues! Nos vemos en la otra ronda.",
+    "arriba": "—Nos vemos mañana.",
+    "abajo": "—¡Vaya pues!",
+    "escena": "casa",
+    "emoji": "👋",
+    "temas": [
+      "todos"
+    ],
+    "queEs": "«Vaya pues» (o «va pue») es el sí y el adiós catracho: sirve para aceptar con ganas y para despedirse.",
+    "fuente": "https://matadornetwork.com/read/17-spanish-expressions-know-go-honduras"
+  },
+  {
+    "id": "ahi-nos-vidrios",
+    "dept": null,
+    "tipo": "viral",
+    "nombre": "Ahí nos vidrios",
+    "frase": "¡Cheque, ahí nos vidrios en la próxima!",
+    "arriba": "Cuando ganás y te vas",
+    "abajo": "Cheque, ahí nos vidrios",
+    "escena": "casa",
+    "emoji": "🪟👋",
+    "temas": [
+      "todos"
+    ],
+    "queEs": "Despedida juguetona del caliche hondureño («ahí nos vemos») que se hizo viral en TikTok cuando un extranjero la usó para despedirse.",
+    "fuente": "https://www.tunota.com/entretenimiento/mormon-reacciona-video-viral-ahi-nos-vidrios-iglesia-2025-04-04"
+  },
+  {
+    "id": "hora-hondurena",
+    "dept": null,
+    "tipo": "dicho",
+    "nombre": "La hora hondureña",
+    "frase": "¿A las 3? En hora hondureña eso es a las 4.",
+    "arriba": "Quedamos a las 3 en punto",
+    "abajo": "Llega a las 4: hora hondureña",
+    "escena": "casa",
+    "emoji": "⏰😅",
+    "temas": [
+      "ruta",
+      "todos"
+    ],
+    "queEs": "Chiste nacional sobre la impuntualidad: se habla de la «hora hondureña» cuando una cita social o de trabajo empieza tarde.",
+    "fuente": "https://www.elheraldo.hn/honduras/los-diez-malos-habitos-de-los-hondurenos-DPEH574025"
+  },
+  {
+    "id": "andar-hule",
+    "dept": null,
+    "tipo": "frase",
+    "nombre": "Ando hule",
+    "frase": "Ando hule, pero el puntaje sí está lleno.",
+    "arriba": "Yo a fin de mes:",
+    "abajo": "Ando hule, pero contento",
+    "escena": "pulperia",
+    "emoji": "🪙😅",
+    "temas": [
+      "pulperia",
+      "feria"
+    ],
+    "queEs": "«Andar hule» es andar sin dinero; se dice en broma cuando la bolsa está vacía.",
+    "fuente": "https://es.hispanopedia.com/wiki/Anexo:Hondure%C3%B1ismos"
+  },
+  {
+    "id": "andar-con-filo",
+    "dept": null,
+    "tipo": "frase",
+    "nombre": "Ando con filo",
+    "frase": "¡Ando con filo! Apurate con esa baleada.",
+    "arriba": "Cuando huele a baleada",
+    "abajo": "Y uno andaba con filo",
+    "escena": "comida",
+    "emoji": "🍽️😋",
+    "temas": [
+      "cocina"
+    ],
+    "queEs": "En Honduras «filo» es hambre: «andar con filo» o «andar filudo» es tener hambre.",
+    "fuente": "https://es.hispanopedia.com/wiki/Anexo:Hondure%C3%B1ismos"
+  },
+  {
+    "id": "pelarse-la-tusa",
+    "dept": null,
+    "tipo": "frase",
+    "nombre": "Pelarse la tusa",
+    "frase": "¡Pelate la tusa, que ahí viene!",
+    "arriba": "Cuando suena el silbatazo final",
+    "abajo": "Todos se pelan la tusa",
+    "escena": "maiz",
+    "emoji": "🌽💨",
+    "temas": [
+      "atrapa",
+      "ruta"
+    ],
+    "queEs": "«Pelarse la tusa» es irse rápido; la tusa es la hoja que envuelve el elote.",
+    "fuente": "https://es.hispanopedia.com/wiki/Anexo:Hondure%C3%B1ismos"
+  },
+  {
+    "id": "hecho-un-cuete",
+    "dept": null,
+    "tipo": "frase",
+    "nombre": "Hecho un cuete",
+    "frase": "¡Ese rapidito va hecho un cuete!",
+    "arriba": "El bus si vas tarde: lentito",
+    "abajo": "Si ya no lo querés: hecho un cuete",
+    "escena": "bus",
+    "emoji": "🚌💨",
+    "temas": [
+      "manejo",
+      "ruta"
+    ],
+    "queEs": "«Ir hecho un cuete» es ir rapidísimo, como cohete de pólvora.",
+    "fuente": "https://es.hispanopedia.com/wiki/Anexo:Hondure%C3%B1ismos"
+  },
+  {
+    "id": "ponerse-coyote",
+    "dept": null,
+    "tipo": "frase",
+    "nombre": "Ponete coyote",
+    "frase": "¡Ponete coyote, que viene otra pelota!",
+    "arriba": "Mamá cuando oye la puerta",
+    "abajo": "Se pone coyote",
+    "escena": "casa",
+    "emoji": "🐺👀",
+    "temas": [
+      "atrapa",
+      "futbol"
+    ],
+    "queEs": "«Ponerse coyote» es ponerse alerta, con los ojos bien abiertos.",
+    "fuente": "https://es.hispanopedia.com/wiki/Anexo:Hondure%C3%B1ismos"
+  },
+  {
+    "id": "andar-yilet",
+    "dept": null,
+    "tipo": "frase",
+    "nombre": "Ando yílet",
+    "frase": "Ando yílet: me sé todas las respuestas.",
+    "arriba": "Yo después de estudiar:",
+    "abajo": "Ando yílet, profe",
+    "escena": "casa",
+    "emoji": "📚✨",
+    "temas": [
+      "trivia",
+      "exploradores"
+    ],
+    "queEs": "«Andar yílet» es ir bien estudiado para un examen; frase de colegio que todos reconocen.",
+    "fuente": "https://es.hispanopedia.com/wiki/Anexo:Hondure%C3%B1ismos"
+  },
+  {
+    "id": "sumba-marumba",
+    "dept": null,
+    "tipo": "frase",
+    "nombre": "Sumba marumba",
+    "frase": "Sumba marumba… ¡te toca a vos!",
+    "arriba": "Cuando nadie quiere ir primero",
+    "abajo": "Sumba marumba y que salga",
+    "escena": "casa",
+    "emoji": "👉🎲",
+    "temas": [
+      "feria",
+      "todos"
+    ],
+    "queEs": "«Sumba marumba» se dice para elegir al azar, como un tin marín catracho.",
+    "fuente": "https://es.hispanopedia.com/wiki/Anexo:Hondure%C3%B1ismos"
+  },
+  {
+    "id": "hasta-los-queques",
+    "dept": null,
+    "tipo": "frase",
+    "nombre": "Hasta los queques",
+    "frase": "¡Estoy hasta los queques de pedidos!",
+    "arriba": "Yo con tres mandados a la vez",
+    "abajo": "Hasta los queques",
+    "escena": "mercado",
+    "emoji": "🎂😵",
+    "temas": [
+      "cocina",
+      "pulperia"
+    ],
+    "queEs": "«Estar hasta los queques» es estar ocupadísimo, sin tiempo o muy comprometido.",
+    "fuente": "https://es.hispanopedia.com/wiki/Anexo:Hondure%C3%B1ismos"
+  },
+  {
+    "id": "aguantar-vara",
+    "dept": null,
+    "tipo": "dicho",
+    "nombre": "Aguantar vara",
+    "frase": "Aguantá vara, que ya falta poquito.",
+    "arriba": "Tercera hora en el trancazo",
+    "abajo": "Aguantando vara",
+    "escena": "trafico",
+    "emoji": "💪🌿",
+    "temas": [
+      "manejo",
+      "ruta"
+    ],
+    "queEs": "«Aguantar vara» es soportar una situación difícil sin rendirse.",
+    "fuente": "https://www.elheraldo.hn/honduras/regionalismo-honduras-ejemplos-cultura-lenguaje-KK16493687"
+  },
+  {
+    "id": "que-alucin",
+    "dept": null,
+    "tipo": "frase",
+    "nombre": "¡Qué alucín!",
+    "frase": "¡No seás alucín y frená a tiempo!",
+    "arriba": "Tu alero frente al charco:",
+    "abajo": "Se avienta. Puro alucín",
+    "escena": "lluvia",
+    "emoji": "🤪💦",
+    "temas": [
+      "manejo",
+      "exploradores"
+    ],
+    "queEs": "Un «alucín» es una persona alocada que se avienta sin pensar.",
+    "fuente": "https://www.elheraldo.hn/honduras/regionalismo-honduras-ejemplos-cultura-lenguaje-KK16493687"
+  },
+  {
+    "id": "hablar-paja",
+    "dept": null,
+    "tipo": "frase",
+    "nombre": "Dejá de hablar paja",
+    "frase": "Dejá de hablar paja y demostralo en la cancha.",
+    "arriba": "El que dice que mete 10 goles",
+    "abajo": "Puro hablar paja",
+    "escena": "futbol",
+    "emoji": "🌾🗣️",
+    "temas": [
+      "futbol",
+      "trivia"
+    ],
+    "queEs": "«Paja» son mentiras o fanfarronadas; «hablar paja» es exagerar o inventar.",
+    "fuente": "https://matadornetwork.com/read/17-spanish-expressions-know-go-honduras"
+  },
+  {
+    "id": "esta-yuca",
+    "dept": null,
+    "tipo": "frase",
+    "nombre": "Está yuca",
+    "frase": "¡Este nivel está yuca, pero vos podés!",
+    "arriba": "El último nivel:",
+    "abajo": "Está bien yuca",
+    "escena": "montana",
+    "emoji": "😬💪",
+    "temas": [
+      "todos"
+    ],
+    "queEs": "Algo «yuca» es difícil o complicado (y una persona yuca es estricta).",
+    "fuente": "https://www.spanish.academy/blog/talk-like-a-honduran-slang-words-for-everyday-use/"
+  },
+  {
+    "id": "te-conozco-mosco",
+    "dept": null,
+    "tipo": "dicho",
+    "nombre": "Te conozco, mosco",
+    "frase": "Te conozco, mosco: esa jugada ya la vi.",
+    "arriba": "El cipote: «Ya me bañé»",
+    "abajo": "Te conozco, mosco",
+    "escena": "casa",
+    "emoji": "🪰😏",
+    "temas": [
+      "atrapa",
+      "trivia"
+    ],
+    "queEs": "Dicho para decir «a mí no me engañás»; hasta da nombre a un diccionario popular de hondureñismos.",
+    "fuente": "https://www.laprensa.hn/espectaculos/rescate-del-pensamiento-popular-hondureno-PALP638171"
+  },
+  {
+    "id": "carne-de-lora",
+    "dept": null,
+    "tipo": "dicho",
+    "nombre": "Duro como carne de lora",
+    "frase": "Esta tortilla está más dura que carne de lora.",
+    "arriba": "La tortilla de ayer",
+    "abajo": "Más dura que carne de lora",
+    "escena": "comida",
+    "emoji": "🦜🫓",
+    "temas": [
+      "cocina"
+    ],
+    "queEs": "Comparación popular hondureña recogida en diccionarios del habla catracha para algo durísimo.",
+    "fuente": "https://www.laprensa.hn/espectaculos/rescate-del-pensamiento-popular-hondureno-PALP638171"
+  },
+  {
+    "id": "gallina-pollitos",
+    "dept": null,
+    "tipo": "dicho",
+    "nombre": "La gallina y los pollitos",
+    "frase": "El que quiere la gallina, quiere los pollitos.",
+    "arriba": "¿Querés la gallina?",
+    "abajo": "Cargá también con los pollitos",
+    "escena": "casa",
+    "emoji": "🐔🐣",
+    "temas": [
+      "atrapa",
+      "todos"
+    ],
+    "queEs": "Dicho popular: si querés algo, aceptalo con todo lo que trae.",
+    "fuente": "https://www.laprensa.hn/espectaculos/rescate-del-pensamiento-popular-hondureno-PALP638171"
+  },
+  {
+    "id": "al-suave",
+    "dept": null,
+    "tipo": "frase",
+    "nombre": "Al suave",
+    "frase": "Al suave, sin carrera, que no se riegue.",
+    "arriba": "Llevando la sopa a la mesa",
+    "abajo": "Al suave, al suave…",
+    "escena": "comida",
+    "emoji": "🐢🥣",
+    "temas": [
+      "cocina",
+      "manejo"
+    ],
+    "queEs": "«Al suave» es con calma, sin complicarse; muletilla de todos los días.",
+    "fuente": "https://www.laprensa.hn/honduras/espanol-hondureno-identidad-historia-evolucion-hondurenismo-NA30300269"
+  },
+  {
+    "id": "se-ahumo",
+    "dept": null,
+    "tipo": "frase",
+    "nombre": "La cosa se ahumó",
+    "frase": "¡Se ahumó la cosa: quedan diez segundos!",
+    "arriba": "Mamá: «¿Quién dejó esto aquí?»",
+    "abajo": "La cosa se ahumó",
+    "escena": "casa",
+    "emoji": "💨😳",
+    "temas": [
+      "todos"
+    ],
+    "queEs": "«La cosa se ahumó» se dice cuando una situación se pone tensa o complicada.",
+    "fuente": "https://www.laprensa.hn/honduras/espanol-hondureno-identidad-historia-evolucion-hondurenismo-NA30300269"
+  },
+  {
+    "id": "pelar-las-jachas",
+    "dept": null,
+    "tipo": "frase",
+    "nombre": "Pelando las jachas",
+    "frase": "¡Ganaste! Andás pelando las jachas.",
+    "arriba": "Yo cuando sale el aguinaldo",
+    "abajo": "Pelando las jachas",
+    "escena": "fiesta",
+    "emoji": "😁",
+    "temas": [
+      "todos"
+    ],
+    "queEs": "«Pelar las jachas» es reírse mucho o sonreír de oreja a oreja.",
+    "fuente": "https://www.elheraldo.hn/honduras/200-palabras-y-expresiones-honduras-y-su-significado-hondurenismos-AF11361212"
+  },
+  {
+    "id": "chonguengue",
+    "dept": null,
+    "tipo": "frase",
+    "nombre": "¡Qué chonguengue!",
+    "frase": "¡Esto ya es chonguengue! Subile a la música.",
+    "arriba": "Un cumpleaños de cipotes",
+    "abajo": "Se volvió chonguengue",
+    "escena": "fiesta",
+    "emoji": "🎉",
+    "temas": [
+      "ritmo",
+      "feria"
+    ],
+    "queEs": "Un «chonguengue» es una fiesta grande o celebración bulliciosa.",
+    "fuente": "https://www.elheraldo.hn/honduras/200-palabras-y-expresiones-honduras-y-su-significado-hondurenismos-AF11361212"
+  },
+  {
+    "id": "alo-largo",
+    "dept": null,
+    "tipo": "viral",
+    "nombre": "¡Alóooo!",
+    "frase": "¡Alóooo! ¿Me escuchás? ¡Ganaste!",
+    "arriba": "Mamá contestando el teléfono:",
+    "abajo": "¡Alóooooo!",
+    "escena": "casa",
+    "emoji": "📞",
+    "temas": [
+      "todos"
+    ],
+    "queEs": "Los hondureños contestan el teléfono con un «¿Aló?» alegre y con la o bien estirada.",
+    "fuente": "https://matadornetwork.com/read/17-spanish-expressions-know-go-honduras"
+  },
+  {
+    "id": "dar-jalon",
+    "dept": null,
+    "tipo": "frase",
+    "nombre": "¿Me das jalón?",
+    "frase": "¿Me das jalón hasta la otra parada?",
+    "arriba": "Cuando tu alero estrena carro",
+    "abajo": "—¿Me das jalón?",
+    "escena": "trafico",
+    "emoji": "🚗👍",
+    "temas": [
+      "manejo",
+      "ruta"
+    ],
+    "queEs": "«Dar jalón» es llevar a alguien en el carro, un aventón.",
+    "fuente": "https://es.hispanopedia.com/wiki/Anexo:Hondure%C3%B1ismos"
+  },
+  {
+    "id": "armar-la-potra",
+    "dept": null,
+    "tipo": "frase",
+    "nombre": "Armar la potra",
+    "frase": "¡Armen la potra! Dos piedras son la portería.",
+    "arriba": "Dos piedras y una pelota",
+    "abajo": "Y ya está armada la potra",
+    "escena": "futbol",
+    "emoji": "⚽🪨",
+    "temas": [
+      "futbol"
+    ],
+    "queEs": "La «potra» es el partido informal de fútbol en la calle o el barrio, la chamusca de todos los días.",
+    "fuente": "https://es.hispanopedia.com/wiki/Anexo:Hondure%C3%B1ismos"
+  },
+  {
+    "id": "se-fue-la-luz",
+    "dept": null,
+    "tipo": "viral",
+    "nombre": "Se fue la luz",
+    "frase": "¡Se fue la luz! Jugá antes que se vuelva a ir.",
+    "arriba": "Justo cuando iba a guardar…",
+    "abajo": "Se fue la luz",
+    "escena": "luz",
+    "emoji": "💡🕯️",
+    "temas": [
+      "todos"
+    ],
+    "queEs": "Los cortes de energía son tema de quejas y memes en redes; cada rumor de apagón trae su ola de chistes.",
+    "fuente": "https://www.elheraldo.hn/honduras/mega-apagon-nacional-este-viernes-20-septiembre-esto-dice-enee-LA21564483"
+  },
+  {
+    "id": "toda-honduras-asi",
+    "dept": null,
+    "tipo": "viral",
+    "nombre": "Toda Honduras así",
+    "frase": "Toda Honduras así… ¡pero con lentes certificados!",
+    "arriba": "El día del eclipse:",
+    "abajo": "Toda Honduras así",
+    "escena": "calor",
+    "emoji": "🌘👀",
+    "temas": [
+      "todos",
+      "exploradores"
+    ],
+    "queEs": "Meme del eclipse anular de octubre de 2023: la foto de un niño viendo al cielo con «Toda Honduras así» fue de lo más compartido.",
+    "fuente": "https://www.laprensa.hn/fotogalerias/honduras/honduras-meme-divertidos-dejo-eclipse-solar-anular-ME15778242"
+  },
+  {
+    "id": "sencilla-o-con-todo",
+    "dept": null,
+    "tipo": "rivalidad",
+    "nombre": "¿Sencilla o con todo?",
+    "frase": "¿Sencilla o con todo? ¡Decidite, que hay cola!",
+    "arriba": "Sencilla: frijol, queso, mantequilla",
+    "abajo": "Con todo: huevo, aguacate y más",
+    "escena": "comida",
+    "emoji": "🫓",
+    "temas": [
+      "cocina",
+      "pulperia"
+    ],
+    "queEs": "La baleada sencilla lleva frijoles, mantequilla y queso; la «con todo» le suma huevo, aguacate o carne, y cada quien defiende la suya.",
+    "fuente": "https://en.wikipedia.org/wiki/Baleada"
+  },
+  {
+    "id": "la-h-le-gano-al-tri",
+    "dept": null,
+    "tipo": "viral",
+    "nombre": "La H 2, el Tri 0",
+    "frase": "¡Como la H en Tegus: 2-0 y a celebrar!",
+    "arriba": "Noviembre de 2023 en Tegus:",
+    "abajo": "La H 2, el Tri 0",
+    "escena": "futbol",
+    "emoji": "⚽🔵",
+    "temas": [
+      "futbol"
+    ],
+    "queEs": "En noviembre de 2023 la Selección, «la H», le ganó 2-0 a México en Tegucigalpa y las redes se llenaron de memes.",
+    "fuente": "https://www.tunota.com/deportes/memes-honduras-vs-mexico-tegucigalpa-2023-11-18"
+  },
+  {
+    "id": "nunca-se-sabe",
+    "dept": null,
+    "tipo": "viral",
+    "nombre": "Nunca se sabe",
+    "frase": "Vas perdiendo… pero nunca se sabe.",
+    "arriba": "Faltan 3 goles y 5 minutos",
+    "abajo": "Nunca se sabe",
+    "escena": "futbol",
+    "emoji": "🤞⚽",
+    "temas": [
+      "futbol",
+      "todos"
+    ],
+    "queEs": "Frase de un veterano entrenador del fútbol hondureño que el país entero repite para no perder la fe.",
+    "fuente": "https://www.elheraldo.hn/fotogalerias/hondurenos-que-sin-planearlo-han-viralizado-sus-famosas-frases-EWEH1123272"
+  },
+  {
+    "id": "nombe-compa",
+    "dept": null,
+    "tipo": "viral",
+    "nombre": "Nombe, compa",
+    "frase": "Nombe, compa, ¿me entendés? ¡Otra vez!",
+    "arriba": "—¿Ya te rendiste?",
+    "abajo": "—Nombe, compa, ¿me entendés?",
+    "escena": "casa",
+    "emoji": "🐱",
+    "temas": [
+      "todos"
+    ],
+    "queEs": "Muletillas de un gato animado hondureño que contaba historias de la vida en Honduras y se volvieron populares.",
+    "fuente": "https://www.elheraldo.hn/fotogalerias/hondurenos-que-sin-planearlo-han-viralizado-sus-famosas-frases-EWEH1123272"
+  },
+  {
+    "id": "pasa-a-la-pulpe",
+    "dept": null,
+    "tipo": "frase",
+    "nombre": "Pasá a la pulpe",
+    "frase": "Pasá a la pulpe y traé el vuelto completo.",
+    "arriba": "Mamá: «Andá a la pulpería»",
+    "abajo": "Yo: «¿Y me compro algo?»",
+    "escena": "pulperia",
+    "emoji": "🏪",
+    "temas": [
+      "pulperia"
+    ],
+    "queEs": "La pulpería («pulpe» o «trucha») es la tiendita de la esquina adonde mandan a los cipotes por mandados.",
+    "fuente": "https://www.spanish.academy/blog/talk-like-a-honduran-slang-words-for-everyday-use/"
+  },
+  {
+    "id": "nacatamal-navidad",
+    "dept": null,
+    "tipo": "frase",
+    "nombre": "Diciembre huele a nacatamal",
+    "frase": "Ya huele a diciembre: ¡a nacatamal!",
+    "arriba": "Diciembre en Honduras:",
+    "abajo": "Nacatamal al desayuno y la cena",
+    "escena": "comida",
+    "emoji": "🫔🎄",
+    "temas": [
+      "cocina"
+    ],
+    "queEs": "Para los hondureños «nacatamal» es sinónimo de Navidad: se hacen, se regalan y se comen todo diciembre.",
+    "fuente": "https://www.elheraldo.hn/cocina/1241325-468/los-distintos-nacatamales-que-disfrutan-los-hondureños-en-época-de-navidad"
+  },
+  {
+    "id": "torrejas-en-miel",
+    "dept": null,
+    "tipo": "frase",
+    "nombre": "Torrejas en miel",
+    "frase": "¡Torrejas en miel! Nadie se va sin probarlas.",
+    "arriba": "La cena de Navidad",
+    "abajo": "Sin torrejas no cuenta",
+    "escena": "comida",
+    "emoji": "🍞🍯",
+    "temas": [
+      "cocina"
+    ],
+    "queEs": "Las torrejas en miel o en leche son el postre infaltable de la mesa navideña catracha.",
+    "fuente": "https://www.elheraldo.hn/fotogalerias/tegucigalpa/nacatamales-torrejas-rosquillas-miel-todo-listo-para-cena-navidenas-PJ28650384"
+  },
+  {
+    "id": "catracho-a-mucha-honra",
+    "dept": null,
+    "tipo": "dicho",
+    "nombre": "Catracho a mucha honra",
+    "frase": "¡Catracho de corazón, y a mucha honra!",
+    "arriba": "—¿De dónde sos?",
+    "abajo": "—¡Catracho, y a mucha honra!",
+    "escena": "fiesta",
+    "emoji": "💙🤍",
+    "temas": [
+      "todos"
+    ],
+    "queEs": "«Catracho» es el apodo de los hondureños; no nació como nombre oficial pero se volvió orgullo nacional.",
+    "fuente": "https://globalvoices.org/2007/06/11/honduras-the-meaning-of-the-word-catracho/"
+  },
+  {
+    "id": "topogigio-o-charamusca",
+    "dept": null,
+    "tipo": "rivalidad",
+    "nombre": "¿Topogigio o charamusca?",
+    "frase": "¿Topogigio o charamusca? ¡Igual quita el calor!",
+    "arriba": "Sampedranos: topogigio",
+    "abajo": "Capitalinos: charamusca",
+    "escena": "calor",
+    "emoji": "🧊🥤",
+    "temas": [
+      "pulperia",
+      "atrapa"
+    ],
+    "queEs": "El mismo fresco congelado en bolsita se llama topogigio en San Pedro Sula y charamusca en Tegucigalpa: debate eterno en redes.",
+    "fuente": "https://www.tunota.com/honduras-hoy/topogigio-o-charamusca-la-eterna-discusion-entre-sampedranos-y-capitalinos"
+  },
+  {
+    "id": "guineo-o-minimo",
+    "dept": null,
+    "tipo": "rivalidad",
+    "nombre": "¿Guineo o mínimo?",
+    "frase": "¿Guineo o mínimo? Igual va en la licuada.",
+    "arriba": "Unos dicen guineo",
+    "abajo": "Otros dicen mínimo. ¡Es banano!",
+    "escena": "mercado",
+    "emoji": "🍌",
+    "temas": [
+      "cocina",
+      "atrapa"
+    ],
+    "queEs": "Según la zona, el banano se llama guineo o mínimo, y el debate revive cada vez que alguien lo pregunta en redes.",
+    "fuente": "https://www.tunota.com/honduras-hoy/topogigio-o-charamusca-la-eterna-discusion-entre-sampedranos-y-capitalinos"
+  },
+  {
+    "id": "macanudo",
+    "dept": null,
+    "tipo": "frase",
+    "nombre": "¡Macanudo!",
+    "frase": "¡Macanudo! Esa jugada estuvo de lujo.",
+    "arriba": "Cuando te sale perfecto",
+    "abajo": "¡Macanudo!",
+    "escena": "fiesta",
+    "emoji": "🌟",
+    "temas": [
+      "todos"
+    ],
+    "queEs": "«Macanudo» es excelente, de lo mejor; palabra de abuelos que sigue viva.",
+    "fuente": "https://www.elheraldo.hn/honduras/regionalismo-honduras-ejemplos-cultura-lenguaje-KK16493687"
+  },
+  {
+    "id": "abusado",
+    "dept": null,
+    "tipo": "frase",
+    "nombre": "¡Abusado!",
+    "frase": "¡Abusado con el hoyo de la calle!",
+    "arriba": "La calle después del aguacero",
+    "abajo": "¡Abusado con el hoyo!",
+    "escena": "lluvia",
+    "emoji": "⚠️🕳️",
+    "temas": [
+      "manejo",
+      "ruta"
+    ],
+    "queEs": "«Abusado» significa pendiente, atento: es el «¡cuidado!» catracho.",
+    "fuente": "https://www.elheraldo.hn/honduras/regionalismo-honduras-ejemplos-cultura-lenguaje-KK16493687"
+  },
+  {
+    "id": "te-chotee",
+    "dept": null,
+    "tipo": "frase",
+    "nombre": "¡Te choteé!",
+    "frase": "¡Te choteé! Ya sé dónde te escondiste.",
+    "arriba": "Cuando agarrás al cipote",
+    "abajo": "Comiéndose el dulce: ¡te choteé!",
+    "escena": "casa",
+    "emoji": "🕵️",
+    "temas": [
+      "atrapa"
+    ],
+    "queEs": "«Chotear» es darse cuenta o sorprender a alguien en plena travesura.",
+    "fuente": "https://es.hispanopedia.com/wiki/Anexo:Hondure%C3%B1ismos"
+  },
+  {
+    "id": "anda-piano",
+    "dept": null,
+    "tipo": "frase",
+    "nombre": "Andá piano",
+    "frase": "Andá piano en la curva, que hay ganado.",
+    "arriba": "Calle de tierra con vacas",
+    "abajo": "Andá piano, andá piano",
+    "escena": "montana",
+    "emoji": "🎹🐄",
+    "temas": [
+      "manejo",
+      "monta"
+    ],
+    "queEs": "«Andar piano» es andar con mucho cuidado.",
+    "fuente": "https://es.hispanopedia.com/wiki/Anexo:Hondure%C3%B1ismos"
+  },
+  {
+    "id": "direccion-catracha",
+    "dept": null,
+    "tipo": "dicho",
+    "nombre": "La dirección catracha",
+    "frase": "Dos cuadras de la cancha, casa de esquina. ¡Fácil!",
+    "arriba": "La dirección catracha:",
+    "abajo": "De la cancha, dos cuadras y esquina",
+    "escena": "casa",
+    "emoji": "🗺️",
+    "temas": [
+      "ruta",
+      "manejo"
+    ],
+    "queEs": "Muchas direcciones en Honduras se dan con puntos de referencia, como una cancha o la casa de esquina, más que con número.",
+    "fuente": "https://help.unhcr.org/honduras/?p=101"
+  },
+  {
+    "id": "semana-morazanica",
+    "dept": null,
+    "tipo": "viral",
+    "nombre": "Semana Morazánica",
+    "frase": "¡Semana Morazánica! Todo mundo pa' la playa.",
+    "arriba": "Octubre en Honduras:",
+    "abajo": "Media Honduras rumbo a la playa",
+    "escena": "playa",
+    "emoji": "🏖️🚗",
+    "temas": [
+      "ruta",
+      "manejo"
+    ],
+    "queEs": "El feriado de octubre es el más esperado del año: carreteras llenas, playas repletas y paseos por todo el país.",
+    "fuente": "https://www.latribuna.hn/2026/09/29/feriado-morazanico-dara-respiro-de-l600-millones-a-economia/"
+  },
+  {
+    "id": "el-rapidito",
+    "dept": "franciscomorazan",
+    "tipo": "viral",
+    "nombre": "El rapidito",
+    "frase": "Subite al rapidito: ¡siempre cabe uno más!",
+    "arriba": "Rapidito en hora pico:",
+    "abajo": "«¡Hay campo atrás!»",
+    "escena": "bus",
+    "emoji": "🚐",
+    "temas": [
+      "manejo",
+      "ruta"
+    ],
+    "queEs": "Los rapiditos son los microbuses de ruta de Tegucigalpa, famosos por ir llenísimos en hora pico.",
+    "fuente": "https://www.elheraldo.hn/elheraldoplus/investigaciones/rapiditos-buses-transporte-publico-tegucigalpa-NG14748544"
+  },
+  {
+    "id": "pilon-o-paleta",
+    "dept": "franciscomorazan",
+    "tipo": "rivalidad",
+    "nombre": "¿Pilón o paleta?",
+    "frase": "En Tegus es paleta; en San Pedro, pilón.",
+    "arriba": "Capitalino: «Dame una paleta»",
+    "abajo": "Sampedrano: «¿Un pilón?»",
+    "escena": "calor",
+    "emoji": "🍦",
+    "temas": [
+      "pulperia"
+    ],
+    "queEs": "El helado de palito se llama paleta en Tegucigalpa y pilón en San Pedro Sula; otro round de la rivalidad capitalina-sampedrana.",
+    "fuente": "https://www.tunota.com/honduras-hoy/topogigio-o-charamusca-la-eterna-discusion-entre-sampedranos-y-capitalinos"
+  },
+  {
+    "id": "tegus-en-diciembre",
+    "dept": "franciscomorazan",
+    "tipo": "viral",
+    "nombre": "Tegus en diciembre",
+    "frase": "Diciembre en Tegus: suéter, bufanda y café.",
+    "arriba": "Capitalinos a 18 grados:",
+    "abajo": "Bufanda, gorro y suéter",
+    "escena": "frio",
+    "emoji": "🧣☕",
+    "temas": [
+      "todos"
+    ],
+    "queEs": "Cuando llegan los vientos del norte en diciembre, los capitalinos salen abrigados con bufanda y suéter.",
+    "fuente": "https://www.elheraldo.hn/fotogalerias/tegucigalpa/capitalinos-abrigados-masa-de-aire-frio-llegada-diciembre-KP22969047"
+  },
+  {
+    "id": "sps-el-horno",
+    "dept": "cortes",
+    "tipo": "viral",
+    "nombre": "San Pedro, el horno",
+    "frase": "En San Pedro hasta el sol busca sombra.",
+    "arriba": "San Pedro Sula a mediodía",
+    "abajo": "Modo horno activado",
+    "escena": "calor",
+    "emoji": "🔥🥵",
+    "temas": [
+      "todos"
+    ],
+    "queEs": "Por la isla de calor urbana, el pavimento de San Pedro Sula llega a 80 °C; el calor sampedrano es chiste nacional.",
+    "fuente": "https://www.laprensa.hn/honduras/sps-isla-calor-urbana-pavimento-80-grados-AH30375151"
+  },
+  {
+    "id": "nieve-o-minuta",
+    "dept": "cortes",
+    "tipo": "rivalidad",
+    "nombre": "¿Nieve o minuta?",
+    "frase": "¿Nieve o minuta? ¡Echale más miel!",
+    "arriba": "En San Pedro: nieve",
+    "abajo": "En Tegus: minuta",
+    "escena": "calor",
+    "emoji": "🍧",
+    "temas": [
+      "cocina",
+      "pulperia"
+    ],
+    "queEs": "El hielo raspado con sirope y leche condensada se llama nieve en San Pedro Sula y minuta en Tegucigalpa.",
+    "fuente": "https://www.tunota.com/honduras-hoy/topogigio-o-charamusca-la-eterna-discusion-entre-sampedranos-y-capitalinos"
+  },
+  {
+    "id": "pollo-chuco",
+    "dept": "cortes",
+    "tipo": "frase",
+    "nombre": "Pollo chuco",
+    "frase": "Pollo chuco con tajadas: ¡con bastante aderezo!",
+    "arriba": "¿Pollo con tajadas?",
+    "abajo": "Aquí se llama pollo chuco",
+    "escena": "comida",
+    "emoji": "🍗",
+    "temas": [
+      "cocina"
+    ],
+    "queEs": "El pollo frito con tajadas, aderezo y encurtido es el «pollo chuco», comida callejera emblema de San Pedro Sula.",
+    "fuente": "https://www.elheraldo.hn/honduras/regionalismo-honduras-ejemplos-cultura-lenguaje-KK16493687"
+  },
+  {
+    "id": "pescado-del-lago",
+    "dept": "cortes",
+    "tipo": "frase",
+    "nombre": "Pescado del lago",
+    "frase": "Parada obligada: pescado frito del lago.",
+    "arriba": "Viaje de Tegus a San Pedro",
+    "abajo": "Parada obligada: pescado frito",
+    "escena": "pesca",
+    "emoji": "🐟🍋",
+    "temas": [
+      "pesca",
+      "cocina",
+      "manejo"
+    ],
+    "queEs": "Los comedores a orillas del Lago de Yojoa venden pescado frito con tajadas desde hace más de 50 años: la parada clásica del viaje.",
+    "fuente": "https://www.elheraldo.hn/fotogalerias/lago-de-yojoa-una-parada-obligatoria-para-degustar-un-rico-pescado-frito-DMEH1097343"
+  },
+  {
+    "id": "novia-de-honduras",
+    "dept": "atlantida",
+    "tipo": "dicho",
+    "nombre": "La novia de Honduras",
+    "frase": "La Ceiba te recibe como novia: con cariño.",
+    "arriba": "¿Por qué la novia de Honduras?",
+    "abajo": "Porque La Ceiba te recibe bonito",
+    "escena": "playa",
+    "emoji": "💍🌴",
+    "temas": [
+      "ruta",
+      "exploradores"
+    ],
+    "queEs": "La Ceiba es «la novia de Honduras», apodo que se atribuye a la hospitalidad de su gente.",
+    "fuente": "https://en.wikipedia.org/wiki/La_Ceiba"
+  },
+  {
+    "id": "carnaval-ceibeno",
+    "dept": "atlantida",
+    "tipo": "viral",
+    "nombre": "Carnaval ceibeño",
+    "frase": "¡Mayo en La Ceiba: carnaval y a bailar!",
+    "arriba": "Mayo en La Ceiba:",
+    "abajo": "Todo el mundo al carnaval",
+    "escena": "fiesta",
+    "emoji": "🎭",
+    "temas": [
+      "ritmo",
+      "feria"
+    ],
+    "queEs": "El Carnaval Internacional de la Amistad de La Ceiba se presenta como la fiesta popular más grande de Honduras.",
+    "fuente": "https://www.laprensa.hn/honduras/honduras-explosion-cultura-fiesta-laceiba-miles-disfrutan-carnaval-internacional-HG25896155"
+  },
+  {
+    "id": "sopa-de-caracol",
+    "dept": "atlantida",
+    "tipo": "viral",
+    "nombre": "Sopa de caracol",
+    "frase": "¡Esto pide sopa de caracol y a bailar punta!",
+    "arriba": "Suena la punta en La Ceiba",
+    "abajo": "Y nadie se queda sentado",
+    "escena": "playa",
+    "emoji": "🐚🥣",
+    "temas": [
+      "ritmo",
+      "cocina"
+    ],
+    "queEs": "Canción punta de 1991, en garífuna y español, que llegó al número uno de listas latinas; «watanegui consup» habla de la sopa.",
+    "fuente": "https://en.wikipedia.org/wiki/Sopa_de_Caracol"
+  },
+  {
+    "id": "ceibenos-vs-capitalinos",
+    "dept": "atlantida",
+    "tipo": "rivalidad",
+    "nombre": "Ceibeños vs capitalinos",
+    "frase": "Ceibeños bailando, capitalinos viendo. ¡Ambos buena gente!",
+    "arriba": "Ceibeño en la fiesta: bailando",
+    "abajo": "Capitalino: «yo solo vine a ver»",
+    "escena": "fiesta",
+    "emoji": "🕺🙈",
+    "temas": [
+      "ritmo"
+    ],
+    "queEs": "Un video viral comparó la forma de ser de ceibeños y capitalinos; la conclusión: los capitalinos son más tímidos, pero buena gente.",
+    "fuente": "https://www.tunota.com/entretenimiento/hondureno-espana-diferencias-entre-ceibenos-capitalinos-2023-05-28"
+  },
+  {
+    "id": "casabe-patrimonio",
+    "dept": "colon",
+    "tipo": "frase",
+    "nombre": "Casabe del mundo",
+    "frase": "Casabe garífuna: patrimonio de la humanidad.",
+    "arriba": "¿Tortilla de yuca, dijiste?",
+    "abajo": "Es casabe: patrimonio mundial",
+    "escena": "comida",
+    "emoji": "🫓",
+    "temas": [
+      "cocina"
+    ],
+    "queEs": "El casabe, pan de yuca garífuna que se hace en comunidades de Colón, fue reconocido por la UNESCO como patrimonio inmaterial.",
+    "fuente": "https://www.tunota.com/honduras-hoy/la-unesco-declara-patrimonio-inmaterial-el-casabe-hondureno-2025-01-19"
+  },
+  {
+    "id": "si-colon-volviera",
+    "dept": "colon",
+    "tipo": "dicho",
+    "nombre": "Si Colón volviera…",
+    "frase": "Si Colón volviera, se quedaba en Trujillo.",
+    "arriba": "Si Colón volviera a Honduras",
+    "abajo": "Se quedaba en Trujillo",
+    "escena": "playa",
+    "emoji": "⛵🏖️",
+    "temas": [
+      "exploradores",
+      "ruta"
+    ],
+    "queEs": "Trujillo, fundada en 1525 y antigua capital, presume bahía, fortaleza y playas; la prensa tituló que si Colón volviera, ahí se quedaría.",
+    "fuente": "https://www.laprensa.hn/viajes/si-colon-volviera-a-honduras-se-quedaria-en-trujillo-FGLP474313"
+  },
+  {
+    "id": "bahia-bien-honda",
+    "dept": "colon",
+    "tipo": "frase",
+    "nombre": "Bahía bien honda",
+    "frase": "Bahía de Trujillo: honda como el nombre del país.",
+    "arriba": "La bahía de Trujillo",
+    "abajo": "Más honda que la palabra Honduras",
+    "escena": "pesca",
+    "emoji": "🌊⚓",
+    "temas": [
+      "pesca",
+      "exploradores"
+    ],
+    "queEs": "La bahía de Trujillo se describe como una de las más profundas de Latinoamérica, entre las montañas Capiro y Calentura.",
+    "fuente": "https://www.laprensa.hn/viajes/si-colon-volviera-a-honduras-se-quedaria-en-trujillo-FGLP474313"
+  },
+  {
+    "id": "utila-y-el-gigante",
+    "dept": "islas",
+    "tipo": "frase",
+    "nombre": "Utila y el gigante",
+    "frase": "En Utila el tiburón ballena es el vecino grande.",
+    "arriba": "Buceando en Utila:",
+    "abajo": "«Ese pez es más grande que el bote»",
+    "escena": "playa",
+    "emoji": "🦈🤿",
+    "temas": [
+      "pesca",
+      "exploradores"
+    ],
+    "queEs": "Utila es famosa por bucear en el arrecife mesoamericano y por ver tiburón ballena durante todo el año.",
+    "fuente": "https://www.pressreader.com/honduras/honduras-tips/20180228/281479276886918"
+  },
+  {
+    "id": "ingles-isleno",
+    "dept": "islas",
+    "tipo": "frase",
+    "nombre": "Inglés isleño",
+    "frase": "Aquí también se saluda en inglés isleño.",
+    "arriba": "Llegás a Roatán: «¡Hola!»",
+    "abajo": "Te responden: «Wha' happen?»",
+    "escena": "playa",
+    "emoji": "🏝️🗣️",
+    "temas": [
+      "trivia",
+      "exploradores"
+    ],
+    "queEs": "En las Islas de la Bahía mucha gente habla inglés isleño, una rareza dentro de un país de habla hispana.",
+    "fuente": "https://www.wanderlustmagazine.com/?p=11972"
+  },
+  {
+    "id": "tres-islas",
+    "dept": "islas",
+    "tipo": "frase",
+    "nombre": "Escogé tu isla",
+    "frase": "Roatán, Utila y Guanaja: escogé tu isla.",
+    "arriba": "¿A cuál isla vamos?",
+    "abajo": "Roatán, Utila, Guanaja… ¡las tres!",
+    "escena": "playa",
+    "emoji": "🏝️⛵",
+    "temas": [
+      "ruta",
+      "exploradores"
+    ],
+    "queEs": "El departamento lo forman tres islas grandes, Roatán, Utila y Guanaja, con cabecera en Coxen Hole.",
+    "fuente": "https://redhonduras.hn/?p=74005"
+  },
+  {
+    "id": "lluvia-de-peces",
+    "dept": "yoro",
+    "tipo": "viral",
+    "nombre": "Lluvia de peces",
+    "frase": "¿Lluvia de peces? En Yoro no es chiste.",
+    "arriba": "Pronóstico en Yoro:",
+    "abajo": "Nublado con chance de peces",
+    "escena": "lluvia",
+    "emoji": "🌧️🐟",
+    "temas": [
+      "pesca",
+      "atrapa"
+    ],
+    "queEs": "Tras los primeros aguaceros fuertes de mayo o junio aparecen peces en el suelo en Yoro; hay festival desde 1998.",
+    "fuente": "https://www.elheraldo.hn/honduras/cae-lluvia-de-peces-yoro-fenomenos-mas-curiosos-honduras-AB31031144"
+  },
+  {
+    "id": "perla-del-ulua",
+    "dept": "yoro",
+    "tipo": "dicho",
+    "nombre": "La Perla del Ulúa",
+    "frase": "El Progreso brilla: ¡la Perla del Ulúa!",
+    "arriba": "¿Qué perla hay en Yoro?",
+    "abajo": "El Progreso, la Perla del Ulúa",
+    "escena": "pesca",
+    "emoji": "🦪🏞️",
+    "temas": [
+      "ruta",
+      "trivia"
+    ],
+    "queEs": "El Progreso es conocida como «la Perla del Ulúa» por estar a orillas del río Ulúa.",
+    "fuente": "https://redhonduras.hn/?p=76926"
+  },
+  {
+    "id": "carnaval-del-jamo",
+    "dept": "yoro",
+    "tipo": "frase",
+    "nombre": "Carnaval del Jamo",
+    "frase": "¡En Olanchito hasta el jamo sale al carnaval!",
+    "arriba": "Abril en Olanchito:",
+    "abajo": "Carrozas, cabalgata y jamo",
+    "escena": "fiesta",
+    "emoji": "🦎🎉",
+    "temas": [
+      "feria",
+      "ritmo"
+    ],
+    "queEs": "Olanchito celebra cada abril el Carnaval del Jamo, con carrozas, cabalgata y baile; el jamo es una iguana negra.",
+    "fuente": "https://www.laprensa.hn/honduras/el-sabado-inicia-el-carnaval-del-jamo-KCLP342811"
+  },
+  {
+    "id": "esas-honduras",
+    "dept": "graciasadios",
+    "tipo": "dicho",
+    "nombre": "Salimos de esas honduras",
+    "frase": "¡Gracias a Dios que salimos de esas honduras!",
+    "arriba": "Colón tras la tormenta de 1502:",
+    "abajo": "«¡Salimos de esas honduras!»",
+    "escena": "lluvia",
+    "emoji": "⛵🌊",
+    "temas": [
+      "trivia",
+      "exploradores"
+    ],
+    "queEs": "Según la tradición, Colón dijo esta frase al doblar el cabo tras una tormenta; de ahí vendría el nombre del cabo y, quizá, del país.",
+    "fuente": "https://en.wikipedia.org/wiki/Cabo_Gracias_a_Dios"
+  },
+  {
+    "id": "mosquitia-sin-carretera",
+    "dept": "graciasadios",
+    "tipo": "frase",
+    "nombre": "Por agua o por aire",
+    "frase": "A La Mosquitia se llega por agua o por aire.",
+    "arriba": "¿Carretera a La Mosquitia?",
+    "abajo": "Mejor lancha o avioneta",
+    "escena": "pesca",
+    "emoji": "✈️🛶",
+    "temas": [
+      "ruta",
+      "exploradores",
+      "manejo"
+    ],
+    "queEs": "Gracias a Dios es remoto y casi sin carreteras: se llega sobre todo por agua o en avión.",
+    "fuente": "https://en.wikipedia.org/wiki/Gracias_a_Dios_Department"
+  },
+  {
+    "id": "selva-mas-grande",
+    "dept": "graciasadios",
+    "tipo": "frase",
+    "nombre": "La selva más grande",
+    "frase": "Río Plátano: la selva más grande de Centroamérica.",
+    "arriba": "El área silvestre más grande",
+    "abajo": "de Centroamérica: aquí mero",
+    "escena": "montana",
+    "emoji": "🌳🦜",
+    "temas": [
+      "exploradores"
+    ],
+    "queEs": "La Reserva del Río Plátano, patrimonio de la UNESCO, es parte de la mayor área silvestre de Centroamérica.",
+    "fuente": "https://en.wikipedia.org/wiki/Gracias_a_Dios_Department"
+  },
+  {
+    "id": "piedras-de-copan",
+    "dept": "copan",
+    "tipo": "frase",
+    "nombre": "Las piedras de Copán",
+    "frase": "Copán Ruinas: más historia que el libro de Sociales.",
+    "arriba": "La escalinata de Copán:",
+    "abajo": "Más letras que tu cuaderno",
+    "escena": "ruinas",
+    "emoji": "🗿📜",
+    "temas": [
+      "exploradores",
+      "trivia"
+    ],
+    "queEs": "Copán Ruinas guarda uno de los grandes sitios mayas, con la famosa escalinata de jeroglíficos; toda escuela hondureña va de gira.",
+    "fuente": "https://www.minube.com/tips/actualidad/explora-copan-lugares-unicos-que-visitar-en-honduras"
+  },
+  {
+    "id": "sultana-de-occidente",
+    "dept": "copan",
+    "tipo": "dicho",
+    "nombre": "La Sultana de Occidente",
+    "frase": "Santa Rosa: la Sultana de Occidente.",
+    "arriba": "Santa Rosa de Copán de noche",
+    "abajo": "La Sultana de Occidente brilla",
+    "escena": "cafe",
+    "emoji": "☕🌄",
+    "temas": [
+      "corte",
+      "ruta"
+    ],
+    "queEs": "Santa Rosa de Copán es «la Sultana de Occidente», ciudad colonial del occidente cafetalero.",
+    "fuente": "https://www.elheraldo.hn/revistas/siempre/la-sultana-de-occidente-resplandece-de-noche-ABEH1077043"
+  },
+  {
+    "id": "viga-atravesada",
+    "dept": "copan",
+    "tipo": "dicho",
+    "nombre": "Viga Atravesada",
+    "frase": "Pasando por Viga Atravesada: ¡agachate!",
+    "arriba": "Lugar real en Copán:",
+    "abajo": "Viga Atravesada. Agachate",
+    "escena": "montana",
+    "emoji": "🪵",
+    "temas": [
+      "ruta",
+      "manejo"
+    ],
+    "queEs": "Viga Atravesada (Cucuyagua) aparece entre los nombres de lugar más curiosos de Honduras, junto a El Garabato y Rastrojo Largo.",
+    "fuente": "https://www.elheraldo.hn/honduras/los-nombres-mas-curiosos-de-algunos-lugares-hondurenos-PWEH1303408"
+  },
+  {
+    "id": "techo-de-honduras",
+    "dept": "lempira",
+    "tipo": "frase",
+    "nombre": "El techo de Honduras",
+    "frase": "Celaque: subí al punto más alto del país.",
+    "arriba": "Punto más alto de Honduras:",
+    "abajo": "Celaque, 2,849 metros",
+    "escena": "montana",
+    "emoji": "⛰️",
+    "temas": [
+      "exploradores",
+      "ruta"
+    ],
+    "queEs": "La Montaña de Celaque, en Lempira, tiene el punto más alto del país; su nombre significaría «caja de agua».",
+    "fuente": "https://www.tunota.com/alista-tu-mochila-y-sube-a-celaque-es-el-punto-mas-alto-de-honduras"
+  },
+  {
+    "id": "ciudad-de-los-confines",
+    "dept": "lempira",
+    "tipo": "dicho",
+    "nombre": "Ciudad de los Confines",
+    "frase": "Gracias, Lempira: la Ciudad de los Confines.",
+    "arriba": "Gracias, Lempira:",
+    "abajo": "La Ciudad de los Confines",
+    "escena": "casa",
+    "emoji": "🏛️",
+    "temas": [
+      "trivia",
+      "exploradores"
+    ],
+    "queEs": "Gracias, cabecera de Lempira y ciudad colonial, es conocida como «la ciudad de los confines».",
+    "fuente": "https://www.elheraldo.hn/tierraadentro/gracias-lempira-enigmatico-viaje-por-la-ciudad-de-los-confines-MCEH878664"
+  },
+  {
+    "id": "aguas-termales-gracias",
+    "dept": "lempira",
+    "tipo": "frase",
+    "nombre": "Aguas termales",
+    "frase": "Bajaste de Celaque: ¡a las aguas termales!",
+    "arriba": "Bajaste de Celaque",
+    "abajo": "Ahora: aguas termales",
+    "escena": "montana",
+    "emoji": "♨️",
+    "temas": [
+      "exploradores"
+    ],
+    "queEs": "Gracias ofrece aguas termales y aviturismo entre sus atractivos, al pie de Celaque.",
+    "fuente": "https://www.laprensa.hn/honduras/gracias-puerta-secretos-lempira-confines-ciudad-colonial-turismo-semana_santa-LCLP1162898"
+  },
+  {
+    "id": "tres-paises",
+    "dept": "ocotepeque",
+    "tipo": "frase",
+    "nombre": "Tres países en un ratito",
+    "frase": "En Ocote, en un ratito estás en otro país.",
+    "arriba": "Ocotepeque:",
+    "abajo": "Guate a un lado, El Salvador al otro",
+    "escena": "montana",
+    "emoji": "🗺️",
+    "temas": [
+      "ruta",
+      "trivia"
+    ],
+    "queEs": "Ocotepeque queda a pocos kilómetros de las fronteras con El Salvador (El Poy) y Guatemala (Agua Caliente).",
+    "fuente": "https://redhonduras.hn/?p=74023"
+  },
+  {
+    "id": "trifinio",
+    "dept": "ocotepeque",
+    "tipo": "frase",
+    "nombre": "El Trifinio",
+    "frase": "Trifinio: un bosque que comparten tres países.",
+    "arriba": "Un bosque, tres países",
+    "abajo": "Y cero pleito por la sombra",
+    "escena": "montana",
+    "emoji": "🌲🌲",
+    "temas": [
+      "exploradores"
+    ],
+    "queEs": "La Reserva de Biosfera Trifinio Fraternidad la comparten Honduras, Guatemala y El Salvador.",
+    "fuente": "https://www.laprensa.hn/honduras/paises-del-plan-trifinio-crean-nueva-ruta-turistica-KVLP1019650"
+  },
+  {
+    "id": "molienda-sensenti",
+    "dept": "ocotepeque",
+    "tipo": "frase",
+    "nombre": "Molienda en Sensenti",
+    "frase": "¡A la molienda! Los bueyes mueven el trapiche.",
+    "arriba": "Molienda en Sensenti:",
+    "abajo": "Bueyes, trapiche y marimba",
+    "escena": "maiz",
+    "emoji": "🐂🍬",
+    "temas": [
+      "corte",
+      "cocina"
+    ],
+    "queEs": "En el valle de Sensenti se revive la molienda de caña con bueyes y trapiche, con marimba y comida de elote.",
+    "fuente": "https://www.laprensa.hn/honduras/honduras-turismo-agroturismo-eocotepeque-tradiciones-semana-santa-IL18318189"
+  },
+  {
+    "id": "orgullo-patepluma",
+    "dept": "santabarbara",
+    "tipo": "dicho",
+    "nombre": "Orgullo patepluma",
+    "frase": "¡Patepluma y a mucha honra!",
+    "arriba": "¿Te dicen patepluma?",
+    "abajo": "Es orgullo, no ofensa",
+    "escena": "mercado",
+    "emoji": "🪶",
+    "temas": [
+      "todos"
+    ],
+    "queEs": "A los de Santa Bárbara les dicen pateplumas (de «pata de pluma»); nadie sabe bien el origen y el apodo es motivo de orgullo.",
+    "fuente": "https://www.laprensa.hn/honduras/por-que-les-dicen-patepluma-GSLP683959"
+  },
+  {
+    "id": "sombrero-de-junco",
+    "dept": "santabarbara",
+    "tipo": "frase",
+    "nombre": "Sombrero de junco",
+    "frase": "Tejido a mano: sombrero de junco patepluma.",
+    "arriba": "Sombrero de junco",
+    "abajo": "Hecho a mano en Santa Bárbara",
+    "escena": "mercado",
+    "emoji": "👒",
+    "temas": [
+      "feria",
+      "corte"
+    ],
+    "queEs": "Los artesanos pateplumas tejen sombreros, canastas y más con fibra de junco.",
+    "fuente": "https://www.laprensa.hn/honduras/1437847-410/honduras-artesanos-pateplumas-arte-tejido-santa-barbara"
+  },
+  {
+    "id": "feria-de-trece-dias",
+    "dept": "santabarbara",
+    "tipo": "viral",
+    "nombre": "Feria de 13 días",
+    "frase": "¿Feria de un día? Aquí son trece.",
+    "arriba": "Feria normal: un día",
+    "abajo": "Pateplumas: trece días",
+    "escena": "fiesta",
+    "emoji": "🎡",
+    "temas": [
+      "feria"
+    ],
+    "queEs": "La feria patronal de la ciudad de Santa Bárbara se celebra con trece días de fiesta.",
+    "fuente": "https://www.laprensa.hn/honduras/pateplumas-celebran-13-dias-de-alegre-feria-patronal-JVLP907178"
+  },
+  {
+    "id": "la-esperanza-a-2-grados",
+    "dept": "intibuca",
+    "tipo": "viral",
+    "nombre": "La Esperanza a 2 °C",
+    "frase": "La Esperanza a 2 grados: ¡sacá la chumpa!",
+    "arriba": "Pronóstico La Esperanza: 2 °C",
+    "abajo": "Yo con tres suéteres y chumpa",
+    "escena": "frio",
+    "emoji": "🥶🧥",
+    "temas": [
+      "todos"
+    ],
+    "queEs": "Intibucá suele ser la zona más fría del país; en La Esperanza el termómetro ha bajado a 2 °C.",
+    "fuente": "https://www.tunota.com/honduras-hoy/cual-es-el-departamento-con-temperaturas-mas-bajas-en-honduras-2026-02-02"
+  },
+  {
+    "id": "festival-del-frio",
+    "dept": "intibuca",
+    "tipo": "frase",
+    "nombre": "Festival del Frío",
+    "frase": "Si hace frío, que sea con festival.",
+    "arriba": "Otros: huyen del frío",
+    "abajo": "Intibucá: le hace festival",
+    "escena": "frio",
+    "emoji": "❄️🎉",
+    "temas": [
+      "feria"
+    ],
+    "queEs": "Yamaranguila, La Esperanza e Intibucá crearon un Festival del Frío para celebrar sus bajas temperaturas.",
+    "fuente": "https://www.laprensa.hn/honduras/festival-del-frio-honduras-yamaranguila-la-esperanza-intibuca-navidad-hondurenos-BCLP1345141"
+  },
+  {
+    "id": "hasta-la-lechuga-tirita",
+    "dept": "intibuca",
+    "tipo": "frase",
+    "nombre": "Hasta la lechuga tirita",
+    "frase": "Hace tanto frío que hasta la lechuga tirita.",
+    "arriba": "Helada en La Esperanza",
+    "abajo": "Hasta las verduras piden suéter",
+    "escena": "mercado",
+    "emoji": "🥬🥶",
+    "temas": [
+      "corte",
+      "cocina"
+    ],
+    "queEs": "Con los frentes fríos, La Esperanza baja tanto de temperatura que las heladas afectan las hortalizas.",
+    "fuente": "https://www.laprensa.hn/honduras/la_esperanza-enfria-congela-produccion-agricola-temperatura-clima-AALP1140473"
+  },
+  {
+    "id": "olancho-es-ancho",
+    "dept": "olancho",
+    "tipo": "dicho",
+    "nombre": "Olancho es ancho",
+    "frase": "Olancho es ancho pa' entrar y angosto pa' salir.",
+    "arriba": "Olancho es ancho para entrar",
+    "abajo": "y angosto para salir",
+    "escena": "montana",
+    "emoji": "🐎🌄",
+    "temas": [
+      "monta",
+      "ruta"
+    ],
+    "queEs": "Lema popular no oficial del departamento: es fácil llegar y cuesta irse (también se dice «entre si quiere, salga si puede»).",
+    "fuente": "https://curoc.unah.edu.hn/dmsdocument/15864-olancho-entre-imagenes-y-palabras-pdf"
+  },
+  {
+    "id": "no-hay-jinete-malo",
+    "dept": "olancho",
+    "tipo": "dicho",
+    "nombre": "No hay jinete malo",
+    "frase": "Desde que hay disculpas, no hay jinete malo.",
+    "arriba": "Me caí del caballo…",
+    "abajo": "Pero fue culpa de la silla",
+    "escena": "montana",
+    "emoji": "🏇😅",
+    "temas": [
+      "monta"
+    ],
+    "queEs": "Dicho olanchano: «desde que se inventaron las disculpas, no hay jinete malo»; siempre aparece una excusa.",
+    "fuente": "https://curoc.unah.edu.hn/dmsdocument/15864-olancho-entre-imagenes-y-palabras-pdf"
+  },
+  {
+    "id": "tapado-olanchano",
+    "dept": "olancho",
+    "tipo": "frase",
+    "nombre": "Tapado olanchano",
+    "frase": "Tapado olanchano y carne asada: ¡a la mesa!",
+    "arriba": "Olanchano de visita:",
+    "abajo": "«¿Y el tapado para cuándo?»",
+    "escena": "comida",
+    "emoji": "🍲🥩",
+    "temas": [
+      "cocina",
+      "monta"
+    ],
+    "queEs": "El tapado olanchano y la carne asada encabezan la comida típica de Olancho, junto a rodeos y ferias patronales.",
+    "fuente": "https://www.elheraldo.hn/honduras/explore-olancho-montanas-cuevas-tradiciones-semana-morazanica-BH27574948"
+  },
+  {
+    "id": "festival-del-maiz",
+    "dept": "elparaiso",
+    "tipo": "viral",
+    "nombre": "Festival del Maíz",
+    "frase": "Agosto en Danlí: ¡todo sabe a maíz!",
+    "arriba": "Agosto en Danlí:",
+    "abajo": "Atol, elote, montuca y más maíz",
+    "escena": "maiz",
+    "emoji": "🌽",
+    "temas": [
+      "cocina",
+      "feria",
+      "corte"
+    ],
+    "queEs": "Danlí celebra cada agosto su Festival Internacional del Maíz, con más de cuatro décadas de historia.",
+    "fuente": "https://www.elheraldo.hn/honduras/danli-inaugura-su-42-festival-internacional-del-maiz-2018-IXEH1204378"
+  },
+  {
+    "id": "atol-de-elote",
+    "dept": "elparaiso",
+    "tipo": "frase",
+    "nombre": "Atol de elote",
+    "frase": "¡Atol de elote calientito pa'l frío!",
+    "arriba": "Llegó la cosecha",
+    "abajo": "Atol, tamalitos y elotes",
+    "escena": "maiz",
+    "emoji": "🌽☕",
+    "temas": [
+      "cocina"
+    ],
+    "queEs": "En el festival de Danlí no faltan el atol, los tamalitos de elote y los elotes asados.",
+    "fuente": "https://www.elheraldo.hn/honduras/danli-inaugura-su-42-festival-internacional-del-maiz-2018-IXEH1204378"
+  },
+  {
+    "id": "el-matazano",
+    "dept": "elparaiso",
+    "tipo": "dicho",
+    "nombre": "El Matazano",
+    "frase": "¿Vas pa' El Matazano? ¡Saludame a Jamastrán!",
+    "arriba": "Lugar real en Danlí:",
+    "abajo": "El Matazano",
+    "escena": "montana",
+    "emoji": "🗺️😄",
+    "temas": [
+      "ruta"
+    ],
+    "queEs": "El Matazano, aldea del valle de Jamastrán en Danlí, figura entre los nombres de lugar más curiosos de Honduras.",
+    "fuente": "https://www.elheraldo.hn/honduras/los-nombres-mas-curiosos-de-algunos-lugares-hondurenos-PWEH1303408"
+  },
+  {
+    "id": "choluteca-sol-vive-aqui",
+    "dept": "choluteca",
+    "tipo": "viral",
+    "nombre": "Aquí vive el sol",
+    "frase": "En Choluteca el sol no sale: ¡vive aquí!",
+    "arriba": "Choluteca a las 2 p.m.",
+    "abajo": "El sol ya paga alquiler aquí",
+    "escena": "calor",
+    "emoji": "☀️🥵",
+    "temas": [
+      "todos"
+    ],
+    "queEs": "Choluteca es históricamente la ciudad con temperaturas promedio más altas de Honduras: 169 olas de calor en 30 años.",
+    "fuente": "https://www.elheraldo.hn/ehambiente/choluteca-altas-temperaturas-olas-de-calor-honduras-AH30620437"
+  },
+  {
+    "id": "cuarenta-y-dos-grados",
+    "dept": "choluteca",
+    "tipo": "viral",
+    "nombre": "42 grados",
+    "frase": "¿42 grados? Pasame otro fresco.",
+    "arriba": "Choluteca: 42 °C",
+    "abajo": "Choluteco: «Está fresquito hoy»",
+    "escena": "calor",
+    "emoji": "🌡️🥤",
+    "temas": [
+      "cocina",
+      "pulperia"
+    ],
+    "queEs": "En 2026 Choluteca marcó 42 °C, de las temperaturas más altas de Centroamérica esa semana.",
+    "fuente": "https://www.tunota.com/honduras-hoy/municipios-honduras-superan-los-40-c-esta-tuyo-ola-calor-2026-05-20"
+  },
+  {
+    "id": "tortuga-golfina",
+    "dept": "choluteca",
+    "tipo": "frase",
+    "nombre": "Tortuga golfina",
+    "frase": "Linterna apagada: las golfinas van al mar.",
+    "arriba": "Tortuguitas rumbo al mar",
+    "abajo": "Punta Ratón echando porras",
+    "escena": "playa",
+    "emoji": "🐢🌊",
+    "temas": [
+      "exploradores",
+      "atrapa"
+    ],
+    "queEs": "Punta Ratón es la principal playa de anidación de tortuga golfina del sur, y cada temporada se liberan crías al mar.",
+    "fuente": "https://www.elheraldo.hn/honduras/decadas-de-cuidados-a-tortuga-golfina-en-el-sur-de-honduras-EBEH1342134"
+  },
+  {
+    "id": "lancha-a-amapala",
+    "dept": "valle",
+    "tipo": "frase",
+    "nombre": "Lancha a Amapala",
+    "frase": "¡Lancha a Amapala! Playa, sol y mariscos.",
+    "arriba": "Feriado en el sur:",
+    "abajo": "Lancha directo a Amapala",
+    "escena": "playa",
+    "emoji": "⛵🐯",
+    "temas": [
+      "ruta",
+      "pesca"
+    ],
+    "queEs": "Amapala, en la Isla del Tigre del Golfo de Fonseca, atrae por sus playas y mariscos; se llega en lancha.",
+    "fuente": "https://www.tunota.com/honduras-hoy/amapala-honduras-un-tesoro-en-el-golfo-de-fonseca-2023-08-18-ia-tn1"
+  },
+  {
+    "id": "camaron-de-san-lorenzo",
+    "dept": "valle",
+    "tipo": "frase",
+    "nombre": "Camarón de San Lorenzo",
+    "frase": "San Lorenzo: camarón fresco y atardecer gratis.",
+    "arriba": "San Lorenzo:",
+    "abajo": "Camarones y el mejor atardecer",
+    "escena": "pesca",
+    "emoji": "🦐🌅",
+    "temas": [
+      "pesca",
+      "cocina"
+    ],
+    "queEs": "San Lorenzo es el puerto más importante del sur y referente de camarones y mariscos, con atardeceres famosos.",
+    "fuente": "https://www.elheraldo.hn/pais/1158634-468/ruta-del-sol-un-atractivo-turístico-con-riqueza-historica-para-los-hondureños"
+  },
+  {
+    "id": "calor-del-sur",
+    "dept": "valle",
+    "tipo": "viral",
+    "nombre": "El calor del sur",
+    "frase": "Calor del sur: el Pacífico es el aire acondicionado.",
+    "arriba": "Calor en Valle y Choluteca",
+    "abajo": "Solución: meterse al Pacífico",
+    "escena": "playa",
+    "emoji": "🏖️🔥",
+    "temas": [
+      "todos"
+    ],
+    "queEs": "Valle y Choluteca están entre los departamentos más calurosos; sus playas del Pacífico son el refugio en los feriados.",
+    "fuente": "https://www.tunota.com/honduras-hoy/region-sur-honduras-turismo-semana-santa-atardeceres-islas-videos-2023-03-24"
+  },
+  {
+    "id": "reloj-de-comayagua",
+    "dept": "comayagua",
+    "tipo": "dicho",
+    "nombre": "¿El reloj más viejo?",
+    "frase": "Este reloj tiene siglos y todavía da la hora.",
+    "arriba": "Reloj de Comayagua:",
+    "abajo": "Funciona con pesas, sin batería",
+    "escena": "ruinas",
+    "emoji": "🕰️",
+    "temas": [
+      "trivia"
+    ],
+    "queEs": "El reloj de la catedral de Comayagua se presume el más antiguo de América y funciona con pesas, aunque historiadores dudan del título.",
+    "fuente": "https://www.laprensa.hn/honduras/reloj-comayagua-antiguo-america-historia-KG25547287"
+  },
+  {
+    "id": "comayagua-no-es-comayaguela",
+    "dept": "comayagua",
+    "tipo": "dicho",
+    "nombre": "Comayagua ≠ Comayagüela",
+    "frase": "Comayagua no es Comayagüela: ¡fijate en la diéresis!",
+    "arriba": "Turista: «Voy a Comayagüela»",
+    "abajo": "Llega a Comayagua: ¡otra ciudad!",
+    "escena": "ruinas",
+    "emoji": "🧭",
+    "temas": [
+      "trivia",
+      "ruta"
+    ],
+    "queEs": "Comayagüela es la ciudad gemela de Tegucigalpa y su nombre es diminutivo de Comayagua, la ciudad colonial que queda más al norte.",
+    "fuente": "https://www.elheraldo.hn/tegucigalpa/comayaguela-mas-de-cuatro-siglos-de-historia-MCEH1240279"
+  },
+  {
+    "id": "capital-primero",
+    "dept": "comayagua",
+    "tipo": "rivalidad",
+    "nombre": "Yo fui capital primero",
+    "frase": "Comayagua fue capital antes que Tegus.",
+    "arriba": "Tegus: «Soy la capital»",
+    "abajo": "Comayagua: «Yo lo fui primero»",
+    "escena": "ruinas",
+    "emoji": "👑",
+    "temas": [
+      "trivia"
+    ],
+    "queEs": "Comayagua, fundada en 1537, fue la primera capital de Honduras y hoy se le dice la capital colonial del país.",
+    "fuente": "https://www.elheraldo.hn/tierraadentro/comayagua-majestuoso-tesoro-historico-y-colonial-JCEH878652"
+  },
+  {
+    "id": "cafe-de-marcala",
+    "dept": "lapaz",
+    "tipo": "frase",
+    "nombre": "Café de Marcala",
+    "frase": "Café de Marcala: te despierta con orgullo.",
+    "arriba": "Café de Marcala",
+    "abajo": "Con denominación de origen",
+    "escena": "cafe",
+    "emoji": "☕",
+    "temas": [
+      "corte",
+      "cocina"
+    ],
+    "queEs": "Marcala tiene la primera denominación de origen de café de Honduras y es famoso por su calidad.",
+    "fuente": "https://www.elheraldo.hn/tierraadentro/el-cafe-de-marcala-una-verdadera-exquisitez-propia-de-honduras-COEH1291407"
+  },
+  {
+    "id": "taza-de-excelencia",
+    "dept": "lapaz",
+    "tipo": "viral",
+    "nombre": "Taza de Excelencia",
+    "frase": "Un cafecito de Marcala se ganó la taza de oro.",
+    "arriba": "Finca de Marcala:",
+    "abajo": "Primer lugar, Taza de Excelencia",
+    "escena": "cafe",
+    "emoji": "🏆☕",
+    "temas": [
+      "corte"
+    ],
+    "queEs": "Una finca de Marcala ganó el primer lugar de la Taza de Excelencia 2018, el concurso de café más sonado.",
+    "fuente": "https://www.laprensa.hn/economia/ganador-tasa-excelencia-2018-finca-san-francisco-FELP1183457"
+  },
+  {
+    "id": "el-pelon",
+    "dept": "lapaz",
+    "tipo": "dicho",
+    "nombre": "El Pelón",
+    "frase": "Vamos pa' El Pelón… el caserío, no tu tío.",
+    "arriba": "Lugar real en La Paz:",
+    "abajo": "El Pelón",
+    "escena": "montana",
+    "emoji": "🏔️😄",
+    "temas": [
+      "ruta"
+    ],
+    "queEs": "El Pelón, caserío de La Paz, aparece en la lista de nombres de lugar más curiosos del país.",
+    "fuente": "https://www.elheraldo.hn/honduras/los-nombres-mas-curiosos-de-algunos-lugares-hondurenos-PWEH1303408"
+  },
+  {
+    "id": "honduraslover",
+    "dept": null,
+    "tipo": "viral",
+    "nombre": "Honduraslover",
+    "frase": "No me juzgués por ser Honduraslover 🇭🇳",
+    "arriba": "No me juzgués por ser Honduraslover",
+    "abajo": "Y moriré por Honduras",
+    "escena": "fiesta",
+    "emoji": "🇭🇳🙏",
+    "temas": [
+      "todos"
+    ],
+    "queEs": "Meme catracho que exagera el amor por Honduras con banderitas por todos lados.",
+    "fuente": "https://www.instagram.com/quemajeshn/p/DOoYHgAjmu1/"
+  },
+  {
+    "id": "cuando-nieva-ma",
+    "dept": null,
+    "tipo": "viral",
+    "nombre": "¿Cuándo nieva, ma?",
+    "frase": "¿Cuándo nieva, ma? Aquí no, cipote.",
+    "arriba": "Yo a los 6 años en Honduras:",
+    "abajo": "¿Cuándo nieva, ma?",
+    "escena": "calor",
+    "emoji": "🐱❄️",
+    "temas": [
+      "todos"
+    ],
+    "queEs": "En Honduras no nieva, pero de cipote uno igual lo esperaba como en las películas.",
+    "fuente": "https://www.instagram.com/quemajeshn/p/DH7N__2NYng/"
+  },
+  {
+    "id": "buses-en-mi-pais",
+    "dept": null,
+    "tipo": "viral",
+    "nombre": "Los buses en mi país",
+    "frase": "Los buses de aquí no corren: ¡despegan! 🚀",
+    "arriba": "Los buses en mi país:",
+    "abajo": "Despegan con todo y pasajeros",
+    "escena": "bus",
+    "emoji": "🚌🚀",
+    "temas": [
+      "manejo",
+      "ruta",
+      "todos"
+    ],
+    "queEs": "Los buses amarillos de Honduras tienen fama de manejar volando; el meme los pone con cohetes.",
+    "fuente": "https://www.instagram.com/quemajeshn/p/DelNV75jdZD/"
+  },
+  {
+    "id": "prohibido-pisar-el-mar",
+    "dept": null,
+    "tipo": "viral",
+    "nombre": "Prohibido pisar el mar",
+    "frase": "Rótulo de playa: prohibido pisar en el mar. ¿Y entonces?",
+    "arriba": "Rótulo en la playa:",
+    "abajo": "Prohibido pisar en el mar",
+    "escena": "playa",
+    "emoji": "🏖️🚫",
+    "temas": [
+      "pesca",
+      "ruta",
+      "exploradores",
+      "todos"
+    ],
+    "queEs": "Los rótulos con reglas absurdas en la playa son un clásico de los memes catrachos.",
+    "fuente": "https://www.instagram.com/quemajeshn/p/DWuhlHEDmR2/"
+  }
+]

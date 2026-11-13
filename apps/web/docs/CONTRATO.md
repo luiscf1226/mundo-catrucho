@@ -360,13 +360,100 @@ regresos, duración, kilómetros, cambios visibles de paisaje y salto. Capturas 
 Sin `VITE_CONVEX_URL` todo sigue local y sin red: `buy`, `equip` y `finishMinigame` pagan al instante como antes.
 Con la variable, `core/servidor.ts` habla con Convex y el perfil local solo refleja lo que respondió el servidor:
 
-- Lempiritas, XP, nivel, lo comprado y lo puesto los manda Convex. `gainCoins` y `gainXp` no hacen nada: monedas
-  sueltas, visitas, recuerdos, misiones, logros y pasajes no tocan el saldo hasta que MC-15 y MC-16 los pasen al servidor.
+- Lempiritas, XP, nivel, lo comprado y lo puesto los manda Convex. `gainCoins` y `gainXp` no hacen nada; monedas
+  sueltas (en tandas), visitas, recuerdos, misiones, logros, emotes, pasajes, comida y bono de viaje se mandan a
+  `convex/progreso.ts` y el perfil copia lo que responda (MC-15, MC-16). Los avisos de logros y de la primera
+  visita salen cuando el servidor confirma, con lo que de verdad pagó.
+- Las etapas de cada juego (`profile.juegos`) las guarda `cerrarPartida`; el navegador no las avanza solo.
+- Al entrar, el avance guardado en el navegador sube una vez sin premios (`subirAvanceLocal`, MC-08).
+- El panel `clasificacion` muestra las tablas del servidor (MC-17): `lb-modo-juego`, `lb-modo-depto`, `lb-depto`,
+  `lb-juego`, `lb-list` (con `data-fuente="servidor"`), `lb-row`, `lb-you`, `lb-cargando`, `lb-error`, `lb-vacia`.
 - La pulpería usa `comprar(id)` (asíncrono: compra y se lo pone). `equip` y `setAvatar` se aplican al momento y
   Convex los confirma o los revierte.
 - Al montar un minijuego (intro) se abre la partida; al terminar se cierra y los premios del resultado quedan en 0
   hasta que el servidor confirma (`mg.pago`: `pendiente`, `pagado`, `rechazado`, `sin-conexion`).
 - Si Convex no responde en 6 s: no se compra y la partida no paga. Nunca se inventa saldo en el navegador.
 
-Prueba real contra el Convex de desarrollo: `node tools/test-tienda-servidor.mjs` (necesita `.env.local`; deja
-capturas en `capturas/mc-13/`).
+Pruebas reales contra el Convex de desarrollo: `node tools/test-tienda-servidor.mjs` y
+`node tools/test-progreso-servidor.mjs` (necesitan `.env.local`; dejan capturas en `capturas/mc-13/` y `capturas/mc-17/`).
+
+## Salas en vivo (MC-18 a MC-21)
+
+Sin `VITE_SALAS_URL` y `VITE_CONVEX_URL` el juego usa `LocalNet` y no hace ninguna petición. Con las dos:
+
+- `core/net.ts` → `SalaNet`. La zona sale de la escena (`zonaDeEscena`): lobby = `mapa`, departamento = `dept:<id>`,
+  minijuego, viaje, menú o «Jugar solo» = sin sala. Al cambiar de zona cambia de sala solo.
+- Entrar: `GET <sala>/libre/<zona>` dice el primer tramo con espacio (`mapa:0`, `dept:olancho:1`; cupo
+  `SALA.cupo` = 24) → Convex `salas:pase { invitado, sala, nombre }` firma un pase de 60 s para esa sala exacta →
+  WebSocket `/sala/<sala>?pase=…`. Si se llenó en medio (cierre `SALA.cierre.llena`) prueba el tramo siguiente.
+  Sin conexión reintenta cada vez más despacio (hasta 30 s). La misma cuenta en otra pestaña cierra la vieja.
+- `game/EnVivo.tsx` (montado en `GameCanvas`) manda la posición a `SALA.envioHz` (15 Hz; quieto, una por segundo)
+  y dibuja a los demás con `art.Avatar` + `Label` verde con su nombre, interpolando entre las dos últimas posiciones
+  (`muestraEn`, `RETRASO_MS`). El avatar remoto es el que guarda Convex (viene en el pase). Con 24 en una sala
+  son ~240 llamadas de dibujo en el mapa.
+- Emotes: `playEmote` (y el baile de punta del lobby) llaman `net.sendEmote(id)`; los demás ven la animación y
+  el ícono del emote encima por 4 s. La sala solo reparte ids `emote_*` (`emoteValido`).
+- Con sala en vivo el lobby no pone bots simulados; el panel `salas` muestra la sala, cuántos hay y quiénes
+  (`room-estado` con `data-estado`, `room-current`, `room-ocupacion`, `room-solo`, `room-vivo`, `room-gente`).
+- En `window.__mc` quedan `net` y `sala` (estado: `apagada | buscando | en-sala | sin-conexion | otra-pestana`).
+
+`node tools/test-salas-vivo.mjs` levanta `wrangler dev` con un secreto aleatorio y un Convex de mentira que firma
+con `firmarPase` de `@mundo-catrucho/reglas`, compila el juego con las dos variables y juega con dos pestañas:
+24 en el mapa (llamadas de dibujo), el tramo 2, Olancho, moverse a 15 Hz, el emote y salir al entrar a un minijuego.
+Capturas en `capturas/mc-19/`.
+
+## Chat y amigos (MC-22, MC-24)
+
+Solo con salas en vivo (`EN_VIVO`). Sin ellas el panel `amigos` muestra `amigos-sin-red` y no hay chat ni peticiones.
+
+- `core/chat.ts`: estado `useChat` (mensajes de la sala, silenciados de esta sesión, `social` de Convex, último
+  código usado) y llamadas a `amigos:*`, `chat:*` y `moderacion:*`. En `window.__mc.chat` con salas en vivo.
+- Chat de sala (`ui/chat/ChatSala.tsx`, abajo a la izquierda; con pantalla táctil, arriba): viaja por el WebSocket
+  (`net.sendChat`, `net.onChat`). La sala limpia, filtra (`filtrarChat` de `packages/reglas`), pone ritmo (5 seguidos,
+  luego uno cada 2 s), firma cada mensaje y no lo pasa entre bloqueados. El navegador filtra antes solo para avisar.
+  La tecla T abre el campo. Tocar un nombre: pedir amistad, silenciar (solo esta sesión), bloquear y reportar.
+- Ajustes → «Chat» (`set-chat`, `profile.settings.chat`): apagado no se guarda, no se muestra ni se manda nada.
+- Panel `amigos`: pestañas Amigos (pedidos, amigos, gente con quien jugás, directos con sondeo cada 3 s), Código
+  (crear el tuyo, unirte con el de alguien) y Bloqueados.
+- Código: `net.unirseA(sala)` entra a la sala exacta del amigo al llegar a su zona (viaja solo si hace falta).
+- `data-testid`: `chat-sala`, `chat-lista`, `chat-msg` (`data-de`, `data-tapado`), `chat-autor`, `chat-texto`,
+  `chat-input`, `chat-enviar`, `chat-toggle`, `chat-aviso`, `chat-menu`, `chat-amistad`, `chat-silenciar`,
+  `chat-bloquear`, `chat-reportar`, `chat-reportar-<motivo>`, `set-chat`, `amigos-tab-<amigos|codigo|bloqueados>`,
+  `amigos-lista`, `amigo` (`data-id`, `data-estado`), `amigo-aceptar|rechazar|escribir|quitar|bloquear`,
+  `amigos-cerca`, `cerca-amistad-<id>`, `directo`, `directo-lista`, `directo-msg` (`data-mio`), `directo-input`,
+  `directo-enviar`, `directo-reportar[-<motivo>]`, `directo-apagado`, `codigo-crear`, `codigo-mio`, `codigo-copiar`,
+  `codigo-input`, `codigo-unirme`, `codigo-estado` (`data-r`), `bloqueado`, `bloqueado-quitar`, `amigos-sin-red`.
+
+`node tools/test-chat-amigos.mjs` corre contra el Convex de desarrollo (lee `SALA_SECRETO` con el CLI, sin
+imprimirlo) y una sala local. Capturas en `capturas/mc-22/`.
+
+## Jugar con gente de la sala (MC-23, MC-25, MC-31)
+
+Solo con `VITE_SALAS_URL` y `VITE_CONVEX_URL`; sin ellas nada de esto se muestra ni pide nada.
+
+- **Bots de relleno (MC-23).** Con menos de 4 personas en una sala de zona, la sala agrega hasta 3 bots
+  (`workers/salas/src/bots.ts`). Llegan en `hola.bots` y en `entra`/`sale` con `bot: true` y una ruta relativa al
+  punto de aparición; `EnVivo` los camina con el reloj (no mandan posiciones) y les pone «🤖 Nombre · bot» en gris.
+  `useSala.otros` y `room-gente` nunca los cuentan; `room-bots` dice cuántos hay. Se van cuando entra gente.
+- **Conectados de verdad (MC-23).** Cada sala de zona avisa su ocupación (sin bots) a Convex cada 30 s
+  (`POST /salas/ocupacion`, firmado). `core/conectados.ts` (`useConectados`) consulta `salas:conectados`; el panel
+  `mapa` (`map-online` con `data-fuente="servidor"`) y los letreros del mapa gigante muestran esa cuenta.
+- **Partida entre dos (MC-25).** `core/juntos.ts`: `jugarConAlguien(juegoId?)` (botón `pj-jugar` del panel
+  `salas`) abre la partida en Convex e invita a la sala; `unirseAPartida(partidaId)` entra a una abierta (la usa la
+  invitación `inv-aceptar` y la pueden usar los códigos de amigos). El minijuego (`mg.juntos`) usa la semilla de la
+  partida y el **reloj de la sala**: el kit de motores (`defineMotor`) sigue `relojPartida()` y manda su puntaje
+  con `reportarPuntos`. Solo motores del kit (`motorJuntos`). En vez de la tarjeta de inicio sale `pj-espera`
+  (`data-estado`, `pj-salir`); jugando, `pj-marcador` con una `pj-fila` por jugador (`data-id`, `data-yo`,
+  `data-puntos`); en los resultados `pj-final` y `pj-pago` (`data-pago="pagado"` cuando Convex pagó el recibo).
+  Entre dos no hay «Otra vez» ni avance de etapa: se juega la primera etapa.
+- **Viaje compartido (MC-31).** `core/viajeJuntos.ts`: `salirDeViajeCompartido(veh, a)` (el botón `tr-go` de la
+  terminal) entra a una sala `viaje:<id>`, invita a la sala de la zona y maneja; `unirseAViaje(sala)` (invitación
+  `inv-subir`) sube de pasajero: paga su pasaje como siempre y `DrivingScene` sigue el vehículo del chofer
+  (`remoto`). Los eventos salen de la misma semilla. Si el chofer se va, maneja el pasajero más antiguo.
+  `vj-rol` (`data-rol="chofer|pasajero"`) dice quién maneja.
+- Invitaciones: `inv-lista` con `inv-juego` / `inv-viaje`, y `inv-aceptar`, `inv-subir`, `inv-no`. Duran 60 s.
+
+`node tools/test-partida-juntos.mjs` levanta la sala con `wrangler dev` y un Convex de mentira que firma y valida
+con `@mundo-catrucho/reglas`, y juega con dos pestañas: bots y conectados, una partida completa de la rosquilla
+(70 s) con recibo pagado, y un viaje con chofer, pasajero y cambio de volante. Capturas en `capturas/mc-23/`,
+`capturas/mc-25/` y `capturas/mc-31/`. Con `MC_GPU=0` dice SALTA (usá `MC_JUNTOS_CPU=1` para forzarla).

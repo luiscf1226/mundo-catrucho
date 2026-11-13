@@ -1,15 +1,18 @@
 // Paneles sencillos: minijuegos, misiones, logros, clasificación, salas, ajustes, controles, emotes y pausa.
+import { SALA } from '@mundo-catrucho/reglas';
 import { type CSSProperties, type ReactNode, useEffect, useState } from 'react';
 import { audio } from '../../core/audio';
-import { ACHIEVEMENTS, MINIGAMES, MISSIONS, SHOP } from '../../core/data';
-import { leaderboard } from '../../core/leaderboard';
-import { net, type RoomInfo } from '../../core/net';
+import { ACHIEVEMENTS, catDe, DEPARTMENTS, juegoById, MINIGAMES, MISSIONS, minigameById, SHOP } from '../../core/data';
+import { leaderboard, scoreLabel } from '../../core/leaderboard';
+import { net, nombreDeSala, type RoomInfo, useSala } from '../../core/net';
+import { type Clasificacion, type FilaClasificacion, SERVIDOR, servidor } from '../../core/servidor';
 import { useGame } from '../../core/store';
 import type { MinigameId } from '../../core/types';
 import { playEmote } from '../../game/PlayerController';
 import { IS_HD } from '../../variant';
 import { Coin, Icon, type IconName } from '../components/Icon';
 import { Bar, Btn, Coins, Note, Panel, Tabs, Tag } from '../components/kit';
+import { JugarConAlguien } from '../Juntos';
 import { act, copyText, cx, EMOTE_ICON, g, roomLabel, usePad, useTouch } from '../lib';
 
 // ------------------------------------------------------------------ misiones del día
@@ -136,6 +139,9 @@ export function AchievementsPanel() {
 
 // ------------------------------------------------------------------ clasificación
 export function LeaderboardPanel() {
+  return SERVIDOR ? <LeaderboardServidor /> : <LeaderboardLocal />;
+}
+function LeaderboardLocal() {
   const p = useGame((s) => s.profile),
     mg = useGame((s) => s.mg),
     [id, setId] = useState<MinigameId>(mg?.id ?? 'carrera');
@@ -186,8 +192,225 @@ export function LeaderboardPanel() {
   );
 }
 
+/** Etiqueta de una marca del servidor con el formato de su motor (tiempo, goles, objetos o puntos). */
+const etiquetaDe = (juegoId: string, puntos: number) =>
+  scoreLabel(juegoById(juegoId)?.motor ?? (juegoId as MinigameId), puntos);
+const nombreDeJuego = (juegoId: string) =>
+  juegoById(juegoId)?.name ?? (juegoId.includes('.') ? juegoId : minigameById(juegoId as MinigameId)?.name) ?? juegoId;
+const LOBBY = 'lobby';
+
+/** Con Convex: los mejores de verdad por juego y por departamento (MC-17). */
+function LeaderboardServidor() {
+  const scene = useGame((s) => s.scene),
+    mg = useGame((s) => s.mg);
+  const inicial = () => {
+    const j = mg?.juego ? juegoById(mg.juego) : undefined;
+    if (j) return { dept: j.dept, juego: j.id };
+    if (mg) return { dept: LOBBY, juego: mg.id as string };
+    const dept = scene.kind === 'dept' ? scene.id : LOBBY;
+    return { dept, juego: dept === LOBBY ? 'carrera' : (catDe(dept).juegos[0]?.id ?? 'carrera') };
+  };
+  const [modo, setModo] = useState<'juego' | 'depto'>('juego'),
+    [dept, setDept] = useState(() => inicial().dept),
+    [juego, setJuego] = useState(() => inicial().juego),
+    [datos, setDatos] = useState<Clasificacion | 'cargando' | 'error'>('cargando');
+  const juegos =
+    dept === LOBBY
+      ? MINIGAMES.map((m) => ({ id: m.id as string, name: m.name }))
+      : catDe(dept).juegos.map((j) => ({ id: j.id, name: j.name }));
+  const elegirDept = (d: string) => {
+    setDept(d);
+    setJuego(d === LOBBY ? 'carrera' : (catDe(d).juegos[0]?.id ?? 'carrera'));
+  };
+  const porDepto = modo === 'depto' && dept !== LOBBY;
+  useEffect(() => {
+    let vivo = true;
+    setDatos('cargando');
+    void (porDepto ? servidor.porDepto(dept) : servidor.porJuego(juego)).then((r) => {
+      if (vivo) setDatos(r ?? 'error');
+    });
+    return () => {
+      vivo = false;
+    };
+  }, [porDepto, dept, juego]);
+  const fila = (r: FilaClasificacion, puesto: number | null) => (
+    <li
+      key={`${r.nombre}-${r.juegoId}-${puesto ?? 'tu'}`}
+      data-testid={r.tu ? 'lb-you' : 'lb-row'}
+      data-rank={puesto ?? undefined}
+      data-puntos={r.puntos}
+      data-on={r.tu}
+      className={cx('mc-card mc-lbrow flex items-center gap-2.5 px-2.5 py-1.5', r.tu && 'is-you')}
+    >
+      <span className={cx('mc-rank mc-num flex-none', puesto !== null && puesto <= 3 && `is-top${puesto}`)}>
+        {puesto ?? '—'}
+      </span>
+      <span className="min-w-0 flex-1 leading-tight">
+        <span className="block truncate font-bold">
+          {r.nombre}
+          {r.tu && (
+            <span className="ml-1.5">
+              <Tag>Vos</Tag>
+            </span>
+          )}
+        </span>
+        {porDepto && <span className="block truncate text-xs text-muted">{nombreDeJuego(r.juegoId)}</span>}
+      </span>
+      <b className="mc-num font-display text-[15px]">{etiquetaDe(r.juegoId, r.puntos)}</b>
+    </li>
+  );
+  return (
+    <Panel id="clasificacion" title="Clasificación" icon="trophy" size="md">
+      <Tabs
+        items={[
+          { id: 'juego', label: 'Por juego', icon: 'play' },
+          { id: 'depto', label: 'Por departamento', icon: 'map' },
+        ]}
+        value={modo}
+        onChange={setModo}
+        testid={(i) => `lb-modo-${i}`}
+        cls="mb-2"
+      />
+      <div className="mb-3 grid gap-2 sm:grid-cols-2">
+        <label className="grid gap-1 text-xs font-bold text-muted">
+          Departamento
+          <select data-testid="lb-depto" className="mc-input" value={dept} onChange={(e) => elegirDept(e.target.value)}>
+            <option value={LOBBY}>Lobby (minijuegos)</option>
+            {DEPARTMENTS.map((d) => (
+              <option key={d.id} value={d.id}>
+                {d.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        {!porDepto && (
+          <label className="grid gap-1 text-xs font-bold text-muted">
+            Juego
+            <select
+              data-testid="lb-juego"
+              className="mc-input"
+              value={juego}
+              onChange={(e) => setJuego(e.target.value)}
+            >
+              {juegos.map((j) => (
+                <option key={j.id} value={j.id}>
+                  {j.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+      </div>
+      {datos === 'cargando' ? (
+        <p data-testid="lb-cargando" className="mc-label py-4 text-center">
+          Cargando la tabla…
+        </p>
+      ) : datos === 'error' ? (
+        <p data-testid="lb-error" className="mc-label py-4 text-center">
+          Sin conexión con el servidor. Probá otra vez en un rato.
+        </p>
+      ) : datos.filas.length === 0 ? (
+        <p data-testid="lb-vacia" className="mc-label py-4 text-center">
+          Nadie tiene marca todavía. ¡Estrená la tabla!
+        </p>
+      ) : (
+        <ol className="grid gap-1.5" data-testid="lb-list" data-fuente="servidor">
+          {datos.filas.map((r, i) => fila(r, i + 1))}
+          {datos.tuya && fila(datos.tuya, null)}
+        </ol>
+      )}
+      <Note cls="mt-3">
+        {porDepto
+          ? 'La mejor marca de cada jugador en los juegos de este departamento.'
+          : 'Jugadores de verdad: solo cuentan las partidas que validó el servidor.'}
+      </Note>
+    </Panel>
+  );
+}
+
 // ------------------------------------------------------------------ salas
+const ESTADO_SALA = {
+  apagada: 'Jugando solo',
+  buscando: 'Buscando sala…',
+  'en-sala': 'En vivo',
+  'sin-conexion': 'Sin conexión: reintentando',
+  'otra-pestana': 'Abriste el juego en otra pestaña',
+} as const;
+const deptName = (id: string) => DEPARTMENTS.find((d) => d.id === id)?.name ?? id;
+/** Salas en vivo (MC-20): se reparten solas por zona y tramos de 24; aquí solo se elige jugar solo o con gente. */
+function SalasEnVivo() {
+  const room = useGame((s) => s.profile.room),
+    { estado, sala, otros } = useSala(),
+    todos = net.players().filter((p) => p.listo),
+    gente = todos.filter((p) => !p.bot),
+    bots = todos.length - gente.length;
+  const solo = room.mode === 'solo';
+  return (
+    <Panel id="salas" title="Salas" icon="users" size="md">
+      <div className="mc-card mc-roomnow flex flex-wrap items-center gap-3 p-3" data-on="true">
+        <span className="mc-check is-on flex-none">
+          <Icon name={solo ? 'user' : 'globe'} size={22} />
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="mc-label" data-testid="room-estado" data-estado={estado}>
+            {ESTADO_SALA[estado]}
+          </div>
+          <b data-testid="room-current" className="block truncate font-display text-xl font-semibold">
+            {solo ? 'Solo' : sala ? nombreDeSala(sala, deptName) : 'Sala en vivo'}
+          </b>
+        </div>
+        {sala && (
+          <span className="mc-num flex items-center gap-1 text-sm font-bold" data-testid="room-ocupacion">
+            <Icon name="users" size={15} />
+            {otros + 1}/{SALA.cupo}
+          </span>
+        )}
+      </div>
+      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+        <Btn id="room-solo" tone={solo ? 'good' : 'neutral'} icon="user" onClick={() => g().setRoom('solo')}>
+          Jugar solo
+        </Btn>
+        <Btn
+          id="room-vivo"
+          tone={solo ? 'primary' : 'good'}
+          icon="globe"
+          onClick={() => {
+            g().setRoom('publica');
+            net.reconnect();
+          }}
+        >
+          Jugar con gente
+        </Btn>
+      </div>
+      {!solo && gente.length > 0 && (
+        <>
+          <div className="mc-label mb-1 mt-4">Aquí con vos</div>
+          <div className="flex flex-wrap gap-1.5" data-testid="room-gente">
+            {gente.map((p) => (
+              <Tag key={p.id} color="#17785a" fg="#fff">
+                {p.name}
+              </Tag>
+            ))}
+          </div>
+        </>
+      )}
+      {!solo && bots > 0 && (
+        <p data-testid="room-bots" className="mc-label mt-2">
+          🤖 {bots} {bots === 1 ? 'bot' : 'bots'} de relleno mientras llega más gente (no cuentan)
+        </p>
+      )}
+      {!solo && sala && <JugarConAlguien />}
+      <Note cls="mt-3">
+        Cada zona (el mapa y cada departamento) tiene salas de {SALA.cupo}. Si una se llena, entrás a la siguiente. Al
+        viajar cambiás de sala solo.
+      </Note>
+    </Panel>
+  );
+}
 export function RoomsPanel() {
+  return net.online ? <SalasEnVivo /> : <RoomsLocal />;
+}
+function RoomsLocal() {
   const room = useGame((s) => s.profile.room),
     [rooms, setRooms] = useState<RoomInfo[]>([]),
     [code, setCode] = useState(''),
@@ -503,6 +726,26 @@ export function SettingsPanel() {
             }}
           />
         </label>
+        <label className="mc-card flex cursor-pointer items-center gap-3 px-3 py-1.5">
+          <Icon name="users" size={22} cls="text-accent" />
+          <span className="flex-1 text-sm font-extrabold leading-tight">
+            Chat
+            <span className="block text-xs font-bold text-muted">
+              Sala y amigos. Apagado no ves ni mandás mensajes.
+            </span>
+          </span>
+          <input
+            data-testid="set-chat"
+            type="checkbox"
+            role="switch"
+            className="mc-toggle"
+            checked={s.chat}
+            onChange={(e) => {
+              audio.sfx('click');
+              set({ chat: e.target.checked });
+            }}
+          />
+        </label>
         <div className={cx('mc-card flex flex-wrap items-center gap-2 px-3 py-2', sure && 'mc-danger')}>
           <Icon name="trash" size={22} cls="text-bad" />
           {sure ? (
@@ -805,6 +1048,9 @@ export function PausePanel() {
         </Btn>
         <Btn id="pause-logros" tone="neutral" icon="medal" onClick={() => g().openPanel('logros')}>
           Logros
+        </Btn>
+        <Btn id="pause-memes" tone="neutral" icon="sparkle" onClick={() => g().openPanel('memes')}>
+          Memes
         </Btn>
         <Btn id="pause-salas" tone="neutral" icon="users" onClick={() => g().openPanel('salas')}>
           Salas

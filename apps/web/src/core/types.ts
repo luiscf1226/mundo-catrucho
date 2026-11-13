@@ -50,6 +50,8 @@ export type MinigameId =
   | 'franciscomorazan.repartidor'
   | 'franciscomorazan.artesania'
   | 'franciscomorazan.rosquilla'
+  | 'franciscomorazan.taxi'
+  | 'franciscomorazan.asalto'
   | 'cortes.chuco'
   | 'cortes.gruas'
   | 'cortes.cortina'
@@ -245,8 +247,10 @@ export type PanelId =
   | 'logros'
   | 'clasificacion'
   | 'salas'
+  | 'amigos'
   | 'controles'
   | 'emotes'
+  | 'memes'
   | 'proyecto';
 export type Scene =
   | { kind: 'lobby' }

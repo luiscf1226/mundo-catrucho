@@ -67,6 +67,7 @@ export default defineSchema({
     sala: v.optional(v.string()),
     semilla: v.number(),
     jugadores: v.array(v.id('usuarios')),
+    abandonaron: v.optional(v.array(v.id('usuarios'))),
     estado: v.union(
       v.literal('abierta'),
       v.literal('cerrada'),
@@ -87,9 +88,21 @@ export default defineSchema({
     cierre: v.optional(v.number()),
     motivos: v.optional(v.array(v.string())),
     pago: v.optional(v.object({ monedas: v.number(), xp: v.number() })),
+    // MC-25: partida entre amigos (`sala` = `juego:<id>`): lo que el recibo de la sala le pagó a cada uno
+    pagos: v.optional(v.array(v.object({ usuarioId: v.id('usuarios'), monedas: v.number(), xp: v.number() }))),
   })
     .index('por_estado', ['estado'])
     .index('por_dueno_estado', ['dueno', 'estado']),
+  aperturas: defineTable({
+    usuarioId: v.id('usuarios'),
+    momento: v.number(),
+    partidaId: v.optional(v.id('partidas')),
+  }).index('por_usuario', ['usuarioId']),
+  viajesCompartidos: defineTable({
+    sala: v.string(),
+    jugadores: v.array(v.id('usuarios')),
+    vence: v.optional(v.number()),
+  }).index('por_sala', ['sala']),
   marcas: defineTable({
     juegoId: v.string(),
     deptId: v.string(),
@@ -112,7 +125,11 @@ export default defineSchema({
     de: v.id('usuarios'),
     juegoId: v.optional(v.string()),
     vence: v.number(),
-  }).index('por_codigo', ['codigo']),
+    /** MC-24: sala en vivo exacta de quien creó el código (`mapa:N` o `dept:<id>:N`) */
+    sala: v.optional(v.string()),
+  })
+    .index('por_codigo', ['codigo'])
+    .index('por_de', ['de']),
   // la escribe cada sala cada 30 s; de aquí salen los «conectados» del mapa
   salas: defineTable({
     tipo: v.union(v.literal('mapa'), v.literal('dept'), v.literal('juego'), v.literal('viaje')),
@@ -120,7 +137,11 @@ export default defineSchema({
     tramo: v.number(),
     ocupacion: v.number(),
     visto: v.number(),
-  }).index('por_dept', ['deptId']),
+    /** MC-23: momento (de la sala) del último aviso; uno más viejo no pisa al nuevo */
+    momento: v.optional(v.number()),
+  })
+    .index('por_dept', ['deptId'])
+    .index('por_visto', ['visto']),
   // el contenido del juego (hoy vive en apps/web/shared/data); se sube con un script y se edita desde el panel
   catalogo: defineTable({ version: v.number(), deptId: v.string(), datos: v.any() }).index('por_version', [
     'version',
@@ -133,5 +154,67 @@ export default defineSchema({
     deptId: v.optional(v.string()),
     reglas: v.any(),
   }),
-  reportes: defineTable({ de: v.id('usuarios'), a: v.id('usuarios'), motivo: v.string() }),
+  reportes: defineTable({
+    de: v.id('usuarios'),
+    a: v.id('usuarios'),
+    motivo: v.string(),
+    // MC-22: qué se reportó. Del chat de sala: la sala y el mensaje (con la firma de la sala ya comprobada);
+    // de un directo: su id. El texto se guarda como estaba al reportarlo.
+    sala: v.optional(v.string()),
+    mensajeId: v.optional(v.string()),
+    directo: v.optional(v.id('directos')),
+    texto: v.optional(v.string()),
+    /** cola de moderación: 'nuevo' hasta que alguien lo revisa (`moderacion:resolver`) */
+    estado: v.optional(v.union(v.literal('nuevo'), v.literal('visto'))),
+  })
+    .index('por_de', ['de'])
+    .index('por_estado', ['estado']),
+  // MC-22: bloqueos. Un bloqueado no ve tus mensajes ni vos los suyos, y no te puede invitar ni pedir amistad.
+  bloqueos: defineTable({ de: v.id('usuarios'), a: v.id('usuarios') })
+    .index('por_de', ['de', 'a'])
+    .index('por_a', ['a']),
+  // MC-22, MC-24: id público de la sala (`idPublico`) → cuenta; se llena al pedir un pase o un código
+  publicos: defineTable({ id: v.string(), usuarioId: v.id('usuarios') })
+    .index('por_id', ['id'])
+    .index('por_usuario', ['usuarioId']),
+  // MC-22: mensajes directos entre amistades aceptadas, ya filtrados
+  directos: defineTable({
+    amistad: v.id('amistades'),
+    de: v.id('usuarios'),
+    texto: v.string(),
+    tapado: v.boolean(),
+  })
+    .index('por_amistad', ['amistad'])
+    .index('por_de', ['de']),
+  // MC-15, MC-16: lo que el servidor cuenta del jugador fuera de las partidas
+  contadores: defineTable({
+    usuarioId: v.id('usuarios'),
+    /** terminó de crear su personaje (logro «Primeros pasos») */
+    entro: v.boolean(),
+    /** emotes contados (con pausa entre uno y otro) */
+    emotes: v.number(),
+    ultimoEmote: v.optional(v.number()),
+    /** ritmo y tope del día de las monedas sueltas */
+    monedas: v.optional(v.object({ fecha: v.string(), hoy: v.number(), fichas: v.number(), t: v.number() })),
+    /** bonos de viaje pagados hoy (tope por día) */
+    bonosViaje: v.optional(v.object({ fecha: v.string(), suma: v.number() })),
+    /** ya subió (o no tenía) avance guardado en el navegador */
+    migrado: v.boolean(),
+    /** códigos de amigo fallidos en la ventana actual (contra adivinar códigos) */
+    fallosCodigo: v.optional(v.object({ desde: v.number(), n: v.number() })),
+  }).index('por_usuario', ['usuarioId']),
+  // las misiones de cada día de Honduras; las reparte el cron de las 06:00 UTC
+  misionesGlobales: defineTable({ fecha: v.string(), ids: v.array(v.string()) }).index('por_fecha', ['fecha']),
+  // un viaje por carretera: se cobra el pasaje al salir y el bono al llegar, con la hora del servidor
+  viajes: defineTable({
+    usuarioId: v.id('usuarios'),
+    veh: v.string(),
+    de: v.string(),
+    a: v.string(),
+    precio: v.number(),
+    inicio: v.number(),
+    estado: v.union(v.literal('en-camino'), v.literal('llego'), v.literal('abandonado')),
+    llegada: v.optional(v.number()),
+    bono: v.optional(v.number()),
+  }).index('por_usuario_estado', ['usuarioId', 'estado']),
 });
