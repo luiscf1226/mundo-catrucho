@@ -234,6 +234,7 @@ export type PanelId =
   | 'salas'
   | 'controles'
   | 'emotes'
+  | 'memes'
   | 'proyecto';
 export type Scene =
   | { kind: 'lobby' }

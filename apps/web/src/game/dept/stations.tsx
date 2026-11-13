@@ -244,6 +244,9 @@ function piecesOf(lay: Layout, plans: StationPlan[], d: Department): Pc[] {
   return out;
 }
 
+/** Dónde aparece el jugador cuando el departamento tiene lugares: al sur de la plaza, mirando a las estaciones. */
+export const salidaDe = (lay: Layout): { pos: V3; yaw: number } => ({ pos: [lay.c[0], 0, lay.c[1] - 5.5], yaw: PI });
+
 const inR = (r: { minX: number; maxX: number; minZ: number; maxZ: number }, x: number, z: number) =>
   x >= r.minX && x <= r.maxX && z >= r.minZ && z <= r.maxZ;
 
@@ -252,7 +255,8 @@ export function Lugares({ d, spec }: { d: Department; spec: ZoneSpec }) {
   const { cat, lay, plans } = useMemo(() => plan(spec, d), [spec, d]);
   const pcs = useMemo(() => piecesOf(lay, plans, d), [lay, plans, d]);
   const has = plans.length > 0,
-    [cx, cz] = lay.c;
+    [cx, cz] = lay.c,
+    salida = salidaDe(lay);
   useLayoutEffect(() => {
     if (!has) return;
     const rs = [lay.old, lay.neck, lay.main];
@@ -289,7 +293,7 @@ export function Lugares({ d, spec }: { d: Department; spec: ZoneSpec }) {
     bio = BIO[d.biome];
   return (
     <>
-      <Spawn pos={[cx, 0, cz - 5.5]} yaw={PI} />
+      <Spawn pos={salida.pos} yaw={salida.yaw} />
       <Ground mat="grass" color={bio.grass} y={-0.08} size={lay.ground.size} pos={lay.ground.pos} />
       <Build pieces={pcs} />
       <Label pos={[cx, 6.1, cz]} text={`🧭 Lugares de ${d.name}`} h={0.75} />
