@@ -9,8 +9,9 @@ const S = 'window.__mc.store.getState()',
   P = 'window.__mc.player',
   T = 'window.__mcTest.turismo';
 const ok = await run('turismo', file, { hash: '#test,go' }, async (t) => {
-  await t.ev('localStorage.clear(); location.reload()');
-  await t.waitFor(`!!window.__mc && ${S}.screen==='world'`);
+  // La marca distingue la página vieja de la recargada: sin ella, en máquinas lentas se seguía antes de recargar.
+  await t.ev('window.__recargando = true; localStorage.clear(); location.reload()');
+  await t.waitFor(`!window.__recargando && !!window.__mc && ${S}.screen==='world'`, 30000);
   const enter = async (id) => {
     await t.ev(`${S}.travel('${id}')`);
     await t.waitFor(`window.__mcTest?.turismo?.dept==='${id}'`, 20000);
