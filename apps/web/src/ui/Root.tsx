@@ -138,7 +138,7 @@ export function GameUI() {
         <TouchControls />
       )}
       {screen === 'world' && mg?.phase === 'intro' && !panel && <MgIntro />}
-      {screen === 'world' && mg?.phase === 'playing' && !panel && !dialog && <MemeTicker />}
+      {screen === 'world' && mg?.phase === 'playing' && <MemeTicker />}
       {screen === 'world' && mg?.phase === 'ended' && !panel && <MgResults />}
       {ActivePanel && <ActivePanel key={panel} />}
       {dialog && <Dialog />}
