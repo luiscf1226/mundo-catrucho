@@ -31,6 +31,7 @@ function levantar(m: Sesion) {
 }
 const motor = defineMotor({
   id: 'intibuca.papas',
+  modos: { duo: { tipo: 'compartido', cada: 4 }, abierto: { tipo: 'ambiente', bots: 3 } },
   guia: {
     goal: 'Apoyá cada raíz de izquierda a derecha y levantá suave con F. Esperá que baje la tensión.',
     ...controles,
@@ -53,8 +54,7 @@ const motor = defineMotor({
     ];
     m.stats = { x: s.x, levantadas: s.levantadas, perdidas: s.perdidas, tension: s.tension };
   },
-  bot(m, _dt, actor) {
-    if (actor === 'compa') return;
+  bot(m, _dt) {
     const s = m.datos;
     s.auto = true;
     s.x = [-0.65, 0, 0.65][s.nodo];

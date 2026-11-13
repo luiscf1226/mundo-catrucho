@@ -21,6 +21,7 @@ function tirar(m: Sesion) {
 }
 const motor = defineMotor({
   id: 'lempira.rebote',
+  modos: { duo: { tipo: 'compartido', cada: 4 }, abierto: { tipo: 'ambiente', bots: 3 } },
   fondo: 'ruinas',
   guia: {
     goal: 'A/D apuntá al muro del fondo; F lanzá pelota blanda. El tabique tapa el tiro directo. Acertá con un solo rebote.',
@@ -67,8 +68,7 @@ const motor = defineMotor({
     ];
     m.stats = { x: s.x, tiros: s.tiros, fallos: s.fallos, rebotes: s.rebotes };
   },
-  bot(m, _dt, actor) {
-    if (actor === 'compa') return;
+  bot(m, _dt) {
     const s = m.datos;
     s.auto = true;
     s.x = Math.atan2(9, objetivo(s)) / (Math.PI / 2) - 1;

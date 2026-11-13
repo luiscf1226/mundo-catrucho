@@ -40,6 +40,7 @@ function reservar(m: Sesion) {
 }
 const motor = defineMotor({
   id: 'intibuca.semilla',
+  modos: { duo: { tipo: 'compartido', cada: 4 }, abierto: { tipo: 'ambiente', bots: 3 } },
   guia: {
     goal: 'Girá la papa con ambos ejes. F marca dos ojos viables; E reserva el lote. Q / Salto vende y pierde la semilla.',
     ...controles,
@@ -67,8 +68,7 @@ const motor = defineMotor({
     ];
     m.stats = { x: s.x, reservadas: s.reservadas, vendidas: s.vendidas, errores: s.errores };
   },
-  bot(m, _dt, actor) {
-    if (actor === 'compa') return;
+  bot(m, _dt) {
     const s = m.datos;
     s.auto = true;
     Object.assign(s, ojo(s));

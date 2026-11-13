@@ -34,6 +34,7 @@ function entrar(m: Sesion) {
 const celebracion = { anim: 'celebrate' as const, speed: 0 };
 const motor = defineMotor({
   id: 'lempira.termal',
+  modos: { duo: { tipo: 'compartido', cada: 4 }, abierto: { tipo: 'ambiente', bots: 3 } },
   fondo: 'rio',
   guia: {
     goal: 'Descansá hasta llenar la recuperación. A/D elegí la poza indicada; F entrá. Es un baño virtual.',
@@ -56,8 +57,7 @@ const motor = defineMotor({
     ];
     m.stats = { x: s.x, circuitos: s.circuitos, apuros: s.apuros, reposo: s.reposo };
   },
-  bot(m, _dt, actor) {
-    if (actor === 'compa') return;
+  bot(m, _dt) {
     const s = m.datos;
     s.auto = true;
     s.x = s.poza - 1;

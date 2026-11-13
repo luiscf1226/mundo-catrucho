@@ -139,6 +139,7 @@ function campanada(m: Sesion) {
 }
 const motor = defineMotor({
   id: 'comayagua.reloj',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   fondo: 'pueblo',
   guia: {
     goal: 'Encajá la rueda justa en cada eje y afiná el péndulo: la aguja tiene que llegar a la hora con la campana.',

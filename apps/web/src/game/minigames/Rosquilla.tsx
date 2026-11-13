@@ -98,6 +98,7 @@ function Escena({ motor: m }: { motor: Sesion }) {
 }
 const motor = defineMotor({
   id: 'franciscomorazan.rosquilla',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   guia: {
     goal: 'Girá la bandeja para dorar el centro sin quemar el borde. Sacá cada tanda a tiempo.',
     keys: [

@@ -24,6 +24,7 @@ function infiltrar(m: Sesion) {
 }
 const motor = defineMotor({
   id: 'franciscomorazan.niebla',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   guia: {
     goal: 'Mové las copas bajo la niebla y abrí infiltraciones con F. Cuidá la ladera.',
     keys: [

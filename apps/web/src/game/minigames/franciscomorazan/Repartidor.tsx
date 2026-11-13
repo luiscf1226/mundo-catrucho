@@ -27,6 +27,7 @@ function cambiar(m: Sesion, i: number) {
 }
 const motor = defineMotor({
   id: 'franciscomorazan.repartidor',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   guia: {
     goal: 'Alterná los dos semáforos para vaciar colas. Esperá a que el cruce quede libre antes de cambiar.',
     keys: [

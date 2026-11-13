@@ -41,6 +41,7 @@ function trazar(m: Sesion) {
 }
 const motor = defineMotor({
   id: 'olancho.tablas',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   guia: {
     goal: 'Madera ya aserrada. Apuntá al inicio del carril verde arriba, F; seguí la fibra hasta abajo y F. El nudo central invalida el corte.',
     ...controles,

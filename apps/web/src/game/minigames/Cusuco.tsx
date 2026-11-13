@@ -55,6 +55,7 @@ function apoyo(m: Sesion, i: number) {
 }
 const motor = defineMotor({
   id: 'cortes.cusuco',
+  modos: { duo: { tipo: 'apoyo', cada: 4 }, abierto: { tipo: 'objetivo-comun', bots: 3, cada: 6 } },
   guia: {
     goal: 'Inspeccioná los apoyos. Elegí dos apoyos sanos con raíces independientes por fila para tener redundancia; la raíz podrida debilita todas sus salidas.',
     ...controles,
@@ -92,8 +93,7 @@ const motor = defineMotor({
     ];
     m.stats = { cruces: s.cruces, caidas: s.caidas, fila: s.fila, elegidos: s.seleccion.length };
   },
-  bot: (m, _dt, actor) => {
-    if (actor === 'compa' && m.tiempo % 4 > _dt) return;
+  bot: (m, _dt) => {
     const i = sanas(m.datos).find((i) => i < 3 && !m.datos.seleccion.includes(i));
     if (i !== undefined) apoyo(m, i);
   },

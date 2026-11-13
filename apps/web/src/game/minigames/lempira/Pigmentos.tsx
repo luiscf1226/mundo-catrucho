@@ -29,6 +29,7 @@ function poner(m: Sesion) {
 }
 const motor = defineMotor({
   id: 'lempira.pigmentos',
+  modos: { duo: { tipo: 'compartido', cada: 4 }, abierto: { tipo: 'ambiente', bots: 3 } },
   fondo: 'pueblo',
   guia: {
     goal: 'Observá qué trazo pasa encima en la copia. A/D elegí pigmento; F poné de fondo a frente. La iglesia real no se toca.',
@@ -51,8 +52,7 @@ const motor = defineMotor({
     ];
     m.stats = { x: s.x, murales: s.murales, tapadas: s.tapadas };
   },
-  bot(m, _dt, actor) {
-    if (actor === 'compa') return;
+  bot(m, _dt) {
     const s = m.datos;
     s.auto = true;
     s.x = orden(s)[s.capas.length] - 1;

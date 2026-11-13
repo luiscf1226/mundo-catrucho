@@ -69,6 +69,7 @@ function entregar(m: Sesion) {
 }
 const motor = defineMotor({
   id: 'islas.bonacca',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   fondo: 'mar',
   guia: {
     goal: 'Cargá en la bodega, llevá la lancha a la casa marcada y ajustá el gancho a su balcón según la marea.',

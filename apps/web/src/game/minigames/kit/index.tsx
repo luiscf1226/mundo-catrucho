@@ -7,6 +7,9 @@ import { finish, type Guia, type Partida, partida, setHud, starsFor } from '../a
 import type { Fondo } from '../corte/common';
 import { BotAvatar } from '../corte/common';
 import { Ambiente, AmbienteContext, fondoMotor } from './Ambiente';
+import { ayudaEnPaso, lineaModo, MODOS_PREDETERMINADOS, type ModosMotor, validarModos } from './modos';
+
+export type { ModosMotor } from './modos';
 
 export interface Motor<P, S> {
   partida: Partida;
@@ -22,6 +25,7 @@ export interface Motor<P, S> {
 }
 interface Definicion<P, S> {
   id: MinigameId;
+  modos?: ModosMotor;
   fondo?: Fondo;
   /** escena propia donde el jugador se mueve con su cámara (sin mesa ni cámara fija); `bots` = dónde se paran los bots */
   libre?: { bots: V3; yaw?: number };
@@ -41,6 +45,8 @@ export interface PruebaMotor {
     etapas: number;
     modo: string;
     bots: number;
+    modos: ModosMotor;
+    ayudas: number;
     cuenta: number;
     tiempo: number;
     duracion: number;
@@ -55,6 +61,8 @@ export interface PruebaMotor {
 type VentanaMotor = Window & { __mcTest?: Record<string, unknown> & { motor?: PruebaMotor } };
 
 export function defineMotor<P, S>(def: Definicion<P, S>) {
+  const modos = def.modos ?? MODOS_PREDETERMINADOS;
+  validarModos(modos);
   const guia: Guia = {
     ...def.guia,
     metas: (p) => {
@@ -84,10 +92,19 @@ export function defineMotor<P, S>(def: Definicion<P, S>) {
         },
       };
       const bots: AvatarState[] = Array.from(
-        { length: partidaActual.modo === 'abierto' ? 3 : 1 },
+        { length: partidaActual.modo === 'abierto' ? modos.abierto.bots : 1 },
         () => ({ anim: 'idle', speed: 0 }) satisfies AvatarState,
       );
-      return { motor, duracion, metas: def.metas(partidaActual), terminado: false, automatico: false, frase: 15, bots };
+      return {
+        motor,
+        duracion,
+        metas: def.metas(partidaActual),
+        terminado: false,
+        automatico: false,
+        ayudas: 0,
+        frase: 15,
+        bots,
+      };
     });
     const [, pintar] = useState(0);
     const m = sesion.motor;
@@ -100,7 +117,19 @@ export function defineMotor<P, S>(def: Definicion<P, S>) {
       dt = Math.min(dt, sesion.duracion - m.tiempo);
       m.tiempo += dt;
       if (sesion.automatico) def.bot?.(m, dt, 'jugador');
-      if (m.partida.modo === 'duo') def.bot?.(m, dt, 'compa');
+      if (m.partida.modo === 'duo' && ayudaEnPaso(m.tiempo, dt, modos.duo.cada)) {
+        def.bot?.(m, dt, modos.duo.tipo === 'apoyo' ? 'compa' : 'jugador');
+        sesion.ayudas++;
+      }
+      if (m.partida.modo === 'abierto' && modos.abierto.tipo === 'objetivo-comun') {
+        const abierto = modos.abierto;
+        for (let i = 0; i < abierto.bots; i++) {
+          if (ayudaEnPaso(m.tiempo, dt, abierto.cada, (i * abierto.cada) / abierto.bots)) {
+            def.bot?.(m, dt, 'compa');
+            sesion.ayudas++;
+          }
+        }
+      }
       def.actualizar(m, dt);
       sesion.bots.forEach((b, i) => {
         b.anim = Math.sin(m.tiempo * 2 + i) > 0 ? 'carry' : 'clap';
@@ -139,7 +168,7 @@ export function defineMotor<P, S>(def: Definicion<P, S>) {
         timer: Math.ceil(Math.max(0, sesion.duracion - m.tiempo)),
         score: `${m.puntos} pts`,
         objective: m.cuenta > 0 ? `¡Preparáte! ${Math.ceil(m.cuenta)}` : `Meta ${sesion.metas[0]} pts · ${m.objetivo}`,
-        lines: m.lineas,
+        lines: [...m.lineas, ...[lineaModo(m.partida.modo, modos)].filter((linea) => linea !== null)],
       });
       pintar((n) => n + 1);
     });
@@ -153,6 +182,8 @@ export function defineMotor<P, S>(def: Definicion<P, S>) {
           etapas: m.partida.etapas,
           modo: m.partida.modo,
           bots: sesion.bots.length,
+          modos,
+          ayudas: sesion.ayudas,
           cuenta: m.cuenta,
           tiempo: m.tiempo,
           duracion: sesion.duracion,

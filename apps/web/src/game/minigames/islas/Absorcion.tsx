@@ -65,6 +65,7 @@ function revolver(m: Sesion) {
 }
 const motor = defineMotor({
   id: 'islas.absorcion',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   fondo: 'mar',
   guia: {
     goal: 'Echá leche de coco en cada lado para que arroz y frijoles terminen juntos. No revolvás.',

@@ -49,6 +49,7 @@ function guardar(m: Sesion) {
 }
 const motor = defineMotor({
   id: 'cortes.garitas',
+  modos: { duo: { tipo: 'apoyo', cada: 4 }, abierto: { tipo: 'objetivo-comun', bots: 3, cada: 6 } },
   guia: {
     goal: 'Orientá las cuatro garitas hacia el patio y guardá cada cono. Cada esquina necesita dos visuales; el muro tapa la diagonal.',
     ...controles,
@@ -70,8 +71,7 @@ const motor = defineMotor({
     ];
     m.stats = { rondas: s.rondas, fallos: s.fallos, garita: s.garita };
   },
-  bot: (m, _dt, actor) => {
-    if (actor === 'compa' && m.tiempo % 4 > _dt) return;
+  bot: (m, _dt) => {
     const s = m.datos,
       [x, z] = esquinas[s.garita];
     s.auto = true;

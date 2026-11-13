@@ -103,6 +103,7 @@ function remar(m: Sesion) {
 
 const motor = defineMotor({
   id: 'atlantida.manati',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   fondo: 'selva',
   guia: {
     goal: 'Remá con F hasta la laguna. Si el hidrófono pasa la raya, pará. Cambiá de canal en los cruces con W/S.',

@@ -92,6 +92,7 @@ function ajuste(m: Sesion, especie: number, col: number, fila: number) {
 }
 const motor = defineMotor({
   id: 'islas.coral',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   fondo: 'mar',
   guia: {
     goal: 'Sembrá juveniles donde les llegue su luz y su corriente, sin amontonarlos. Cada adulta te devuelve módulos.',

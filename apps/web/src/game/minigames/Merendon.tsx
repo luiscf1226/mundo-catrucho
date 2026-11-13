@@ -41,6 +41,7 @@ function subir(m: Sesion) {
 }
 const motor = defineMotor({
   id: 'cortes.merendon',
+  modos: { duo: { tipo: 'apoyo', cada: 4 }, abierto: { tipo: 'objetivo-comun', bots: 3, cada: 6 } },
   guia: {
     goal: 'Guardá esfuerzo descansando. F sube un tramo; la mochila pierde capacidad con la altura. El último cuesta 30 extra y exige 8 de reserva.',
     ...controles,
@@ -68,8 +69,7 @@ const motor = defineMotor({
     ];
     m.stats = { cumbres: s.cumbres, agotadas: s.agotadas, altura: s.altura, reserva: s.reserva };
   },
-  bot: (m, _dt, actor) => {
-    if (actor === 'compa' && m.tiempo % 4 > _dt) return;
+  bot: (m, _dt) => {
     if (m.datos.reserva >= costo(m) + 12) subir(m);
   },
   Escena: ({ motor: m }) => (

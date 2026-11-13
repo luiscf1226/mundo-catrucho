@@ -29,6 +29,7 @@ function avanzar(m: Sesion, dt: number, marcha: number) {
 }
 const motor = defineMotor({
   id: 'olancho.postura',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   guia: {
     goal: 'Avanzá con W o palanca arriba. F alterna postura. Agachate antes de las copas bajas; erguido avanzás más pero el viento te frena.',
     keys: [

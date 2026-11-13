@@ -99,6 +99,7 @@ function elegir(m: Sesion, i: number) {
 }
 const motor = defineMotor({
   id: 'islas.colorprofundo',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   fondo: 'mar',
   guia: {
     goal: 'Compará las dos fotos del mismo coral y elegí su color real: el que pierde rojo al bajar.',

@@ -142,6 +142,7 @@ function caminar(m: Sesion) {
 }
 const motor = defineMotor({
   id: 'islas.cangrejo',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   fondo: 'mar',
   guia: {
     goal: 'Poné cercas un ratito para que el cangrejo azul encuentre su refugio. Nunca lo dejés sin salida.',

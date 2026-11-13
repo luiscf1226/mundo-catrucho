@@ -161,6 +161,7 @@ function soplar(m: Sesion) {
 }
 const motor = defineMotor({
   id: 'comayagua.aserrin',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   fondo: 'pueblo',
   guia: {
     goal: 'Poné la plantilla sobre su dibujo, sujetala y soplá el aserrín. No manchés el paso de la procesión.',

@@ -33,6 +33,7 @@ function alimentar(m: Sesion) {
 }
 const motor = defineMotor({
   id: 'lempira.trapiche',
+  modos: { duo: { tipo: 'compartido', cada: 4 }, abierto: { tipo: 'ambiente', bots: 3 } },
   fondo: 'finca',
   guia: { goal: 'Alterná cañas finas y gruesas. Esperá que baje el par antes de alimentar con F.', ...controles },
   etapa: (p) => ({ limite: 1.15 - p.dif * 0.15 }),
@@ -52,8 +53,7 @@ const motor = defineMotor({
     ];
     m.stats = { x: s.x, jugo: s.jugo, atascos: s.atascos, par: s.par };
   },
-  bot(m, _dt, actor) {
-    if (actor === 'compa') return;
+  bot(m, _dt) {
     const s = m.datos;
     s.auto = true;
     s.x = s.ultimo === 1 ? -0.7 : 0.7;

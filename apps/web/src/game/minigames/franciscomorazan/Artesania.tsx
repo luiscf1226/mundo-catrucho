@@ -48,6 +48,7 @@ function encajar(m: Sesion) {
 }
 const motor = defineMotor({
   id: 'franciscomorazan.artesania',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   guia: {
     goal: 'Girá cada pieza hasta alinear los dos ejes del hueco. F la apoya. Cada tres piezas, la caja pasa la prueba de vibración.',
     keys: [
