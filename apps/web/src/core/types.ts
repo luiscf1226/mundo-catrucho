@@ -35,6 +35,8 @@ export type MinigameId =
   | 'franciscomorazan.repartidor'
   | 'franciscomorazan.artesania'
   | 'franciscomorazan.rosquilla'
+  | 'franciscomorazan.taxi'
+  | 'franciscomorazan.asalto'
   | 'cortes.chuco'
   | 'cortes.gruas'
   | 'cortes.cortina'

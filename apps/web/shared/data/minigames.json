@@ -233,6 +233,22 @@
   "rules": {}
  },
  {
+  "id": "franciscomorazan.taxi",
+  "name": "Taxi a toda mecha",
+  "place": "Tegucigalpa",
+  "icon": "🚕",
+  "desc": "Manejá un taxi por la capital, subí pasajeros y llevalos antes de que se les acabe la paciencia. Frená en la marca; chocar te quita la racha.",
+  "rules": {}
+ },
+ {
+  "id": "franciscomorazan.asalto",
+  "name": "¡Corré, que viene la chepa!",
+  "place": "Tegucigalpa",
+  "icon": "🦹",
+  "desc": "Jugás de asaltante de caricatura: juntás bolsas de pisto de noche y las guardás en la guarida. Entre más cargás, más lento corrés y los chepos te alcanzan.",
+  "rules": {}
+ },
+ {
   "id": "cortes.chuco",
   "name": "Ingeniería del pollo chuco",
   "place": "Cortés",
