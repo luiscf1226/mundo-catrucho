@@ -4,7 +4,7 @@
 //
 // Entra:  { t: 'chat', texto }                  { t: 'bloquear', id, si }   (si = false desbloquea)
 // Sale:   { t: 'chat', id, de, nombre, sala, ts, texto, tapado, firma }   { t: 'chat-no', motivo: 'ritmo' }
-import { CHAT, filtrarChat, firmarMensaje } from '@mundo-catrucho/reglas';
+import { CHAT, filtrarChat, firmarMensaje, SALA } from '@mundo-catrucho/reglas';
 import type { RitmoSala } from './ritmo';
 
 /** Lo que el chat necesita del jugador guardado en el WebSocket. */
@@ -81,4 +81,12 @@ export async function iniciarBloqueos(ctx: DurableObjectState, id: string, lista
       await tx.put(`bloqueos-momento:${id}`, emitido);
     }
   });
+}
+
+/** Al irse el último socket del jugador: los bloqueos se olvidan solo si ya venció cualquier pase emitido antes del
+ * último cambio; si no, un pase viejo al reconectar restauraría la lista sin el bloqueo nuevo. */
+export async function olvidarBloqueos(ctx: DurableObjectState, id: string, ahora = Date.now()) {
+  const momento = await ctx.storage.get<number>(`bloqueos-momento:${id}`);
+  if (momento !== undefined && momento + SALA.paseMs > ahora) return;
+  await ctx.storage.delete([`bloqueos:${id}`, `bloqueos-momento:${id}`]);
 }

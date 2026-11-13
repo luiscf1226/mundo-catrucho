@@ -24,7 +24,7 @@ import {
   zonaValida,
 } from '@mundo-catrucho/reglas';
 import { botsDe, cambiosDeBots, cuantosBots } from './bots';
-import { bloqueadosEntre, esDeChat, iniciarBloqueos, recibirChat } from './chat';
+import { bloqueadosEntre, esDeChat, iniciarBloqueos, olvidarBloqueos, recibirChat } from './chat';
 import { invitacionValida } from './comun';
 import { alarmaOcupacion, type EnvOcupacion, programarOcupacion } from './ocupacion';
 import { alarmaPartida, entrarPartida, mensajePartida, salirPartida } from './partida';
@@ -180,9 +180,8 @@ export class Sala extends DurableObject<Env> {
     const yo = ws.deserializeAttachment() as Jugador | null;
     if (yo && !this.jugadores(ws).some((j) => j?.id === yo.id)) {
       this.ritmo.borrar(yo.id);
+      await olvidarBloqueos(this.ctx, yo.id);
       await this.ctx.storage.delete([
-        `bloqueos:${yo.id}`,
-        `bloqueos-momento:${yo.id}`,
         `ritmo:chat:${yo.id}`,
         `ritmo:general:${yo.id}`,
       ]);
