@@ -3,6 +3,8 @@ import { audio } from '../../core/audio';
 import { deptById } from '../../core/data';
 import { useGame } from '../../core/store';
 import type { Vehiculo } from '../../core/types';
+import { enviarAuto, leerAuto, useViajeJuntos } from '../../core/viajeJuntos';
+import { Label } from '../kit';
 import { DrivingScene } from './DrivingScene';
 import { EscenaCamino } from './eventos/EscenaCamino';
 import { iniciarCamino, pasoCamino, useCamino } from './eventos/state';
@@ -35,8 +37,13 @@ export function Viaje({ veh, to }: { veh: Vehiculo; to: string }) {
     () => ({ veh: activo, via, difficulty: 0.35, trip: true, seed: 504 }),
     [activo, via],
   );
+  // MC-31: en un viaje compartido todos ven los mismos eventos (la semilla del chofer)
+  const compartido = useViajeJuntos((s) => (s.fase === 'en-viaje' ? s.ruta : null));
+  const rol = useViajeJuntos((s) => s.rol),
+    gente = useViajeJuntos((s) => s.gente),
+    yo = useGame((s) => s.profile.name);
   useLayoutEffect(() => {
-    iniciarCamino(ruta);
+    iniciarCamino(ruta, compartido ? (compartido.semilla % 19) + 1 : undefined);
     const radio = veh === 'taxi' ? 2 : veh === 'bus' ? 3 : 0;
     useViaje.setState({
       progress: 0,
@@ -55,10 +62,22 @@ export function Viaje({ veh, to }: { veh: Vehiculo; to: string }) {
       camino={<EscenaCamino />}
       clima={clima === 'lluvia' || clima === 'neblina' ? clima : undefined}
       onRoadStep={(s, dt) => pasoCamino(s, dt, veh)}
+      remoto={leerAuto}
+      encima={
+        rol && (
+          <Label
+            pos={[0, 2.95, 1.2]}
+            text={`🚌 ${[yo, ...gente.map((g) => g.nombre)].join(' · ')}`}
+            h={0.36}
+            bg="rgba(23,120,90,0.88)"
+          />
+        )
+      }
       destination={dept?.name ?? to}
       biome={linea?.tramo?.paisaje ?? dept?.biome}
       tramo={linea?.tramo ?? undefined}
       onStep={(s, dt) => {
+        enviarAuto(s);
         clock.current += dt;
         const track = RADIOS[useViaje.getState().radio].track;
         if (audio.track !== track) audio.music(track);

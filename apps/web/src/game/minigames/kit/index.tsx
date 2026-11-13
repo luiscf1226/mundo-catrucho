@@ -1,4 +1,5 @@
 import { type ComponentType, useLayoutEffect, useMemo, useState } from 'react';
+import { relojPartida, reportarPuntos } from '../../../core/juntos';
 import { isPaused, useGame } from '../../../core/store';
 import type { AvatarState, MinigameId, V3 } from '../../../core/types';
 import { Label, useMgTick } from '../../kit';
@@ -125,7 +126,15 @@ export function defineMotor<P, S>(def: Definicion<P, S>) {
       }
     }
     useMgTick((dt) => {
-      paso(dt);
+      const reloj = relojPartida();
+      if (!reloj) paso(dt);
+      else if (reloj.transcurrido !== null) {
+        // MC-25: entre dos manda el reloj de la sala; si este navegador va lento, se pone al día en pasos cortos
+        m.cuenta = Math.max(0, -reloj.transcurrido);
+        for (let falta = Math.min(2, reloj.transcurrido - m.tiempo); falta > 0.001 && !sesion.terminado; falta -= 0.05)
+          paso(Math.min(0.05, falta));
+        reportarPuntos(m.puntos);
+      }
       setHud({
         timer: Math.ceil(Math.max(0, sesion.duracion - m.tiempo)),
         score: `${m.puntos} pts`,

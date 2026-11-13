@@ -39,6 +39,8 @@ test('nombre y emote', () => {
   assert.ok(emoteValido('emote_punta'));
   assert.equal(emoteValido('x'.repeat(SALA.emoteMax + 1)), false);
   assert.equal(emoteValido(5), false);
+  assert.equal(emoteValido('<script>'), false);
+  assert.equal(emoteValido('emote_'), false);
 });
 
 test('ritmo: ráfaga permitida, luego solo lo sostenido', () => {

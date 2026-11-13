@@ -7,6 +7,7 @@ import * as THREE from 'three';
 import { audio } from '../core/audio';
 import { input } from '../core/input';
 import { nearest } from '../core/interact';
+import { net } from '../core/net';
 import { phys, stepBody } from '../core/phys';
 import { player } from '../core/player';
 import { isPaused, useGame } from '../core/store';
@@ -40,6 +41,7 @@ const EMOTE_ANIM: Record<string, Anim> = {
 export function playEmote(id: string) {
   if (!useGame.getState().useEmote(id)) return false;
   player.emote = { anim: EMOTE_ANIM[id] ?? 'dance', until: performance.now() + 4200 };
+  net.sendEmote(id);
   return true;
 }
 

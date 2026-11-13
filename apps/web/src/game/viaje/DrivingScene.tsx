@@ -176,8 +176,14 @@ export function DrivingScene({
   onRoadStep,
   camino,
   clima,
+  remoto,
+  encima,
 }: {
   config: DriveConfig;
+  /** MC-31: pasajero de un viaje compartido; el vehículo sigue lo que manda el chofer (null: maneja este navegador) */
+  remoto?: () => { x: number; v: number; d: number; e: number; h: number } | null;
+  /** lo que va encima del vehículo (nombres de quienes viajan) */
+  encima?: import('react').ReactNode;
   clima?: 'lluvia' | 'neblina';
   camino?: import('react').ReactNode;
   onRoadStep?: (s: DriveState, dt: number) => void;
@@ -219,8 +225,21 @@ export function DrivingScene({
   usePruebaCamino(s, config, onRoadStep, onStep);
   useTick((dt) => {
     if (!config.trip && useGame.getState().mg?.phase !== 'playing') return;
-    const honk = input.take('fire'),
-      ev = stepDrive(s, config, dt, input.mx, input.mz, honk);
+    const r = remoto?.() ?? null,
+      mx = r ? 0 : input.mx,
+      honk = r ? false : input.take('fire'),
+      choques = s.hits,
+      ev = stepDrive(s, config, dt, mx, r ? 0 : input.mz, honk);
+    if (r) {
+      // de pasajero: el tráfico se mueve aquí, pero el vehículo, el reloj y los choques son los del chofer
+      s.x = r.x;
+      s.speed = r.v;
+      s.distance = r.d;
+      s.elapsed = r.e;
+      s.hits = r.h;
+      ev.collision = r.h > choques;
+      ev.pickup = false;
+    }
     onRoadStep?.(s, dt);
     if (honk) {
       if (['bicitaxi', 'cayuco', 'lancha', 'ferry', 'avioneta'].includes(config.veh))
@@ -250,8 +269,8 @@ export function DrivingScene({
         );
     if (car.current) {
       car.current.position.x = s.x;
-      car.current.rotation.z = (water ? Math.sin(s.elapsed * 1.7) * 0.045 : 0) + (-input.mx * 0.035 * s.speed) / 20;
-      car.current.rotation.y = -input.mx * 0.07;
+      car.current.rotation.z = (water ? Math.sin(s.elapsed * 1.7) * 0.045 : 0) + (-mx * 0.035 * s.speed) / 20;
+      car.current.rotation.y = -mx * 0.07;
       car.current.position.y = Math.sin(s.elapsed * 12) * (water || aire ? 0.15 : 0.018) + s.shake * 0.13;
     }
     if (road.current) road.current.position.z = s.distance % 32;
@@ -467,6 +486,7 @@ export function DrivingScene({
       {camino}
       <group ref={car} userData={{ vehiculo: config.veh }}>
         <Vehicle kind={config.veh} />
+        {encima}
         {water && <Estela ancho={config.veh === 'ferry' ? 2.2 : 0.9} velocidad={() => s.speed} />}
       </group>
       <group ref={sparks} visible={false}>

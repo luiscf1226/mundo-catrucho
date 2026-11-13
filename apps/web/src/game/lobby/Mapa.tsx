@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import * as THREE from 'three';
+import { useConectados } from '../../core/conectados';
 import { catDe } from '../../core/data';
 import { useGame } from '../../core/store';
 import { art, Interactable, Label, useTick } from '../kit';
@@ -59,6 +60,8 @@ const SHIFT: Record<string, [number, number]> = {
 };
 function DeptSign({ d }: { d: (typeof DEPTOS)[number] }) {
   const [n, setN] = useState(() => conectados(d.id));
+  // MC-23: con salas en vivo, la gente de verdad (sin bots)
+  const vivos = useConectados();
   let elapsed = 0;
   useTick((dt) => {
     elapsed += dt;
@@ -81,7 +84,12 @@ function DeptSign({ d }: { d: (typeof DEPTOS)[number] }) {
           text={`${cat.tipos}${cat.juegos.length ? ` · ${cat.juegos.length} juegos` : ''}`}
           h={0.8}
         />
-        <Label pos={[x, y + 8.3, z]} text={`🟢 ${n} conectados · simulados`} h={0.65} bg="#214e45" />
+        <Label
+          pos={[x, y + 8.3, z]}
+          text={vivos ? `🟢 ${vivos.depts[d.id] ?? 0} conectados` : `🟢 ${n} conectados · simulados`}
+          h={0.65}
+          bg="#214e45"
+        />
         <Label pos={[x - 3, y + 0.65, z + 4]} text="ENTRÁ" h={0.5} />
       </NearOnly>
       <Interactable
