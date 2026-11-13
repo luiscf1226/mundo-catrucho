@@ -1,28 +1,17 @@
-import { useRef, useState } from 'react';
-import { player } from '../../../core/player';
-import { useGame } from '../../../core/store';
-import { Ball, Block, Cyl, Label, useTick } from '../../kit';
+import { Ball, Block, Cyl, Label } from '../../kit';
 import puntos from './cortes-puntos.json';
 
 function Punto({ indice }: { indice: number }) {
   const p = puntos[indice];
-  const [visto, descubrir] = useState(false);
-  const cerca = useRef(false);
   const x = -40 + (indice % 6) * 15;
   const z = indice < 6 ? 9 : 24;
   const loco = indice >= 9;
-  useTick(() => {
-    if (useGame.getState().dialog || visto || cerca.current || Math.hypot(player.pos[0] - x, player.pos[2] - z) > 2.5)
-      return;
-    cerca.current = true;
-    descubrir(true);
-    useGame.getState().showDialog({ title: p.nombre, text: p.texto, icon: loco ? '✨' : '📍' });
-  });
+
   return (
     <group position={[x, 0, z]}>
-      <Cyl pos={[0, 0.04, 0]} r={2} h={0.08} mat="sand" color={visto ? '#91c786' : '#ffda75'} solid={false} />
+      <Cyl pos={[0, 0.04, 0]} r={2} h={0.08} mat="sand" color="#ffda75" solid={false} />
       <Block pos={[0, 1, -1]} size={[0.12, 2, 0.12]} mat="wood" color="#795333" solid={false} />
-      <Label pos={[0, 2.5, -1]} text={`${visto ? '✓' : loco ? '✨' : '📍'} ${p.nombre}`} h={0.32} />
+      <Label pos={[0, 2.5, -1]} text={`${loco ? '✨' : '📍'} ${p.nombre}`} h={0.32} />
       {indice === 9 && (
         <>
           <Block pos={[-0.6, 1, 0]} size={[0.7, 1.1, 0.3]} mat="glass" color="#ed8bac" solid={false} />
@@ -66,11 +55,5 @@ function Punto({ indice }: { indice: number }) {
   );
 }
 export function CortesDescubrimientos() {
-  return (
-    <>
-      {puntos.map((p, i) => (
-        <Punto key={p.id} indice={i} />
-      ))}
-    </>
-  );
+  return <>{puntos.map((p, i) => p.id.includes('locura') && <Punto key={p.id} indice={i} />)}</>;
 }

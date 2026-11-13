@@ -4,6 +4,7 @@ import { DEPARTMENTS, deptById } from '../../core/data';
 import { Spawn } from '../kit';
 import { MuroMemes } from './muro';
 import { Lugares } from './stations';
+import { Turismo } from './turismo';
 import { ZoneLife, ZoneScenery } from './zone';
 import { zoneOf } from './zones';
 
@@ -35,6 +36,7 @@ export function DeptScene({ id }: { id: string }) {
       <ZoneLife d={d} spec={spec} />
       <Lugares d={d} spec={spec} />
       <MuroMemes d={d} spec={spec} />
+      <Turismo dept={id} spec={spec} />
     </>
   );
 }

@@ -251,6 +251,8 @@ export type PanelId =
   | 'controles'
   | 'emotes'
   | 'memes'
+  | 'recuerdos'
+  | 'turismo'
   | 'proyecto';
 export type Scene =
   | { kind: 'lobby' }
