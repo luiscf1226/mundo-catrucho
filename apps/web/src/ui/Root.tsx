@@ -11,6 +11,7 @@ import { g, TEST, useOverview, usePad, useTouch } from './lib';
 let padHinted = false;
 
 import { MapPanel } from './panels/Map';
+import { MemesPanel } from './panels/Memes';
 import {
   AchievementsPanel,
   ControlsPanel,
@@ -25,6 +26,7 @@ import { ProjectPanel } from './panels/Project';
 import { TransportePanel } from './panels/Transporte';
 import { CharacterPanel, ShopPanel } from './panels/Wardrobe';
 import { Hud, Toasts } from './screens/Hud';
+import { MemeTicker } from './screens/MemeTicker';
 import { MainMenu } from './screens/Menu';
 import { MgIntro, MgResults } from './screens/Minigame';
 import { TouchControls } from './screens/Touch';
@@ -44,6 +46,7 @@ const PANELS: Record<PanelId, () => ReactNode> = {
   salas: RoomsPanel,
   controles: ControlsPanel,
   emotes: EmotesPanel,
+  memes: MemesPanel,
   proyecto: ProjectPanel,
 };
 
@@ -135,6 +138,7 @@ export function GameUI() {
         <TouchControls />
       )}
       {screen === 'world' && mg?.phase === 'intro' && !panel && <MgIntro />}
+      {screen === 'world' && mg?.phase === 'playing' && <MemeTicker />}
       {screen === 'world' && mg?.phase === 'ended' && !panel && <MgResults />}
       {ActivePanel && <ActivePanel key={panel} />}
       {dialog && <Dialog />}

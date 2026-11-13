@@ -1,14 +1,16 @@
 // Flujo de un minijuego: tarjeta de inicio (qué es, cómo se juega, tu mejor marca) y pantalla de resultados.
-import { Suspense, useEffect, useMemo } from 'react';
+import { type ReactNode, Suspense, useEffect, useMemo } from 'react';
 import { audio } from '../../core/audio';
 import { ACHIEVEMENTS, catDe, deptById, juegoById, minigameById } from '../../core/data';
 import { leaderboard } from '../../core/leaderboard';
-import { type Best, useGame } from '../../core/store';
+import { elegirMeme, type Meme, memesDelJuego } from '../../core/memes';
+import { type Best, type MgState, useGame } from '../../core/store';
 import type { MinigameId, Modo } from '../../core/types';
 import { motorGuide } from '../../game/minigames';
 import { partida } from '../../game/minigames/api';
 import { Coin, Icon, type IconName, Star } from '../components/Icon';
 import { Btn, Confetti, Stars, Tag } from '../components/kit';
+import { MemeImg } from '../components/MemeImg';
 import { LoadingScreen } from '../LoadingScreen';
 import { cx, fmtTime, g, useCountUp, useTouch } from '../lib';
 
@@ -296,6 +298,55 @@ function Reward({ icon, n, label, delay }: { icon: 'coin' | IconName; n: number;
   );
 }
 
+/** Un meme por partida: se escoge una vez y se queda aunque abrás el álbum y volvás a los resultados. */
+const memeDePartida = new WeakMap<MgState, { meme: Meme; nuevo: boolean }>();
+function useMemeDePartida(mg: MgState) {
+  let e = memeDePartida.get(mg);
+  if (!e) {
+    const p = g().profile,
+      pool = memesDelJuego(mg.juego ? juegoById(mg.juego)?.dept : undefined, mg.id),
+      meme = elegirMeme(pool, `${mg.juego ?? mg.id}|${p.stats.played}`, p.memes);
+    if (meme) {
+      e = { meme, nuevo: !p.memes.includes(meme.id) };
+      memeDePartida.set(mg, e);
+    }
+  }
+  useEffect(() => {
+    if (e) g().verMeme(e.meme.id);
+  }, [e]);
+  return e;
+}
+/** El meme de la partida al lado de las posiciones, para que los botones sigan a la vista. */
+function MemeYRanking({ partida, children }: { partida?: { meme: Meme; nuevo: boolean }; children: ReactNode }) {
+  if (!partida) return children;
+  const { meme, nuevo } = partida;
+  return (
+    <div className="anim-up flex w-full items-start gap-2 text-left" style={{ animationDelay: '1s' }}>
+      <div
+        data-testid="mg-meme"
+        data-meme={meme.id}
+        data-nuevo={nuevo}
+        className="mc-card flex w-[140px] flex-none flex-col gap-1.5 p-1.5 short:w-[104px]"
+      >
+        <MemeImg meme={meme} cls="w-full" />
+        <Btn id="mg-meme-album" tone="neutral" size="sm" onClick={() => g().openPanel('memes')}>
+          Ver álbum
+        </Btn>
+      </div>
+      <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+        <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 leading-tight">
+          {nuevo && <Tag cls="anim-pulse">¡Meme nuevo para tu álbum!</Tag>}
+          <b className="min-w-0 truncate">
+            <span aria-hidden>{meme.emoji} </span>
+            {meme.nombre}
+          </b>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
 export function MgResults() {
   const mg = useGame((s) => s.mg)!,
     profile = useGame((s) => s.profile),
@@ -305,6 +356,7 @@ export function MgResults() {
     m = j ? { ...minigameById(mg.id), name: j.name, icon: j.icon } : minigameById(mg.id);
   const sigue = !!j && r.won && mg.etapa + 1 < j.etapas,
     completo = !!j && r.won && mg.etapa + 1 >= j.etapas;
+  const meme = useMemeDePartida(mg);
   useEffect(() => {
     audio.sfx(r.won ? 'win' : 'lose');
     const ts = Array.from({ length: r.stars }, (_, i) => setTimeout(() => audio.sfx('star'), 420 + i * 320));
@@ -436,23 +488,25 @@ export function MgResults() {
                 : `Etapa ${mg.etapa + 1} de ${j.etapas}`}
           </div>
         )}
-        {mg.ranking && (
-          <ol data-testid="mg-ranking" className="mc-card flex w-full flex-col gap-0.5 px-3 py-1.5 text-left text-sm">
-            {mg.ranking.slice(0, 5).map((row, i) => (
-              <li
-                key={i}
-                className={cx('flex items-center gap-2', row.you && 'font-bold text-[var(--mc-gold,#f6b91a)]')}
-              >
-                <span className="mc-num w-5">{i + 1}.</span>
-                <span className="min-w-0 flex-1 truncate">
-                  {row.bot ? '🤖 ' : ''}
-                  {row.name}
-                </span>
-                <span className="mc-num">{row.label}</span>
-              </li>
-            ))}
-          </ol>
-        )}
+        <MemeYRanking partida={meme}>
+          {mg.ranking && (
+            <ol data-testid="mg-ranking" className="mc-card flex w-full flex-col gap-0.5 px-3 py-1.5 text-left text-sm">
+              {mg.ranking.slice(0, 5).map((row, i) => (
+                <li
+                  key={i}
+                  className={cx('flex items-center gap-2', row.you && 'font-bold text-[var(--mc-gold,#f6b91a)]')}
+                >
+                  <span className="mc-num w-5">{i + 1}.</span>
+                  <span className="min-w-0 flex-1 truncate">
+                    {row.bot ? '🤖 ' : ''}
+                    {row.name}
+                  </span>
+                  <span className="mc-num">{row.label}</span>
+                </li>
+              ))}
+            </ol>
+          )}
+        </MemeYRanking>
         {!r.won && <p className="text-sm text-muted">No pasa nada. ¡Dale otra vez, que sí se puede!</p>}
         <div className="mt-1 flex w-full gap-2">
           <Btn id="mg-replay" tone="primary" icon="refresh" cls="flex-1" onClick={() => g().replayMinigame()}>

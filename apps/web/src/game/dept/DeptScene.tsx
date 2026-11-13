@@ -2,6 +2,7 @@
 import { useEffect, useMemo } from 'react';
 import { DEPARTMENTS, deptById } from '../../core/data';
 import { Spawn } from '../kit';
+import { MuroMemes } from './muro';
 import { Lugares } from './stations';
 import { ZoneLife, ZoneScenery } from './zone';
 import { zoneOf } from './zones';
@@ -33,6 +34,7 @@ export function DeptScene({ id }: { id: string }) {
       <ZoneScenery spec={spec} />
       <ZoneLife d={d} spec={spec} />
       <Lugares d={d} spec={spec} />
+      <MuroMemes d={d} spec={spec} />
     </>
   );
 }

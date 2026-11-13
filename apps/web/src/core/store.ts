@@ -28,6 +28,7 @@ import {
   minigameById,
   SHOP,
 } from './data';
+import { memeById } from './memes';
 import { player } from './player';
 import { alVencer, type PerfilServidor, SERVIDOR, servidor } from './servidor';
 import type { AvatarConfig, MinigameId, MinigameResult, Modo, PanelId, Rewards, Scene, V3, Vehiculo } from './types';
@@ -79,6 +80,8 @@ export interface Profile {
   visited: string[];
   collected: string[];
   achievements: string[];
+  /** memes del álbum ya desbloqueados (ids de shared/data/memes.json) */
+  memes: string[];
   stats: {
     played: number;
     wins: number;
@@ -150,6 +153,7 @@ const freshProfile = (): Profile => ({
   visited: [],
   collected: [],
   achievements: [],
+  memes: [],
   stats: { played: 0, wins: 0, goals: 0, pickups: 0, emotes: 0, purchases: 0, coinsEarned: 0 },
   best: {},
   juegos: {},
@@ -195,6 +199,8 @@ export interface Game {
   dialog: { title: string; text: string; icon?: string } | null;
   prompt: { label: string; icon?: string } | null;
   toasts: Toast[];
+  /** el meme que el juego está mostrando en 3D ahora (n sube con cada aviso, aunque se repita el meme) */
+  memeAlAire: { id: string; n: number } | null;
   mg: MgState | null;
   mgHud: MgHud;
   profile: Profile;
@@ -243,6 +249,9 @@ export interface Game {
   setName(n: string): void;
   finishCreation(): void;
   useEmote(id: string): boolean;
+  /** Mete el meme al álbum. Devuelve true si era nuevo. No da premios. */
+  verMeme(id: string): boolean;
+  alAire(id: string): void;
   bump(type: string, amount?: number, target?: string): void;
   claimMission(id: string): boolean;
   setSettings(s: Partial<Settings>): void;
@@ -438,6 +447,7 @@ export const useGame = create<Game>((set, get) => {
     dialog: null,
     prompt: null,
     toasts: [],
+    memeAlAire: null,
     mg: null,
     mgHud: {},
     llegada: null,
@@ -804,6 +814,14 @@ export const useGame = create<Game>((set, get) => {
       commit((p) => {
         p.stats.emotes++;
         bumpMissions(p, 'emote', 1);
+      });
+      return true;
+    },
+    alAire: (id) => set((s) => ({ memeAlAire: { id, n: (s.memeAlAire?.n ?? 0) + 1 } })),
+    verMeme: (id) => {
+      if (!memeById(id) || get().profile.memes.includes(id)) return false;
+      commit((p) => {
+        p.memes.push(id);
       });
       return true;
     },
