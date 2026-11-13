@@ -3,6 +3,7 @@ import { phys } from '../../core/phys';
 import { player } from '../../core/player';
 import { useGame } from '../../core/store';
 import type { V3 } from '../../core/types';
+import { DecoracionEventos } from '../eventos/Decoracion';
 import { art, Interactable, Label, P, Spawn } from '../kit';
 import { enterVehicle } from '../PlayerController';
 import { Baked } from './Baked';
@@ -29,6 +30,7 @@ export function LobbyScene() {
       <art.SkyRig time="auto" weather="despejado" fogFar={650} shadowRadius={65} />
       <Spawn pos={SPAWN} />
       <World />
+      <DecoracionEventos dept={null} pos={SPAWN} />
       <Vista />
       <MapBoard />
       <MapaHonduras />
