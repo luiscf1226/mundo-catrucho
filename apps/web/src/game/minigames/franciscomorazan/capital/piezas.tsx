@@ -3,7 +3,7 @@ import { useRef } from 'react';
 import type * as THREE from 'three';
 import { player } from '../../../../core/player';
 import { Block, Label, P, Plate } from '../../../kit';
-import { BORDE, CALLES } from './ciudad';
+import { BORDE, CALLES } from './calles';
 
 export interface Carro {
   eje: 'x' | 'z';

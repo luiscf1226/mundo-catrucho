@@ -1,64 +1,11 @@
-// Tegucigalpa de bolsillo: una cuadrícula de calles que comparten el taxi y el asaltante.
-import { memo, useLayoutEffect } from 'react';
+// Tegucigalpa de bolsillo en 3D: la ciudad que comparten el taxi y el asaltante (la cuadrícula está en calles.ts).
+import { memo, useLayoutEffect, useRef } from 'react';
 import { phys } from '../../../../core/phys';
 import { player } from '../../../../core/player';
 import { useGame } from '../../../../core/store';
 import type { V3 } from '../../../../core/types';
 import { art, Block, Cyl, Ground, Label, P, Spawn, useTick } from '../../../kit';
-
-/** calles cada 24 m, de -48 a 48 en x y en z; las cuadras quedan en ±12 y ±36 */
-export const CALLES = [-48, -24, 0, 24, 48];
-export const CUADRAS = [-36, -12, 12, 36];
-export const ANCHO_CALLE = 9;
-export const BORDE = 54;
-const MEDIA_CUADRA = (24 - ANCHO_CALLE) / 2;
-
-export interface Lugar {
-  nombre: string;
-  /** punto en la calle frente al lugar */
-  x: number;
-  z: number;
-  color: string;
-}
-/** cada lugar está en la calle al sur de su cuadra (cuadra + 12 en z) */
-const lugar = (nombre: string, cx: number, cz: number, color: string): Lugar => ({ nombre, x: cx, z: cz + 12, color });
-export const LUGARES: Lugar[] = [
-  lugar('Parque Central', -12, -12, '#ffd166'),
-  lugar('Estadio Nacional', 36, -36, '#4cc9f0'),
-  lugar('Mercado San Isidro', -36, 36, '#f77f00'),
-  lugar('Bulevar Morazán', 36, 12, '#c77dff'),
-  lugar('Colonia Kennedy', -36, -36, '#80ed99'),
-  lugar('Ciudad Universitaria', 12, 36, '#ff6b6b'),
-  lugar('Paseo Liquidámbar', -12, 12, '#f4a261'),
-  lugar('Basílica de Suyapa', 36, 36, '#90e0ef'),
-  lugar('Barrio La Hoya', 12, -36, '#e9c46a'),
-  lugar('El Obelisco', -36, 12, '#ade8f4'),
-];
-const ESPECIALES = new Set(['-12,-12', '36,-36', '-36,36', '36,36']);
-
-/** ¿el punto cae dentro del edificio de una cuadra? (sirve para que los NPC no atraviesen paredes) */
-export function enEdificio(x: number, z: number, margen = 0.6) {
-  const m = MEDIA_CUADRA - 1.2 + margen;
-  return CUADRAS.some((cx) => Math.abs(x - cx) < m) && CUADRAS.some((cz) => Math.abs(z - cz) < m);
-}
-/** Punto al azar sobre una calle, lejos de los cruces: `x, z` en el carril y `ax, az` en la acera de al lado. */
-export function parada(r: () => number) {
-  const linea = CALLES[Math.floor(r() * CALLES.length)],
-    lado = r() < 0.5 ? -1 : 1;
-  let largo = 0;
-  for (let i = 0; i < 12; i++) {
-    largo = -BORDE + 6 + r() * (BORDE * 2 - 12);
-    if (CALLES.every((c) => Math.abs(c - largo) > ANCHO_CALLE / 2 + 2)) break;
-  }
-  return r() < 0.5
-    ? { x: linea + lado * 2.2, z: largo, ax: linea + lado * 5.6, az: largo }
-    : { x: largo, z: linea + lado * 2.2, ax: largo, az: linea + lado * 5.6 };
-}
-export const rumbo = (dx: number, dz: number) => {
-  const a = (Math.atan2(dx, -dz) * 180) / Math.PI;
-  const nombres = ['norte', 'noreste', 'este', 'sureste', 'sur', 'suroeste', 'oeste', 'noroeste'];
-  return nombres[Math.round(((a + 360) % 360) / 45) % 8];
-};
+import { BORDE, CALLES, CUADRAS, ESPECIALES, LUGARES, MEDIA_CUADRA } from './calles';
 
 const PALETA = ['#f1e3c8', '#e9c46a', '#a8dadc', '#f4a261', '#e5e5e5', '#cdb4db', '#b7e4c7', '#ffd6a5'];
 type Edificio = { pos: V3; size: V3; color: string; mat: 'stucco' | 'concrete' | 'brick' | 'glass' };
@@ -92,8 +39,8 @@ function edificios(): Edificio[] {
 }
 const EDIFICIOS = edificios();
 
-/** Toma la cámara de seguir al jugador y encierra la ciudad. `noche` cambia el cielo. */
-export function useCiudad() {
+/** Toma la cámara de seguir al jugador y encierra la ciudad. `esperando` = todavía corre la cuenta regresiva. */
+export function useCiudad(esperando: () => boolean) {
   useLayoutEffect(() => {
     phys.limit = { minX: -BORDE, maxX: BORDE, minZ: -BORDE, maxZ: BORDE };
     phys.killY = -20;
@@ -105,13 +52,20 @@ export function useCiudad() {
       phys.limit = null;
     };
   }, []);
-  // el jugador solo se mueve cuando corre el reloj (no en la tarjeta ni en la cuenta regresiva)
+  // el jugador no se mueve en la tarjeta ni durante la cuenta regresiva: el carro queda clavado en su sitio
+  const fijo = useRef<[number, number] | null>(null);
   useTick(() => {
-    const mg = useGame.getState().mg;
-    if (mg?.phase !== 'playing') {
-      player.control = false;
-      if (player.vehicle) player.vehicle.speed = 0;
+    if (useGame.getState().mg?.phase === 'playing' && !esperando()) {
+      fijo.current = null;
+      return;
     }
+    player.control = false;
+    const v = player.vehicle;
+    if (!v) return;
+    v.speed = 0;
+    fijo.current ??= [player.pos[0], player.pos[2]];
+    player.pos[0] = fijo.current[0];
+    player.pos[2] = fijo.current[1];
   });
 }
 

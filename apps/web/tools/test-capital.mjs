@@ -3,7 +3,23 @@
 import assert from 'node:assert/strict';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { caminar, enEdificio } from '../src/game/minigames/franciscomorazan/capital/calles.ts';
 import { run } from './harness.mjs';
+
+// un chepo que va de una calle a otra con una cuadra en medio la rodea y llega, sin meterse al edificio
+for (const [x, z, tx, tz] of [
+  [2.2, 14, 26.2, 14],
+  [26.2, 14, 2.2, 14],
+  [14, 2.2, 14, 26.2],
+  [-21.8, -40, 21.8, 30],
+]) {
+  const c = { x, z, yaw: 0, rodeo: null };
+  let t = 0;
+  for (; t < 100 && caminar(c, tx, tz, 3, 0.05) > 0.05; t += 0.05)
+    assert.ok(!enEdificio(c.x, c.z), `chepo dentro de un edificio en ${c.x.toFixed(1)},${c.z.toFixed(1)}`);
+  assert.ok(Math.hypot(c.x - tx, c.z - tz) < 0.1, `chepo atascado en ${c.x.toFixed(1)},${c.z.toFixed(1)}`);
+}
+console.log('PASA los chepos rodean las cuadras');
 
 const file = process.argv[2];
 if (!file) throw new Error('Uso: test-capital.mjs <html>');
@@ -23,6 +39,17 @@ const ok = await run('capital', file, { hash: '#test', width: 1280, height: 800 
       `window.__mcTest?.motor?.estado().id === '${motor}' && window.__mc.store.getState().mg.phase === 'intro'`,
     );
     await t.click('mg-start');
+    // durante la cuenta regresiva nadie arranca, ni con W apretada
+    await t.waitFor("window.__mc.store.getState().mg.phase === 'playing'");
+    const antes = await pos();
+    await t.down('w');
+    await t.waitFor('window.__mcTest.motor.estado().cuenta < 1.5', 20000 * lento, 'avanza la cuenta regresiva');
+    const durante = await pos();
+    await t.up('w');
+    assert.ok(
+      Math.hypot(durante[0] - antes[0], durante[2] - antes[2]) < 0.3,
+      `se movió en la cuenta: ${antes} → ${durante}`,
+    );
     await t.waitFor('window.__mcTest.motor.estado().cuenta === 0', 20000 * lento, 'termina la cuenta regresiva');
   }
 

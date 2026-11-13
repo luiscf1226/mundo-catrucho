@@ -7,7 +7,8 @@ import type { AvatarConfig, AvatarState } from '../../../core/types';
 import { art, Ball, Block, Label, P } from '../../kit';
 import { rng } from '../api';
 import { defineMotor, type Motor } from '../kit';
-import { Ciudad, enEdificio, parada, rumbo, useCiudad } from './capital/ciudad';
+import { type Caminante, caminar, parada, rumbo } from './capital/calles';
+import { Ciudad, useCiudad } from './capital/ciudad';
 import {
   type Aviso,
   AvisoFlotante,
@@ -40,12 +41,9 @@ const CHEPO: AvatarConfig = {
   skin: '#a66f45',
 } as AvatarConfig;
 
-type Chepo = {
-  x: number;
-  z: number;
+type Chepo = Caminante & {
   tx: number;
   tz: number;
-  yaw: number;
   persigue: number;
   mareo: number;
   st: AvatarState;
@@ -86,22 +84,6 @@ function nuevaBolsa(s: Asalto): Bolsa {
   }
   return { x: p.ax, z: p.az };
 }
-/** camina hacia (tx, tz) sin atravesar edificios: si un eje choca, se desliza por el otro */
-function caminar(c: Chepo, tx: number, tz: number, vel: number, dt: number) {
-  const dx = tx - c.x,
-    dz = tz - c.z,
-    d = Math.hypot(dx, dz);
-  if (d < 0.01) return d;
-  const paso = Math.min(d, vel * dt),
-    nx = c.x + (dx / d) * paso,
-    nz = c.z + (dz / d) * paso;
-  if (!enEdificio(nx, c.z)) c.x = nx;
-  else if (!enEdificio(c.x, c.z + Math.sign(dz || 1) * paso)) c.z += Math.sign(dz || 1) * paso;
-  if (!enEdificio(c.x, nz)) c.z = nz;
-  else if (!enEdificio(c.x + Math.sign(dx || 1) * paso, c.z)) c.x += Math.sign(dx || 1) * paso;
-  c.yaw = Math.atan2(dx, dz);
-  return d;
-}
 function agarrar(m: Sesion) {
   const s = m.datos;
   s.agarrones++;
@@ -129,7 +111,7 @@ function guardar(m: Sesion) {
 }
 
 function Escena({ motor: m }: { motor: Sesion }) {
-  useCiudad();
+  useCiudad(() => m.cuenta > 0);
   const s = m.datos;
   const meta: [number, number] | null =
     m.cuenta > 0
@@ -269,6 +251,7 @@ const motor = defineMotor({
         tx: t.x,
         tz: t.z,
         yaw: 0,
+        rodeo: null,
         persigue: 0,
         mareo: 0,
         st: { anim: 'walk', speed: 3 },

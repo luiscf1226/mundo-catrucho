@@ -10,7 +10,8 @@ import { enterVehicle } from '../../PlayerController';
 import { rng } from '../api';
 import { botCfg } from '../corte/common';
 import { defineMotor, type Motor } from '../kit';
-import { Ciudad, LUGARES, parada, rumbo, useCiudad } from './capital/ciudad';
+import { LUGARES, parada, rumbo } from './capital/calles';
+import { Ciudad, useCiudad } from './capital/ciudad';
 import {
   type Aviso,
   AvisoFlotante,
@@ -117,7 +118,7 @@ function objetivo(s: Taxi): [number, number] {
 }
 
 function Escena({ motor: m }: { motor: Sesion }) {
-  useCiudad();
+  useCiudad(() => m.cuenta > 0);
   useLayoutEffect(() => {
     enterVehicle('Car');
     useGame.getState().setPrompt(null);
