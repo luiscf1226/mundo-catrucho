@@ -40,6 +40,7 @@ function observar(m: Sesion) {
 
 const motor = defineMotor({
   id: 'copan.hojas',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   fondo: 'finca',
   guia: {
     goal: 'Contrastá ambas caras de la hoja. Ubicá la misma lesión con ambos ejes; F registra el haz y luego el envés.',

@@ -152,6 +152,7 @@ function Escena({ motor: m }: { motor: Sesion }) {
 
 const motor = defineMotor({
   id: 'franciscomorazan.taxi',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   libre: { bots: [6.2, 0.2, 18], yaw: -1.2 },
   guia: {
     goal: 'Subí pasajeros y llevalos a su destino antes de que se acabe su paciencia. Frená dentro de la marca.',

@@ -33,6 +33,7 @@ function registrar(m: Sesion, extraer = false) {
 }
 const motor = defineMotor({
   id: 'olancho.calcita',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   guia: {
     goal: 'Alineá ambos focos con las marcas, sostené la luz y registrá con F. E / X invalida la ficha por intentar extraer.',
     ...controles,

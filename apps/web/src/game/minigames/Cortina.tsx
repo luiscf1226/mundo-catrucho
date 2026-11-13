@@ -42,6 +42,7 @@ function marcar(m: Sesion, i: number) {
 }
 const motor = defineMotor({
   id: 'cortes.cortina',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   guia: {
     goal: 'Con guía, marcá refugio 1 y después 2 mientras ambas ventanas estén verdes. Es una réplica virtual.',
     ...controles,

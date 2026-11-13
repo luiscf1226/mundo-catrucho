@@ -44,6 +44,7 @@ function modelar(m: Sesion) {
 }
 const motor = defineMotor({
   id: 'lempira.barro',
+  modos: { duo: { tipo: 'compartido', cada: 4 }, abierto: { tipo: 'ambiente', bots: 3 } },
   fondo: 'pueblo',
   guia: {
     goal: 'Dibujá círculos con arrastre o ambos ejes. El radio fija espesor. F levantá un anillo; dejá secar el barro húmedo. En la olla con cintura redistribuís el barro existente.',
@@ -94,8 +95,7 @@ const motor = defineMotor({
     ];
     m.stats = { x: s.x, vasijas: s.vasijas, colapsos: s.colapsos, giro: s.giro, anillos: s.anillos.length };
   },
-  bot(m, dt, actor) {
-    if (actor === 'compa') return;
+  bot(m, dt) {
     const s = m.datos;
     s.auto = true;
     s.autoGiro += dt * 3.8;

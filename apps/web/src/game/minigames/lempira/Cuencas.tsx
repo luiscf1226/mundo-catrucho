@@ -38,6 +38,7 @@ function asignar(m: Sesion) {
 }
 const motor = defineMotor({
   id: 'lempira.cuencas',
+  modos: { duo: { tipo: 'compartido', cada: 4 }, abierto: { tipo: 'ambiente', bots: 3 } },
   fondo: 'montana',
   guia: {
     goal: 'A/D trazá la divisoria de la ladera indicada, F fijá. W/S asigná caudal y F confirmá sin secar el río.',
@@ -59,8 +60,7 @@ const motor = defineMotor({
     ];
     m.stats = { x: s.x, tomas: s.tomas, secas: s.secas, trazo: Number(s.trazo) };
   },
-  bot(m, _dt, actor) {
-    if (actor === 'compa') return;
+  bot(m, _dt) {
     const s = m.datos;
     s.auto = true;
     s.x = (s.ladera - 1) * 0.6;

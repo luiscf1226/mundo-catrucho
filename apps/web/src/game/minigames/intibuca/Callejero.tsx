@@ -36,6 +36,7 @@ function entregar(m: Sesion) {
 }
 const motor = defineMotor({
   id: 'intibuca.callejero',
+  modos: { duo: { tipo: 'compartido', cada: 4 }, abierto: { tipo: 'ambiente', bots: 3 } },
   guia: {
     goal: 'E cambia municipio. Ubicá la manzana con ambos ejes; F la coloca y F entrega. Las plazas se conservan.',
     ...controles,
@@ -70,8 +71,7 @@ const motor = defineMotor({
     ];
     m.stats = { x: s.x, entregas: s.entregas, errores: s.errores };
   },
-  bot(m, _dt, actor) {
-    if (actor === 'compa') return;
+  bot(m, _dt) {
     const s = m.datos;
     s.auto = true;
     Object.assign(s, destino(s));

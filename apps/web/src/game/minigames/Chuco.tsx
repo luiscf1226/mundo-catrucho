@@ -36,6 +36,7 @@ function resolver(m: Sesion, bien: boolean) {
 }
 const motor = defineMotor({
   id: 'cortes.chuco',
+  modos: { duo: { tipo: 'apoyo', cada: 4 }, abierto: { tipo: 'objetivo-comun', bots: 3, cada: 6 } },
   guia: { goal: 'Apilá tres capas centradas y bañalas sin volcar el papel.', ...controles },
   etapa: (p) => ({
     margen: 0.85 - p.dif * 0.4,
@@ -71,8 +72,7 @@ const motor = defineMotor({
     ];
     m.stats = { buenas: s.buenas, derrames: s.derrames, capas: s.capas.length, salsa: s.salsa };
   },
-  bot: (m, _dt, actor) => {
-    if (actor === 'compa' && m.tiempo % 4 > _dt) return;
+  bot: (m, _dt) => {
     const s = m.datos;
     s.auto = true;
     s.x = 0;

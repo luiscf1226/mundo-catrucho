@@ -29,6 +29,7 @@ function marcar(m: Sesion) {
 }
 const motor = defineMotor({
   id: 'lempira.opalo',
+  modos: { duo: { tipo: 'compartido', cada: 4 }, abierto: { tipo: 'ambiente', bots: 3 } },
   fondo: 'cueva',
   guia: {
     goal: 'Girá la muestra con ambos ejes. El color interno se mueve con la luz; el reflejo blanco no es veta. F registrá cada una de tres luces.',
@@ -60,8 +61,7 @@ const motor = defineMotor({
     ];
     m.stats = { x: s.x, y: s.y, planos: s.planos, errores: s.errores, luz: s.luz };
   },
-  bot(m, _dt, actor) {
-    if (actor === 'compa') return;
+  bot(m, _dt) {
     const s = m.datos;
     s.auto = true;
     const v = veta(m);

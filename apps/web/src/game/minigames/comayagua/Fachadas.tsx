@@ -151,6 +151,7 @@ function Figura({ forma, color, s = 1, gris = false }: { forma: Forma; color: st
 }
 const motor = defineMotor({
   id: 'comayagua.fachadas',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   fondo: 'pueblo',
   guia: {
     goal: 'La foto 1 da las formas y la 2 los colores: pegá cada recorte donde cumple las dos. Si se repite, descartalo.',

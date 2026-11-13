@@ -49,6 +49,7 @@ function volar(m: Sesion) {
 
 const motor = defineMotor({
   id: 'copan.guaras',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   fondo: 'valle',
   guia: {
     goal: 'Conectá refugios sin encerrar aves. A/D elige destino, F vuela; hacé escalas dentro del alcance de cada pareja.',

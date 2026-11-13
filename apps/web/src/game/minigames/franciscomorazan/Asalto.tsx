@@ -195,6 +195,7 @@ function Escena({ motor: m }: { motor: Sesion }) {
 
 const motor = defineMotor({
   id: 'franciscomorazan.asalto',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   libre: { bots: [2.6, 0.2, 40], yaw: Math.PI },
   guia: {
     goal: 'Jugás de asaltante: juntá bolsas de pisto y guardalas en la guarida sin que te agarren los chepos.',

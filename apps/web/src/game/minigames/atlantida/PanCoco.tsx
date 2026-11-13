@@ -119,6 +119,7 @@ function evaluar(m: Sesion) {
 
 const motor = defineMotor({
   id: 'atlantida.pancoco',
+  modos: { duo: { tipo: 'compartido', cada: 4 }, abierto: { tipo: 'ambiente', bots: 3 } },
   fondo: 'costa',
   guia: {
     goal: 'Poné los bollos dejando lo que van a crecer. Horneá cuando la bandeja esté llena: los que se tocan salen pegados.',
@@ -205,9 +206,8 @@ const motor = defineMotor({
       x: s.c.x,
     };
   },
-  bot: (m, dt, actor) => {
+  bot: (m, dt) => {
     const s = m.datos;
-    if (actor === 'compa') return;
     s.c.auto = true;
     s.bot -= dt;
     if (s.bot > 0 || s.levado > 0 || s.muestra > 0) return;

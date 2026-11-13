@@ -51,6 +51,7 @@ function dibujar(m: Sesion) {
 }
 const motor = defineMotor({
   id: 'intibuca.vaho',
+  modos: { duo: { tipo: 'compartido', cada: 4 }, abierto: { tipo: 'ambiente', bots: 3 } },
   guia: {
     goal: 'E exhala. Entre 20% y 85% de vaho, seguí los cinco puntos con F. Soplar de más borra la guía.',
     ...controles,
@@ -75,8 +76,7 @@ const motor = defineMotor({
     ];
     m.stats = { x: s.x, mensajes: s.mensajes, errores: s.errores, vaho: s.vaho };
   },
-  bot(m, _dt, actor) {
-    if (actor === 'compa') return;
+  bot(m, _dt) {
     const s = m.datos;
     s.auto = true;
     [s.x, s.y] = puntos[s.trazo];

@@ -128,6 +128,7 @@ function asentar(m: Sesion) {
 }
 const motor = defineMotor({
   id: 'comayagua.tenampua',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   fondo: 'ruinas',
   guia: {
     goal: 'Corré los bloques de réplica en su terraza hasta que su sombra llene el relieve dorado. Cada terraza con lo suyo.',

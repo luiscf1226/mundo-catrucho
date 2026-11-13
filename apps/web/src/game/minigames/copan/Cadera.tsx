@@ -39,6 +39,7 @@ function golpear(m: Sesion, prohibido = false) {
 
 const motor = defineMotor({
   id: 'copan.cadera',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   fondo: 'ruinas',
   guia: {
     goal: 'Orientá la cadera y desviá la pelota a los marcadores. F golpea al pasar por el aro; E o salto anula.',

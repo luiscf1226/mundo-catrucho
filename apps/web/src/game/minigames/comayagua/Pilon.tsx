@@ -112,6 +112,7 @@ function mover(m: Sesion) {
 }
 const motor = defineMotor({
   id: 'comayagua.pilon',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   fondo: 'pueblo',
   guia: {
     goal: 'Aislá con divisores los sabores que más piden y abrí solo la tapa del pedido. Cada tapa calienta a sus vecinas.',

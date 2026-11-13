@@ -60,6 +60,7 @@ function amarrar(m: Sesion) {
 }
 const motor = defineMotor({
   id: 'islas.estela',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   fondo: 'mar',
   guia: {
     goal: 'Acelerá y frená suave. Tu estela llega después: dejala pasar antes de amarrar con F.',

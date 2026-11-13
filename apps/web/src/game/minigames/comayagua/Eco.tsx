@@ -115,6 +115,7 @@ function marcar(m: Sesion) {
 }
 const motor = defineMotor({
   id: 'comayagua.eco',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   fondo: 'cueva',
   guia: {
     goal: 'Apuntá, chasqueá y mirá cuánto tarda el eco: si tarda más de 0.9 s hay galería. Dibujá solo las galerías.',

@@ -51,6 +51,7 @@ function pasar(m: Sesion) {
 }
 const motor = defineMotor({
   id: 'intibuca.telar',
+  modos: { duo: { tipo: 'compartido', cada: 4 }, abierto: { tipo: 'ambiente', bots: 3 } },
   guia: {
     goal: 'Elegí pedal con E. Llevá la lanzadera al extremo señalado y pasala con F; revisá ambas caras.',
     ...controles,
@@ -74,8 +75,7 @@ const motor = defineMotor({
     ];
     m.stats = { x: s.x, filas: s.filas, errores: s.errores };
   },
-  bot(m, _dt, actor) {
-    if (actor === 'compa') return;
+  bot(m, _dt) {
     const s = m.datos;
     s.auto = true;
     s.pedal = objetivo(m);

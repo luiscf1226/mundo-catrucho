@@ -147,6 +147,7 @@ function deshacer(m: Sesion) {
 }
 const motor = defineMotor({
   id: 'comayagua.anden',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   fondo: 'montana',
   guia: {
     goal: 'Poné cada bus en el diagrama dentro de su ventana, sin encimarlo con otro. Si trae enlace, dejá tiempo para la maleta.',

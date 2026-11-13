@@ -35,6 +35,7 @@ function encajar(m: Sesion) {
 
 const motor = defineMotor({
   id: 'copan.glifos',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   fondo: 'ruinas',
   guia: {
     goal: 'Girás la réplica y cotejás dos bordes. A/D giro, W/S inclinación; F encaja si ambas juntas continúan.',

@@ -37,6 +37,7 @@ function inclinar(m: Sesion) {
 }
 const motor = defineMotor({
   id: 'olancho.batea',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   guia: { goal: 'Girá suavemente, soltá para sedimentar y luego incliná con F. No es extracción real.', ...controles },
   etapa: (p) => ({ dif: p.dif, nombre: typeof p.tema.nombre === 'string' ? p.tema.nombre : 'Batea del Guayape' }),
   metas,

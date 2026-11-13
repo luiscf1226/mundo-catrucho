@@ -149,6 +149,7 @@ function terminar(m: Sesion, e: Encuentro, fin: Encuentro['fin']) {
 
 const motor = defineMotor({
   id: 'islas.ballena',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   fondo: 'mar',
   guia: {
     goal: 'Mirá las dos sombras, calculá el rumbo y dejá la boya del grupo a distancia, sin cerrarle el paso.',

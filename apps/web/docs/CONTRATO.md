@@ -289,6 +289,7 @@ Ejemplo de forma de la API (ver `Rosquilla.tsx` para una implementación jugable
 ```tsx
 const motor = defineMotor({
   id: 'franciscomorazan.rosquilla',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   guia: { goal: 'Sacá la tanda a tiempo.', keys: [['F', 'sacar']], touch: [['🎯', 'sacar']] },
   etapa: (p) => ({ velocidad: 1 + p.dif }),
   metas: (p) => [80 + 80 * p.dif, 180 + 80 * p.dif, 280 + 80 * p.dif],
@@ -457,3 +458,20 @@ Solo con `VITE_SALAS_URL` y `VITE_CONVEX_URL`; sin ellas nada de esto se muestra
 con `@mundo-catrucho/reglas`, y juega con dos pestañas: bots y conectados, una partida completa de la rosquilla
 (70 s) con recibo pagado, y un viaje con chofer, pasajero y cambio de volante. Capturas en `capturas/mc-23/`,
 `capturas/mc-25/` y `capturas/mc-31/`. Con `MC_GPU=0` dice SALTA (usá `MC_JUNTOS_CPU=1` para forzarla).
+
+## Modos declarados del kit (MC-26)
+
+Cada motor del kit declara `modos: { duo, abierto }`; `check-motores.mjs` rechaza una declaración ausente.
+La API conserva valores predeterminados para consumidores anteriores: apoyo continuo en dúo y tres bots de ambiente.
+
+- `duo: { tipo: 'apoyo', cada?: number }`: comparte estado y puntaje; llama `bot(..., 'compa')` continuamente
+  o cada tantos segundos. El motor conserva únicamente la acción particular del ayudante.
+- `duo: { tipo: 'compartido', cada: number }`: el compa usa las acciones de `bot(..., 'jugador')` sobre la misma
+  partida cada tantos segundos. Sirve para motores sin un rol de apoyo específico.
+- `abierto: { tipo: 'ambiente', bots: 2 | 3 }`: los bots acompañan sin modificar la partida.
+- `abierto: { tipo: 'objetivo-comun', bots: 2 | 3, cada: number }`: cada bot usa la acción `compa` sobre el
+  objetivo compartido. El kit escalona sus intervenciones dentro del intervalo para evitar acciones simultáneas.
+
+`cada` debe ser positivo y finito. Las ayudas usan el reloj de simulación, respetan pausa y cuenta regresiva y
+no cambian metas, duración ni premios. El HUD explica el modo. `__mcTest.motor.estado()` también expone `modos`
+y `ayudas` (intervenciones programadas). `test-modos-motor.mjs` prueba contribuciones reales y aislamiento entre intentos.

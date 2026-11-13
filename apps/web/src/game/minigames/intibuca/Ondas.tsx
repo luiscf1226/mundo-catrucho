@@ -34,6 +34,7 @@ function foto(m: Sesion) {
 }
 const motor = defineMotor({
   id: 'intibuca.ondas',
+  modos: { duo: { tipo: 'compartido', cada: 4 }, abierto: { tipo: 'ambiente', bots: 3 } },
   guia: {
     goal: 'Mové la plataforma hasta la marca. Cada movimiento produce ondas. Esperá que se apaguen y F toma la foto.',
     ...controles,
@@ -58,8 +59,7 @@ const motor = defineMotor({
     ];
     m.stats = { x: s.x, fotos: s.fotos, errores: s.errores, onda: s.onda };
   },
-  bot(m, _dt, actor) {
-    if (actor === 'compa') return;
+  bot(m, _dt) {
     const s = m.datos;
     s.auto = true;
     s.x = 0.5;

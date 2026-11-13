@@ -27,6 +27,7 @@ function revisar(m: Sesion, consulta: boolean) {
 }
 const motor = defineMotor({
   id: 'intibuca.hongos',
+  modos: { duo: { tipo: 'compartido', cada: 4 }, abierto: { tipo: 'ambiente', bots: 3 } },
   guia: {
     goal: 'Solo réplicas. E envía la duda al experto; F archiva una ficha completa. Nunca decidás consumo.',
     ...controles,
@@ -53,8 +54,7 @@ const motor = defineMotor({
     ];
     m.stats = { x: s.x, fichas: s.fichas, errores: s.errores, cancelada: Number(s.cancelada) };
   },
-  bot(m, _dt, actor) {
-    if (actor === 'compa') return;
+  bot(m, _dt) {
     m.datos.auto = true;
     m.datos.x = [-0.65, 0, 0.65][m.datos.fichas % 3];
     revisar(m, m.parametros.carnet || m.datos.fichas % 4 !== 3);

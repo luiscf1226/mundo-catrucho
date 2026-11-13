@@ -91,6 +91,7 @@ function boton(m: Sesion) {
 
 const motor = defineMotor({
   id: 'atlantida.canopy',
+  modos: { duo: { tipo: 'compartido', cada: 4 }, abierto: { tipo: 'ambiente', bots: 3 } },
   fondo: 'selva',
   guia: {
     goal: 'Soltate con F y frená después del fondo para llegar despacio a la plataforma.',
@@ -199,10 +200,9 @@ const motor = defineMotor({
       viento: s.viento,
     };
   },
-  bot: (m, _dt, actor) => {
+  bot: (m, _dt) => {
     const s = m.datos;
     const p = m.parametros;
-    if (actor === 'compa') return;
     if (s.pausa > 0) return;
     if (!s.andando) {
       boton(m);
