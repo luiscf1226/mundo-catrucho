@@ -77,6 +77,10 @@ const MOTORS = {
   'atlantida.canopy': motor(() => import('./atlantida/Canopy').then((m) => ({ ...m, default: m.Canopy }))),
   'atlantida.carnaval': motor(() => import('./atlantida/Carnaval').then((m) => ({ ...m, default: m.Carnaval }))),
   'franciscomorazan.rosquilla': motor(() => import('./Rosquilla').then((m) => ({ ...m, default: m.Rosquilla }))),
+  'franciscomorazan.taxi': motor(() => import('./franciscomorazan/Taxi').then((m) => ({ ...m, default: m.Taxi }))),
+  'franciscomorazan.asalto': motor(() =>
+    import('./franciscomorazan/Asalto').then((m) => ({ ...m, default: m.Asalto })),
+  ),
   carrera: motor(() => import('./Carrera').then((m) => ({ ...m, default: m.Carrera }))),
   futbol: motor(() => import('./Futbol').then((m) => ({ ...m, default: m.Futbol }))),
   feria: motor(() => import('./Feria').then((m) => ({ ...m, default: m.Feria }))),

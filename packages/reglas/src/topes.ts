@@ -167,6 +167,14 @@ export const TOPES: Record<string, TopeMotor> = {
   'franciscomorazan.niebla': kit(lineal(100, 220, 340, 60), () => 75),
   'franciscomorazan.artesania': kit(lineal(100, 200, 350, 100), () => 75),
   'franciscomorazan.baleada': kit(lineal(100, 220, 340, 80), () => 70),
+  'franciscomorazan.taxi': kit(
+    (d) => [100 + r(d * 60), 220 + r(d * 80), 340 + r(d * 100)],
+    (d) => 75 + r(d * 15),
+  ),
+  'franciscomorazan.asalto': kit(
+    (d) => [90 + r(d * 60), 220 + r(d * 90), 360 + r(d * 120)],
+    (d) => 80 + r(d * 20),
+  ),
   'olancho.batea': taller,
   'olancho.arreo': taller,
   'olancho.calcita': taller,
