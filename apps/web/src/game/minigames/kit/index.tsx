@@ -1,7 +1,7 @@
 import { type ComponentType, useLayoutEffect, useMemo, useState } from 'react';
 import { relojPartida, reportarPuntos } from '../../../core/juntos';
 import { isPaused, useGame } from '../../../core/store';
-import type { AvatarState, MinigameId } from '../../../core/types';
+import type { AvatarState, MinigameId, V3 } from '../../../core/types';
 import { Label, useMgTick } from '../../kit';
 import { finish, type Guia, type Partida, partida, setHud, starsFor } from '../api';
 import type { Fondo } from '../corte/common';
@@ -23,6 +23,8 @@ export interface Motor<P, S> {
 interface Definicion<P, S> {
   id: MinigameId;
   fondo?: Fondo;
+  /** escena propia donde el jugador se mueve con su cámara (sin mesa ni cámara fija); `bots` = dónde se paran los bots */
+  libre?: { bots: V3; yaw?: number };
   guia: Omit<Guia, 'metas'>;
   etapa: (p: Partida) => P;
   metas: (p: Partida) => [number, number, number];
@@ -174,13 +176,21 @@ export function defineMotor<P, S>(def: Definicion<P, S>) {
         if (w.__mcTest?.motor === prueba) delete w.__mcTest.motor;
       };
     }, [sesion]);
+    const libre = def.libre;
     return (
       <AmbienteContext.Provider value={fondoMotor(def.id, m.partida.tema.fondo, def.fondo)}>
-        <Ambiente fondo={fondoMotor(def.id, m.partida.tema.fondo, def.fondo)} />
+        {!libre && <Ambiente fondo={fondoMotor(def.id, m.partida.tema.fondo, def.fondo)} />}
         <def.Escena motor={m} />
-        {m.cuenta > 0 && <Label pos={[0, 4, 0]} text={`¡Preparáte! ${Math.ceil(m.cuenta)}`} h={0.7} />}
+        {m.cuenta > 0 && !libre && <Label pos={[0, 4, 0]} text={`¡Preparáte! ${Math.ceil(m.cuenta)}`} h={0.7} />}
         {sesion.bots.map((b, i) => (
-          <BotAvatar key={i} i={i} state={b} pos={[5 + i * 1.8, 0, -1]} yaw={-0.7} compa={m.partida.modo === 'duo'} />
+          <BotAvatar
+            key={i}
+            i={i}
+            state={b}
+            pos={libre ? [libre.bots[0] + i * 1.8, libre.bots[1], libre.bots[2]] : [5 + i * 1.8, 0, -1]}
+            yaw={libre?.yaw ?? -0.7}
+            compa={m.partida.modo === 'duo'}
+          />
         ))}
       </AmbienteContext.Provider>
     );
