@@ -16,6 +16,8 @@ import { Gallery } from './dev/Gallery';
 import { EnVivo } from './EnVivo';
 import { art } from './kit/art';
 import { Lobby } from './lobby/Lobby';
+import { FotografoMemes } from './memes/Fotografo';
+import { MemePop } from './memes/MemePop';
 import { MINIGAME_SCENES } from './minigames';
 import { PlayerController } from './PlayerController';
 import { Viaje } from './viaje/Viaje';
@@ -94,6 +96,8 @@ function ActiveScene() {
     <SceneRoot key={key}>
       {node}
       <Llegada />
+      {scene.kind === 'minigame' && <MemePop />}
+      <FotografoMemes />
     </SceneRoot>
   );
 }

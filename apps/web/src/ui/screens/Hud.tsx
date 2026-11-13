@@ -19,6 +19,7 @@ const SIDE: [PanelId, IconName, string][] = [
   ['misiones', 'missions', 'Misiones'],
   ['emotes', 'emote', 'Emotes'],
   ['amigos', 'users', 'Amigos'],
+  ['memes', 'sparkle', 'Memes'],
   ['pausa', 'pause', 'Pausa'],
 ];
 
