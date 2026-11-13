@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { BOT_NAMES, SHOP } from '../../../core/data';
 import type { AvatarConfig, AvatarState, MinigameResult, V3 } from '../../../core/types';
 import { art, Block, Cyl, Ground, P, useTick } from '../../kit';
+import { COMPACT_QUALITY } from '../../quality';
 import { finish, type Partida, rng } from '../api';
 
 export type Fondo =
@@ -359,7 +360,8 @@ export function BotAvatar({
 export const newState = (anim: AvatarState['anim'] = 'idle'): AvatarState => ({ anim, speed: 0 });
 
 // ------------------------------------------------------------------ partículas (un solo InstancedMesh)
-export function useBurst(max = 70, size = 0.09) {
+export function useBurst(capacity = 70, size = 0.09) {
+  const max = COMPACT_QUALITY ? Math.max(1, Math.ceil(capacity / 3)) : capacity;
   const mesh = useRef<THREE.InstancedMesh>(null);
   const S = useRef({
     n: 0,

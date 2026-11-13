@@ -341,7 +341,7 @@ const deptName = (id: string) => DEPARTMENTS.find((d) => d.id === id)?.name ?? i
 function SalasEnVivo() {
   const room = useGame((s) => s.profile.room),
     { estado, sala, otros } = useSala(),
-    todos = net.players().filter((p) => p.listo),
+    todos = net.players(),
     gente = todos.filter((p) => !p.bot),
     bots = todos.length - gente.length;
   const solo = room.mode === 'solo';

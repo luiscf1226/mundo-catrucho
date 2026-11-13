@@ -13,6 +13,7 @@ import * as THREE from 'three';
 import { env } from '../../../../core/env';
 import { player } from '../../../../core/player';
 import { isPaused } from '../../../../core/store';
+import { COMPACT_QUALITY } from '../../../quality';
 import type { SkyRigProps } from '../types';
 import { G } from './materials';
 
@@ -371,11 +372,14 @@ export function SkyRig({
     });
     const envScene = new THREE.Scene();
     envScene.add(new THREE.Mesh(new THREE.SphereGeometry(10, 24, 14), envMat));
-    const cubeRT = new THREE.WebGLCubeRenderTarget(64, { type: THREE.HalfFloatType, generateMipmaps: false }),
+    const cubeRT = new THREE.WebGLCubeRenderTarget(COMPACT_QUALITY ? 32 : 64, {
+        type: THREE.HalfFloatType,
+        generateMipmaps: false,
+      }),
       cubeCam = new THREE.CubeCamera(0.1, 50, cubeRT);
     const pmrem = new THREE.PMREMGenerator(gl);
     // lluvia
-    const N = 1500,
+    const N = COMPACT_QUALITY ? 400 : 1500,
       rp = new Float32Array(N * 6),
       re = new Float32Array(N * 2);
     for (let i = 0; i < N; i++) {
@@ -647,7 +651,7 @@ export function SkyRig({
         sunDir.x * 0.6 +
         sunDir.y * 0.9 +
         L!.intensity * 0.2;
-    if (Math.abs(sig - R.envSig) > 0.06 && T - R.envT > (R.envSig === -1 ? -1 : 1.5)) {
+    if (Math.abs(sig - R.envSig) > 0.06 && T - R.envT > (R.envSig === -1 ? -1 : COMPACT_QUALITY ? 10 : 1.5)) {
       R.envSig = sig;
       R.envT = T;
       const e = R.envMat.uniforms;
