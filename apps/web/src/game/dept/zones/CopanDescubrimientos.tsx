@@ -1,23 +1,15 @@
-import { useState } from 'react';
-import { player } from '../../../core/player';
-import { useGame } from '../../../core/store';
-import { Ball, Block, Cyl, Label, P, useTick } from '../../kit';
+import { Ball, Block, Cyl, Label, P } from '../../kit';
 import puntos from './copan-puntos.json';
 
 function Punto({ indice }: { indice: number }) {
   const p = puntos[indice],
     x = indice < 5 ? -8 : 8,
     z = 36 - (indice % 5) * 6;
-  const [visto, descubrir] = useState(false);
-  useTick(() => {
-    if (visto || useGame.getState().dialog || Math.hypot(player.pos[0] - x, player.pos[2] - z) > 2) return;
-    descubrir(true);
-    useGame.getState().showDialog({ title: p.nombre, text: p.texto, icon: indice < 7 ? '📍' : '✨' });
-  });
+
   return (
     <group position={[x, 0, z]}>
-      <Cyl pos={[0, 0.04, 0]} r={1.6} h={0.08} color={visto ? '#91c786' : '#ebc879'} mat="sand" solid={false} />
-      <Label pos={[0, 2.5, -0.5]} text={`${visto ? '✓' : indice < 7 ? '📍' : '✨'} ${p.nombre}`} h={0.26} />
+      <Cyl pos={[0, 0.04, 0]} r={1.6} h={0.08} color="#ebc879" mat="sand" solid={false} />
+      <Label pos={[0, 2.5, -0.5]} text={`${indice < 7 ? '📍' : '✨'} ${p.nombre}`} h={0.26} />
       {indice === 7 ? (
         <>
           <P.Macaw pos={[0, 1, 0]} scale={0.4} />
@@ -46,11 +38,5 @@ function Punto({ indice }: { indice: number }) {
   );
 }
 export function CopanDescubrimientos() {
-  return (
-    <>
-      {puntos.map((p, i) => (
-        <Punto key={p.id} indice={i} />
-      ))}
-    </>
-  );
+  return <>{puntos.map((p, i) => i >= 7 && <Punto key={p.id} indice={i} />)}</>;
 }

@@ -35,6 +35,8 @@ import { TouchControls } from './screens/Touch';
 import { ViajeHud } from './screens/Viaje';
 import './pad';
 
+import { RecuerdosPanel, TurismoPanel } from './panels/Recuerdos';
+
 const PANELS: Record<PanelId, () => ReactNode> = {
   mapa: MapPanel,
   transporte: TransportePanel,
@@ -50,6 +52,8 @@ const PANELS: Record<PanelId, () => ReactNode> = {
   controles: ControlsPanel,
   emotes: EmotesPanel,
   memes: MemesPanel,
+  recuerdos: RecuerdosPanel,
+  turismo: TurismoPanel,
   proyecto: ProjectPanel,
 };
 

@@ -8,7 +8,6 @@ import puntos from './intibuca-puntos.json';
 function Punto({ indice }: { indice: number }) {
   const p = puntos[indice];
   const [x, y, z] = p.pos;
-  const [visto, ver] = useState(false);
   const [hecho, hacer] = useState(false);
   const g = useRef<Group>(null);
   const calma = useRef(0);
@@ -22,9 +21,6 @@ function Punto({ indice }: { indice: number }) {
       g.current.rotation.y = Math.sin(t) * 0.25;
       if (indice === 5) g.current.position.x = Math.sin(t) * 1.5;
     }
-    if (visto || useGame.getState().dialog || Math.hypot(player.pos[0] - x, player.pos[2] - z) > 2) return;
-    ver(true);
-    useGame.getState().showDialog({ title: p.nombre, text: p.texto, icon: indice < 7 ? '📍' : '✨' });
   });
   const usar = () => {
     if (indice === 1 && calma.current < 2) {
@@ -116,11 +112,5 @@ function Punto({ indice }: { indice: number }) {
   );
 }
 export function IntibucaDescubrimientos() {
-  return (
-    <>
-      {puntos.map((p, i) => (
-        <Punto key={p.id} indice={i} />
-      ))}
-    </>
-  );
+  return <>{puntos.map((p, i) => i >= 7 && <Punto key={p.id} indice={i} />)}</>;
 }

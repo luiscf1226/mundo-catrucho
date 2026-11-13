@@ -22,7 +22,6 @@ export const posicionLempira = (i: number): [number, number, number] => [puntos[
 function Punto({ indice: i, altura }: { indice: number; altura: number }) {
   const p = puntos[i],
     pos = posicionLempira(i),
-    [visto, ver] = useState(false),
     [paso, avanzar] = useState(0),
     g = useRef<Group>(null),
     viaje = useRef(-1),
@@ -52,9 +51,6 @@ function Punto({ indice: i, altura }: { indice: number; altura: number }) {
       g.current.rotation.y = t * 0.4;
       if (i === 8) g.current.scale.y = 1 + Math.sin(t * 3) * 0.2;
     }
-    if (visto || useGame.getState().dialog || Math.hypot(player.pos[0] - pos[0], player.pos[2] - pos[2]) > 1.5) return;
-    ver(true);
-    useGame.getState().showDialog({ title: p.nombre, text: p.texto, icon: i < 8 ? '📍' : '✨' });
   });
   function usar() {
     if (juegos[i]) {
@@ -86,8 +82,8 @@ function Punto({ indice: i, altura }: { indice: number; altura: number }) {
   return (
     <>
       <group position={pos}>
-        <Cyl pos={[0, 0.05, 0]} r={0.9} h={0.1} color={visto ? '#9bc693' : '#eccd83'} mat="sand" solid={false} />
-        <Label pos={[0, 2.2, 0]} text={`${visto ? '✓' : '📍'} ${p.nombre}`} h={0.2} />
+        <Cyl pos={[0, 0.05, 0]} r={0.9} h={0.1} color="#eccd83" mat="sand" solid={false} />
+        <Label pos={[0, 2.2, 0]} text={`✨ ${p.nombre}`} h={0.2} />
         <group ref={g}>
           {i === 0 || i === 8 ? (
             <Cyl pos={[0, 0.7, 0]} r={0.45} rTop={0.25} h={0.8} color="#b77c55" mat="stone" solid={false} />
@@ -130,11 +126,5 @@ function Punto({ indice: i, altura }: { indice: number; altura: number }) {
   );
 }
 export function LempiraDescubrimientos({ altura }: { altura: (x: number, z: number) => number }) {
-  return (
-    <>
-      {puntos.map((p, i) => (
-        <Punto key={p.id} indice={i} altura={altura(p.pos[0], p.pos[1])} />
-      ))}
-    </>
-  );
+  return <>{puntos.map((p, i) => i >= 8 && <Punto key={p.id} indice={i} altura={altura(p.pos[0], p.pos[1])} />)}</>;
 }

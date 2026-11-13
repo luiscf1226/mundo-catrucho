@@ -10,6 +10,7 @@ import {
   type FunctionReturnType,
   makeFunctionReference,
 } from 'convex/server';
+import type { RecuerdoTuristico } from '../../../../docs/generador/turismo';
 import type { AvatarConfig, Modo } from './types';
 
 const URL_CONVEX = import.meta.env.VITE_CONVEX_URL;
@@ -52,6 +53,7 @@ export interface ProgresoJuegoServidor {
   veces: number;
 }
 export interface EstadoServidor {
+  turismo: RecuerdoTuristico[];
   visitas: string[];
   recuerdos: string[];
   logros: string[];
@@ -82,6 +84,11 @@ export type Respuesta<T> = ({ ok: true } & T) | Fallo;
 type Logros = { logros?: Avance['logros'] };
 
 const fn = {
+  turismo: makeFunctionReference<
+    'mutation',
+    Quien & { lugarId: string; completa: boolean },
+    Respuesta<{ recuerdo: RecuerdoTuristico }>
+  >('progreso:turismo'),
   entrar: makeFunctionReference<
     'mutation',
     Quien & { nombre?: string; avatar?: Record<string, string>; creado?: boolean },
@@ -143,6 +150,7 @@ const fn = {
   subirAvance: makeFunctionReference<
     'mutation',
     Quien & {
+      turismo?: RecuerdoTuristico[];
       visitados: string[];
       recuerdos: string[];
       juegos: { juegoId: string; etapa?: number; stars?: number[]; veces?: number }[];
@@ -253,6 +261,7 @@ async function consultar<F extends RefConsulta>(
 }
 
 export const servidor = {
+  turismo: async (lugarId: string, completa: boolean) => conFallo(await llamar(fn.turismo, { lugarId, completa })),
   /** null si no hubo respuesta */
   entrar: (nombre: string, avatar: AvatarConfig, creado: boolean) =>
     llamar(fn.entrar, { nombre, avatar: avatarTexto(avatar), creado }),
