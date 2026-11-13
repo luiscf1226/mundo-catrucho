@@ -33,6 +33,12 @@ export function limpiarTexto(s: unknown): string {
   return (
     s
       .normalize('NFKC')
+      .replace(/\p{Nd}/gu, (c) => {
+        const punto = c.codePointAt(0) ?? 0;
+        let cero = punto;
+        while (cero > 0 && /\p{Nd}/u.test(String.fromCodePoint(cero - 1))) cero--;
+        return String((punto - cero) % 10);
+      })
       .replace(/<[^>]*>/g, ' ')
       .replace(/[<>]/g, '')
       .replace(/\s+/g, ' ')
@@ -60,12 +66,13 @@ const FRASE_DATO = new RegExp(
 );
 const DATOS: RegExp[] = [
   // correos (también con «arroba» y «punto»)
-  /[\p{L}\p{N}._%+-]+\s*(@|\(at\)|[[({]\s*arroba\s*[\])}]|\barroba\b)\s*[\p{L}\p{N}-]+(\s*(\.|[[({]\s*punto\s*[\])}]|\bpunto\b)\s*[\p{L}]{2,})+/giu,
+  /[\p{L}\p{N}._%+-]+\s*(@|\(\s*@\s*\)|\(at\)|[[({]\s*arroba\s*[\])}]|\barroba\b)\s*[\p{L}\p{N}-]+(\s*([.。,]|\(\s*\.\s*\)|[[({]\s*punto\s*[\])}]|\bpunto\b)\s*[\p{L}]{2,})+/giu,
   // direcciones web
   /\b(https?:\/\/|www\.)\S+/giu,
   /\b[\p{L}\p{N}-]+(\.|\s+punto\s+)(com|net|org|hn|io|gg|me|ly|co|app|xyz|tv|info|biz|link)\b(\/\S*)?/giu,
   // teléfonos: 7 dígitos o más, con o sin +504, espacios, puntos, guiones o paréntesis entre ellos
-  /\+?\(?\d(?:[\s./_|()-]{0,4}\d){6,}\)?/gu,
+  /(?<![\d/|_:])(?:\+?\(?504\)?[ -]?)?\d{4}(?:\s*[/_|*,:]\s*|[ .]{1,8})\d{4}(?![\d/|_:])/gu,
+  /(?<![\d/|_:])\+?\(?\d(?:[\s.()-]{0,4}\d){6,}\)?(?![\d/|_:])/gu,
 ];
 /** @usuarios de redes; guarda lo que había antes de la arroba */
 const ARROBA = /(^|[^\p{L}\p{N}])@[\p{L}\p{N}._]{2,}/gu;
@@ -85,7 +92,6 @@ const LEET: Record<string, string> = {
   $: 's',
   '!': 'i',
   '|': 'i',
-  '¡': 'i',
   '€': 'e',
 };
 /**
@@ -118,7 +124,7 @@ const GROSERIAS: RegExp[] = [
 /** Minúsculas, ñ conservada, sin tildes, números y símbolos a letras, sin separadores y sin letras repetidas. */
 export function normalizarPalabra(p: string): string {
   let s = '';
-  for (const c of p.toLowerCase()) {
+  for (const c of p.toLowerCase().replace(/[¡¿]/g, '')) {
     // la ñ es otra letra (coño no es cono); las demás pierden la tilde
     const letra = c === 'ñ' ? c : c.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     s += LEET[letra] ?? letra;

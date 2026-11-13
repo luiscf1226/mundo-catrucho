@@ -74,6 +74,7 @@ type Fallo = {
   ok: false;
   motivo: string;
   motivos?: string[];
+  reintentarMs?: number;
   perfil?: PerfilServidor;
   saldo?: Saldo;
 } & Partial<Avance>;
@@ -258,8 +259,15 @@ export const servidor = {
   comprar: async (itemId: string) => conFallo(await llamar(fn.comprar, { itemId, equipar: true })),
   equipar: async (itemId: string) => conFallo(await llamar(fn.equipar, { itemId })),
   vestir: async (avatar: Partial<AvatarConfig>) => conFallo(await llamar(fn.vestir, { avatar: avatarTexto(avatar) })),
-  abrir: async (a: { motor: string; etapa: number; juegoId?: string; modo: Modo }) =>
-    conFallo(await llamar(fn.abrir, a)),
+  abrir: async (a: { motor: string; etapa: number; juegoId?: string; modo: Modo }) => {
+    let r = conFallo(await llamar(fn.abrir, a));
+    if (!r.ok && r.motivo === 'muy seguido') {
+      const espera = (r.reintentarMs ?? 1000) + 50;
+      await new Promise((resolve) => setTimeout(resolve, espera));
+      r = conFallo(await llamar(fn.abrir, a));
+    }
+    return r;
+  },
   cerrar: async (c: { partidaId: string; puntos: number; estrellas: number; gano: boolean }) =>
     conFallo(await llamar(fn.cerrar, c)),
   visitar: async (deptId: string) => conFallo(await llamar(fn.visitar, { deptId })),

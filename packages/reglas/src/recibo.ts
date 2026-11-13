@@ -226,3 +226,5 @@ export function decidirRecibo<U>({
   if (!pagos.length) return { tipo: 'error', motivo: 'vacio' };
   return { tipo: 'pagar', pagos };
 }
+
+export const VIAJE = { cupo: 8, vigenciaMs: 30 * 60_000 } as const;

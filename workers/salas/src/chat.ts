@@ -5,7 +5,7 @@
 // Entra:  { t: 'chat', texto }                  { t: 'bloquear', id, si }   (si = false desbloquea)
 // Sale:   { t: 'chat', id, de, nombre, sala, ts, texto, tapado, firma }   { t: 'chat-no', motivo: 'ritmo' }
 import { CHAT, filtrarChat, firmarMensaje } from '@mundo-catrucho/reglas';
-import { gastarRitmo } from './ritmo';
+import type { RitmoSala } from './ritmo';
 
 /** Lo que el chat necesita del jugador guardado en el WebSocket. */
 export interface JugadorChat {
@@ -38,16 +38,20 @@ export async function recibirChat(
   yo: JugadorChat,
   m: Record<string, unknown>,
   secreto: string,
+  ritmo: RitmoSala,
 ) {
   if (m.t === 'bloquear') {
     if (typeof m.id !== 'string' || !/^[\w-]{1,24}$/.test(m.id) || m.id === yo.id) return;
     const lista = ((await ctx.storage.get<string[]>(`bloqueos:${yo.id}`)) ?? []).filter((x) => x !== m.id);
     if (m.si !== false && lista.length >= CHAT.bloqueosEnPase) return;
-    await ctx.storage.put(`bloqueos:${yo.id}`, m.si === false ? lista : [m.id, ...lista]);
+    await ctx.storage.transaction(async (tx) => {
+      await tx.put(`bloqueos:${yo.id}`, m.si === false ? lista : [m.id, ...lista]);
+      await tx.put(`bloqueos-momento:${yo.id}`, Date.now());
+    });
     return;
   }
   const ahora = Date.now();
-  if (!(await gastarRitmo(ctx, yo.id, 'chat'))) return enviar(ws, JSON.stringify({ t: 'chat-no', motivo: 'ritmo' }));
+  if (!ritmo.gastar(yo.id, 'chat')) return enviar(ws, JSON.stringify({ t: 'chat-no', motivo: 'ritmo' }));
   const f = filtrarChat(m.texto);
   if (!f) return;
   const msg = {
@@ -66,4 +70,15 @@ export async function recibirChat(
     if (w !== ws && (await bloqueadosEntre(ctx, yo, otro))) continue;
     enviar(w, salida);
   }
+}
+
+export async function iniciarBloqueos(ctx: DurableObjectState, id: string, lista: string[], emitido = 0) {
+  await ctx.storage.transaction(async (tx) => {
+    const clave = `bloqueos:${id}`;
+    const momento = (await tx.get<number>(`bloqueos-momento:${id}`)) ?? 0;
+    if ((await tx.get<string[]>(clave)) === undefined || emitido > momento) {
+      await tx.put(clave, lista);
+      await tx.put(`bloqueos-momento:${id}`, emitido);
+    }
+  });
 }

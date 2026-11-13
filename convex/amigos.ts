@@ -100,7 +100,7 @@ export async function bloqueadosParaPase(ctx: Lectura, usuarioId: IdUsuario, sec
     .query('bloqueos')
     .withIndex('por_de', (q) => q.eq('de', usuarioId))
     .order('desc')
-    .collect();
+    .take(CHAT.bloqueosEnPase);
   return Promise.all(filas.map((f) => idPublico(f.a, secreto)));
 }
 const nombreDe = async (ctx: Lectura, id: IdUsuario) => (await ctx.db.get(id))?.nombre ?? 'Catracho';

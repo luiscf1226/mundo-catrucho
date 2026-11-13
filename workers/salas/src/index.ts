@@ -24,11 +24,11 @@ import {
   zonaValida,
 } from '@mundo-catrucho/reglas';
 import { botsDe, cambiosDeBots, cuantosBots } from './bots';
-import { bloqueadosEntre, esDeChat, recibirChat } from './chat';
+import { bloqueadosEntre, esDeChat, iniciarBloqueos, recibirChat } from './chat';
 import { invitacionValida } from './comun';
 import { alarmaOcupacion, type EnvOcupacion, programarOcupacion } from './ocupacion';
 import { alarmaPartida, entrarPartida, mensajePartida, salirPartida } from './partida';
-import { gastarRitmo } from './ritmo';
+import { RitmoSala } from './ritmo';
 import { entrarViaje, mensajeViaje, salirViaje } from './viaje';
 
 export interface Env extends EnvOcupacion {
@@ -62,6 +62,8 @@ function rechazar(codigo: number, motivo: string) {
 }
 
 export class Sala extends DurableObject<Env> {
+  private ritmo = new RitmoSala();
+
   private conectados() {
     return this.ctx.getWebSockets().filter((w) => w.readyState === WebSocket.OPEN);
   }
@@ -116,7 +118,7 @@ export class Sala extends DurableObject<Env> {
     const antes = this.conectados().filter((w) => w.deserializeAttachment()).length;
     if (antes >= SALA.cupo) return rechazar(CIERRE.llena, 'llena');
     const { id, nombre, avatar, bloqueados = [] } = v.pase;
-    await this.ctx.storage.put(`bloqueos:${id}`, bloqueados);
+    await iniciarBloqueos(this.ctx, id, bloqueados, v.pase.vence - SALA.paseMs);
     const yo: Jugador = { id, nombre, avatar, x: 0, y: 0, z: 0, yaw: 0, anim: 'idle', sala, bloqueados: [] };
     const [cliente, servidor] = Object.values(new WebSocketPair());
     this.ctx.acceptWebSocket(servidor);
@@ -142,7 +144,7 @@ export class Sala extends DurableObject<Env> {
     if (typeof raw !== 'string' || raw.length > SALA.mensajeMax) return;
     const yo = ws.deserializeAttachment() as Jugador | null;
     if (!yo) return;
-    if (!(await gastarRitmo(this.ctx, yo.id, 'general'))) return;
+    if (!this.ritmo.gastar(yo.id, 'general')) return;
     let m: Record<string, unknown>;
     try {
       m = JSON.parse(raw);
@@ -163,7 +165,7 @@ export class Sala extends DurableObject<Env> {
     } else if (m.t === 'emote' && emoteValido(m.id)) {
       this.difundir({ t: 'emote', id: yo.id, emote: m.id }, ws);
     } else if (esDeChat(m)) {
-      return recibirChat(this.ctx, this.ctx.getWebSockets(), ws, yo, m, this.env.SALA_SECRETO);
+      return recibirChat(this.ctx, this.ctx.getWebSockets(), ws, yo, m, this.env.SALA_SECRETO, this.ritmo);
     } else if (m.t === 'invita') {
       const inv = invitacionValida(m);
       if (inv)
@@ -176,6 +178,15 @@ export class Sala extends DurableObject<Env> {
   }
   async webSocketClose(ws: WebSocket) {
     const yo = ws.deserializeAttachment() as Jugador | null;
+    if (yo && !this.jugadores(ws).some((j) => j?.id === yo.id)) {
+      this.ritmo.borrar(yo.id);
+      await this.ctx.storage.delete([
+        `bloqueos:${yo.id}`,
+        `bloqueos-momento:${yo.id}`,
+        `ritmo:chat:${yo.id}`,
+        `ritmo:general:${yo.id}`,
+      ]);
+    }
     const tipo = (yo as { tipo?: string } | null)?.tipo;
     if (tipo === 'juego') return salirPartida(this.ctx, ws);
     if (tipo === 'viaje') return salirViaje(this.ctx, ws);

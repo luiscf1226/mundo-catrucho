@@ -100,6 +100,25 @@ try {
 
     // 5. partida posible (trivia suelta, sin reloj fijo): paga lo que dice premioPartida, una sola vez
     await t.ev(`${S}.exitMinigame()`);
+    // Reserva justo antes de montar la trivia: obliga al cliente a reintentar «muy seguido».
+    const abrirRapido = makeFunctionReference('partidas:abrirPartida');
+    let reserva = await convex.mutation(abrirRapido, { invitado: secreto, motor: 'trivia', etapa: 0 });
+    if (!reserva.ok && reserva.motivo === 'muy seguido') {
+      await t.sleep(reserva.reintentarMs + 50);
+      reserva = await convex.mutation(abrirRapido, { invitado: secreto, motor: 'trivia', etapa: 0 });
+    }
+    assert(reserva.ok);
+    await t.ev(`(() => {
+      const original = window.fetch;
+      window.__aperturasPrueba = [];
+      window.fetch = async (...args) => {
+        const res = await original(...args);
+        if (String(args[0]).includes('/api/mutation')) {
+          window.__aperturasPrueba.push(await res.clone().json());
+        }
+        return res;
+      };
+    })()`);
     await t.ev(`${S}.startMinigame('trivia')`);
     await t.waitFor(`${S}.mg?.phase === 'intro'`);
     const desde = Date.now();
@@ -108,6 +127,11 @@ try {
     while (Date.now() - desde < 10_000) await t.sleep(250);
     await t.ev(`${S}.finishMinigame({ won: true, stars: 1, score: 480, label: '480 pts' })`);
     await t.waitFor(`${S}.mg?.pago === 'pagado'`, 20000, 'pago del servidor');
+    assert.equal(
+      await t.ev(`window.__aperturasPrueba.some(r => r.value?.motivo === 'muy seguido')`),
+      true,
+      'se probó el reintento real tras una apertura seguida',
+    );
     const R = JSON.parse(readFileSync(join(raiz, 'apps/web/shared/data/rewards.json'), 'utf8')).minigame;
     const premio = R.win.coins + R.perStar.coins,
       saldo = trasGorra + premio + premioLogro('primera_victoria');

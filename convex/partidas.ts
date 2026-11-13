@@ -3,6 +3,7 @@
 import {
   APERTURA_MIN_MS,
   avanzarJuego,
+  DURACION_MAX_S,
   decidirApertura,
   decidirCierre,
   decidirRecibo,
@@ -141,6 +142,7 @@ export const abrirPartida = mutation({
       estado: 'abierta',
       inicio: ahora,
     });
+    await registrarApertura(ctx, usuario._id, id);
     return { ok: true as const, id };
   },
 });
@@ -271,6 +273,7 @@ export const abrirJuntos = mutation({
       inicio: Date.now(),
     });
     await ctx.db.patch(id, { sala: `juego:${id}` });
+    await registrarApertura(ctx, usuario._id, id);
     await ctx.scheduler.runAfter(PARTIDA.esperaMaxMs, vencerEsperaRef, { partidaId: id });
     const p = await ctx.db.get(id);
     return p ? datosJuntos(p) : { ok: false as const, motivo: 'no se abrió' };
@@ -285,6 +288,7 @@ export const unirseJuntos = mutation({
     const id = ctx.db.normalizeId('partidas', args.partidaId);
     const p = id ? await ctx.db.get(id) : null;
     if (!p?.sala || p.estado !== 'abierta') return { ok: false as const, motivo: 'ya no está' };
+    if (p.abandonaron?.includes(usuario._id)) return { ok: false as const, motivo: 'abandonada' };
     if (p.jugadores.includes(usuario._id)) return datosJuntos(p);
     if (p.jugadores.length >= PARTIDA.cupo) return { ok: false as const, motivo: 'llena' };
     if (Date.now() - (p.inicio ?? 0) >= PARTIDA.esperaMaxMs) {
@@ -295,6 +299,7 @@ export const unirseJuntos = mutation({
       if (await hayBloqueo(ctx, usuario._id, otro)) return { ok: false as const, motivo: 'bloqueado' };
     const turno = await reservarApertura(ctx, usuario._id, Date.now(), p._id);
     if (!turno.ok) return turno;
+    await registrarApertura(ctx, usuario._id, p._id);
     await ctx.db.patch(p._id, { jugadores: [...p.jugadores, usuario._id] });
     return datosJuntos(p);
   },
@@ -333,6 +338,7 @@ export const cerrarJuntos = mutation({
       p = id ? await ctx.db.get(id) : null;
     if (!p?.sala || !p.motor || p.inicio === undefined || !p.jugadores.includes(s.usuarioId))
       return { ok: false as const, motivo: 'ajena' };
+    if (p.abandonaron?.includes(s.usuarioId)) return { ok: false as const, motivo: 'abandonada' };
     const mio = () => p.pagos?.find((x) => x.usuarioId === s.usuarioId) ?? { monedas: 0, xp: 0 };
     if (p.estado === 'cerrada') return { ok: true as const, ya: true, ...mio(), ...(await terminar(s)) };
     const secreto = process.env.SALA_SECRETO;
@@ -352,6 +358,7 @@ export const cerrarJuntos = mutation({
     const pagos: { usuarioId: GenericId<'usuarios'>; monedas: number; xp: number }[] = [];
     for (const x of d.pagos) {
       const quienCobra = x.usuarioId === s.usuarioId ? s : await sesionDe(s, x.usuarioId);
+      if (p.abandonaron?.includes(x.usuarioId)) continue;
       if (!quienCobra || !x.premio) {
         pagos.push({ usuarioId: x.usuarioId, monedas: 0, xp: 0 });
         continue;
@@ -409,15 +416,72 @@ async function reservarApertura(
     .query('aperturas')
     .withIndex('por_usuario', (q) => q.eq('usuarioId', usuarioId))
     .unique();
-  if (ultima && ahora - ultima.momento < APERTURA_MIN_MS) return { ok: false as const, motivo: 'muy seguido' };
+  if (ultima && ahora - ultima.momento < APERTURA_MIN_MS)
+    return { ok: false as const, motivo: 'muy seguido', reintentarMs: APERTURA_MIN_MS - (ahora - ultima.momento) };
   if (ultima) await ctx.db.patch(ultima._id, { momento: ahora });
   else await ctx.db.insert('aperturas', { usuarioId, momento: ahora });
-  const abiertas = await ctx.db
-    .query('partidas')
-    .withIndex('por_estado', (q) => q.eq('estado', 'abierta'))
-    .collect();
-  for (const p of abiertas)
-    if (p._id !== conservar && p.jugadores.includes(usuarioId))
-      await ctx.db.patch(p._id, { estado: 'vencida', cierre: ahora, motivos: ['se abrió otra partida'] });
+  const p = ultima?.partidaId ? await ctx.db.get(ultima.partidaId) : null;
+  if (p?.estado === 'abierta' && p._id !== conservar) {
+    const abandonaron = [...new Set([...(p.abandonaron ?? []), usuarioId])];
+    const quedan = p.jugadores.some((id) => !abandonaron.includes(id));
+    await ctx.db.patch(p._id, {
+      abandonaron,
+      ...(!quedan ? { estado: 'vencida' as const, cierre: ahora, motivos: ['se abrió otra partida'] } : {}),
+    });
+  }
   return { ok: true as const };
 }
+
+const vencerPartidaRef = makeFunctionReference<'mutation', { partidaId: GenericId<'partidas'> }>(
+  'partidas:vencerPartida',
+) as unknown as FunctionReference<'mutation', 'internal', { partidaId: GenericId<'partidas'> }>;
+
+async function registrarApertura(
+  ctx: GenericMutationCtx<Modelo>,
+  usuarioId: GenericId<'usuarios'>,
+  partidaId: GenericId<'partidas'>,
+) {
+  const fila = await ctx.db
+    .query('aperturas')
+    .withIndex('por_usuario', (q) => q.eq('usuarioId', usuarioId))
+    .unique();
+  if (fila) await ctx.db.patch(fila._id, { partidaId });
+  await ctx.scheduler.runAfter(DURACION_MAX_S * 1000 + 1, vencerPartidaRef, { partidaId });
+}
+
+export const vencerPartida = internalMutation({
+  args: { partidaId: v.id('partidas') },
+  handler: async (ctx, { partidaId }) => {
+    const p = await ctx.db.get(partidaId);
+    if (p?.estado === 'abierta' && Date.now() > (p.inicio ?? 0) + DURACION_MAX_S * 1000)
+      await ctx.db.patch(p._id, { estado: 'vencida', cierre: Date.now() });
+  },
+});
+
+/** Migra las abiertas anteriores al índice por jugador, en tandas acotadas; también programa su vencimiento. */
+export const migrarAbiertas = internalMutation({
+  args: { cursor: v.union(v.string(), v.null()) },
+  handler: async (ctx, { cursor }) => {
+    const lote = await ctx.db
+      .query('partidas')
+      .withIndex('por_estado', (q) => q.eq('estado', 'abierta'))
+      .paginate({ cursor, numItems: 50 });
+    for (const p of lote.page) {
+      await ctx.scheduler.runAfter(
+        Math.max(0, (p.inicio ?? 0) + DURACION_MAX_S * 1000 + 1 - Date.now()),
+        vencerPartidaRef,
+        { partidaId: p._id },
+      );
+      for (const usuarioId of p.jugadores) {
+        if (p.abandonaron?.includes(usuarioId)) continue;
+        const fila = await ctx.db
+          .query('aperturas')
+          .withIndex('por_usuario', (q) => q.eq('usuarioId', usuarioId))
+          .unique();
+        if (fila && !fila.partidaId) await ctx.db.patch(fila._id, { partidaId: p._id });
+        else if (!fila) await ctx.db.insert('aperturas', { usuarioId, momento: p.inicio ?? 0, partidaId: p._id });
+      }
+    }
+    return { cursor: lote.continueCursor, listo: lote.isDone };
+  },
+});

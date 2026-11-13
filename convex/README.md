@@ -33,8 +33,10 @@ cambia `tokenDe`.
 - `tienda:equipar { itemId }` y `tienda:vestir { avatar }`: solo lo que tenés, cada pieza en su ranura.
 - `partidas:abrirPartida { motor, etapa, juegoId?, modo? }`: motor, etapas y tema salen del último catálogo
   publicado (o del empaquetado); guarda `inicio` con la hora del servidor y `dueno`. Cada jugador tiene como mucho
-  una partida abierta: abrir otra deja las anteriores `vencida` sin pagar, y abrir dos en menos de
-  `APERTURA_MIN_MS` (1 s) se rechaza.
+  una partida activa, referida en `aperturas.partidaId`: abrir otra retira a ese jugador del cobro anterior.
+  Si no queda nadie, la anterior queda `vencida`; en un dúo el compañero conserva su cobro. Abrir dos en menos de
+  `APERTURA_MIN_MS` (1 s) se rechaza con el plazo restante; el cliente reintenta una vez. Cada apertura programa
+  su vencimiento a los 30 min, aunque nadie vuelva a abrir.
 - `partidas:cerrarPartida { partidaId, puntos, estrellas, gano }`: duración = ahora − inicio, `validarResultado`
   con la holgura de `HOLGURA_S`, y paga `premioPartida` + `ganarXp` una sola vez. Imposible → `rechazada`;
   motor sin fila en `TOPES` → `rechazada`; más de 30 min → `vencida`; ajena, ya cerrada o abandonada → no se toca.
@@ -243,7 +245,7 @@ Tablas nuevas: `bloqueos`, `publicos` y `directos`. Campos nuevos opcionales: `r
 ## Jugar con gente de la sala (MC-23, MC-25, MC-31)
 
 - `partidas:abrirJuntos { juegoId }`: partida entre dos (modo `duo`, primera etapa, solo motores del kit) con su
-  semilla y `sala = juego:<id>`. Comparte el turno de apertura con la partida sola: abrir o unirse vence las anteriores de ese jugador sin pago. Hay una pausa de 1 s entre aperturas, aunque la anterior ya esté cerrada. Una tarea programada vence las invitaciones sin segundo jugador a los 3 min. `partidas:unirseJuntos
+  semilla y `sala = juego:<id>`. Comparte el turno de apertura con la partida sola: abrir o unirse retira solo a ese jugador del cobro anterior. Hay una pausa de 1 s entre aperturas, aunque la anterior ya esté cerrada. Una tarea programada vence las invitaciones sin segundo jugador a los 3 min. `partidas:unirseJuntos
   { partidaId }` agrega al segundo (cupo `PARTIDA.cupo`, mientras esté abierta y no hayan pasado 3 min).
 - `salas:paseJuego { partidaId }`: pase para `juego:<id>` y un **acta** firmada (motor, etapa, semilla, cupo) que
   la sala necesita para llevar el reloj. Solo para jugadores de esa partida.
@@ -269,7 +271,9 @@ Los bloqueos tienen un límite duro de 200 en `amigos:bloquear` (`tope-bloqueos`
 La sala guarda las listas completas fuera del adjunto del WebSocket y corta chat e invitaciones en ambos sentidos.
 Los pases anteriores duran como máximo 60 s; una conexión ya abierta recibe los cambios del propio jugador.
 Los viajes compartidos registran todas las cuentas admitidas: se rechaza entrar si alguna bloqueó a la nueva
-cuenta o viceversa. Esa lista se conserva durante el viaje, incluso si alguien se baja.
+cuenta o viceversa. Esa lista admite como máximo 8 jugadores y vence a los 30 min, con borrado programado.
+Pendiente: quien bloqueó a un participante ya admitido tampoco puede reconectar hasta desbloquearlo, aunque
+el otro se haya bajado. Convex no recibe la presencia de la sala del viaje para distinguir ese caso.
 Los avisos de ocupación deben ser estrictamente posteriores al anterior, de hace menos de 75 s y como mucho
 5 s adelantados. La vigencia corre desde la hora firmada, aunque el aviso llegue tarde.
 
@@ -277,3 +281,17 @@ Regresión de la segunda revisión (contra desarrollo, crea y borra invitados de
 `node scripts/test-revision-2.mjs`. Incluye 200 bloqueos y espera los 3 minutos reales del vencimiento
 programado. No la corras junto a publicaciones del panel. La prueba de navegador
 `test-partida-juntos.mjs` usa su servidor local simulado; esta regresión cubre las mutaciones de Convex real.
+
+Regresión de verificación: `node scripts/test-revision-3.mjs`. Crea invitados, comprueba el abandono individual,
+el cobro único del compañero con recibo firmado, los estados admitidos por `paseJuego`, el cupo del viaje y
+los vencimientos del scheduler. `pruebasVerificacion` contiene solo mutaciones internas administrativas que
+adelantan fechas de esas filas de prueba o marcan una como rechazada; no están disponibles para jugadores.
+La prueba borra sus invitados al terminar.
+
+Tras desplegar sobre datos anteriores, `partidas:migrarAbiertas { "cursor": null }` programa los vencimientos y
+completa las referencias de `aperturas` en tandas de 50. Repetí con el cursor devuelto hasta `listo: true`.
+La migración es interna y se puede repetir.
+
+Las cubetas de sala viven en memoria y se conservan al reemplazar un socket. Al cerrar el último socket de una
+cuenta se borran su cubeta y sus bloqueos almacenados. Un pase anterior a un cambio de bloqueo no pisa ese cambio;
+un pase nuevo sí actualiza la lista. Despertar de hibernación vuelve a llenar las cubetas.
