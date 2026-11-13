@@ -181,10 +181,7 @@ export class Sala extends DurableObject<Env> {
     if (yo && !this.jugadores(ws).some((j) => j?.id === yo.id)) {
       this.ritmo.borrar(yo.id);
       await olvidarBloqueos(this.ctx, yo.id);
-      await this.ctx.storage.delete([
-        `ritmo:chat:${yo.id}`,
-        `ritmo:general:${yo.id}`,
-      ]);
+      await this.ctx.storage.delete([`ritmo:chat:${yo.id}`, `ritmo:general:${yo.id}`]);
     }
     const tipo = (yo as { tipo?: string } | null)?.tipo;
     if (tipo === 'juego') return salirPartida(this.ctx, ws);
