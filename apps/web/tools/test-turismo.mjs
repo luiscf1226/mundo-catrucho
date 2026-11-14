@@ -39,15 +39,24 @@ const ok = await run('turismo', file, { hash: '#test,go' }, async (t) => {
     const ruta = p.camino,
       inicio = ruta[Math.max(0, ruta.length - 4)];
     await t.ev(`${P}.teleport(${inicio[0]},${inicio[1] + 0.1},${inicio[2]})`);
+    // W se mantiene hasta llegar (o pasarse), no por un tiempo fijo: sin GPU el juego va a ~1 cuadro por segundo y una
+    // pulsación de 100 ms casi nunca abarca un cuadro, así que el muñeco no avanzaba y parecía un camino bloqueado.
+    // Si de verdad algo tapa el paso, holdUntil agota su espera y la prueba falla igual.
     for (const target of ruta.slice(Math.max(1, ruta.length - 3))) {
       for (let tries = 0; ; tries++) {
         const pos = await t.ev(`${P}.pos`),
           dx = target[0] - pos[0],
-          dz = target[2] - pos[2];
-        if (Math.hypot(dx, dz) < 0.6) break;
-        if (tries > 60) throw Error(`camino bloqueado ${dept}: ${pos} → ${target}`);
+          dz = target[2] - pos[2],
+          d = Math.hypot(dx, dz);
+        if (d < 0.6) break;
+        if (tries > 8) throw Error(`no se detiene en el punto ${dept}: ${pos} → ${target}`);
         await t.ev(`${P}.camYaw=${Math.atan2(-dx, -dz)}`);
-        await t.hold('w', Math.min(180, Math.hypot(dx, dz) * 90));
+        const llego = `(()=>{const p=${P}.pos,x=${target[0]}-p[0],z=${target[2]}-p[2];return Math.hypot(x,z)<0.6||x*${dx / d}+z*${dz / d}<0})()`;
+        try {
+          await t.holdUntil('w', llego, 20000);
+        } catch {
+          throw Error(`camino bloqueado ${dept}: ${await t.ev(`${P}.pos`)} → ${target}`);
+        }
       }
     }
     await t.waitFor(`${S}.profile.turismo.some(r=>r.id==='${p.lugar.id}')`);
