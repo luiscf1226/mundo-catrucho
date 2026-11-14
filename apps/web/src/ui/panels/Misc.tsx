@@ -9,6 +9,7 @@ import { type Clasificacion, type FilaClasificacion, SERVIDOR, servidor } from '
 import { useGame } from '../../core/store';
 import type { MinigameId } from '../../core/types';
 import { playEmote } from '../../game/PlayerController';
+import { calidadEfectiva } from '../../game/quality';
 import { IS_HD } from '../../variant';
 import { Coin, Icon, type IconName } from '../components/Icon';
 import { Bar, Btn, Coins, Note, Panel, Tabs, Tag } from '../components/kit';
@@ -700,10 +701,10 @@ export function SettingsPanel() {
                 key={q}
                 type="button"
                 role="radio"
-                aria-checked={s.quality === q}
-                aria-selected={s.quality === q}
+                aria-checked={calidadEfectiva(s) === q}
+                aria-selected={calidadEfectiva(s) === q}
                 data-testid={`set-quality-${q}`}
-                onClick={act(() => set({ quality: q }))}
+                onClick={act(() => set({ quality: q, calidadElegida: true }))}
                 className="mc-tab flex-1 capitalize"
               >
                 {q}

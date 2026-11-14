@@ -1,12 +1,14 @@
 import { deptById, juegoById } from '../../core/data';
 import { useGame } from '../../core/store';
+import { cx, useTouch } from '../../ui/lib';
 import { eventosEn } from './calendario';
 import { useFecha } from './fecha';
 
 export function BannerEventos() {
   const scene = useGame((s) => s.scene),
     panel = useGame((s) => s.panel);
-  const fecha = useFecha();
+  const fecha = useFecha(),
+    touch = useTouch();
   if (panel || (scene.kind !== 'lobby' && scene.kind !== 'dept')) return null;
   const eventos = eventosEn(fecha, scene.kind === 'dept' ? scene.id : null);
   if (!eventos.length) return null;
@@ -15,7 +17,11 @@ export function BannerEventos() {
       data-testid="eventos"
       data-fecha={fecha}
       aria-label="Fiestas de temporada"
-      className="pointer-events-auto absolute bottom-24 right-16 flex max-h-[30vh] w-60 max-w-[65vw] flex-col gap-2 overflow-auto sm:bottom-5 sm:right-5"
+      className={cx(
+        'pointer-events-auto absolute flex max-h-[30vh] w-60 max-w-[65vw] flex-col gap-2 overflow-auto',
+        // con controles táctiles, abajo a la derecha quedaba debajo de E, 🎯 y emotes: no se leía ni se podía tocar
+        touch ? 'right-3 top-20' : 'bottom-24 right-16 sm:bottom-5 sm:right-5',
+      )}
     >
       {eventos.map((e) => {
         const juego = juegoById(e.juego);

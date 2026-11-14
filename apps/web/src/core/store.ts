@@ -45,6 +45,8 @@ export interface Settings {
   music: number;
   sfx: number;
   quality: 'baja' | 'media' | 'alta';
+  /** true cuando el jugador eligió la calidad en Ajustes: así ya no se aplica la baja automática del celular */
+  calidadElegida?: boolean;
   sens: number;
   invertY: boolean;
   /** MC-22: chat de sala y directos; apagado no se muestra ni se manda nada */

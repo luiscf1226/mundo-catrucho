@@ -120,6 +120,12 @@ export function bindInput() {
     else if (k === 'shift') input.run = false;
   });
   addEventListener('blur', () => input.reset());
+  // Q queda guardada hasta que un juego la usa: una tocada en un minijuego que no la ocupa (el botón táctil Q sale
+  // en todos) no debe gastarse sola en el primer cuadro del siguiente (p. ej. apagar una vela en Niebla).
+  useGame.subscribe((s, antes) => {
+    if (s.mg?.phase === 'playing' && (antes.mg?.phase !== 'playing' || antes.mg.run !== s.mg.run))
+      input.pressed.delete('alt');
+  });
   requestAnimationFrame(padLoop);
 }
 

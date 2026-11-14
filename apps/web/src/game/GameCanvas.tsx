@@ -20,7 +20,7 @@ import { FotografoMemes } from './memes/Fotografo';
 import { MemePop } from './memes/MemePop';
 import { MINIGAME_SCENES } from './minigames';
 import { PlayerController } from './PlayerController';
-import { COMPACT_QUALITY } from './quality';
+import { calidadEfectiva } from './quality';
 import { Viaje } from './viaje/Viaje';
 
 const Department = lazy(() => import('./dept/Department').then((m) => ({ default: m.Department })));
@@ -104,9 +104,8 @@ function ActiveScene() {
 }
 
 export function GameCanvas() {
-  const requestedQuality = useGame((s) => s.profile.settings.quality),
+  const quality = useGame((s) => calidadEfectiva(s.profile.settings)),
     wrap = useRef<HTMLDivElement>(null);
-  const quality = COMPACT_QUALITY ? 'baja' : requestedQuality;
   const [loading, setLoading] = useState(false);
   useEffect(() => (wrap.current ? bindPointer(wrap.current) : undefined), []);
   // al volver al menú se desmonta el lienzo: cerrá la sala en vivo para no dejar el cupo ocupado. Va aquí y no en
