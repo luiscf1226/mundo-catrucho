@@ -29,6 +29,7 @@ function agitar(m: Sesion) {
 
 const motor = defineMotor({
   id: 'copan.atol',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   fondo: 'pueblo',
   guia: {
     goal: 'Mantené el atol en suspensión sin cambiar el fuego. A/D y F agita lateral; W/S incorpora espuma.',

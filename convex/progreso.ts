@@ -22,6 +22,7 @@ import {
   queryGeneric,
 } from 'convex/server';
 import { v } from 'convex/values';
+import { turismoById } from '../docs/generador/turismo';
 import {
   asegurarContadores,
   avanzar,
@@ -62,6 +63,7 @@ export const estado = query({
     const hoy = await misionesDeHoy(ctx, usuarioId, Date.now());
     return {
       visitas: visitas.map((x) => x.deptId),
+      turismo: visitas.flatMap((x) => x.turismo ?? []),
       recuerdos: visitas.filter((x) => x.recuerdo).map((x) => x.deptId),
       logros: await logrosDe(ctx, usuarioId),
       misiones: { fecha: hoy.fecha, misiones: hoy.misiones },
@@ -103,6 +105,27 @@ export const recoger = mutation({
     pagar(s, PREMIO_RECUERDO);
     await avanzar(s, [{ tipo: 'collect', cantidad: 1 }]);
     return { ok: true as const, ...(await terminar(s)) };
+  },
+});
+
+/** Turismo no paga premios: valida el lugar, la visita y la secuencia; repetir converge al mismo recuerdo. */
+export const turismo = mutation({
+  args: { ...quien, lugarId: v.string(), completa: v.boolean() },
+  handler: async (ctx, args) => {
+    const lugar = turismoById(args.lugarId);
+    if (!lugar) return { ok: false as const, motivo: 'lugar' };
+    const s = await sesion(ctx, args);
+    const visita = await ctx.db
+      .query('visitas')
+      .withIndex('por_usuario', (q) => q.eq('usuarioId', s.usuarioId).eq('deptId', lugar.dept))
+      .first();
+    if (!visita) return { ok: false as const, motivo: 'sin-visita' };
+    const recuerdos = visita.turismo ?? [];
+    const previo = recuerdos.find((x) => x.id === lugar.id);
+    if (args.completa && !previo) return { ok: false as const, motivo: 'sin-descubrir' };
+    const recuerdo = { id: lugar.id, completa: !!previo?.completa || args.completa };
+    await ctx.db.patch(visita._id, { turismo: [...recuerdos.filter((x) => x.id !== lugar.id), recuerdo] });
+    return { ok: true as const, recuerdo };
   },
 });
 
@@ -234,12 +257,18 @@ export const subirAvanceLocal = mutation({
     visitados: v.array(v.string()),
     recuerdos: v.array(v.string()),
     juegos: v.array(juegoLocal),
+    turismo: v.optional(v.array(v.object({ id: v.string(), completa: v.boolean() }))),
   },
   handler: async (ctx, args) => {
     const s = await sesion(ctx, args),
       c = await asegurarContadores(ctx, s.usuarioId);
     if (c.migrado) return { ok: false as const, motivo: 'ya' };
-    if (args.visitados.length > 100 || args.recuerdos.length > 100 || args.juegos.length > 2000)
+    if (
+      args.visitados.length > 100 ||
+      args.recuerdos.length > 100 ||
+      args.juegos.length > 2000 ||
+      (args.turismo?.length ?? 0) > 200
+    )
       return { ok: false as const, motivo: 'demasiado' };
     const catalogo = await juegosDelCatalogo(ctx);
     const limpio = limpiarAvanceLocal(
@@ -258,6 +287,23 @@ export const subirAvanceLocal = mutation({
         .first();
       if (!ya) await ctx.db.insert('visitas', { usuarioId: s.usuarioId, deptId, recuerdo });
       else if (recuerdo && !ya.recuerdo) await ctx.db.patch(ya._id, { recuerdo: true });
+    }
+    for (const recuerdo of args.turismo ?? []) {
+      const lugar = turismoById(recuerdo.id);
+      if (!lugar || !limpio.visitas.includes(lugar.dept)) continue;
+      const visita = await ctx.db
+        .query('visitas')
+        .withIndex('por_usuario', (q) => q.eq('usuarioId', s.usuarioId).eq('deptId', lugar.dept))
+        .first();
+      if (!visita) continue;
+      const previos = visita.turismo ?? [],
+        anterior = previos.find((x) => x.id === lugar.id);
+      await ctx.db.patch(visita._id, {
+        turismo: [
+          ...previos.filter((x) => x.id !== lugar.id),
+          { id: lugar.id, completa: recuerdo.completa || !!anterior?.completa },
+        ],
+      });
     }
     for (const j of limpio.juegos) {
       const prev = await ctx.db

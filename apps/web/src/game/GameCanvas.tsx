@@ -20,6 +20,7 @@ import { FotografoMemes } from './memes/Fotografo';
 import { MemePop } from './memes/MemePop';
 import { MINIGAME_SCENES } from './minigames';
 import { PlayerController } from './PlayerController';
+import { calidadEfectiva } from './quality';
 import { Viaje } from './viaje/Viaje';
 
 const Department = lazy(() => import('./dept/Department').then((m) => ({ default: m.Department })));
@@ -103,7 +104,7 @@ function ActiveScene() {
 }
 
 export function GameCanvas() {
-  const quality = useGame((s) => s.profile.settings.quality),
+  const quality = useGame((s) => calidadEfectiva(s.profile.settings)),
     wrap = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(false);
   useEffect(() => (wrap.current ? bindPointer(wrap.current) : undefined), []);

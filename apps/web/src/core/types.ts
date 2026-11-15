@@ -2,6 +2,21 @@ export type V3 = [number, number, number];
 
 /** Motores de minijuego. Cada juego del catálogo (shared/data/catalogo) es un motor + un tema del departamento. */
 export type MinigameId =
+  | 'intibuca.carrera'
+  | 'intibuca.telar'
+  | 'intibuca.hongos'
+  | 'intibuca.callejero'
+  | 'intibuca.papas'
+  | 'intibuca.semilla'
+  | 'intibuca.vaho'
+  | 'intibuca.ondas'
+  | 'lempira.barro'
+  | 'lempira.opalo'
+  | 'lempira.cuencas'
+  | 'lempira.rebote'
+  | 'lempira.pigmentos'
+  | 'lempira.trapiche'
+  | 'lempira.termal'
   | 'copan.cadera'
   | 'copan.glifos'
   | 'copan.guaras'
@@ -236,6 +251,8 @@ export type PanelId =
   | 'controles'
   | 'emotes'
   | 'memes'
+  | 'recuerdos'
+  | 'turismo'
   | 'proyecto';
 export type Scene =
   | { kind: 'lobby' }

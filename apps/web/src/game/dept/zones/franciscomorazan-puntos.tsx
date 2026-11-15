@@ -1,37 +1,21 @@
-import { useRef, useState } from 'react';
-import { player } from '../../../core/player';
+import { useState } from 'react';
 import { useGame } from '../../../core/store';
 import type { V3 } from '../../../core/types';
-import { Ball, Block, Cyl, Interactable, Label, useTick } from '../../kit';
+import { Ball, Block, Cyl, Interactable, Label } from '../../kit';
 import puntos from './franciscomorazan-puntos.json';
 export function PuntosFM({ altura }: { altura: (x: number, z: number) => number }) {
   return (
     <>
-      {puntos.map((p, i) => (
-        <Punto key={p.id} p={p} i={i} pos={[p.x, altura(p.x, p.z), p.z]} />
-      ))}
+      {puntos.map((p, i) => p.tipo === 'locura' && <Punto key={p.id} p={p} i={i} pos={[p.x, altura(p.x, p.z), p.z]} />)}
     </>
   );
 }
 function Punto({ p, i, pos }: { p: (typeof puntos)[number]; i: number; pos: V3 }) {
-  const visto = useRef(false),
-    [descubierto, marcar] = useState(false),
-    [activo, activar] = useState(false);
-  useTick(() => {
-    if (
-      !visto.current &&
-      Math.hypot(player.pos[0] - pos[0], player.pos[2] - pos[2]) < 2.8 &&
-      Math.abs(player.pos[1] - pos[1]) < 3
-    ) {
-      visto.current = true;
-      marcar(true);
-      useGame.getState().toast(`Descubriste: ${p.nombre}`, p.tipo === 'locura' ? '✨' : '📍');
-    }
-  });
+  const [activo, activar] = useState(false);
   return (
     <group position={pos}>
-      <Cyl pos={[0, 0.15, 0]} r={1.5} h={0.3} color={descubierto ? '#35b898' : '#ddb970'} mat="stone" solid={false} />
-      <Label pos={[0, 3.3, 0]} text={`${descubierto ? '✓ ' : ''}${p.nombre}`} h={0.35} />
+      <Cyl pos={[0, 0.15, 0]} r={1.5} h={0.3} color="#ddb970" mat="stone" solid={false} />
+      <Label pos={[0, 3.3, 0]} text={p.nombre} h={0.35} />
       {p.tipo === 'lugar' ? (
         <>
           <Block pos={[0, 0.9, 0]} size={[1.7, 1.5, 0.2]} color="#31664f" mat="wood" solid={false} />

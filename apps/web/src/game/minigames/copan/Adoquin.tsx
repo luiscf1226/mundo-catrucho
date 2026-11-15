@@ -29,6 +29,7 @@ function avanzar(m: Sesion) {
 
 const motor = defineMotor({
   id: 'copan.adoquin',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   fondo: 'pueblo',
   guia: {
     goal: 'Elegí diagonales de rueda para que la taza no salte. A/D ajusta delante, W/S atrás; evitá impactos al mismo tiempo.',

@@ -39,6 +39,7 @@ function fotografiar(m: Sesion) {
 
 const motor = defineMotor({
   id: 'copan.estelas',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   fondo: 'ruinas',
   guia: {
     goal: 'Rotá la réplica y cotejá las dos fotografías. A/D giro, W/S vista frontal o posterior; F registra cada vista.',

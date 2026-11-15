@@ -25,6 +25,7 @@ function reiniciar(s: Estado) {
 }
 const motor = defineMotor({
   id: 'olancho.cuajada',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   guia: {
     goal: 'Agregá un peso con F. Esperá que drene 25% antes del siguiente. Cuatro pesos completan la cuajada.',
     keys: [['F / clic / B / RT', 'agregar un peso']],

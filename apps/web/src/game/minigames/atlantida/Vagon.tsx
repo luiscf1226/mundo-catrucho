@@ -128,6 +128,7 @@ function girar(m: Sesion, dir: 1 | -1) {
 
 const motor = defineMotor({
   id: 'atlantida.vagon',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   fondo: 'selva',
   guia: {
     goal: 'Elegí apartadero y ordená los vagones. Tu tren tiene que caber entero y llegar antes que el convoy.',

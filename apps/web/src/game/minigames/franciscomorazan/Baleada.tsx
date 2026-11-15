@@ -32,6 +32,7 @@ function servir(m: Sesion) {
 }
 const motor = defineMotor({
   id: 'franciscomorazan.baleada',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   guia: {
     goal: 'Doblá ambos bordes siguiendo los frijoles. Dejá abertura y serví con F; si jalás de más, rompés la masa.',
     keys: [

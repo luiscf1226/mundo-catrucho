@@ -98,6 +98,7 @@ function remar(m: Sesion, dir: 1 | -1) {
 
 const motor = defineMotor({
   id: 'atlantida.balsa',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   fondo: 'selva',
   guia: {
     goal: 'Elegí remero y da paladas para meter la balsa en los remansos verdes sin pegarle a las rocas.',

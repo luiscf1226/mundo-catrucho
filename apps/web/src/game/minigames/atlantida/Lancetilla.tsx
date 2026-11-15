@@ -257,6 +257,7 @@ function Semilla({ e, pos }: { e: Especie; pos: V3 }) {
 
 const motor = defineMotor({
   id: 'atlantida.lancetilla',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   fondo: 'selva',
   guia: {
     goal: 'Juntá fruto, semilla y placa de la misma planta. El color es la familia; la placa dice las formas.',

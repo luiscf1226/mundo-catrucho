@@ -59,6 +59,7 @@ function foto(m: Sesion) {
 }
 const motor = defineMotor({
   id: 'islas.flotacion',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   fondo: 'mar',
   guia: {
     goal: 'Con poquito aire en el chaleco y respiración pareja, quedate quieto a la profundidad pedida y tomá la foto.',

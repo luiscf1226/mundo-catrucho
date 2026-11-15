@@ -33,6 +33,7 @@ function cruzar(m: Sesion) {
 
 const motor = defineMotor({
   id: 'copan.estratigrafia',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   fondo: 'ruinas',
   guia: {
     goal: 'Elegí una fase y recorré solo sus accesos. A/D rueda temporal, W/S puerta; F cruza al siguiente patio.',

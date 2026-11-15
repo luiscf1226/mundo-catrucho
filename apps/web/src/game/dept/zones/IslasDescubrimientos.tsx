@@ -1,7 +1,5 @@
 import { useRef, useState } from 'react';
 import type * as THREE from 'three';
-import { player } from '../../../core/player';
-import { useGame } from '../../../core/store';
 import { Ball, Block, Cyl, Label, Plate, useTick } from '../../kit';
 import puntos from './islas-puntos.json';
 
@@ -108,26 +106,13 @@ function Semaforo() {
 }
 function Punto({ indice, y }: { indice: number; y: number }) {
   const p = puntos[indice];
-  const [visto, descubrir] = useState(false);
-  const cerca = useRef(false);
   const loco = p.id.includes('locura');
-  useTick(() => {
-    if (
-      useGame.getState().dialog ||
-      visto ||
-      cerca.current ||
-      Math.hypot(player.pos[0] - p.x, player.pos[2] - p.z) > 2.5
-    )
-      return;
-    cerca.current = true;
-    descubrir(true);
-    useGame.getState().showDialog({ title: p.nombre, text: p.texto, icon: loco ? '✨' : '📍' });
-  });
+
   return (
     <group position={[p.x, y, p.z]}>
-      <Cyl pos={[0, 0.04, 0]} r={2} h={0.08} mat="sand" color={visto ? '#91c786' : '#ffda75'} solid={false} />
+      <Cyl pos={[0, 0.04, 0]} r={2} h={0.08} mat="sand" color="#ffda75" solid={false} />
       <Block pos={[0, 1, -1]} size={[0.12, 2, 0.12]} mat="wood" color="#795333" solid={false} />
-      <Label pos={[0, 2.5, -1]} text={`${visto ? '✓' : loco ? '✨' : '📍'} ${p.nombre}`} h={0.32} />
+      <Label pos={[0, 2.5, -1]} text={`${loco ? '✨' : '📍'} ${p.nombre}`} h={0.32} />
       {p.id === 'islas.locura-1' && (
         <group position={[0, 0, 0.6]}>
           <Selfie />
@@ -150,9 +135,9 @@ function Punto({ indice, y }: { indice: number; y: number }) {
 export function IslasDescubrimientos({ altura }: { altura: (x: number, z: number) => number }) {
   return (
     <>
-      {puntos.map((p, i) => (
-        <Punto key={p.id} indice={i} y={Math.max(0, altura(p.x, p.z))} />
-      ))}
+      {puntos.map(
+        (p, i) => p.id.includes('locura') && <Punto key={p.id} indice={i} y={Math.max(0, altura(p.x, p.z))} />,
+      )}
     </>
   );
 }

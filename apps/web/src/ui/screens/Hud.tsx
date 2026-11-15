@@ -7,6 +7,7 @@ import { input } from '../../core/input';
 import { player } from '../../core/player';
 import { mgTitulo, useGame } from '../../core/store';
 import type { PanelId } from '../../core/types';
+import { BannerEventos } from '../../game/eventos/Banner';
 import { ChatSala } from '../chat/ChatSala';
 import { Coin, Icon, type IconName, Star } from '../components/Icon';
 import { Bar, Confetti, IBtn } from '../components/kit';
@@ -20,6 +21,7 @@ const SIDE: [PanelId, IconName, string][] = [
   ['emotes', 'emote', 'Emotes'],
   ['amigos', 'users', 'Amigos'],
   ['memes', 'sparkle', 'Memes'],
+  ['recuerdos', 'map', 'Recuerdos'],
   ['pausa', 'pause', 'Pausa'],
 ];
 
@@ -424,6 +426,7 @@ export function Hud() {
       {!panel && (!mg || playing) && !overview && <Prompt />}
       {!panel && lobby && !mg && overview && <OverviewBar />}
       {!overview && <ChatSala />}
+      <BannerEventos />
       <Celebrations />
     </div>
   );

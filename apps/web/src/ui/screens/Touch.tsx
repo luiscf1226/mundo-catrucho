@@ -76,6 +76,18 @@ export function TouchControls() {
         />
       </div>
       <div className="mc-pad pointer-events-none relative">
+        {mg && (
+          <button
+            type="button"
+            data-testid="touch-alt"
+            aria-label="Acción alterna (Q)"
+            className="mc-tbtn pointer-events-auto touch-none"
+            style={{ right: 150, bottom: 112 }}
+            onPointerDown={tap(() => input.press('alt'))}
+          >
+            <b className="font-display text-xl">Q</b>
+          </button>
+        )}
         <button
           type="button"
           data-testid="touch-emote"

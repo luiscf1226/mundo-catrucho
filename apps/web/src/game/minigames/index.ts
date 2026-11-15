@@ -19,6 +19,22 @@ function motor(load: () => Promise<{ default: FC; guia?: Guia }>) {
   };
 }
 const MOTORS = {
+  'intibuca.carrera': motor(() => import('./intibuca/Carrera').then((m) => ({ ...m, default: m.Carrera }))),
+  'intibuca.telar': motor(() => import('./intibuca/Telar').then((m) => ({ ...m, default: m.Telar }))),
+  'intibuca.hongos': motor(() => import('./intibuca/Hongos').then((m) => ({ ...m, default: m.Hongos }))),
+  'intibuca.callejero': motor(() => import('./intibuca/Callejero').then((m) => ({ ...m, default: m.Callejero }))),
+  'intibuca.papas': motor(() => import('./intibuca/Papas').then((m) => ({ ...m, default: m.Papas }))),
+  'intibuca.semilla': motor(() => import('./intibuca/Semilla').then((m) => ({ ...m, default: m.Semilla }))),
+  'intibuca.vaho': motor(() => import('./intibuca/Vaho').then((m) => ({ ...m, default: m.Vaho }))),
+  'intibuca.ondas': motor(() => import('./intibuca/Ondas').then((m) => ({ ...m, default: m.Ondas }))),
+  'lempira.barro': motor(() => import('./lempira/Barro').then((m) => ({ ...m, default: m.Barro }))),
+  'lempira.opalo': motor(() => import('./lempira/Opalo').then((m) => ({ ...m, default: m.Opalo }))),
+  'lempira.cuencas': motor(() => import('./lempira/Cuencas').then((m) => ({ ...m, default: m.Cuencas }))),
+  'lempira.rebote': motor(() => import('./lempira/Rebote').then((m) => ({ ...m, default: m.Rebote }))),
+  'lempira.pigmentos': motor(() => import('./lempira/Pigmentos').then((m) => ({ ...m, default: m.Pigmentos }))),
+  'lempira.trapiche': motor(() => import('./lempira/Trapiche').then((m) => ({ ...m, default: m.Trapiche }))),
+  'lempira.termal': motor(() => import('./lempira/Termal').then((m) => ({ ...m, default: m.Termal }))),
+
   'copan.cadera': motor(() => import('./copan/Cadera').then((m) => ({ ...m, default: m.Cadera }))),
   'copan.glifos': motor(() => import('./copan/Glifos').then((m) => ({ ...m, default: m.Glifos }))),
   'copan.guaras': motor(() => import('./copan/Guaras').then((m) => ({ ...m, default: m.Guaras }))),
@@ -89,7 +105,7 @@ const MOTORS = {
   corte: motor(() => import('./Corte').then((m) => ({ ...m, default: m.Corte }))),
   monta: motor(() => import('./Monta').then((m) => ({ ...m, default: m.Monta }))),
   ritmo: motor(() => import('./Ritmo').then((m) => ({ ...m, default: m.Ritmo }))),
-  ruta: motor(() => import('./Ruta').then((m) => ({ ...m, default: m.Ruta }))),
+  ruta: motor(() => import('./lempira/Sendero').then((m) => ({ ...m, default: m.Ruta }))),
   pesca: motor(() => import('./Pesca').then((m) => ({ ...m, default: m.Pesca }))),
   atrapa: motor(() => import('./Atrapa').then((m) => ({ ...m, default: m.Atrapa }))),
   cocina: motor(() => import('./Cocina').then((m) => ({ ...m, default: m.Cocina }))),

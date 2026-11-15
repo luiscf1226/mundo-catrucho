@@ -19,6 +19,7 @@ import {
   premioPartida,
 } from '@mundo-catrucho/reglas';
 import { create } from 'zustand';
+import { type RecuerdoTuristico, turismoById } from '../../../../docs/generador/turismo';
 import { OPCIONES, rutaParaVehiculo } from '../game/viaje/opciones';
 import {
   ACHIEVEMENTS,
@@ -44,6 +45,8 @@ export interface Settings {
   music: number;
   sfx: number;
   quality: 'baja' | 'media' | 'alta';
+  /** true cuando el jugador eligió la calidad en Ajustes: así ya no se aplica la baja automática del celular */
+  calidadElegida?: boolean;
   sens: number;
   invertY: boolean;
   /** MC-22: chat de sala y directos; apagado no se muestra ni se manda nada */
@@ -75,6 +78,7 @@ export interface RankRow {
   bot?: boolean;
 }
 export interface Profile {
+  turismo: RecuerdoTuristico[];
   name: string;
   created: boolean;
   avatar: AvatarConfig;
@@ -154,6 +158,7 @@ function pickDaily(date: string): DailyMission[] {
   return out;
 }
 const freshProfile = (): Profile => ({
+  turismo: [],
   name: 'Catracho',
   created: false,
   avatar: { ...SHOP.defaultAvatar },
@@ -263,6 +268,7 @@ export interface Game {
   useEmote(id: string): boolean;
   /** Mete el meme al álbum. Devuelve true si era nuevo. No da premios. */
   verMeme(id: string): boolean;
+  registrarTurismo(id: string, completa: boolean): Promise<boolean>;
   alAire(id: string): void;
   bump(type: string, amount?: number, target?: string): void;
   claimMission(id: string): boolean;
@@ -451,6 +457,7 @@ export const useGame = create<Game>((set, get) => {
   /** Copia todo el avance del servidor: visitas, recuerdos, logros, misiones y etapas. */
   const aplicarEstado = (e: EstadoServidor) =>
     commit((p) => {
+      p.turismo = e.turismo ?? [];
       p.visited = [...e.visitas];
       p.collected = [...e.recuerdos];
       p.achievements = [...e.logros];
@@ -974,6 +981,26 @@ export const useGame = create<Game>((set, get) => {
       return true;
     },
     alAire: (id) => set((s) => ({ memeAlAire: { id, n: (s.memeAlAire?.n ?? 0) + 1 } })),
+    registrarTurismo: async (id, completa) => {
+      const lugar = turismoById(id);
+      if (!lugar) return false;
+      const previo = get().profile.turismo.find((x) => x.id === id);
+      if (previo && (!completa || previo.completa)) return true;
+      if (completa && !previo) return false;
+      let recuerdo = { id, completa };
+      if (SERVIDOR) {
+        const r = await servidor.turismo(id, completa);
+        if (!r.ok) {
+          get().toast('No se guardó. Acercate y probá de nuevo.', '📡');
+          return false;
+        }
+        recuerdo = r.recuerdo;
+      }
+      commit((p) => {
+        p.turismo = [...p.turismo.filter((x) => x.id !== id), recuerdo];
+      });
+      return true;
+    },
     verMeme: (id) => {
       if (!memeById(id) || get().profile.memes.includes(id)) return false;
       commit((p) => {
@@ -1038,6 +1065,7 @@ export const useGame = create<Game>((set, get) => {
       if (e && !e.migrado) {
         const local = get().profile;
         await servidor.subirAvance({
+          turismo: local.turismo,
           visitados: local.visited,
           recuerdos: local.collected,
           juegos: Object.entries(local.juegos).map(([juegoId, g]) => ({

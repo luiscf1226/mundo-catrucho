@@ -9,6 +9,7 @@ import { player } from '../../core/player';
 import { useGame } from '../../core/store';
 import type { AvatarState, Comida, Department, Juego, Palabra, V3 } from '../../core/types';
 import { art, Ground, Interactable, Label, Plate, Spawn, useTick } from '../kit';
+import { COMPACT_QUALITY } from '../quality';
 import { decorFor } from './decor';
 import { clampTo, type Layout, layoutOf, type StationLay } from './ext';
 import { Build, bl, bx, cy, mergePieces, type Pc, PI, place, rotXZ, type XZ } from './lib';
@@ -375,7 +376,11 @@ export function Lugares({ d, spec }: { d: Department; spec: ZoneSpec }) {
         );
       })}
       <Cocineras foods={plans.flatMap((p) => p.foods)} />
-      <Bots lay={lay} plans={plans} n={Math.min(4, Math.max(2, Math.round(cat.juegos.length / 4)))} />
+      <Bots
+        lay={lay}
+        plans={plans}
+        n={COMPACT_QUALITY ? 1 : Math.min(4, Math.max(2, Math.round(cat.juegos.length / 4)))}
+      />
     </>
   );
 }

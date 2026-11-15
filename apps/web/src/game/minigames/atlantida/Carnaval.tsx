@@ -92,6 +92,7 @@ function cerrar(m: Sesion) {
 
 const motor = defineMotor({
   id: 'atlantida.carnaval',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   fondo: 'ciudad',
   guia: {
     goal: 'Deslizá barras de compases a cada calle para que las comparsas cierren la frase justo en el cruce.',

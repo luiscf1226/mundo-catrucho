@@ -46,10 +46,12 @@ export default defineSchema({
     mejor: v.number(),
     veces: v.number(),
   }).index('por_usuario_juego', ['usuarioId', 'juegoId']),
-  visitas: defineTable({ usuarioId: v.id('usuarios'), deptId: v.string(), recuerdo: v.boolean() }).index(
-    'por_usuario',
-    ['usuarioId', 'deptId'],
-  ),
+  visitas: defineTable({
+    usuarioId: v.id('usuarios'),
+    deptId: v.string(),
+    recuerdo: v.boolean(),
+    turismo: v.optional(v.array(v.object({ id: v.string(), completa: v.boolean() }))),
+  }).index('por_usuario', ['usuarioId', 'deptId']),
   misionesDia: defineTable({
     usuarioId: v.id('usuarios'),
     fecha: v.string(),

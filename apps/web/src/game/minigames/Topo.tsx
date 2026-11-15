@@ -38,6 +38,7 @@ function tirar(m: Sesion, dt: number) {
 }
 const motor = defineMotor({
   id: 'cortes.topo',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   guia: {
     goal: 'Separá el sabor pedido con dos tirones parejos. A/D regula el sello izquierdo; W/S el derecho. F sostenido no hace falta: pulsá para tirar un segundo.',
     ...controles,

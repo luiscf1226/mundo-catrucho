@@ -164,6 +164,11 @@ export async function launch(
   };
   const t = {
     errors,
+    async cdp(method, params) {
+      const response = await send(method, params);
+      if (response.error) throw new Error(`${method}: ${response.error.message}`);
+      return response.result;
+    },
     requests,
     ev,
     sleep,

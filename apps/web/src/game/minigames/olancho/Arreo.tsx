@@ -43,6 +43,7 @@ function caminar(m: Sesion, x: number, y: number, dt: number) {
 }
 const motor = defineMotor({
   id: 'olancho.arreo',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   guia: {
     goal: 'Rodeá el hato. El costado cambia rumbo; detrás de su línea avanza al corral. No lo toqués ni te pongás de frente.',
     ...controles,

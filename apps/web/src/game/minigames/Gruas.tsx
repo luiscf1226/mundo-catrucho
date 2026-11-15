@@ -19,6 +19,7 @@ function programar(m: Sesion, riel: number) {
 }
 const motor = defineMotor({
   id: 'cortes.gruas',
+  modos: { duo: { tipo: 'apoyo', cada: 4 }, abierto: { tipo: 'objetivo-comun', bots: 3, cada: 6 } },
   guia: { goal: 'Programá riel 1 o 2 según el manifiesto. Esperá a que la otra grúa libere el cruce.', ...controles },
   etapa: (p) => ({ velocidad: 0.32 + p.dif * 0.18 }),
   metas: (p) => [120 + Math.round(p.dif * 80), 300, 500],
@@ -71,8 +72,7 @@ const motor = defineMotor({
     m.lineas = [`Cola ${s.cola.map((r) => r + 1).join(' → ') || 'vacía'} · Bloqueo ${s.bloqueo.toFixed(1)} s`];
     m.stats = { entregas: s.entregas, choques: s.choques, cola: s.cola.length, activas: s.cargas.length };
   },
-  bot: (m, _dt, actor) => {
-    if (actor === 'compa' && m.tiempo % 4 > _dt) return;
+  bot: (m, _dt) => {
     const s = m.datos;
     if (!s.cola.length && !s.cargas.length && s.bloqueo === 0) programar(m, s.manifiesto);
   },

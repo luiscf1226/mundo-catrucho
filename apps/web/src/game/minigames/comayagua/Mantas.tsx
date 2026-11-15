@@ -94,6 +94,7 @@ function paso(m: Sesion, dt: number) {
 }
 const motor = defineMotor({
   id: 'comayagua.mantas',
+  modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   fondo: 'finca',
   guia: {
     goal: 'Atajá los mangos con la primera manta, pasalos a la segunda y de ahí al guacal, sin golpes ni caídas.',
