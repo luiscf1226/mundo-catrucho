@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import type { Group } from 'three';
 import { useGame } from '../../../core/store';
 import { Ball, Block, Cyl, Interactable, Label, useTick } from '../../kit';
+import { reaccionLocura } from '../../reacciones';
 import puntos from './valle-puntos.json';
 
 /** Las tres locuras de Valle: una concha con ventanita, un punche de papel que corre el marco y un marco que se estira. */
@@ -29,6 +30,7 @@ function Locura({ indice: i, altura }: { indice: number; altura: number }) {
   function usar() {
     hacer(true);
     reloj.current = 0;
+    reaccionLocura();
     useGame.getState().showDialog({ title: p.nombre, text: p.texto, icon: '✨' });
   }
   const pos: [number, number, number] = [p.pos[0], altura, p.pos[1]];

@@ -192,7 +192,13 @@ export type Anim =
   | 'throw'
   | 'carry'
   | 'drive'
-  | 'sit';
+  | 'sit'
+  // MC-58: animaciones exageradas (emote del gol, victoria, choque contra pared, asombro de locura, mareo)
+  | 'gol'
+  | 'victoria'
+  | 'choque'
+  | 'asombro'
+  | 'mareo';
 
 export interface AvatarConfig {
   /** cuerpo: 'h' hombre, 'm' mujer */ body?: 'h' | 'm';

@@ -13,6 +13,7 @@ import { player } from '../core/player';
 import { isPaused, useGame } from '../core/store';
 import type { Anim } from '../core/types';
 import { art } from './kit/art';
+import { useReacciones } from './reacciones';
 
 const tmp = new THREE.Vector3(),
   look = new THREE.Vector3();
@@ -34,7 +35,7 @@ const EMOTE_ANIM: Record<string, Anim> = {
   emote_punta: 'dance',
   emote_celebrar: 'celebrate',
   emote_aplaudir: 'clap',
-  emote_gol: 'celebrate',
+  emote_gol: 'gol',
   emote_sique: 'dance2',
 };
 /** Lanza un emote del jugador (lo usa la rueda de emotes de la interfaz). */
@@ -51,7 +52,16 @@ export function PlayerController() {
   const avatar = useGame((s) => s.profile.avatar),
     name = useGame((s) => s.profile.name);
   const camera = useThree((s) => s.camera) as THREE.PerspectiveCamera;
-  const st = useRef({ over: 0, coyote: 0, buffer: 0, stepT: 0, wasGround: true, camPos: new THREE.Vector3(0, 6, 10) });
+  const st = useRef({
+    over: 0,
+    coyote: 0,
+    buffer: 0,
+    stepT: 0,
+    wasGround: true,
+    libre: true,
+    camPos: new THREE.Vector3(0, 6, 10),
+  });
+  useReacciones();
   const [vehicleKind, setVehicleKind] = useState('');
   const Vehicle = (art.props as any)[vehicleKind] as undefined | ((p: any) => any);
 
@@ -159,7 +169,18 @@ export function PlayerController() {
           audio.sfx('jump');
           if (player.emote) player.emote = null;
         }
+        const x0 = b.pos[0],
+          z0 = b.pos[2],
+          quiere = Math.hypot(b.vel[0], b.vel[2]) * dt;
         stepBody(b, dt);
+        // MC-58: corriendo de frente contra una pared, el muñeco se da el golpe (solo la animación; la física igual)
+        if (ctl && b.grounded && !b.on?.vel && quiere > 6.4 * dt) {
+          const avanzo = Math.hypot(b.pos[0] - x0, b.pos[2] - z0);
+          if (avanzo < quiere * 0.2) {
+            if (s.libre && !player.override) player.play('choque', 0.75);
+            s.libre = false;
+          } else if (avanzo > quiere * 0.6) s.libre = true;
+        }
         if (b.grounded && !s.wasGround) audio.sfx('land');
         s.wasGround = b.grounded;
         if (b.pos[1] < phys.killY) player.respawn();

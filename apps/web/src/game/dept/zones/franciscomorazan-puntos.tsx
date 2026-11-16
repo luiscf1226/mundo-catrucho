@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useGame } from '../../../core/store';
 import type { V3 } from '../../../core/types';
 import { Ball, Block, Cyl, Interactable, Label } from '../../kit';
+import { reaccionLocura } from '../../reacciones';
 import puntos from './franciscomorazan-puntos.json';
 export function PuntosFM({ altura }: { altura: (x: number, z: number) => number }) {
   return (
@@ -70,6 +71,7 @@ function Punto({ p, i, pos }: { p: (typeof puntos)[number]; i: number; pos: V3 }
         icon={p.tipo === 'locura' ? '✨' : '📍'}
         onUse={() => {
           activar(!activo);
+          if (p.tipo === 'locura') reaccionLocura();
           useGame.getState().showDialog({ title: p.nombre, text: p.texto, icon: p.tipo === 'locura' ? '✨' : '📍' });
         }}
       />

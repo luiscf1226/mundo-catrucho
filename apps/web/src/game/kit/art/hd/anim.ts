@@ -2,6 +2,7 @@
 // hueso + desplazamiento de la raíz) a partir del tiempo; el avatar mezcla poses con pesos suavizados, así que
 // pasar de una animación a otra nunca da saltos.
 import type { Anim } from '../../../../core/types';
+import { asombro as curvaAsombro, choque as curvaChoque, victoria as curvaVictoria } from '../exagera';
 import { B, LEG } from './avatarGeo';
 
 /** 3 de posición de la raíz + 3 ángulos por cada uno de los 14 huesos animados */
@@ -22,6 +23,11 @@ export const ANIMS: Anim[] = [
   'carry',
   'drive',
   'sit',
+  'gol',
+  'victoria',
+  'choque',
+  'asombro',
+  'mareo',
 ];
 export interface Ctx {
   /** tiempo global */ t: number /** tiempo desde que empezó la animación */;
@@ -208,38 +214,54 @@ function sique(p: P, c: Ctx) {
   set(p, AR, 0.3 * (1 - r) - 0.2 * r, 0, -0.85 - 1.75 * r);
   set(p, FR, 0, 0, 2.05 * (1 - r) + (0.4 + 0.4 * sin(c.t * 9)) * r);
 }
+/** celebrar: brincos grandes con las rodillas encogidas y los puños arriba, uno y otro */
 function celebrate(p: P, c: Ctx) {
   const f = c.t * 8.5,
     j = sin(f),
     up = max(0, j),
-    dn = max(0, -j);
-  p[1] += up * 0.26;
-  bend(p, 0.08 + dn * 0.38);
-  set(p, AL, -0.2, 0, 2.55 + 0.2 * sin(f * 2));
-  set(p, FL, 0, 0, -0.3);
-  set(p, AR, -0.2, 0, -2.55 - 0.2 * sin(f * 2));
-  set(p, FR, 0, 0, 0.3);
-  set(p, HEAD, -0.22);
-  set(p, CHEST, -0.1);
-  add(p, TL, 0, 0, 0.14 * up);
-  add(p, TR, 0, 0, -0.14 * up);
+    dn = max(0, -j),
+    alt = sin(f * 0.5);
+  p[1] += up * 0.42;
+  bend(p, 0.08 + dn * 0.5);
+  add(p, TL, -0.55 * up, 0, 0.18 * up);
+  add(p, SL, 0.95 * up);
+  add(p, TR, -0.55 * up, 0, -0.18 * up);
+  add(p, SR, 0.95 * up);
+  set(p, AL, -0.3, 0, 2.6 + 0.25 * alt);
+  set(p, FL, -0.7 * max(0, alt), 0, -0.3);
+  set(p, AR, -0.3, 0, -2.6 + 0.25 * alt);
+  set(p, FR, -0.7 * max(0, -alt), 0, 0.3);
+  set(p, HEAD, -0.34, 0, alt * 0.12);
+  set(p, CHEST, -0.18, 0, alt * 0.07);
 }
+/** saludar: brazo enorme de lado a lado, la otra mano en la cintura y brinquitos de puntillas */
 function wave(p: P, c: Ctx) {
   idle(p, c);
-  set(p, AR, -0.15, 0, -2.45);
-  set(p, FR, 0, 0, 0.45 + sin(c.t * 10) * 0.42);
-  add(p, HEAD, 0, 0, -0.08);
-  add(p, CHEST, 0, 0, -0.04);
+  const w = sin(c.t * 10),
+    s = sin(c.t * 5);
+  p[1] += max(0, s) * 0.07;
+  set(p, ROOT, 0, 0, 0.1 + s * 0.05);
+  set(p, AR, -0.25, 0, -2.75 - w * 0.25);
+  set(p, FR, 0, 0, 0.3 + w * 0.75);
+  set(p, AL, 0.3, 0, 0.85);
+  set(p, FL, 0, 0, -2.05);
+  add(p, HEAD, -0.14, w * 0.08, -0.16);
+  add(p, CHEST, -0.06, 0, -0.12);
 }
+/** aplaudir: brinco por cada aplauso, con las manos arriba de la cabeza */
 function clap(p: P, c: Ctx) {
   idle(p, c);
-  const k = 0.5 + 0.5 * sin(c.t * 15);
-  set(p, AL, -0.9, 0, -0.08 - 0.16 * k);
-  set(p, FL, -0.78, 0, -0.05 - 0.32 * k);
-  set(p, AR, -0.9, 0, 0.08 + 0.16 * k);
-  set(p, FR, -0.78, 0, 0.05 + 0.32 * k);
-  add(p, CHEST, 0.04);
-  p[1] += k * 0.008;
+  const h = sin(c.t * 7.5),
+    up = max(0, h),
+    k = 0.5 + 0.5 * sin(c.t * 15);
+  p[1] += up * 0.2;
+  bend(p, max(0, -h) * 0.35);
+  set(p, AL, -0.15, 0, 2.5 + 0.42 * k);
+  set(p, FL, 0, 0, -0.2 - 0.25 * k);
+  set(p, AR, -0.15, 0, -2.5 - 0.42 * k);
+  set(p, FR, 0, 0, 0.2 + 0.25 * k);
+  set(p, HEAD, -0.28, 0, 0);
+  set(p, CHEST, -0.12);
 }
 function kick(p: P, c: Ctx) {
   const u = c.tl % 0.95,
@@ -323,6 +345,113 @@ function sit(p: P, c: Ctx) {
   add(p, FTR, -sw * 0.12);
 }
 
+/** gol: avioncito con los brazos abiertos, brinco y barrida de rodillas gritando con los puños arriba */
+function gol(p: P, c: Ctx) {
+  const u = c.tl % 4.2,
+    av = 1 - sm(1.55, 1.8, u),
+    vu = sm(1.6, 1.8, u) * (1 - sm(1.85, 2.1, u)),
+    ro = sm(1.85, 2.1, u) * (1 - sm(3.9, 4.2, u)),
+    ph = c.tl * 13,
+    sl = sin(ph),
+    pu = sin(u * 12),
+    bank = sin(u * 5);
+  p[1] += av * abs(cos(ph)) * 0.05 + vu * 0.45 - ro * 0.38;
+  p[2] += ro * 0.9 * (1 - Math.exp(-max(0, u - 1.9) * 3));
+  set(p, ROOT, 0.16 * av, sin(u * 1.6) * 0.9 * av, bank * 0.32 * av);
+  set(p, CHEST, 0.08 * av - 0.5 * ro - 0.15 * vu, 0, -bank * 0.1 * av + pu * 0.03 * ro);
+  set(p, HEAD, -0.1 * av - 0.5 * ro - 0.3 * vu, 0, -bank * 0.2 * av + sin(u * 20) * 0.05 * ro);
+  set(p, AL, -0.3 * ro, 0, 1.45 * av + 2.8 * vu + (2.5 + 0.2 * pu) * ro);
+  set(p, FL, -0.9 * max(0, pu) * ro, 0, 0);
+  set(p, AR, -0.3 * ro, 0, -1.45 * av - 2.8 * vu - (2.5 - 0.2 * pu) * ro);
+  set(p, FR, -0.9 * max(0, -pu) * ro, 0, 0);
+  set(p, TL, av * (-0.6 * max(0, sl) - 0.15) - 0.9 * vu + 0.15 * ro, 0, 0.12 * ro);
+  set(p, SL, av * (0.3 + 1.2 * max(0, sl)) + 1.5 * vu + 1.65 * ro);
+  set(p, FTL, 0.2 * av + 0.5 * ro);
+  set(p, TR, av * (-0.6 * max(0, -sl) - 0.15) - 0.9 * vu + 0.15 * ro, 0, -0.12 * ro);
+  set(p, SR, av * (0.3 + 1.2 * max(0, -sl)) + 1.5 * vu + 1.65 * ro);
+  set(p, FTR, 0.2 * av + 0.5 * ro);
+}
+/** victoria (oro o nivel nuevo): se agacha, salta altísimo dando una vuelta, cae aplastado y sigue con el puño */
+function victoria(p: P, c: Ctx) {
+  const v = curvaVictoria(c.tl),
+    a = v.agacha,
+    f = sm(0.4, 0.5, c.tl) * (1 - sm(1.0, 1.12, c.tl)),
+    l = v.luego,
+    pump = max(0, sin(c.tl * 9.35));
+  bend(p, 0.08 + a * 0.75 + l * 0.06);
+  p[1] += v.salto;
+  set(p, ROOT, 0, c.tl < 1.05 ? v.vuelta : 0, 0);
+  add(p, TL, -0.9 * f, 0, 0.15 * f);
+  add(p, SL, 1.5 * f);
+  add(p, TR, -0.9 * f, 0, -0.15 * f);
+  add(p, SR, 1.5 * f);
+  set(p, AL, a * 0.9 - f * 0.2 + l * 0.3, 0, a * 0.25 + f * 2.7 + l * 0.85);
+  set(p, FL, -0.2 * a, 0, -2.05 * l);
+  set(p, AR, a * 0.9 - f * 0.2 - l * 0.2, 0, -(a * 0.25 + f * 2.7 + l * 2.85));
+  set(p, FR, -1.3 * pump * l, 0, 0);
+  set(p, CHEST, a * 0.35 - f * 0.22 - l * 0.12, 0, l * 0.06 * pump);
+  set(p, HEAD, a * 0.12 - f * 0.38 - l * 0.3);
+}
+/** choque contra una pared: la cabeza se va para atrás, brazos al aire, una pierna arriba y se tambalea */
+function choque(p: P, c: Ctx) {
+  const k = curvaChoque(c.tl),
+    e = 1 - sm(0.5, 0.75, c.tl),
+    w = sin(c.tl * 24) * e;
+  bend(p, 0.15 + 0.25 * e);
+  p[2] -= 0.3 * sm(0, 0.12, c.tl) * e;
+  set(p, ROOT, -0.25 * k - 0.08 * e, 0, w * 0.12);
+  set(p, CHEST, -0.35 * k, 0, w * 0.1);
+  set(p, HEAD, -0.5 * k + 0.15 * e, w * 0.3, 0);
+  set(p, AL, 0.6 * e, 0, 1.2 * e + 0.3 * k);
+  set(p, FL, -0.3);
+  set(p, AR, 0.6 * e, 0, -1.2 * e - 0.3 * k);
+  set(p, FR, -0.3);
+  add(p, TL, -0.5 * k);
+  add(p, SL, 0.6 * k);
+}
+/** asombro de una locura: brinco del susto con todo abierto y después carcajada doblado, palmeándose la rodilla */
+function asombro(p: P, c: Ctx) {
+  const a = curvaAsombro(c.tl),
+    s = a.susto,
+    r = a.risa,
+    q = sin(c.t * 28),
+    sl = max(0, sin(c.t * 9));
+  bend(p, 0.06 + 0.4 * a.agacha + 0.25 * r);
+  p[1] += 0.4 * s + abs(q) * 0.015 * r;
+  set(p, ROOT, 0.22 * r - 0.12 * s, 0, 0);
+  set(p, CHEST, -0.25 * s + 0.32 * r, q * 0.06 * r, q * 0.05 * r);
+  set(p, HEAD, -0.35 * s - 0.3 * r, 0, q * 0.05 * r);
+  set(p, AL, -0.4 * s - (0.45 + 0.4 * sl) * r, 0, 2.3 * s + 0.2 * r + 0.11 * (1 - s) * (1 - r));
+  set(p, FL, -0.3 * s - 0.35 * r, 0, sin(c.t * 30) * 0.4 * s);
+  set(p, AR, -0.4 * s - 0.65 * r, 0, -2.3 * s - 0.15 * r - 0.11 * (1 - s) * (1 - r));
+  set(p, FR, -0.3 * s - 1.55 * r, 0, -sin(c.t * 30) * 0.4 * s);
+  add(p, TL, -0.25 * s, 0, 0.35 * s);
+  add(p, SL, 0.5 * s);
+  add(p, TR, -0.25 * s, 0, -0.35 * s);
+  add(p, SR, 0.5 * s);
+}
+/** mareo después de una caída: tambaleo en círculos, cabeza floja, brazos colgando y rodillas de gelatina */
+function mareo(p: P, c: Ctx) {
+  const a = c.t * 3.1,
+    cs = cos(a),
+    sn = sin(a);
+  bend(p, 0.18 + 0.05 * sn);
+  p[0] = cs * 0.06;
+  p[2] = sn * 0.04;
+  set(p, ROOT, sn * 0.1, 0, cs * 0.12);
+  set(p, HIPS, 0, sn * 0.15, -cs * 0.06);
+  set(p, CHEST, 0.12 + sn * 0.08, 0, -cs * 0.18);
+  set(p, HEAD, 0.15 + cos(a * 1.3) * 0.18, sin(a * 0.9) * 0.4, sin(a * 1.3) * 0.3);
+  set(p, AL, sn * 0.3, 0, 0.25 + cs * 0.2);
+  set(p, FL, -0.15);
+  set(p, AR, -sn * 0.3, 0, -0.25 + cs * 0.2);
+  set(p, FR, -0.15);
+  add(p, TL, 0, 0, 0.08 * cs);
+  add(p, TR, 0, 0, 0.08 * cs);
+  add(p, SL, 0.15 * max(0, sn));
+  add(p, SR, 0.15 * max(0, -sn));
+}
+
 export const POSES: ((p: P, c: Ctx) => void)[] = [
   idle,
   loco(false),
@@ -339,4 +468,9 @@ export const POSES: ((p: P, c: Ctx) => void)[] = [
   carry,
   drive,
   sit,
+  gol,
+  victoria,
+  choque,
+  asombro,
+  mareo,
 ];

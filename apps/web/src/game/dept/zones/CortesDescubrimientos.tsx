@@ -1,4 +1,5 @@
 import { Ball, Block, Cyl, Label } from '../../kit';
+import { useLocuraCerca } from '../../reacciones';
 import puntos from './cortes-puntos.json';
 
 function Punto({ indice }: { indice: number }) {
@@ -6,6 +7,7 @@ function Punto({ indice }: { indice: number }) {
   const x = -40 + (indice % 6) * 15;
   const z = indice < 6 ? 9 : 24;
   const loco = indice >= 9;
+  useLocuraCerca(x, z);
 
   return (
     <group position={[x, 0, z]}>
