@@ -44,6 +44,11 @@ const ANIMS: Anim[] = [
   'carry',
   'drive',
   'sit',
+  'gol',
+  'victoria',
+  'choque',
+  'asombro',
+  'mareo',
 ];
 const LOOKS: Partial<AvatarConfig>[] = [
   {},

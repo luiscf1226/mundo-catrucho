@@ -2,6 +2,7 @@ import { useRef } from 'react';
 import type * as THREE from 'three';
 import { player } from '../../../core/player';
 import { Ball, Block, Cyl, Label, Plate, useTick } from '../../kit';
+import { useLocuraCerca } from '../../reacciones';
 import puntos from './atlantida-puntos.json';
 
 const CARN = ['#e63946', '#ffd166', '#19b5c8', '#7b2cbf', '#2ea44f'];
@@ -105,6 +106,7 @@ function BambuConSaludo({ x, z }: { x: number; z: number }) {
 function Punto({ indice, y }: { indice: number; y: number }) {
   const p = puntos[indice];
   const loco = p.id.includes('locura');
+  useLocuraCerca(p.x, p.z);
 
   return (
     <group position={[p.x, y, p.z]}>

@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import type * as THREE from 'three';
 import { Ball, Block, Cyl, Label, Plate, useTick } from '../../kit';
+import { useLocuraCerca } from '../../reacciones';
 import puntos from './islas-puntos.json';
 
 /** Selfie con el tiburón ballena… a distancia: el palito, el teléfono y la flecha que te frena. */
@@ -107,6 +108,7 @@ function Semaforo() {
 function Punto({ indice, y }: { indice: number; y: number }) {
   const p = puntos[indice];
   const loco = p.id.includes('locura');
+  useLocuraCerca(p.x, p.z);
 
   return (
     <group position={[p.x, y, p.z]}>

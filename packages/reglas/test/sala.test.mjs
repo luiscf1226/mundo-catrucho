@@ -24,9 +24,10 @@ test('posiciones recortadas a los límites de siempre', () => {
   assert.equal(acotarEje('x', undefined), 0);
 });
 
-test('animaciones: las 15 del kit; lo demás es idle', () => {
-  assert.equal(ANIMACIONES.length, 15);
+test('animaciones: las 20 del kit; lo demás es idle', () => {
+  assert.equal(ANIMACIONES.length, 20);
   assert.equal(animacionPermitida('run'), 'run');
+  assert.equal(animacionPermitida('victoria'), 'victoria');
   assert.equal(animacionPermitida('volar'), 'idle');
   assert.equal(animacionPermitida(3), 'idle');
 });

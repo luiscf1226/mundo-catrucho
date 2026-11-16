@@ -3,6 +3,7 @@ import type { Group } from 'three';
 import { player } from '../../../core/player';
 import { useGame } from '../../../core/store';
 import { Ball, Block, Cyl, Interactable, Label, useTick } from '../../kit';
+import { reaccionLocura } from '../../reacciones';
 import puntos from './elparaiso-puntos.json';
 
 // Las tres locuras de El Paraíso. Los siete lugares para explorar los pone dept/turismo.tsx desde contenido.json.
@@ -23,6 +24,7 @@ function Locura({ indice: i, altura }: { indice: number; altura: number }) {
     if (!visto.current && !s.dialog && !s.panel && Math.hypot(player.pos[0] - x, player.pos[2] - z) < 2.2) {
       visto.current = true;
       s.showDialog({ title: p.nombre, text: p.texto, icon: '✨' });
+      reaccionLocura();
     }
     if (!g.current) return;
     if (i === 0) g.current.rotation.y = Math.sin(t * 1.5) * 0.4;
@@ -31,6 +33,7 @@ function Locura({ indice: i, altura }: { indice: number; altura: number }) {
   });
   function accion() {
     usar(veces + 1);
+    reaccionLocura();
     const s = useGame.getState();
     if (i === 0) s.toast(EXAMEN[veces % EXAMEN.length], '🌽');
     if (i === 1)

@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import type { Group } from 'three';
 import { useGame } from '../../../core/store';
 import { Ball, Block, Cyl, Interactable, Label, Plate, useTick } from '../../kit';
+import { reaccionLocura } from '../../reacciones';
 import puntos from './choluteca-puntos.json';
 
 /** La sombra del visitante saca abanico y pide turno bajo el toldo. */
@@ -111,6 +112,7 @@ function Punto({ indice: i, y }: { indice: number; y: number }) {
         icon="✨"
         onUse={() => {
           activar(true);
+          reaccionLocura();
           useGame.getState().showDialog({ title: p.nombre, text: p.texto, icon: '✨' });
         }}
       />
