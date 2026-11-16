@@ -76,6 +76,11 @@ const lempira = kit(
   (d) => [120 + r(d * 120), 360, 600],
   () => 75,
 );
+/** Choluteca: metas y reloj de minigames/choluteca/comun.tsx. */
+const choluteca = kit(
+  (d) => [120 + r(d * 120), 360, 600],
+  () => 75,
+);
 const islas = (a: number, b: number, c: number, k: number, base: number, extra: number) =>
   kit(lineal(a, b, c, k), (d) => base + r(d * extra));
 /** Comayagua: `metasLineales` y `reloj` de apps/web/src/game/minigames/comayagua/comun.tsx */
@@ -213,6 +218,15 @@ export const TOPES: Record<string, TopeMotor> = {
   'lempira.pigmentos': conRitmo(lempira, 40),
   'lempira.trapiche': conRitmo(lempira, 30),
   'lempira.termal': lempira,
+  // Choluteca: el ritmo sale de cuánto paga cada acierto y la espera mínima entre aciertos
+  'choluteca.puentes': conRitmo(choluteca, 40),
+  'choluteca.tortuga': conRitmo(choluteca, 56),
+  'choluteca.estanque': choluteca,
+  'choluteca.sombra': conRitmo(choluteca, 26),
+  'choluteca.mielrosca': conRitmo(choluteca, 35),
+  'choluteca.cincha': conRitmo(choluteca, 67),
+  'choluteca.ventanasbus': choluteca,
+  'choluteca.mareapaseo': choluteca,
   'copan.cadera': copan,
   'copan.estelas': copan,
   'copan.estratigrafia': copan,

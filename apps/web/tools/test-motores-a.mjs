@@ -73,7 +73,7 @@ if (!only || only === 'corte')
 if (!only || only === 'monta')
   all =
     (await run('monta', file, { hash: '#go' }, async (t) => {
-      await abre(t, 'choluteca.doma', 'monta', 'solo');
+      await abre(t, 'olancho.jaripeo', 'monta', 'solo');
       await t.ev(BOT_MONTA);
       await sleep(14000);
       const s1 = await t.ev(

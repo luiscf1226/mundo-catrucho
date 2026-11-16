@@ -3,6 +3,7 @@ import { P } from '../../kit';
 import { bl, bx, cy, inR, type Pc, PI, place, ss } from '../lib';
 import { casa, champa, fence, mesa, mont, puesto, slab, vaca } from '../parts';
 import { ZB, type ZoneSpec } from '../zone';
+import { CholutecaDescubrimientos, cercaDeLocura } from './CholutecaDescubrimientos';
 
 const STEEL = '#c7ccd4';
 /** Choluteca: el puente colgante sobre el río; se cruza a pie. El recuerdo espera en un islote del río. */
@@ -21,6 +22,7 @@ export function puente(d: Department): ZoneSpec {
     .layer('asphalt', '#6a6660', (x, z) => Math.min(2.6 - Math.abs(x), dr(x, z) - 13.5) * 2);
   Z.sea(-0.7);
   Z.stop(0, 42);
+  Z.n(<CholutecaDescubrimientos altura={Z.h} />);
   // puente: torres, tablero, cables y tirantes
   const seg = (x: number, z0: number, y0: number, z1: number, y1: number): Pc => {
     const dz = z1 - z0,
@@ -105,13 +107,19 @@ export function puente(d: Department): ZoneSpec {
     dr(x, z) > 13 &&
     !inR(x, z, -20, 21, 14, 48) &&
     !inR(x, z, 14, 38, -42, -25) &&
-    Math.hypot(x - 10, z + 32) > 5;
+    Math.hypot(x - 10, z + 32) > 5 &&
+    !cercaDeLocura(x, z);
   Z.veg('dry', 46, open, { sep: 6 });
   Z.veg('bush', 34, open, { sep: 3.5, colors: ['#a3a34a', '#8a9a3a', '#b7a24a'] });
-  Z.veg('rock', 16, (x, z) => open(x, z) || (dr(x, z) > 9 && dr(x, z) < 12 && Math.abs(x) > 6), {
-    sep: 4,
-    colors: [B.rock],
-  });
+  Z.veg(
+    'rock',
+    16,
+    (x, z) => open(x, z) || (dr(x, z) > 9 && dr(x, z) < 12 && Math.abs(x) > 6 && !cercaDeLocura(x, z)),
+    {
+      sep: 4,
+      colors: [B.rock],
+    },
+  );
   Z.add(
     place(mont(70, 40, '#a8964a'), -150, 0, -110),
     place(mont(80, 48, '#9a8a48'), 130, 0, -150),

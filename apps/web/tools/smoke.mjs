@@ -33,6 +33,15 @@ const JUEGOS = [
   'lempira.colohete-por-capas',
   'lempira.cana-al-trapiche',
   'lempira.la-pausa-tambien-cuenta',
+  // Choluteca
+  'choluteca.el-puente-y-el-cauce',
+  'choluteca.noche-de-punta-raton',
+  'choluteca.estanques-de-marcovia',
+  'choluteca.sombra-al-mediodia',
+  'choluteca.miel-dentro-de-la-rosquilla',
+  'choluteca.cuero-que-queda-parejo',
+  'choluteca.bus-sureno-con-brisa',
+  'choluteca.cedeno-deja-tres-marcas',
 ];
 const ok = await run('smoke', file, { hash: '#test' }, async (t) => {
   await t.ev(`localStorage.clear()`);

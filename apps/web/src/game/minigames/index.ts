@@ -34,6 +34,15 @@ const MOTORS = {
   'lempira.pigmentos': motor(() => import('./lempira/Pigmentos').then((m) => ({ ...m, default: m.Pigmentos }))),
   'lempira.trapiche': motor(() => import('./lempira/Trapiche').then((m) => ({ ...m, default: m.Trapiche }))),
   'lempira.termal': motor(() => import('./lempira/Termal').then((m) => ({ ...m, default: m.Termal }))),
+  // Choluteca
+  'choluteca.puentes': motor(() => import('./choluteca/Puentes').then((m) => ({ ...m, default: m.Puentes }))),
+  'choluteca.tortuga': motor(() => import('./choluteca/Tortuga').then((m) => ({ ...m, default: m.Tortuga }))),
+  'choluteca.estanque': motor(() => import('./choluteca/Estanque').then((m) => ({ ...m, default: m.Estanque }))),
+  'choluteca.sombra': motor(() => import('./choluteca/Sombra').then((m) => ({ ...m, default: m.Sombra }))),
+  'choluteca.mielrosca': motor(() => import('./choluteca/MielRosca').then((m) => ({ ...m, default: m.MielRosca }))),
+  'choluteca.cincha': motor(() => import('./choluteca/Cincha').then((m) => ({ ...m, default: m.Cincha }))),
+  'choluteca.ventanasbus': motor(() => import('./choluteca/Bus').then((m) => ({ ...m, default: m.Bus }))),
+  'choluteca.mareapaseo': motor(() => import('./choluteca/Marea').then((m) => ({ ...m, default: m.Marea }))),
 
   'copan.cadera': motor(() => import('./copan/Cadera').then((m) => ({ ...m, default: m.Cadera }))),
   'copan.glifos': motor(() => import('./copan/Glifos').then((m) => ({ ...m, default: m.Glifos }))),
