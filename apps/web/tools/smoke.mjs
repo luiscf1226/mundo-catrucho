@@ -42,6 +42,24 @@ const JUEGOS = [
   'elparaiso.yuscaran-por-sus-aleros',
   'elparaiso.el-sello-va-antes',
   'elparaiso.cafe-que-no-se-riega',
+  // Valle
+  'valle.curiles-entre-raices',
+  'valle.bicitaxi-de-amapala',
+  'valle.lancha-lista-de-coyolito',
+  'valle.el-tigre-desde-el-golfo',
+  'valle.cayuco-entre-raices',
+  'valle.jocotes-con-sal-pareja',
+  'valle.el-manglar-sostiene-al-golfo',
+  'valle.el-punche-no-va-de-frente',
+  // Choluteca
+  'choluteca.el-puente-y-el-cauce',
+  'choluteca.noche-de-punta-raton',
+  'choluteca.estanques-de-marcovia',
+  'choluteca.sombra-al-mediodia',
+  'choluteca.miel-dentro-de-la-rosquilla',
+  'choluteca.cuero-que-queda-parejo',
+  'choluteca.bus-sureno-con-brisa',
+  'choluteca.cedeno-deja-tres-marcas',
 ];
 const ok = await run('smoke', file, { hash: '#test' }, async (t) => {
   await t.ev(`localStorage.clear()`);

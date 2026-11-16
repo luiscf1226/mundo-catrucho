@@ -1,0 +1,20 @@
+[
+  {
+    "id": "choluteca.locura-0",
+    "nombre": "La sombra pide fresco",
+    "texto": "Al casco histórico se va temprano o al caer la tarde. Aquí hasta tu sombra saca abanico y pide turno bajo el toldo.",
+    "pos": [-26, 21]
+  },
+  {
+    "id": "choluteca.locura-1",
+    "nombre": "Linterna con buenos modales",
+    "texto": "En Punta Ratón se cuida a la tortuga golfina. Esta linterna se baja sola y apunta al suelo: así no desorienta a las crías.",
+    "pos": [26, 9]
+  },
+  {
+    "id": "choluteca.locura-2",
+    "nombre": "La casa posa al amanecer",
+    "texto": "Choluteca conserva su casco histórico. En esta postal digital las fachadas se desperezan con la luz suave; es pura ficción.",
+    "pos": [24, 26]
+  }
+]

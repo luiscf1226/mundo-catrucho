@@ -3,6 +3,7 @@ import { P } from '../../kit';
 import { bx, distToPath, inR, PI, place, ss } from '../lib';
 import { casa, iglesia, mont, pier, pipante, slab } from '../parts';
 import { ZB, type ZoneSpec } from '../zone';
+import { ValleDescubrimientos } from './ValleDescubrimientos';
 
 /** Valle: la Isla del Tigre en el Golfo de Fonseca, con su volcán, el muelle de Amapala y la Playa Negra. */
 export function volcan(d: Department): ZoneSpec {
@@ -28,6 +29,7 @@ export function volcan(d: Department): ZoneSpec {
   Z.sea(-0.35, '#2f9ab8');
   Z.far = { mat: 'sand', color: B.sand, y: -2.62 };
   Z.stop(-6, 28);
+  Z.n(<ValleDescubrimientos altura={Z.h} />);
   // Amapala: casas de colores, iglesia y muelle
   Z.n(<P.House pos={Z.at(13, 24)} rot={-0.4} color="#ffd166" sign="Hotel Amapala" />).n(
     <P.House pos={Z.at(-21, 22)} rot={0.5} color="#7fd6c2" />,

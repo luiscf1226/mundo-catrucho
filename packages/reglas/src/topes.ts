@@ -81,6 +81,17 @@ const elparaiso = kit(
   (d) => [120 + r(d * 120), 360, 600],
   () => 75,
 );
+// Valle
+/** Valle: metas y reloj de minigames/valle/comun.tsx. */
+const valle = kit(
+  (d) => [120 + r(d * 120), 360, 600],
+  () => 75,
+);
+/** Choluteca: metas y reloj de minigames/choluteca/comun.tsx. */
+const choluteca = kit(
+  (d) => [120 + r(d * 120), 360, 600],
+  () => 75,
+);
 const islas = (a: number, b: number, c: number, k: number, base: number, extra: number) =>
   kit(lineal(a, b, c, k), (d) => base + r(d * extra));
 /** Comayagua: `metasLineales` y `reloj` de apps/web/src/game/minigames/comayagua/comun.tsx */
@@ -227,6 +238,24 @@ export const TOPES: Record<string, TopeMotor> = {
   'elparaiso.aleros': conRitmo(elparaiso, 40),
   'elparaiso.fronterafila': conRitmo(elparaiso, 40),
   'elparaiso.costura': conRitmo(elparaiso, 40),
+  // Valle
+  'valle.curil': conRitmo(valle, 40),
+  'valle.bicitaxi': conRitmo(valle, 40),
+  'valle.embarque': conRitmo(valle, 40),
+  'valle.volcan': conRitmo(valle, 40),
+  'valle.raices': conRitmo(valle, 40),
+  'valle.saljocote': conRitmo(valle, 40),
+  'valle.redviva': conRitmo(valle, 40),
+  'valle.punche': conRitmo(valle, 40),
+  // Choluteca: el ritmo sale de cuánto paga cada acierto y la espera mínima entre aciertos
+  'choluteca.puentes': conRitmo(choluteca, 40),
+  'choluteca.tortuga': conRitmo(choluteca, 56),
+  'choluteca.estanque': choluteca,
+  'choluteca.sombra': conRitmo(choluteca, 26),
+  'choluteca.mielrosca': conRitmo(choluteca, 35),
+  'choluteca.cincha': conRitmo(choluteca, 67),
+  'choluteca.ventanasbus': choluteca,
+  'choluteca.mareapaseo': choluteca,
   'copan.cadera': copan,
   'copan.estelas': copan,
   'copan.estratigrafia': copan,

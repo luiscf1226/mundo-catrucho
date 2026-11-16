@@ -73,7 +73,7 @@ if (!only || only === 'corte')
 if (!only || only === 'monta')
   all =
     (await run('monta', file, { hash: '#go' }, async (t) => {
-      await abre(t, 'choluteca.doma', 'monta', 'solo');
+      await abre(t, 'olancho.jaripeo', 'monta', 'solo');
       await t.ev(BOT_MONTA);
       await sleep(14000);
       const s1 = await t.ev(
@@ -119,7 +119,8 @@ if (!only || only === 'ritmo')
       assert(r.res.won, 'autoplay perfecto gana');
       await t.ev(`window.__mcTest.ritmo.stop(); window.__mc.store.getState().goLobby()`);
       await sleep(500);
-      await abre(t, 'valle.marimba', 'ritmo', 'abierto');
+      // la marimba del muelle de Valle se cambió por los juegos del golfo (MC-53): se prueba el ritmo sin tema
+      await abre(t, null, 'ritmo', 'abierto');
       await t.ev(`window.__mcTest.ritmo.auto(20)`);
       await sleep(8000);
       await t.shot(`${out}/ritmo-marimba.png`);
