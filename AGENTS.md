@@ -15,7 +15,8 @@ también van en español.
 | `workers/salas/` | Sala en vivo (`@mundo-catrucho/salas`): Cloudflare Durable Object con WebSocket. |
 | `convex/` | Modelo de datos (`schema.ts`). Las funciones llegan en la ola 2. |
 | `packages/reglas/` | Reglas compartidas (`@mundo-catrucho/reglas`): premios, niveles, topes para validar resultados y límites de la sala. Las usan el juego, Convex y la sala. |
-| `.github/` | Revisión automática (`workflows/revision.yml`) y plantillas de pull request e issues. |
+| `.github/` | Revisión automática (`workflows/revision.yml`), despliegue por entorno (`workflows/despliegue.yml`) y plantillas de pull request e issues. |
+| `docs/ENTORNOS.md` | Desarrollo, vista previa y producción: dónde vive cada llave, host del juego y protección de `main`. Variables en `.env.example`. |
 | `docs/` | Plan, olas (`OLAS.md`), tickets (`TICKETS.md`) y el generador que los produce. |
 
 ## Comandos (siempre desde la raíz)

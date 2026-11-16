@@ -1,0 +1,17 @@
+# Opción Cloudflare para publicar el juego (MC-65). Todavía no está elegido el host: ver docs/ENTORNOS.md.
+# Es un Worker solo de archivos estáticos: sirve apps/web/dist/web (sale de `pnpm --filter @mundo-catrucho/web build:web`).
+#   wrangler deploy --env preview      → mundo-catrucho-web-preview
+#   wrangler deploy --env production   → mundo-catrucho-web
+# Las URL de Convex y de la sala se meten al compilar (VITE_CONVEX_URL, VITE_SALAS_URL), no aquí.
+name = "mundo-catrucho-web-dev"
+compatibility_date = "2026-10-01"
+
+[assets]
+directory = "./dist/web"
+not_found_handling = "single-page-application"
+
+[env.preview]
+name = "mundo-catrucho-web-preview"
+
+[env.production]
+name = "mundo-catrucho-web"
