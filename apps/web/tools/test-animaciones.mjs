@@ -181,7 +181,8 @@ const ok = await run('animaciones', file, { hash: '#test', width: 1280, height: 
     await t.waitFor(`${S}.mg?.phase === 'intro'`, 15000);
     await t.click('mg-start');
     await t.waitFor(`${S}.mg?.phase === 'playing'`);
-    await t.ev(`${P}.override = null`);
+    // como en la pulpería: una animación de la escena (cargar) sigue viva al terminar; la victoria igual gana
+    await t.ev(res.won ? `${P}.play('carry', 5)` : `${P}.override = null`);
     await t.ev(`${S}.finishMinigame(${JSON.stringify({ ...res, score: 1, label: 'prueba' })})`);
     await t.waitFor(`${S}.mg?.phase === 'ended'`);
     await t.ev('new Promise((r) => setTimeout(r, 60))');

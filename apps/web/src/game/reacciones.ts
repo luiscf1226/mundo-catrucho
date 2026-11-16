@@ -9,11 +9,13 @@ import { useTick } from './kit/core';
 
 /**
  * El muñeco reacciona `segundos`. Si la escena ya lo tiene haciendo otra cosa (patear, cargar, sentarse), gana la
- * escena; solo se cambia un 'celebrate' de la escena por algo más grande. Devuelve si reaccionó.
+ * escena; solo se cambia un 'celebrate' de la escena por algo más grande. Con `final` (la partida terminó) solo
+ * se respeta estar sentado o manejando: lo demás ya se acabó. Devuelve si reaccionó.
  */
-export function reaccionar(anim: Anim, segundos: number) {
-  const o = player.override;
-  if (player.vehicle || (o && o.anim !== 'celebrate' && performance.now() < o.until)) return false;
+export function reaccionar(anim: Anim, segundos: number, final = false) {
+  const o = player.override,
+    ocupado = o && performance.now() < o.until && (final ? o.anim === 'sit' || o.anim === 'drive' : o.anim !== 'celebrate');
+  if (player.vehicle || ocupado) return false;
   player.play(anim, segundos);
   // se ve de una vez, aunque se abra una ficha y el juego quede en pausa
   player.state.anim = anim;
@@ -36,7 +38,7 @@ export function useReacciones() {
   useEffect(() => {
     let nivel = useGame.getState().profile.level;
     // un tick después: algunas escenas ponen su propio 'celebrate' justo al terminar, y la victoria va encima
-    const luego = (anim: Anim, s: number) => setTimeout(() => reaccionar(anim, s), 0);
+    const luego = (anim: Anim, s: number) => setTimeout(() => reaccionar(anim, s, true), 0);
     return useGame.subscribe((s, prev) => {
       const mg = s.mg;
       if (mg?.phase === 'ended' && prev.mg?.phase === 'playing' && mg.result?.won)
