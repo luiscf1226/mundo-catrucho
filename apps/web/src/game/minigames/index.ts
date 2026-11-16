@@ -34,6 +34,15 @@ const MOTORS = {
   'lempira.pigmentos': motor(() => import('./lempira/Pigmentos').then((m) => ({ ...m, default: m.Pigmentos }))),
   'lempira.trapiche': motor(() => import('./lempira/Trapiche').then((m) => ({ ...m, default: m.Trapiche }))),
   'lempira.termal': motor(() => import('./lempira/Termal').then((m) => ({ ...m, default: m.Termal }))),
+  // El Paraíso
+  'elparaiso.trivia': motor(() => import('./elparaiso/Archivo').then((m) => ({ ...m, default: m.Archivo }))),
+  'elparaiso.montuca': motor(() => import('./elparaiso/Montuca').then((m) => ({ ...m, default: m.Montuca }))),
+  'elparaiso.carrozamaiz': motor(() => import('./elparaiso/Carroza').then((m) => ({ ...m, default: m.Carroza }))),
+  'elparaiso.mina': motor(() => import('./elparaiso/Mina').then((m) => ({ ...m, default: m.Mina }))),
+  'elparaiso.tapisca': motor(() => import('./elparaiso/Tapisca').then((m) => ({ ...m, default: m.Tapisca }))),
+  'elparaiso.aleros': motor(() => import('./elparaiso/Aleros').then((m) => ({ ...m, default: m.Aleros }))),
+  'elparaiso.fronterafila': motor(() => import('./elparaiso/Frontera').then((m) => ({ ...m, default: m.Frontera }))),
+  'elparaiso.costura': motor(() => import('./elparaiso/Costura').then((m) => ({ ...m, default: m.Costura }))),
 
   'copan.cadera': motor(() => import('./copan/Cadera').then((m) => ({ ...m, default: m.Cadera }))),
   'copan.glifos': motor(() => import('./copan/Glifos').then((m) => ({ ...m, default: m.Glifos }))),

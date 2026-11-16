@@ -76,6 +76,11 @@ const lempira = kit(
   (d) => [120 + r(d * 120), 360, 600],
   () => 75,
 );
+/** El Paraíso: metas y reloj de minigames/elparaiso/comun.tsx. */
+const elparaiso = kit(
+  (d) => [120 + r(d * 120), 360, 600],
+  () => 75,
+);
 const islas = (a: number, b: number, c: number, k: number, base: number, extra: number) =>
   kit(lineal(a, b, c, k), (d) => base + r(d * extra));
 /** Comayagua: `metasLineales` y `reloj` de apps/web/src/game/minigames/comayagua/comun.tsx */
@@ -213,6 +218,15 @@ export const TOPES: Record<string, TopeMotor> = {
   'lempira.pigmentos': conRitmo(lempira, 40),
   'lempira.trapiche': conRitmo(lempira, 30),
   'lempira.termal': lempira,
+  // El Paraíso
+  'elparaiso.trivia': conRitmo(elparaiso, 40),
+  'elparaiso.montuca': conRitmo(elparaiso, 40),
+  'elparaiso.carrozamaiz': conRitmo(elparaiso, 40),
+  'elparaiso.mina': conRitmo(elparaiso, 40),
+  'elparaiso.tapisca': conRitmo(elparaiso, 40),
+  'elparaiso.aleros': conRitmo(elparaiso, 40),
+  'elparaiso.fronterafila': conRitmo(elparaiso, 40),
+  'elparaiso.costura': conRitmo(elparaiso, 40),
   'copan.cadera': copan,
   'copan.estelas': copan,
   'copan.estratigrafia': copan,
