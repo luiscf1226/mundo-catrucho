@@ -19,8 +19,9 @@ on:
         options: [preview, production]
         default: preview
 
+# Una publicación a la vez por entorno: todos los PR comparten los mismos Workers de vista previa.
 concurrency:
-  group: despliegue-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || inputs.entorno || 'production' }}
+  group: despliegue-${{ github.event_name == 'pull_request' && 'preview' || inputs.entorno || 'production' }}
   cancel-in-progress: false
 
 permissions:

@@ -31,7 +31,8 @@ workflow → `preview` o `production`.
 | `CLERK_SECRET_KEY` | Clerk / Convex cuando llegue MC-07 | Panel de Clerk |
 
 Variables de GitHub (no secretas), por entorno: `VITE_CONVEX_URL` (`https://….convex.cloud`; solo hace falta si no
-hay `CONVEX_DEPLOY_KEY`), `CONVEX_SITE_URL` (`https://….convex.site`; en vista previa se puede dejar vacía) y, si
+hay `CONVEX_DEPLOY_KEY`), `CONVEX_SITE_URL` (`https://….convex.site`; en vista previa dejala vacía: hay un Convex por rama pero una sola sala
+de vista previa, así que la sala no reporta cuánta gente hay) y, si
 querés fijarla, `VITE_SALAS_URL`. De repositorio, opcional: `CLOUDFLARE_ACCOUNT_ID` (si el token ve varias cuentas).
 
 ## Host del juego: Cloudflare
