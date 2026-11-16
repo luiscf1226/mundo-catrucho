@@ -34,6 +34,15 @@ const MOTORS = {
   'lempira.pigmentos': motor(() => import('./lempira/Pigmentos').then((m) => ({ ...m, default: m.Pigmentos }))),
   'lempira.trapiche': motor(() => import('./lempira/Trapiche').then((m) => ({ ...m, default: m.Trapiche }))),
   'lempira.termal': motor(() => import('./lempira/Termal').then((m) => ({ ...m, default: m.Termal }))),
+  // Valle
+  'valle.curil': motor(() => import('./valle/Curil').then((m) => ({ ...m, default: m.Curil }))),
+  'valle.bicitaxi': motor(() => import('./valle/Bicitaxi').then((m) => ({ ...m, default: m.Bicitaxi }))),
+  'valle.embarque': motor(() => import('./valle/Embarque').then((m) => ({ ...m, default: m.Embarque }))),
+  'valle.volcan': motor(() => import('./valle/Volcan').then((m) => ({ ...m, default: m.Volcan }))),
+  'valle.raices': motor(() => import('./valle/Raices').then((m) => ({ ...m, default: m.Raices }))),
+  'valle.saljocote': motor(() => import('./valle/Saljocote').then((m) => ({ ...m, default: m.Saljocote }))),
+  'valle.redviva': motor(() => import('./valle/Redviva').then((m) => ({ ...m, default: m.Redviva }))),
+  'valle.punche': motor(() => import('./valle/Punche').then((m) => ({ ...m, default: m.Punche }))),
 
   'copan.cadera': motor(() => import('./copan/Cadera').then((m) => ({ ...m, default: m.Cadera }))),
   'copan.glifos': motor(() => import('./copan/Glifos').then((m) => ({ ...m, default: m.Glifos }))),

@@ -33,6 +33,15 @@ const JUEGOS = [
   'lempira.colohete-por-capas',
   'lempira.cana-al-trapiche',
   'lempira.la-pausa-tambien-cuenta',
+  // Valle
+  'valle.curiles-entre-raices',
+  'valle.bicitaxi-de-amapala',
+  'valle.lancha-lista-de-coyolito',
+  'valle.el-tigre-desde-el-golfo',
+  'valle.cayuco-entre-raices',
+  'valle.jocotes-con-sal-pareja',
+  'valle.el-manglar-sostiene-al-golfo',
+  'valle.el-punche-no-va-de-frente',
 ];
 const ok = await run('smoke', file, { hash: '#test' }, async (t) => {
   await t.ev(`localStorage.clear()`);

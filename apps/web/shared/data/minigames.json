@@ -792,4 +792,109 @@
     "gold": 600
   }
 }
+,
+{
+  "id": "valle.curil",
+  "name": "Tacto del manglar",
+  "place": "Valle",
+  "icon": "🐚",
+  "desc": "Palpá una cuadrícula de lodo simulada leyendo resistencia háptica o sus barras visuales. Ganás identificando concha, raíz y hueco sin extraer juveniles; confundirlos daña el registro.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "valle.bicitaxi",
+  "name": "Pedales independientes",
+  "place": "Valle",
+  "icon": "🚲",
+  "desc": "Dos teclas accionan ruedas traseras independientes de un bicitaxi caricaturesco. Ganás doblando sin inclinar la cabina; pedalear igual en una curva la saca del trazado.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "valle.embarque",
+  "name": "Bancas de Coyolito",
+  "place": "Valle",
+  "icon": "🚤",
+  "desc": "Asigná pasajeros sentados a bancas antes de autorizar la salida de una lancha virtual. Ganás con peso equilibrado y chalecos listos; mover una banca altera a las dos vecinas.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "valle.volcan",
+  "name": "Panorámica del Tigre",
+  "place": "Valle",
+  "icon": "🌋",
+  "desc": "Girá una cámara desde un punto fijo y cosé fotografías del perfil insular corrigiendo paralaje en las uniones. Ganás una panorámica sin doble costa; desplazar la cámara en vez de rotarla duplica los cabos.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "valle.raices",
+  "name": "Cambio de borda",
+  "place": "Valle",
+  "icon": "🛶",
+  "desc": "Alterná lado del remo de un cayuco únicamente en ensanches de un laberinto de raíces. Ganás sin trabar la pala; cambiar de borda en canal angosto bloquea el giro.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "valle.saljocote",
+  "name": "Cobertura en bolsita",
+  "place": "Valle",
+  "icon": "🥭",
+  "desc": "Dosificá sal por superficie de fruta y agitá una bolsa virtual con movimientos medidos. Ganás cobertura uniforme; un giro excesivo concentra sal en el fondo.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "valle.redviva",
+  "name": "Dependencias del manglar",
+  "place": "Valle",
+  "icon": "🌿",
+  "desc": "Relacioná raíces, conchas y cangrejos en un diagrama de alimento y refugio. Ganás anticipando dos efectos de retirar un eslabón; una explicación de un solo vínculo queda incompleta.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "valle.punche",
+  "name": "Salida lateral del punche",
+  "place": "Valle",
+  "icon": "🦀",
+  "desc": "Observá orientación de pinzas y abrí compuertas laterales en una maqueta de refugios. Ganás prediciendo el desplazamiento de lado; abrir enfrente no le da paso y debés replantear.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+}
 ]
