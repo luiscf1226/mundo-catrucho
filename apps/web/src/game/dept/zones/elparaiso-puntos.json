@@ -1,0 +1,20 @@
+[
+  {
+    "id": "elparaiso.locura-0",
+    "nombre": "Mazorca con examen",
+    "texto": "Una mazorca de espuma te enseña tarjetas de preguntas y a veces se equivoca ella también. Danlí es conocida por su Festival Internacional del Maíz.",
+    "pos": [5.6, 15]
+  },
+  {
+    "id": "elparaiso.locura-1",
+    "nombre": "Montuca con corbata",
+    "texto": "Una montuca de utilería se acomoda una tira de tusa como corbata antes del desfile. El maíz es protagonista en la cocina de Danlí.",
+    "pos": [-5.6, 15]
+  },
+  {
+    "id": "elparaiso.locura-2",
+    "nombre": "Caballito que pide parqueo",
+    "texto": "Un caballito de palo de juguete exige su espacio de parqueo y se dobla para caber. El plan municipal de Danlí nombra los caballitos de palo entre sus juegos tradicionales.",
+    "pos": [-5.6, 33]
+  }
+]

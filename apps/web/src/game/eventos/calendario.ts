@@ -71,7 +71,7 @@ export const EVENTOS: Evento[] = [
     ventana: { tipo: 'fija', desde: [8, 1], hasta: [8, 31] },
     estilo: 'feria',
     color: '#f6d55c',
-    juego: 'elparaiso.montucas',
+    juego: 'elparaiso.montuca-de-danli',
   },
   {
     id: 'navidad',
@@ -83,7 +83,7 @@ export const EVENTOS: Evento[] = [
     ventana: { tipo: 'fija', desde: [12, 1], hasta: [1, 1] },
     estilo: 'luces',
     color: '#ef655a',
-    juego: 'elparaiso.montucas',
+    juego: 'elparaiso.montuca-de-danli',
   },
   {
     id: 'alfombras',
@@ -106,7 +106,7 @@ export const EVENTOS: Evento[] = [
     ventana: { tipo: 'fija', desde: [12, 5], hasta: [12, 8] },
     estilo: 'feria',
     color: '#8dbbe8',
-    juego: 'elparaiso.montucas',
+    juego: 'elparaiso.montuca-de-danli',
   },
 ];
 

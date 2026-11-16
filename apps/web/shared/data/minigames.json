@@ -791,6 +791,110 @@
     "silver": 360,
     "gold": 600
   }
+},
+{
+  "id": "elparaiso.trivia",
+  "name": "Archivo del maíz",
+  "place": "El Paraíso",
+  "icon": "🌽",
+  "desc": "Elegí respuestas comparando fichas verificadas sobre maíz y la feria de Danlí. Ganás pistas para armar un itinerario cultural; contestar sin evidencia consume una consulta y podés pasar.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "elparaiso.montuca",
+  "name": "Tusas entrelazadas",
+  "place": "El Paraíso",
+  "icon": "🫔",
+  "desc": "Cruzá fibras de tusa en sentidos opuestos alrededor de una masa blanda virtual. Ganás un envoltorio que sostiene el relleno; fibras paralelas deslizan y abren el paquete.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "elparaiso.carrozamaiz",
+  "name": "Mazorcas como engranajes",
+  "place": "El Paraíso",
+  "icon": "🌽",
+  "desc": "Conectá mazorcas de utilería a ruedas excéntricas para abrir y cerrar hojas en desfile. Ganás una secuencia animada por vuelta; una transmisión invertida cierra la figura antes de tiempo.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "elparaiso.mina",
+  "name": "Soportes de Yuscarán",
+  "place": "El Paraíso",
+  "icon": "⛏️",
+  "desc": "Distribuí puntales en una maqueta de galerías históricas antes de liberar bloques de peso. Ganás un modelo estable; retirar un bloque transfiere carga a la bóveda vecina.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "elparaiso.tapisca",
+  "name": "Tallos como barreras",
+  "place": "El Paraíso",
+  "icon": "🌽",
+  "desc": "Doblá tallos virtuales orientando sus mazorcas a dos sacos laterales. Ganás un recorrido de cosecha sin encierros; cada tallo doblado queda bloqueando una celda futura.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "elparaiso.aleros",
+  "name": "Lluvia de los tejados",
+  "place": "El Paraíso",
+  "icon": "⛏️",
+  "desc": "Dibujá conexiones entre aleros según su pendiente para llevar lluvia a una cuneta. Ganás evitando retornos contra fachadas; un tramo ascendente embalsa y rebalsa la maqueta.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "elparaiso.fronterafila",
+  "name": "Expedientes de Las Manos",
+  "place": "El Paraíso",
+  "icon": "🚛",
+  "desc": "Asigná camiones a filas por documento y tipo de carga en un tablero de aduana simulado. Ganás despachos completos; cambiar de fila exige retroceder hasta una bahía de maniobra libre.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "elparaiso.costura",
+  "name": "Puntada de exportación",
+  "place": "El Paraíso",
+  "icon": "☕",
+  "desc": "Cerrá costales con puntadas de ida y retorno que traban sus bucles. Ganás un saco que supera la prueba de tracción; un punto omitido exige deshacer hasta la falla.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
 }
 ,
 {

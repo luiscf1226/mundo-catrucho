@@ -33,6 +33,15 @@ const JUEGOS = [
   'lempira.colohete-por-capas',
   'lempira.cana-al-trapiche',
   'lempira.la-pausa-tambien-cuenta',
+  // El Paraíso
+  'elparaiso.danli-pregunta-por-su-maiz',
+  'elparaiso.montuca-de-danli',
+  'elparaiso.maiz-convertido-en-carroza',
+  'elparaiso.plata-bajo-yuscaran',
+  'elparaiso.tapisca-de-jamastran',
+  'elparaiso.yuscaran-por-sus-aleros',
+  'elparaiso.el-sello-va-antes',
+  'elparaiso.cafe-que-no-se-riega',
   // Valle
   'valle.curiles-entre-raices',
   'valle.bicitaxi-de-amapala',
