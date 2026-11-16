@@ -14,7 +14,8 @@ import { useTick } from './kit/core';
  */
 export function reaccionar(anim: Anim, segundos: number, final = false) {
   const o = player.override,
-    ocupado = o && performance.now() < o.until && (final ? o.anim === 'sit' || o.anim === 'drive' : o.anim !== 'celebrate');
+    ocupado =
+      o && performance.now() < o.until && (final ? o.anim === 'sit' || o.anim === 'drive' : o.anim !== 'celebrate');
   if (player.vehicle || ocupado) return false;
   player.play(anim, segundos);
   // se ve de una vez, aunque se abra una ficha y el juego quede en pausa
