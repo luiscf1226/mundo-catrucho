@@ -13,6 +13,3 @@ capturas/
 
 # secretos locales de wrangler dev (SALA_SECRETO)
 .dev.vars
-
-# despliegue a Vercel (MC-65)
-.vercel/

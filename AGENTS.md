@@ -33,6 +33,10 @@ pnpm build         # apps/web/dist/mundo-catrucho-hd.html y el empaquetado de la
 pnpm capturas      # compila y deja ./capturas/*.png, ./capturas/recorrido.mp4 e INDICE.md
 pnpm fix           # arregla el formato y lo que Biome sabe arreglar solo
 pnpm avisos        # avisos de Biome que no bloquean: `any`, `!`, accesibilidad, variables sin usar
+pnpm web:build     # solo el HTML autónomo del juego (apps/web/dist/mundo-catrucho-hd.html)
+pnpm web:test      # pruebas de punta a punta del juego sobre ese HTML (corré web:build antes)
+pnpm salas:test    # pruebas de la sala en vivo (dos clientes por WebSocket)
+pnpm convex:check  # tipos de las funciones de Convex
 ```
 
 Antes de dar algo por terminado: `pnpm check` y `pnpm test` en verde. Si tocaste algo que se ve, corre `pnpm capturas`

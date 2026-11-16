@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # MC-64 · Protege main: solo entra por pull request y con la revisión «check, test y capturas» en verde.
-# Lo corre el dueño del repo con su sesión de GitHub (`gh auth login`); los agentes no tienen ese permiso.
+# Lo corre el dueño del repo con su sesión de GitHub (`gh auth login`).
+# OJO: en un repo privado, GitHub solo deja proteger ramas con GitHub Pro (o si el repo es público). Sin eso
+# responde 403 «Upgrade to GitHub Pro or make this repository public»: ver docs/ENTORNOS.md.
 #   bash scripts/proteger-main.sh [dueño/repo]
 set -euo pipefail
 repo="${1:-luiscf1226/mundo-catrucho}"
