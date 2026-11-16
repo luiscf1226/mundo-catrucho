@@ -895,5 +895,214 @@
     "silver": 360,
     "gold": 600
   }
+},
+{
+  "id": "elparaiso.trivia",
+  "name": "Archivo del maíz",
+  "place": "El Paraíso",
+  "icon": "🌽",
+  "desc": "Elegí respuestas comparando fichas verificadas sobre maíz y la feria de Danlí. Ganás pistas para armar un itinerario cultural; contestar sin evidencia consume una consulta y podés pasar.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "elparaiso.montuca",
+  "name": "Tusas entrelazadas",
+  "place": "El Paraíso",
+  "icon": "🫔",
+  "desc": "Cruzá fibras de tusa en sentidos opuestos alrededor de una masa blanda virtual. Ganás un envoltorio que sostiene el relleno; fibras paralelas deslizan y abren el paquete.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "elparaiso.carrozamaiz",
+  "name": "Mazorcas como engranajes",
+  "place": "El Paraíso",
+  "icon": "🌽",
+  "desc": "Conectá mazorcas de utilería a ruedas excéntricas para abrir y cerrar hojas en desfile. Ganás una secuencia animada por vuelta; una transmisión invertida cierra la figura antes de tiempo.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "elparaiso.mina",
+  "name": "Soportes de Yuscarán",
+  "place": "El Paraíso",
+  "icon": "⛏️",
+  "desc": "Distribuí puntales en una maqueta de galerías históricas antes de liberar bloques de peso. Ganás un modelo estable; retirar un bloque transfiere carga a la bóveda vecina.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "elparaiso.tapisca",
+  "name": "Tallos como barreras",
+  "place": "El Paraíso",
+  "icon": "🌽",
+  "desc": "Doblá tallos virtuales orientando sus mazorcas a dos sacos laterales. Ganás un recorrido de cosecha sin encierros; cada tallo doblado queda bloqueando una celda futura.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "elparaiso.aleros",
+  "name": "Lluvia de los tejados",
+  "place": "El Paraíso",
+  "icon": "⛏️",
+  "desc": "Dibujá conexiones entre aleros según su pendiente para llevar lluvia a una cuneta. Ganás evitando retornos contra fachadas; un tramo ascendente embalsa y rebalsa la maqueta.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "elparaiso.fronterafila",
+  "name": "Expedientes de Las Manos",
+  "place": "El Paraíso",
+  "icon": "🚛",
+  "desc": "Asigná camiones a filas por documento y tipo de carga en un tablero de aduana simulado. Ganás despachos completos; cambiar de fila exige retroceder hasta una bahía de maniobra libre.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "elparaiso.costura",
+  "name": "Puntada de exportación",
+  "place": "El Paraíso",
+  "icon": "☕",
+  "desc": "Cerrá costales con puntadas de ida y retorno que traban sus bucles. Ganás un saco que supera la prueba de tracción; un punto omitido exige deshacer hasta la falla.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+}
+,
+{
+  "id": "valle.curil",
+  "name": "Tacto del manglar",
+  "place": "Valle",
+  "icon": "🐚",
+  "desc": "Palpá una cuadrícula de lodo simulada leyendo resistencia háptica o sus barras visuales. Ganás identificando concha, raíz y hueco sin extraer juveniles; confundirlos daña el registro.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "valle.bicitaxi",
+  "name": "Pedales independientes",
+  "place": "Valle",
+  "icon": "🚲",
+  "desc": "Dos teclas accionan ruedas traseras independientes de un bicitaxi caricaturesco. Ganás doblando sin inclinar la cabina; pedalear igual en una curva la saca del trazado.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "valle.embarque",
+  "name": "Bancas de Coyolito",
+  "place": "Valle",
+  "icon": "🚤",
+  "desc": "Asigná pasajeros sentados a bancas antes de autorizar la salida de una lancha virtual. Ganás con peso equilibrado y chalecos listos; mover una banca altera a las dos vecinas.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "valle.volcan",
+  "name": "Panorámica del Tigre",
+  "place": "Valle",
+  "icon": "🌋",
+  "desc": "Girá una cámara desde un punto fijo y cosé fotografías del perfil insular corrigiendo paralaje en las uniones. Ganás una panorámica sin doble costa; desplazar la cámara en vez de rotarla duplica los cabos.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "valle.raices",
+  "name": "Cambio de borda",
+  "place": "Valle",
+  "icon": "🛶",
+  "desc": "Alterná lado del remo de un cayuco únicamente en ensanches de un laberinto de raíces. Ganás sin trabar la pala; cambiar de borda en canal angosto bloquea el giro.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "valle.saljocote",
+  "name": "Cobertura en bolsita",
+  "place": "Valle",
+  "icon": "🥭",
+  "desc": "Dosificá sal por superficie de fruta y agitá una bolsa virtual con movimientos medidos. Ganás cobertura uniforme; un giro excesivo concentra sal en el fondo.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "valle.redviva",
+  "name": "Dependencias del manglar",
+  "place": "Valle",
+  "icon": "🌿",
+  "desc": "Relacioná raíces, conchas y cangrejos en un diagrama de alimento y refugio. Ganás anticipando dos efectos de retirar un eslabón; una explicación de un solo vínculo queda incompleta.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "valle.punche",
+  "name": "Salida lateral del punche",
+  "place": "Valle",
+  "icon": "🦀",
+  "desc": "Observá orientación de pinzas y abrí compuertas laterales en una maqueta de refugios. Ganás prediciendo el desplazamiento de lado; abrir enfrente no le da paso y debés replantear.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
 }
 ]

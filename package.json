@@ -15,7 +15,11 @@
     "avisos": "biome check .",
     "capturas": "pnpm --filter @mundo-catrucho/web build && pnpm --filter @mundo-catrucho/web capturas",
     "web:dev": "pnpm --filter @mundo-catrucho/web dev",
+    "web:build": "pnpm --filter @mundo-catrucho/web build",
+    "web:test": "pnpm --filter @mundo-catrucho/web test",
     "salas:dev": "pnpm --filter @mundo-catrucho/salas dev",
+    "salas:test": "pnpm --filter @mundo-catrucho/salas test",
+    "convex:check": "tsc --noEmit -p convex",
     "catalogo:subir": "node scripts/catalogo.mjs"
   },
   "devDependencies": {

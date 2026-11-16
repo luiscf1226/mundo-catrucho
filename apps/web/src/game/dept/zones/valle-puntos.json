@@ -1,0 +1,20 @@
+[
+  {
+    "id": "valle.locura-0",
+    "nombre": "Curil con contraseña",
+    "texto": "Esta concha de utilería tiene contraseña: abrila y te enseña su ficha. Los curiles chiquitos se quedan en el manglar.",
+    "pos": [-12, 14]
+  },
+  {
+    "id": "valle.locura-1",
+    "nombre": "El punche mira de lado",
+    "texto": "Un punche de papel camina de lado hasta el marco de la foto y lo corre. Así se mueven: nunca de frente.",
+    "pos": [10, 12]
+  },
+  {
+    "id": "valle.locura-2",
+    "nombre": "Isla con marco pequeño",
+    "texto": "El marco de la postal se estira y se estira hasta que le cabe toda la Isla del Tigre. Es pura ficción del encuadre.",
+    "pos": [18, 31]
+  }
+]

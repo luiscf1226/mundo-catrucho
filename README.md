@@ -60,3 +60,4 @@ capturas y un pull request. Con «full send» se une a `main`. La fase de cada t
 
 La ola 0 prepara el repo y las herramientas: comandos, revisión automática, guía para los agentes, capturas
 automáticas, vistas previas por rama y entornos. Necesita tus cuentas de Convex, Clerk y Cloudflare (`wrangler login`).
+Entornos, llaves y host: [`docs/ENTORNOS.md`](docs/ENTORNOS.md); variables en [`.env.example`](.env.example).
