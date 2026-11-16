@@ -4,6 +4,7 @@ import { CaveCam, Darkness } from '../fx';
 import { bl, bx, cliff, cy, distToPath, inR, PI, place, ss } from '../lib';
 import { bunting, casa, fence, hat, iglesia, mont } from '../parts';
 import { ZB, type ZoneSpec } from '../zone';
+import { ElParaisoDescubrimientos } from './ElParaisoDescubrimientos';
 
 /** El Paraíso: Yuscarán, pueblo minero de casas blancas, con su bocamina y una milpa donde se esconde la mazorca dorada. */
 export function pueblo(d: Department): ZoneSpec {
@@ -41,6 +42,7 @@ export function pueblo(d: Department): ZoneSpec {
       ),
     );
   Z.stop(0, 42);
+  Z.n(<ElParaisoDescubrimientos altura={Z.h} />);
   // bocamina: túnel con marcos de madera, rieles y galería con vetas
   Z.add(
     bx(10.6, 2.2, -23.25, 2.4, 4.4, 17.5, 'stone', R),
