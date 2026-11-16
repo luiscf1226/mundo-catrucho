@@ -76,8 +76,10 @@ function actuar(m: Sesion) {
       m.sumar(-25);
       useGame.getState().toast('Primero diagnosticá: no retirés nada.', '📏');
     } else if (s.puntales[b] > 0) {
+      // quitar devuelve los 5 puntos de ponerlo: alternar no suma
       s.puntales[b]--;
       s.quedan++;
+      m.sumar(-5);
     }
     return;
   }
