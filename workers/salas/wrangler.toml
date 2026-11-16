@@ -1,6 +1,13 @@
-name = "mundo-catrucho-salas"
+name = "mundo-catrucho-salas-dev"
 main = "src/index.ts"
 compatibility_date = "2026-10-01"
+
+# Tres entornos (MC-65), cada uno es un Worker aparte con sus propios Durable Objects y su propio SALA_SECRETO:
+#   sin --env       → desarrollo, mundo-catrucho-salas-dev (`pnpm dev` corre local); el secreto sale de .dev.vars
+#   --env preview   → mundo-catrucho-salas-preview, para las vistas previas de los pull requests
+#   --env production → mundo-catrucho-salas, la que usa el juego publicado
+# Los secretos se cargan con `wrangler secret put SALA_SECRETO --env <entorno>`; nunca van en este archivo.
+# CONVEX_SITE_URL (no es secreto) apunta al Convex del mismo entorno: https://<deployment>.convex.site
 
 [[durable_objects.bindings]]
 name = "SALAS"
@@ -9,3 +16,23 @@ class_name = "Sala"
 [[migrations]]
 tag = "v1"
 new_sqlite_classes = ["Sala"]
+
+[env.preview]
+name = "mundo-catrucho-salas-preview"
+
+[[env.preview.durable_objects.bindings]]
+name = "SALAS"
+class_name = "Sala"
+
+[env.preview.vars]
+CONVEX_SITE_URL = ""
+
+[env.production]
+name = "mundo-catrucho-salas"
+
+[[env.production.durable_objects.bindings]]
+name = "SALAS"
+class_name = "Sala"
+
+[env.production.vars]
+CONVEX_SITE_URL = ""

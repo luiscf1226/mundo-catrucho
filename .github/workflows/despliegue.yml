@@ -1,0 +1,98 @@
+name: Despliegue
+
+# MC-65. Publica la sala, Convex y el juego en Cloudflare, por entorno: `preview` (desde un pull request o a mano) o
+# `production` (cada push a main). Las llaves salen de los secretos de GitHub (del entorno o del repo), nunca del
+# código. Si falta una llave, ese paso se salta con un aviso y el flujo queda en verde. Ver docs/ENTORNOS.md.
+#
+#   Secretos:  CLOUDFLARE_API_TOKEN (obligatorio para publicar), SALA_SECRETO, CONVEX_DEPLOY_KEY (opcional)
+#   Variables: VITE_CONVEX_URL (si no hay CONVEX_DEPLOY_KEY), CONVEX_SITE_URL, CLOUDFLARE_ACCOUNT_ID (opcional)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      entorno:
+        description: Entorno
+        type: choice
+        options: [preview, production]
+        default: preview
+
+# Una publicación a la vez por entorno: todos los PR comparten los mismos Workers de vista previa.
+concurrency:
+  group: despliegue-${{ github.event_name == 'pull_request' && 'preview' || inputs.entorno || 'production' }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  desplegar:
+    name: desplegar (${{ github.event_name == 'pull_request' && 'preview' || inputs.entorno || 'production' }})
+    # Los pull requests desde forks no tienen secretos: ni lo intentamos.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: ${{ github.event_name == 'pull_request' && 'preview' || inputs.entorno || 'production' }}
+    env:
+      ENTORNO: ${{ github.event_name == 'pull_request' && 'preview' || inputs.entorno || 'production' }}
+      RAMA: ${{ github.head_ref || github.ref_name }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+      SALA_SECRETO: ${{ secrets.SALA_SECRETO }}
+      CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+      VITE_CONVEX_URL: ${{ vars.VITE_CONVEX_URL }}
+      VITE_SALAS_URL: ${{ vars.VITE_SALAS_URL }}
+      CONVEX_SITE_URL: ${{ vars.CONVEX_SITE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Qué falta
+        run: |
+          avisar() { echo "::notice title=Despliegue $ENTORNO::$1"; }
+          [ -n "$CLOUDFLARE_API_TOKEN" ] || avisar "Falta el secreto CLOUDFLARE_API_TOKEN: no se publica nada en Cloudflare."
+          [ -n "$SALA_SECRETO" ] || avisar "Falta el secreto SALA_SECRETO: la sala queda con el secreto que ya tenga."
+          [ -n "$CONVEX_DEPLOY_KEY" ] || [ -n "$VITE_CONVEX_URL" ] ||
+            avisar "Sin CONVEX_DEPLOY_KEY ni VITE_CONVEX_URL: el juego sale sin servidor (LocalNet, sin sala en vivo)."
+
+      # La sala primero: el juego necesita su dirección (wss://…workers.dev) para compilarse.
+      - name: Sala (Cloudflare)
+        if: env.CLOUDFLARE_API_TOKEN != ''
+        working-directory: workers/salas
+        run: |
+          extra=()
+          [ -n "$CONVEX_SITE_URL" ] && extra=(--var "CONVEX_SITE_URL:$CONVEX_SITE_URL")
+          pnpm exec wrangler deploy --env "$ENTORNO" "${extra[@]}" | tee /tmp/sala.log
+          if [ -n "$SALA_SECRETO" ]; then
+            printf '%s' "$SALA_SECRETO" | pnpm exec wrangler secret put SALA_SECRETO --env "$ENTORNO"
+          fi
+          if [ -z "$VITE_SALAS_URL" ]; then
+            url=$(grep -oE 'https://[a-z0-9.-]+\.workers\.dev' /tmp/sala.log | head -1)
+            [ -n "$url" ] && echo "VITE_SALAS_URL=wss://${url#https://}" >> "$GITHUB_ENV"
+          fi
+
+      # Con llave de despliegue, Convex publica sus funciones y compila el juego con su propia URL (en preview crea
+      # un Convex por rama). Sin llave se compila con la variable VITE_CONVEX_URL (o sin servidor si está vacía).
+      - name: Convex y compilar el juego
+        if: env.CONVEX_DEPLOY_KEY != ''
+        run: |
+          extra=()
+          [ "$ENTORNO" = preview ] && extra=(--preview-name "$RAMA")
+          npx convex deploy "${extra[@]}" \
+            --cmd 'pnpm --filter @mundo-catrucho/web build:web' --cmd-url-env-var-name VITE_CONVEX_URL
+
+      - name: Compilar el juego
+        if: env.CONVEX_DEPLOY_KEY == ''
+        run: pnpm --filter @mundo-catrucho/web build:web
+
+      - name: Juego (Cloudflare)
+        if: env.CLOUDFLARE_API_TOKEN != ''
+        working-directory: apps/web
+        run: pnpm --filter @mundo-catrucho/salas exec wrangler deploy --config "$PWD/wrangler.toml" --env "$ENTORNO"
