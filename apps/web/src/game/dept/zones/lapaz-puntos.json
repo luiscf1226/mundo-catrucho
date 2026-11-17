@@ -1,0 +1,20 @@
+[
+  {
+    "id": "lapaz.locura-0",
+    "nombre": "Sorbo con lupa",
+    "texto": "Marcala tiene denominación de origen para su café. Esta taza de mentiras, al sorberla, despliega su mapa de aromas con lupa y todo.",
+    "pos": [-30, 12]
+  },
+  {
+    "id": "lapaz.locura-1",
+    "nombre": "Café con aplausos",
+    "texto": "CaféCultura junta café, música y artesanías en Marcala. Este grano de utilería hace reverencia y le llueve confeti de papel.",
+    "pos": [31, 7]
+  },
+  {
+    "id": "lapaz.locura-2",
+    "nombre": "La bruma trae cortina",
+    "texto": "Guajiquiro es destino de bosque nublado para ver aves. Quedate quieto y callado: la niebla se abre como telón.",
+    "pos": [-28, 35]
+  }
+]

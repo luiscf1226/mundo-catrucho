@@ -92,6 +92,12 @@ const choluteca = kit(
   (d) => [120 + r(d * 120), 360, 600],
   () => 75,
 );
+// La Paz
+/** La Paz: metas y reloj de minigames/lapaz/comun.tsx. */
+const lapaz = kit(
+  (d) => [120 + r(d * 120), 360, 600],
+  () => 75,
+);
 const islas = (a: number, b: number, c: number, k: number, base: number, extra: number) =>
   kit(lineal(a, b, c, k), (d) => base + r(d * extra));
 /** Comayagua: `metasLineales` y `reloj` de apps/web/src/game/minigames/comayagua/comun.tsx */
@@ -256,6 +262,15 @@ export const TOPES: Record<string, TopeMotor> = {
   'choluteca.cincha': conRitmo(choluteca, 67),
   'choluteca.ventanasbus': choluteca,
   'choluteca.mareapaseo': choluteca,
+  // La Paz
+  'lapaz.catacion': conRitmo(lapaz, 45),
+  'lapaz.cafe': conRitmo(lapaz, 35),
+  'lapaz.tostador': conRitmo(lapaz, 30),
+  'lapaz.reciprocidad': conRitmo(lapaz, 35),
+  'lapaz.vapor': conRitmo(lapaz, 25),
+  'lapaz.pesas': conRitmo(lapaz, 60),
+  'lapaz.abrasigo': conRitmo(lapaz, 40),
+  'lapaz.estiba': conRitmo(lapaz, 35),
   'copan.cadera': copan,
   'copan.estelas': copan,
   'copan.estratigrafia': copan,

@@ -1105,4 +1105,109 @@
     "gold": 600
   }
 }
+,
+{
+  "id": "lapaz.catacion",
+  "name": "Triángulo de catación",
+  "place": "La Paz",
+  "icon": "👃",
+  "desc": "Olfateá fichas de aroma y compará tres tazas virtuales sin etiqueta con clics limitados. Ganás al señalar la distinta y justificarla con dos descriptores; apostar sin contraste consume el lote.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "lapaz.cafe",
+  "name": "Rama que vuelve a producir",
+  "place": "La Paz",
+  "icon": "🍒",
+  "desc": "Pellizcá cerezas rojas con el cursor dejando nudos y frutos verdes intactos. Ganás por cosecha de dos temporadas; arrancar el nudo elimina la producción futura.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "lapaz.tostador",
+  "name": "Chasquido del tostado",
+  "place": "La Paz",
+  "icon": "🔥",
+  "desc": "Ajustá aire y tambor con dos perillas siguiendo los intervalos del crack del grano. Ganás al descargar en la ventana del perfil pedido; pasarte carboniza el lote.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "lapaz.reciprocidad",
+  "name": "Saludo entre comitivas",
+  "place": "La Paz",
+  "icon": "🥁",
+  "desc": "Mové dos grupos por turnos negociando quién ofrece y quién responde cada saludo. Ganás cuando ambos completan su visita con igual hospitalidad; adelantarse sin respuesta suspende el encuentro.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "lapaz.vapor",
+  "name": "Olla de ticucos",
+  "place": "La Paz",
+  "icon": "🫔",
+  "desc": "Abrí una válvula y redistribuí envoltorios por altura para mantener presión uniforme. Ganás una tanda cocida sin destapar hojas; vapor retenido abre las costuras.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "lapaz.pesas",
+  "name": "Humedad en el beneficio",
+  "place": "La Paz",
+  "icon": "⚖️",
+  "desc": "Colocá contrapesos y tará una balanza mientras un lote de café pierde humedad. Ganás pesando materia seca real; confundir agua con grano te deja el inventario descuadrado.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "lapaz.abrasigo",
+  "name": "Lectura rupestre sin contacto",
+  "place": "La Paz",
+  "icon": "🖐️",
+  "desc": "Superponé transparencias digitales desde estaciones de observación fijas. Ganás reconstruyendo el contorno sin tocar la pared; iluminar o intervenir el original cancela el registro.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "lapaz.estiba",
+  "name": "Descarga de Tutule",
+  "place": "La Paz",
+  "icon": "🛻",
+  "desc": "Ordená costales por destino dentro de una caja con salida exclusivamente trasera. Ganás al completar entregas sin desmontar toda la carga; tapar una entrega temprana cuesta un turno.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+}
 ]

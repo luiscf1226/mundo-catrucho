@@ -61,6 +61,15 @@ const MOTORS = {
   'choluteca.cincha': motor(() => import('./choluteca/Cincha').then((m) => ({ ...m, default: m.Cincha }))),
   'choluteca.ventanasbus': motor(() => import('./choluteca/Bus').then((m) => ({ ...m, default: m.Bus }))),
   'choluteca.mareapaseo': motor(() => import('./choluteca/Marea').then((m) => ({ ...m, default: m.Marea }))),
+  // La Paz
+  'lapaz.catacion': motor(() => import('./lapaz/Catacion').then((m) => ({ ...m, default: m.Catacion }))),
+  'lapaz.cafe': motor(() => import('./lapaz/Cafe').then((m) => ({ ...m, default: m.Cafe }))),
+  'lapaz.tostador': motor(() => import('./lapaz/Tostador').then((m) => ({ ...m, default: m.Tostador }))),
+  'lapaz.reciprocidad': motor(() => import('./lapaz/Reciprocidad').then((m) => ({ ...m, default: m.Reciprocidad }))),
+  'lapaz.vapor': motor(() => import('./lapaz/Vapor').then((m) => ({ ...m, default: m.Vapor }))),
+  'lapaz.pesas': motor(() => import('./lapaz/Pesas').then((m) => ({ ...m, default: m.Pesas }))),
+  'lapaz.abrasigo': motor(() => import('./lapaz/Abrasigo').then((m) => ({ ...m, default: m.Abrasigo }))),
+  'lapaz.estiba': motor(() => import('./lapaz/Estiba').then((m) => ({ ...m, default: m.Estiba }))),
 
   'copan.cadera': motor(() => import('./copan/Cadera').then((m) => ({ ...m, default: m.Cadera }))),
   'copan.glifos': motor(() => import('./copan/Glifos').then((m) => ({ ...m, default: m.Glifos }))),
