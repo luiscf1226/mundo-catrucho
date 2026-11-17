@@ -158,7 +158,7 @@ function piecesOf(lay: Layout, plans: StationPlan[], d: Department): Pc[] {
     put = (p: Pc[], x: number, z: number, r: number) => out.push(...place(p, x, 0, z, r));
   // plaza, poste y caminos
   out.push(
-    cy(cx, 0.03, cz, 7.5, 0.06, 'plastic', '#d9c7a0', { n: 28, solid: false }),
+    cy(cx, 0.03, cz, 7.5, 0.06, 'cobble', '#d9c7a0', { n: 28, solid: false }),
     cy(cx, 2.6, cz, 0.18, 5.2, 'wood', DW, { n: 8 }),
     bl(cx, 5.3, cz, 0.3, 'gold', '#e8c547'),
   );
@@ -178,7 +178,7 @@ function piecesOf(lay: Layout, plans: StationPlan[], d: Department): Pc[] {
       p.s.ang,
     );
     // piso de la estación, decorado y rótulo de entrada
-    out.push(cy(p.s.pos[0], 0.035, p.s.pos[1], 13.5, 0.05, 'plastic', '#e3d6b4', { n: 30, solid: false }));
+    out.push(cy(p.s.pos[0], 0.035, p.s.pos[1], 13.5, 0.05, 'concrete', '#e3d6b4', { n: 30, solid: false }));
     const [dx, dz] = rotXZ(0, -7.5, p.s.rot);
     put(decorFor(p.s.lugar.kind, i * 97 + 13), p.s.pos[0] + dx, p.s.pos[1] + dz, p.s.rot);
     put(

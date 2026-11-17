@@ -4,8 +4,22 @@
 // Todas las capas viven en dos DataArrayTexture para que un solo material (y una sola llamada de dibujo)
 // pueda mezclar madera, estuco, teja, hoja, etc. según un atributo por vértice.
 import * as THREE from 'three';
+import { useGame } from '../../../../core/store';
+import { calidadEfectiva } from '../../../quality';
 
-export const TS = 512;
+/** tamaño lógico del dibujo: los generadores piensan en un lienzo de 512 px y se escalan a la resolución real */
+const W = 512;
+let _calidad: 'baja' | 'media' | 'alta' | null = null;
+/** Calidad con la que nacen las texturas y los materiales HD. Se fija la primera vez (cambiarla pide recargar). */
+export function texCalidad() {
+  if (_calidad) return _calidad;
+  try {
+    _calidad = calidadEfectiva(useGame.getState().profile.settings);
+  } catch {
+    _calidad = 'alta';
+  }
+  return _calidad;
+}
 export const LAYERS = [
   'plastic',
   'grass',
@@ -106,12 +120,13 @@ export function fbm(u: number, v: number, p: number, oct = 4, off = 0, py = p) {
 }
 
 type Ctx = CanvasRenderingContext2D;
-function canvas(fill: string): [HTMLCanvasElement, Ctx] {
+function canvas(fill: string, res: number): [HTMLCanvasElement, Ctx] {
   const c = document.createElement('canvas');
-  c.width = c.height = TS;
-  const x = c.getContext('2d', { willReadFrequently: true })!;
+  c.width = c.height = res;
+  const x = c.getContext('2d', { willReadFrequently: true }) as Ctx;
+  x.scale(res / W, res / W);
   x.fillStyle = fill;
-  x.fillRect(0, 0, TS, TS);
+  x.fillRect(0, 0, W, W);
   return [c, x];
 }
 /** dibuja una forma 9 veces para que el mosaico cierre en los bordes */
@@ -120,7 +135,7 @@ function wrap(cs: Ctx[], fn: (c: Ctx, i: number) => void) {
     for (let dx = -1; dx <= 1; dx++)
       for (let dy = -1; dy <= 1; dy++) {
         c.save();
-        c.translate(dx * TS, dy * TS);
+        c.translate(dx * W, dy * W);
         fn(c, i);
         c.restore();
       }
@@ -138,11 +153,11 @@ interface Cfg {
   /** rugosidad relativa = r0 + r1 * altura (0..1; 0.5 = la del material) */ r0?: number;
   r1?: number;
   /** oscurecer huecos según la altura */ ao?: number;
-  /** modulación por píxel: (u, v) → [factor de albedo, altura extra] */ px?: (
+  /** modulación por píxel: (u, v) → [factor de albedo, altura extra, tono cálido −1..1 (seco/quemado) opcional] */ px?: (
     u: number,
     v: number,
     rnd: () => number,
-  ) => [number, number];
+  ) => [number, number] | [number, number, number];
   /** si se define, la altura sale de px y el lienzo solo suma (lienzo − 0.5) × hk; si no, altura = lienzo + px */ hk?: number;
 }
 type Gen = (a: Ctx, h: Ctx, r: () => number) => Cfg;
@@ -163,25 +178,135 @@ const blob = (c: Ctx, x: number, y: number, rx: number, ry: number, rot: number,
   c.closePath();
 };
 
+/** Grieta quebrada que se ramifica: oscurece el color y hunde la altura. Cierra en los bordes del mosaico. */
+function crack(
+  a: Ctx,
+  h: Ctx,
+  r: () => number,
+  x: number,
+  y: number,
+  o: { n?: number; step?: number; w?: number; al?: number; branch?: number; turn?: number } = {},
+) {
+  const { n = 12, step = 14, w = 1.1, al = 0.5, branch = 0.3, turn = 0.9 } = o;
+  const lines: { pts: number[][]; w: number }[] = [];
+  const walk = (x0: number, y0: number, ang: number, steps: number, lw: number, depth: number) => {
+    const pts = [[x0, y0]];
+    let px = x0,
+      py = y0;
+    for (let s = 0; s < steps; s++) {
+      ang += (r() - 0.5) * turn;
+      const l = step * (0.5 + r());
+      px += Math.cos(ang) * l;
+      py += Math.sin(ang) * l;
+      pts.push([px, py]);
+      if (depth < 2 && r() < branch)
+        walk(px, py, ang + (r() < 0.5 ? -1 : 1) * (0.6 + r() * 0.8), steps >> 1, lw * 0.6, depth + 1);
+    }
+    lines.push({ pts, w: lw * (0.7 + r() * 0.5) });
+  };
+  walk(x, y, r() * Math.PI * 2, n, w, 0);
+  wrap([a, h], (c, k) => {
+    c.lineJoin = c.lineCap = 'round';
+    for (const ln of lines) {
+      c.strokeStyle = k ? g(0.08) : `rgba(34,30,26,${al})`;
+      c.lineWidth = k ? ln.w * 1.8 : ln.w;
+      c.beginPath();
+      ln.pts.forEach((p, j) => (j ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1])));
+      c.stroke();
+    }
+  });
+}
+/** Manchas suaves (agua, aceite, tierra, liquen): degradado radial en el color y, si se pide, en la altura. */
+function stains(
+  a: Ctx,
+  r: () => number,
+  n: number,
+  rmin: number,
+  rmax: number,
+  col: (r: () => number) => [number, number, number, number],
+  h?: Ctx,
+  hv = 0,
+) {
+  for (let i = 0; i < n; i++) {
+    const x = r() * W,
+      y = r() * W,
+      rad = rmin + r() * (rmax - rmin),
+      sx = 0.6 + r() * 0.8,
+      rot = r() * Math.PI,
+      [cr, cg, cb, al] = col(r);
+    wrap(h ? [a, h] : [a], (c, k) => {
+      c.translate(x, y);
+      c.rotate(rot);
+      c.scale(sx, 1);
+      const gr = c.createRadialGradient(0, 0, 0, 0, 0, rad);
+      if (k) {
+        gr.addColorStop(0, `rgba(${hv * 255},${hv * 255},${hv * 255},0.5)`);
+        gr.addColorStop(1, `rgba(${hv * 255},${hv * 255},${hv * 255},0)`);
+      } else {
+        gr.addColorStop(0, rgb(cr, cg, cb, al));
+        gr.addColorStop(0.55, rgb(cr, cg, cb, al * 0.6));
+        gr.addColorStop(1, rgb(cr, cg, cb, 0));
+      }
+      c.fillStyle = gr;
+      c.fillRect(-rad, -rad, rad * 2, rad * 2);
+    });
+  }
+}
+/** Granitos (agregado, poros, piedrín): puntos claros u oscuros con su altura. */
+function specks(
+  a: Ctx,
+  h: Ctx | null,
+  r: () => number,
+  n: number,
+  smin: number,
+  smax: number,
+  light: number,
+  dark: number,
+) {
+  for (let i = 0; i < n; i++) {
+    const x = r() * W,
+      y = r() * W,
+      s = smin + r() * (smax - smin),
+      up = r() < 0.5,
+      t = up ? 1 - r() * light : 1 - dark * (0.5 + r() * 0.5);
+    a.fillStyle = up ? `rgba(255,252,246,${0.25 + r() * 0.35})` : rgb(t * 0.5, t * 0.48, t * 0.45, 0.25 + r() * 0.4);
+    a.beginPath();
+    a.arc(x, y, s, 0, 6.3);
+    a.fill();
+    if (h) {
+      h.fillStyle = up ? g(0.6 + r() * 0.3) : g(0.15 + r() * 0.2);
+      h.beginPath();
+      h.arc(x, y, s, 0, 6.3);
+      h.fill();
+    }
+  }
+}
+
 const GEN: Record<LayerName, Gen> = {
   plastic: () => ({ hk: 0, n: 0.25, r0: 0.45, r1: 0.1, px: (u, v) => [1, 0.5 + (fbm(u, v, 48, 3) - 0.5) * 0.25] }),
   grass: (a, h, r) => {
     h.fillStyle = g(0.3);
-    h.fillRect(0, 0, TS, TS);
+    h.fillRect(0, 0, W, W);
+    // matas: manchones más oscuros (húmedos) y más claros/amarillos (secos) debajo de las hojas
+    stains(a, r, 26, 30, 90, (r) =>
+      r() < 0.55 ? [0.42, 0.56, 0.34, 0.32 + r() * 0.2] : [1, 0.95, 0.66, 0.3 + r() * 0.2],
+    );
     for (let i = 0; i < 16000; i++) {
-      const x = r() * TS,
-        y = r() * TS,
+      const x = r() * W,
+        y = r() * W,
         ang = r() * Math.PI * 2,
         len = 5 + r() * 11,
         t = r();
       const col =
-          t < 0.25
-            ? rgb(1, 1, 0.72, 0.5)
+          t < 0.22
+            ? rgb(1, 0.98, 0.66, 0.5)
             : t < 0.5
-              ? rgb(0.62, 0.8, 0.6, 0.5)
+              ? rgb(0.56, 0.74, 0.54, 0.55)
               : t < 0.8
                 ? rgb(0.86, 1, 0.78, 0.5)
-                : rgb(0.5, 0.68, 0.5, 0.5),
+                : t < 0.95
+                  ? rgb(0.44, 0.6, 0.44, 0.55)
+                  : rgb(0.92, 0.84, 0.6, 0.55),
         hv = 0.35 + r() * 0.65;
       wrap([a, h], (c, k) => {
         c.strokeStyle = k ? g(hv) : col;
@@ -198,30 +323,89 @@ const GEN: Record<LayerName, Gen> = {
         c.stroke();
       });
     }
-    return { n: 1.1, r0: 0.5, r1: 0.1, ao: 0.3, px: (u, v) => [0.8 + fbm(u, v, 6, 4) * 0.34, 0] };
+    // tierrita entre las matas
+    stains(a, r, 7, 8, 20, () => [0.62, 0.5, 0.36, 0.35], h, 0.1);
+    return {
+      n: 1.1,
+      r0: 0.5,
+      r1: 0.1,
+      ao: 0.34,
+      px: (u, v) => {
+        const f = fbm(u, v, 4, 4),
+          f2 = fbm(u, v, 3, 3, 7);
+        return [0.76 + f * 0.4, 0, (f2 - 0.5) * 1.6];
+      },
+    };
   },
   dirt: (a, h, r) => {
-    for (let i = 0; i < 260; i++) {
-      const x = r() * TS,
-        y = r() * TS,
-        s = 2 + r() * 7,
-        t = 0.75 + r() * 0.3;
+    // manchas de humedad y tierra suelta más clara
+    stains(a, r, 10, 40, 110, (r) => (r() < 0.5 ? [0.62, 0.52, 0.42, 0.35] : [1, 0.94, 0.82, 0.3]), h, 0.35);
+    // huellas de zapato que cruzan el mosaico (dos caminantes)
+    for (let tr = 0; tr < 2; tr++) {
+      const ang = r() * Math.PI * 2,
+        x0 = r() * W,
+        y0 = r() * W,
+        dx = Math.cos(ang),
+        dy = Math.sin(ang);
+      for (let st = 0; st < 7; st++) {
+        const side = st % 2 ? 1 : -1,
+          cx = x0 + dx * st * 62 - dy * side * 9,
+          cy = y0 + dy * st * 62 + dx * side * 9,
+          al = 0.1 + r() * 0.08,
+          rot = ang + (r() - 0.5) * 0.2;
+        wrap([a, h], (c, k) => {
+          c.translate(cx, cy);
+          c.rotate(rot);
+          c.fillStyle = k ? g(0.18) : `rgba(60,42,26,${al})`;
+          c.beginPath();
+          c.ellipse(6, 0, 15, 7, 0, 0, 6.3);
+          c.fill();
+          c.beginPath();
+          c.ellipse(-15, 0, 7, 6, 0, 0, 6.3);
+          c.fill();
+          if (!k) {
+            c.strokeStyle = `rgba(60,42,26,${al * 0.8})`;
+            c.lineWidth = 1;
+            for (let q = -6; q <= 16; q += 5) {
+              c.beginPath();
+              c.moveTo(q, -5);
+              c.lineTo(q, 5);
+              c.stroke();
+            }
+          }
+        });
+      }
+    }
+    // terrones y piedrín con su sombra
+    for (let i = 0; i < 300; i++) {
+      const x = r() * W,
+        y = r() * W,
+        s = 1.6 + r() * (r() < 0.12 ? 7 : 3.5),
+        t = 0.72 + r() * 0.34,
+        rot = r() * 3;
       wrap([a, h], (c, k) => {
-        c.fillStyle = k ? g(0.75 + r() * 0.2) : rgb(t, t * 0.97, t * 0.92, 0.9);
-        blob(c, x, y, s, s * (0.6 + r() * 0.4), r() * 3, r);
+        if (!k) {
+          c.fillStyle = 'rgba(40,28,18,0.35)';
+          blob(c, x + s * 0.35, y + s * 0.45, s, s * 0.75, rot, r);
+          c.fill();
+        }
+        c.fillStyle = k ? g(0.72 + r() * 0.25) : rgb(t, t * 0.96, t * 0.9, 0.95);
+        blob(c, x, y, s, s * (0.6 + r() * 0.4), rot, r);
         c.fill();
       });
     }
+    // rajaduras de tierra seca
+    for (let i = 0; i < 3; i++) crack(a, h, r, r() * W, r() * W, { n: 8, step: 12, w: 1, al: 0.35, branch: 0.35 });
     return {
       hk: 1.2,
-      n: 1.3,
+      n: 1.4,
       r0: 0.5,
       r1: 0.05,
-      ao: 0.35,
+      ao: 0.38,
       px: (u, v, rn) => {
         const f = fbm(u, v, 5, 5),
           f2 = fbm(u, v, 24, 3, 3);
-        return [0.72 + f * 0.42 + (rn() - 0.5) * 0.06, 0.25 + f * 0.4 + f2 * 0.3];
+        return [0.7 + f * 0.46 + (rn() - 0.5) * 0.07, 0.25 + f * 0.4 + f2 * 0.3, (fbm(u, v, 3, 3, 4) - 0.5) * 0.9];
       },
     };
   },
@@ -238,49 +422,34 @@ const GEN: Record<LayerName, Gen> = {
     },
   }),
   stone: (a, h, r) => {
-    for (let i = 0; i < 14; i++) {
-      let x = r() * TS,
-        y = r() * TS,
-        ang = r() * 6.28;
-      const pts: number[][] = [[x, y]];
-      for (let s = 0; s < 14; s++) {
-        ang += (r() - 0.5) * 1.1;
-        x += Math.cos(ang) * 22;
-        y += Math.sin(ang) * 22;
-        pts.push([x, y]);
-      }
-      wrap([a, h], (c, k) => {
-        c.strokeStyle = k ? g(0) : 'rgba(40,36,34,0.55)';
-        c.lineWidth = k ? 3.2 : 1.6;
-        c.lineJoin = 'round';
-        c.beginPath();
-        pts.forEach((p, j) => (j ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1])));
-        c.stroke();
-      });
-    }
+    // vetas y manchas de liquen, poros y unas pocas grietas finas (antes era una red de grietas que se repetía)
+    stains(a, r, 16, 20, 60, (r) => (r() < 0.5 ? [0.66, 0.63, 0.58, 0.14] : [1, 0.98, 0.92, 0.2]));
+    stains(a, r, 9, 5, 14, () => [0.8, 0.82, 0.6, 0.3]);
+    specks(a, h, r, 1100, 0.5, 1.6, 0.2, 0.5);
+    for (let i = 0; i < 2; i++) crack(a, h, r, r() * W, r() * W, { n: 9, step: 15, w: 0.9, al: 0.3, branch: 0.2 });
     return {
-      hk: 1.6,
-      n: 1.5,
+      hk: 1.2,
+      n: 1.3,
       r0: 0.42,
       r1: 0.14,
-      ao: 0.4,
+      ao: 0.35,
       px: (u, v, rn) => {
         const f = fbm(u, v, 4, 5),
           rd = Math.abs(fbm(u, v, 7, 4, 5) - 0.5) * 2,
           st = fbm(u, v, 4, 2, 9, 14);
-        return [0.74 + f * 0.3 + st * 0.08 + (rn() - 0.5) * 0.05, 0.25 + f * 0.35 + rd * 0.4];
+        return [0.72 + f * 0.34 + st * 0.08 + (rn() - 0.5) * 0.05, 0.3 + f * 0.35 + rd * 0.3, (f - 0.5) * 0.5];
       },
     };
   },
   cobble: (a, h, r) => {
     a.fillStyle = 'rgba(96,88,80,0)';
-    a.clearRect(0, 0, TS, TS);
+    a.clearRect(0, 0, W, W);
     a.fillStyle = 'rgba(92,86,80,0.25)';
-    a.fillRect(0, 0, TS, TS);
+    a.fillRect(0, 0, W, W);
     h.fillStyle = g(0.05);
-    h.fillRect(0, 0, TS, TS);
+    h.fillRect(0, 0, W, W);
     const N = 8,
-      cs = TS / N;
+      cs = W / N;
     for (let j = 0; j < N; j++)
       for (let i = 0; i < N; i++) {
         const x = (i + 0.5 + (j % 2) * 0.5 + (r() - 0.5) * 0.22) * cs,
@@ -313,15 +482,15 @@ const GEN: Record<LayerName, Gen> = {
     };
   },
   brick: (a, h, r) => {
-    a.clearRect(0, 0, TS, TS);
+    a.clearRect(0, 0, W, W);
     a.fillStyle = 'rgba(214,206,192,0.12)';
-    a.fillRect(0, 0, TS, TS);
+    a.fillRect(0, 0, W, W);
     h.fillStyle = g(0.15);
-    h.fillRect(0, 0, TS, TS);
+    h.fillRect(0, 0, W, W);
     const rows = 8,
       cols = 4,
-      bh = TS / rows,
-      bw = TS / cols,
+      bh = W / rows,
+      bw = W / cols,
       m = 5;
     for (let j = 0; j < rows; j++)
       for (let i = 0; i < cols; i++) {
@@ -352,15 +521,15 @@ const GEN: Record<LayerName, Gen> = {
   },
   wood: (a, h, r) => {
     const planks = 4,
-      ph = TS / planks;
+      ph = W / planks;
     for (let j = 0; j < planks; j++) {
-      const t = 0.8 + r() * 0.2,
-        warm = (r() - 0.5) * 0.06,
+      const t = 0.74 + r() * 0.26,
+        warm = (r() - 0.5) * 0.12,
         y0 = j * ph;
       a.fillStyle = rgb(t + warm, t, t - warm);
-      a.fillRect(0, y0, TS, ph);
+      a.fillRect(0, y0, W, ph);
       h.fillStyle = g(0.7 + r() * 0.1);
-      h.fillRect(0, y0, TS, ph);
+      h.fillRect(0, y0, W, ph);
       for (let l = 0; l < 26; l++) {
         const y = y0 + 3 + r() * (ph - 6),
           amp = 1 + r() * 4,
@@ -372,8 +541,8 @@ const GEN: Record<LayerName, Gen> = {
           c.strokeStyle = k ? `rgba(0,0,0,${al * 1.4})` : `rgba(60,34,14,${al})`;
           c.lineWidth = lw;
           c.beginPath();
-          for (let x = 0; x <= TS; x += 8) {
-            const yy = y + Math.sin((x / TS) * Math.PI * 2 * fr + ph0) * amp;
+          for (let x = 0; x <= W; x += 8) {
+            const yy = y + Math.sin((x / W) * Math.PI * 2 * fr + ph0) * amp;
             if (x) c.lineTo(x, yy);
             else c.moveTo(x, yy);
           }
@@ -381,7 +550,7 @@ const GEN: Record<LayerName, Gen> = {
         });
       }
       if (r() < 0.75) {
-        const kx = r() * TS,
+        const kx = r() * W,
           ky = y0 + ph * (0.3 + r() * 0.4),
           kr = 5 + r() * 8;
         wrap([a, h], (c, k) => {
@@ -398,11 +567,11 @@ const GEN: Record<LayerName, Gen> = {
           c.fill();
         });
       }
-      const cut = r() * TS;
+      const cut = r() * W;
       wrap([a, h], (c, k) => {
         c.fillStyle = k ? g(0.05) : 'rgba(30,18,10,0.85)';
         c.fillRect(cut, y0, 3, ph);
-        c.fillRect(0, y0 - 2, TS, 4);
+        c.fillRect(0, y0 - 2, W, 4);
         if (!k) {
           c.fillStyle = 'rgba(40,40,44,0.8)';
           for (const dx of [-9, 10])
@@ -419,20 +588,24 @@ const GEN: Record<LayerName, Gen> = {
       r0: 0.4,
       r1: 0.14,
       ao: 0.3,
-      px: (u, v, rn) => [0.92 + fbm(u, v, 8, 3, 0, 30) * 0.14 + (rn() - 0.5) * 0.03, 0],
+      px: (u, v, rn) => [
+        0.86 + fbm(u, v, 8, 3, 0, 30) * 0.22 + (rn() - 0.5) * 0.03,
+        0,
+        (fbm(u, v, 3, 3, 5) - 0.5) * 0.6,
+      ],
     };
   },
   metal: (a, h, r) => {
-    for (let y = 0; y < TS; y++) {
+    for (let y = 0; y < W; y++) {
       const t = 0.9 + r() * 0.1;
       a.fillStyle = g(t);
-      a.fillRect(0, y, TS, 1);
+      a.fillRect(0, y, W, 1);
       h.fillStyle = g(0.4 + r() * 0.25);
-      h.fillRect(0, y, TS, 1);
+      h.fillRect(0, y, W, 1);
     }
     for (let i = 0; i < 60; i++) {
-      const x = r() * TS,
-        y = r() * TS,
+      const x = r() * W,
+        y = r() * W,
         l = 30 + r() * 160,
         dy = (r() - 0.5) * 8;
       wrap([a, h], (c, k) => {
@@ -447,13 +620,13 @@ const GEN: Record<LayerName, Gen> = {
     return { n: 0.5, r0: 0.38, r1: 0.25, px: (u, v) => [0.94 + fbm(u, v, 5, 3) * 0.1, 0] };
   },
   tile: (a, h, r) => {
-    a.clearRect(0, 0, TS, TS);
+    a.clearRect(0, 0, W, W);
     a.fillStyle = 'rgba(208,204,196,0.1)';
-    a.fillRect(0, 0, TS, TS);
+    a.fillRect(0, 0, W, W);
     h.fillStyle = g(0.2);
-    h.fillRect(0, 0, TS, TS);
+    h.fillRect(0, 0, W, W);
     const N = 4,
-      s = TS / N,
+      s = W / N,
       m = 5;
     for (let j = 0; j < N; j++)
       for (let i = 0; i < N; i++) {
@@ -486,12 +659,13 @@ const GEN: Record<LayerName, Gen> = {
     };
   },
   stucco: (a, h, r) => {
-    for (let i = 0; i < 26; i++) {
-      const x = r() * TS,
-        y = r() * TS,
+    // chorreados de lluvia desde arriba
+    for (let i = 0; i < 30; i++) {
+      const x = r() * W,
+        y = r() * W,
         w = 6 + r() * 22,
         l = 60 + r() * 200,
-        al = 0.03 + r() * 0.06;
+        al = 0.04 + r() * 0.07;
       wrap([a], (c) => {
         const gr = c.createLinearGradient(0, y, 0, y + l);
         gr.addColorStop(0, `rgba(70,58,46,${al})`);
@@ -500,47 +674,70 @@ const GEN: Record<LayerName, Gen> = {
         c.fillRect(x, y, w, l);
       });
     }
-    for (let i = 0; i < 90; i++) {
-      const x = r() * TS,
-        y = r() * TS,
+    // manchones de pintura vieja y repello más claro
+    stains(a, r, 14, 30, 90, (r) => (r() < 0.5 ? [0.82, 0.78, 0.72, 0.22] : [1, 1, 0.97, 0.3]));
+    // pasadas de llana (relieve del repello)
+    for (let i = 0; i < 110; i++) {
+      const x = r() * W,
+        y = r() * W,
         rad = 14 + r() * 40,
         a0 = r() * 6.28;
       wrap([h], (c) => {
-        c.strokeStyle = `rgba(255,255,255,${0.05 + r() * 0.08})`;
+        c.strokeStyle = `rgba(255,255,255,${0.06 + r() * 0.1})`;
         c.lineWidth = 3 + r() * 5;
         c.beginPath();
         c.arc(x, y, rad, a0, a0 + 0.8 + r());
         c.stroke();
       });
     }
+    // descascarados: se ve el bloque/repello de abajo, más gris y hundido
+    for (let i = 0; i < 4; i++) {
+      const x = r() * W,
+        y = r() * W,
+        rx = 10 + r() * 22,
+        ry = 6 + r() * 14,
+        rot = r() * 3,
+        sd = Math.floor(r() * 1e6);
+      wrap([a, h], (c, k) => {
+        blob(c, x, y, rx, ry, rot, rng(sd), 0.5);
+        c.fillStyle = k ? g(0.12) : 'rgba(150,140,124,0.55)';
+        c.fill();
+        if (!k) {
+          c.strokeStyle = 'rgba(255,255,250,0.5)';
+          c.lineWidth = 1.2;
+          c.stroke();
+        }
+      });
+    }
+    for (let i = 0; i < 3; i++) crack(a, h, r, r() * W, r() * W, { n: 7, step: 14, w: 0.8, al: 0.3, branch: 0.2 });
     return {
       hk: 1.6,
-      n: 0.85,
+      n: 0.95,
       r0: 0.5,
       r1: 0.06,
-      ao: 0.1,
+      ao: 0.12,
       px: (u, v, rn) => {
         const f = fbm(u, v, 5, 4),
           f2 = fbm(u, v, 40, 3, 2);
-        return [0.9 + f * 0.13 + (rn() - 0.5) * 0.025, 0.2 + f2 * 0.45 + (rn() - 0.5) * 0.12];
+        return [0.86 + f * 0.2 + (rn() - 0.5) * 0.03, 0.2 + f2 * 0.45 + (rn() - 0.5) * 0.12];
       },
     };
   },
   roof: (a, h, r) => {
     a.fillStyle = g(0.3);
-    a.fillRect(0, 0, TS, TS);
+    a.fillRect(0, 0, W, W);
     h.fillStyle = g(0);
-    h.fillRect(0, 0, TS, TS);
+    h.fillRect(0, 0, W, W);
     const cols = 8,
       rows = 4,
-      cw = TS / cols,
-      rh = TS / rows;
+      cw = W / cols,
+      rh = W / rows;
     for (let j = 0; j < rows; j++)
       for (let i = 0; i < cols; i++) {
         const x = i * cw,
           y = j * rh,
-          t = r() < 0.15 ? 0.66 + r() * 0.1 : 0.84 + r() * 0.18,
-          warm = (r() - 0.5) * 0.12;
+          t = r() < 0.18 ? 0.6 + r() * 0.12 : 0.8 + r() * 0.22,
+          warm = (r() - 0.5) * 0.2;
         const ga = a.createLinearGradient(x, 0, x + cw, 0);
         ga.addColorStop(0, rgb(t * 0.5, t * 0.48, t * 0.46));
         ga.addColorStop(0.2, rgb(t + warm, t, t - warm));
@@ -567,12 +764,27 @@ const GEN: Record<LayerName, Gen> = {
           h.fillRect(x + px, y, 1, rh);
         }
       }
+    // liquen y hollín: puntitos grisáceos/amarillos y manchas oscuras donde se junta el agua
+    stains(a, r, 10, 14, 40, (r) => (r() < 0.6 ? [0.35, 0.3, 0.26, 0.3] : [0.82, 0.84, 0.66, 0.3]));
+    for (let i = 0; i < 160; i++) {
+      const x = r() * W,
+        y = r() * W,
+        s = 0.8 + r() * 2.2;
+      a.fillStyle = r() < 0.5 ? 'rgba(214,214,170,0.55)' : 'rgba(60,52,40,0.45)';
+      a.beginPath();
+      a.arc(x, y, s, 0, 6.3);
+      a.fill();
+    }
     return {
       n: 2.4,
       r0: 0.44,
       r1: 0.1,
-      ao: 0.2,
-      px: (u, v, rn) => [0.9 + fbm(u, v, 20, 3) * 0.2 + (rn() - 0.5) * 0.04, 0],
+      ao: 0.22,
+      px: (u, v, rn) => [
+        0.84 + fbm(u, v, 3, 3) * 0.2 + fbm(u, v, 20, 3) * 0.1 + (rn() - 0.5) * 0.04,
+        0,
+        (fbm(u, v, 4, 3, 2) - 0.5) * 0.8,
+      ],
     };
   },
   water: () => ({
@@ -608,59 +820,89 @@ const GEN: Record<LayerName, Gen> = {
     },
   }),
   asphalt: (a, h, r) => {
-    for (let i = 0; i < 2600; i++) {
-      const x = r() * TS,
-        y = r() * TS,
-        s = 0.8 + r() * 2.4,
-        t = 0.85 + r() * 0.5;
-      [a, h].forEach((c, k) => {
-        c.fillStyle = k ? g(0.5 + r() * 0.5) : rgb(t, t, t * 0.98, 0.7);
-        c.beginPath();
-        c.arc(x, y, s, 0, 6.3);
-        c.fill();
+    // agregado: piedrín claro y oscuro bien tupido
+    specks(a, h, r, 7000, 0.5, 1.7, 0.35, 0.6);
+    // bacheos: parches rectangulares más oscuros con su borde de corte
+    for (let i = 0; i < 3; i++) {
+      const x = r() * W,
+        y = r() * W,
+        w = 70 + r() * 140,
+        hh = 50 + r() * 90,
+        rot = (r() - 0.5) * 0.3,
+        al = 0.18 + r() * 0.14;
+      wrap([a, h], (c, k) => {
+        c.translate(x, y);
+        c.rotate(rot);
+        c.fillStyle = k ? 'rgba(255,255,255,0.12)' : `rgba(16,16,18,${al})`;
+        c.fillRect(-w / 2, -hh / 2, w, hh);
+        c.strokeStyle = k ? g(0.1) : 'rgba(10,10,12,0.5)';
+        c.lineWidth = 1.6;
+        c.strokeRect(-w / 2, -hh / 2, w, hh);
       });
     }
+    // manchas de aceite y desgaste más claro donde pasan las llantas
+    stains(a, r, 5, 14, 40, () => [0.12, 0.12, 0.14, 0.45]);
+    stains(a, r, 8, 40, 120, () => [1, 1, 0.98, 0.14]);
+    for (let i = 0; i < 4; i++) crack(a, h, r, r() * W, r() * W, { n: 12, step: 16, w: 1.3, al: 0.6, branch: 0.4 });
     return {
       hk: 1,
-      n: 1.3,
+      n: 1.4,
       r0: 0.5,
-      r1: 0.06,
-      ao: 0.2,
-      px: (u, v, rn) => [0.74 + fbm(u, v, 5, 4) * 0.22 + (rn() - 0.5) * 0.14, 0.3 + (rn() - 0.5) * 0.3],
+      r1: 0.08,
+      ao: 0.25,
+      px: (u, v, rn) => [
+        0.72 + fbm(u, v, 5, 4) * 0.26 + (rn() - 0.5) * 0.16,
+        0.35 + (rn() - 0.5) * 0.3 + (fbm(u, v, 20, 2) - 0.5) * 0.2,
+      ],
     };
   },
   concrete: (a, h, r) => {
-    for (let i = 0; i < 420; i++) {
-      const x = r() * TS,
-        y = r() * TS,
-        s = 0.6 + r() * 1.8;
-      [a, h].forEach((c, k) => {
-        c.fillStyle = k ? g(0.15) : 'rgba(60,58,54,0.45)';
+    // juntas de losa cada 2 m (el mosaico mide 4 m): ranura oscura y hundida
+    wrap([a, h], (c, k) => {
+      c.strokeStyle = k ? g(0.05) : 'rgba(58,54,50,0.55)';
+      c.lineWidth = k ? 4 : 2.2;
+      for (const q of [0, W / 2]) {
         c.beginPath();
-        c.arc(x, y, s, 0, 6.3);
-        c.fill();
-      });
+        c.moveTo(q, 0);
+        c.lineTo(q, W);
+        c.moveTo(0, q);
+        c.lineTo(W, q);
+        c.stroke();
+      }
+    });
+    // manchas de agua, de tierra y parches lavados más claros
+    stains(a, r, 9, 30, 100, (r) => (r() < 0.65 ? [0.6, 0.57, 0.52, 0.26] : [0.5, 0.44, 0.36, 0.22]), h, 0.4);
+    stains(a, r, 6, 40, 110, () => [1, 1, 0.98, 0.24]);
+    stains(a, r, 3, 10, 26, () => [0.2, 0.2, 0.22, 0.4]);
+    // poros y granitos del cemento
+    specks(a, h, r, 1600, 0.4, 1.5, 0.25, 0.45);
+    // grietas que nacen de las juntas
+    for (let i = 0; i < 5; i++) {
+      const onX = r() < 0.5,
+        q = r() < 0.5 ? 0 : W / 2,
+        t = r() * W;
+      crack(a, h, r, onX ? q : t, onX ? t : q, { n: 9, step: 15, w: 1.1, al: 0.55, branch: 0.3 });
     }
     return {
       hk: 1,
-      n: 0.8,
+      n: 1,
       r0: 0.5,
       r1: 0.06,
-      ao: 0.1,
+      ao: 0.18,
       px: (u, v, rn) => {
         const f = fbm(u, v, 4, 5);
-        return [0.86 + f * 0.17 + (rn() - 0.5) * 0.035, 0.45 + fbm(u, v, 48, 2, 2) * 0.25];
+        return [0.84 + f * 0.22 + (rn() - 0.5) * 0.04, 0.45 + fbm(u, v, 48, 2, 2) * 0.25];
       },
     };
   },
   leaf: (a, h, r) => {
     a.fillStyle = g(0.74);
-    a.fillRect(0, 0, TS, TS);
+    a.fillRect(0, 0, W, W);
     h.fillStyle = g(0.3);
-    h.fillRect(0, 0, TS, TS);
+    h.fillRect(0, 0, W, W);
     for (let i = 0; i < 520; i++) {
-      const x = r() * TS,
-        y = r() * TS,
+      const x = r() * W,
+        y = r() * W,
         len = 20 + r() * 20,
         wd = len * (0.36 + r() * 0.14),
         rot = r() * 6.28,
@@ -711,21 +953,21 @@ const GEN: Record<LayerName, Gen> = {
   }),
   bark: (a, h, r) => {
     for (let i = 0; i < 70; i++) {
-      const x = r() * TS,
+      const x = r() * W,
         w = 2 + r() * 5,
         amp = 3 + r() * 9,
         fr = 1 + Math.floor(r() * 3),
         p0 = r() * 6.28,
         al = 0.3 + r() * 0.45,
-        y0 = r() * TS,
-        len = TS * (0.3 + r() * 0.7);
+        y0 = r() * W,
+        len = W * (0.3 + r() * 0.7);
       wrap([a, h], (c, k) => {
         c.strokeStyle = k ? `rgba(0,0,0,${al})` : `rgba(38,22,10,${al * 0.75})`;
         c.lineWidth = w;
         c.lineCap = 'round';
         c.beginPath();
         for (let y = y0; y <= y0 + len; y += 8) {
-          const xx = x + Math.sin((y / TS) * Math.PI * 2 * fr + p0) * amp;
+          const xx = x + Math.sin((y / W) * Math.PI * 2 * fr + p0) * amp;
           if (y === y0) c.moveTo(xx, y);
           else c.lineTo(xx, y);
         }
@@ -746,11 +988,11 @@ const GEN: Record<LayerName, Gen> = {
   },
   straw: (a, h, r) => {
     a.fillStyle = g(0.72);
-    a.fillRect(0, 0, TS, TS);
+    a.fillRect(0, 0, W, W);
     h.fillStyle = g(0.2);
-    h.fillRect(0, 0, TS, TS);
+    h.fillRect(0, 0, W, W);
     const N = 16,
-      s = TS / N;
+      s = W / N;
     for (let j = 0; j < N; j++)
       for (let i = 0; i < N; i++) {
         const horiz = (i + j) % 2 === 0,
@@ -792,80 +1034,95 @@ const GEN: Record<LayerName, Gen> = {
   }),
 };
 
-let built: { alb: THREE.DataArrayTexture; nrm: THREE.DataArrayTexture } | null = null;
-/** Genera (una sola vez) las dos texturas en arreglo con todas las capas. */
+let built: { alb: THREE.DataArrayTexture; nrm: THREE.DataArrayTexture; res: number } | null = null;
+/** Genera (una sola vez) las dos texturas en arreglo con todas las capas.
+ *  Alta y media: 512 px por capa (~59 MB de video con mipmaps). Baja (celular): 256 px (~15 MB). */
 export function layerTextures() {
   if (built) return built;
-  const N = LAYERS.length,
-    sz = TS * TS * 4,
+  const t0 = performance.now(),
+    cal = texCalidad(),
+    RES = cal === 'baja' ? 256 : W,
+    N = LAYERS.length,
+    sz = RES * RES * 4,
     A = new Uint8Array(sz * N),
     Nm = new Uint8Array(sz * N),
-    hf = new Float32Array(TS * TS);
+    hf = new Float32Array(RES * RES);
   LAYERS.forEach((name, li) => {
-    const [, a] = canvas('#ffffff'),
-      [, h] = canvas(g(0.5)),
+    const [, a] = canvas('#ffffff', RES),
+      [, h] = canvas(g(0.5), RES),
       r = rng(li * 977 + 13);
     const cfg = GEN[name](a, h, r),
-      ad = a.getImageData(0, 0, TS, TS).data,
-      hd = h.getImageData(0, 0, TS, TS).data,
+      ad = a.getImageData(0, 0, RES, RES).data,
+      hd = h.getImageData(0, 0, RES, RES).data,
       o = li * sz,
       pr = rng(li * 31 + 7);
     const ao = cfg.ao ?? 0,
       r0 = cfg.r0 ?? 0.5,
       r1 = cfg.r1 ?? 0;
     // fila 0 de los datos = v 0 (abajo); el lienzo se dibuja con y hacia abajo, así que se voltea
-    for (let y = 0; y < TS; y++)
-      for (let x = 0; x < TS; x++) {
-        const src = ((TS - 1 - y) * TS + x) * 4,
-          dst = o + (y * TS + x) * 4,
-          i = y * TS + x;
+    for (let y = 0; y < RES; y++)
+      for (let x = 0; x < RES; x++) {
+        const src = ((RES - 1 - y) * RES + x) * 4,
+          dst = o + (y * RES + x) * 4,
+          i = y * RES + x;
         let hv = hd[src] / 255,
-          m = 1;
+          m = 1,
+          wr = 1,
+          wg = 1,
+          wb = 1;
         if (cfg.px) {
-          const p = cfg.px(x / TS, y / TS, pr);
+          const p = cfg.px(x / RES, y / RES, pr);
           m = p[0];
           hv = cfg.hk === undefined ? hv + p[1] : p[1] + (hv - 0.5) * cfg.hk;
+          // tono: positivo = más seco/amarillo, negativo = más frío/gris
+          const w = p[2] ?? 0;
+          wr = 1 + w * 0.1;
+          wg = 1 + w * 0.02;
+          wb = 1 - w * 0.2;
         }
         hv = Math.max(0, Math.min(1, hv));
         hf[i] = hv;
         m *= 1 - ao * (1 - hv);
-        A[dst] = Math.min(255, ad[src] * m);
-        A[dst + 1] = Math.min(255, ad[src + 1] * m);
-        A[dst + 2] = Math.min(255, ad[src + 2] * m);
+        A[dst] = Math.min(255, ad[src] * m * wr);
+        A[dst + 1] = Math.min(255, ad[src + 1] * m * wg);
+        A[dst + 2] = Math.min(255, ad[src + 2] * m * wb);
         A[dst + 3] = ad[src + 3];
         Nm[dst + 2] = Math.max(0, Math.min(255, (r0 + r1 * (hv - 0.5) * 2) * 255));
         Nm[dst + 3] = hv * 255;
       }
-    const s = cfg.n * 2.2;
-    for (let y = 0; y < TS; y++)
-      for (let x = 0; x < TS; x++) {
-        const xl = (x + TS - 1) % TS,
-          xr = (x + 1) % TS,
-          yd = (y + TS - 1) % TS,
-          yu = (y + 1) % TS;
-        let nx = (hf[y * TS + xl] - hf[y * TS + xr]) * s,
-          ny = (hf[yd * TS + x] - hf[yu * TS + x]) * s;
+    // la pendiente se mide por píxel: a menos resolución cada píxel cubre más, así que se compensa
+    const s = cfg.n * 2.2 * (RES / W);
+    for (let y = 0; y < RES; y++)
+      for (let x = 0; x < RES; x++) {
+        const xl = (x + RES - 1) % RES,
+          xr = (x + 1) % RES,
+          yd = (y + RES - 1) % RES,
+          yu = (y + 1) % RES;
+        let nx = (hf[y * RES + xl] - hf[y * RES + xr]) * s,
+          ny = (hf[yd * RES + x] - hf[yu * RES + x]) * s;
         const l = 1 / Math.hypot(nx, ny, 1);
         nx *= l;
         ny *= l;
-        const dst = o + (y * TS + x) * 4;
+        const dst = o + (y * RES + x) * 4;
         Nm[dst] = (nx * 0.5 + 0.5) * 255;
         Nm[dst + 1] = (ny * 0.5 + 0.5) * 255;
       }
   });
   const mk = (data: Uint8Array, srgb: boolean) => {
-    const t = new THREE.DataArrayTexture(data, TS, TS, N);
+    const t = new THREE.DataArrayTexture(data, RES, RES, N);
     t.format = THREE.RGBAFormat;
     t.type = THREE.UnsignedByteType;
     t.wrapS = t.wrapT = THREE.RepeatWrapping;
     t.minFilter = THREE.LinearMipmapLinearFilter;
     t.magFilter = THREE.LinearFilter;
     t.generateMipmaps = true;
-    t.anisotropy = 4;
+    // anisotropía moderada: el piso visto de lado se mantiene nítido sin gastar de más en celular
+    t.anisotropy = cal === 'alta' ? 8 : cal === 'media' ? 4 : 2;
     if (srgb) t.colorSpace = THREE.SRGBColorSpace;
     t.needsUpdate = true;
     return t;
   };
-  built = { alb: mk(A, true), nrm: mk(Nm, false) };
+  built = { alb: mk(A, true), nrm: mk(Nm, false), res: RES };
+  performance.measure?.('mc:texturas', { start: t0 });
   return built;
 }
