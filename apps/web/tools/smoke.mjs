@@ -78,7 +78,6 @@ const JUEGOS = [
   'colon.el-plano-del-castillo',
   'colon.por-mano--no-por-dedo',
   // Santa Bárbara
-  'santabarbara.argollas-pateplumas',
   'santabarbara.chimeneas-de-trinidad',
   'santabarbara.junco-que-se-vuelve-sombrero',
   'santabarbara.maroncho-por-debajo',
