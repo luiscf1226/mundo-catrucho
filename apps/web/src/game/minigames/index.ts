@@ -61,6 +61,14 @@ const MOTORS = {
   'choluteca.cincha': motor(() => import('./choluteca/Cincha').then((m) => ({ ...m, default: m.Cincha }))),
   'choluteca.ventanasbus': motor(() => import('./choluteca/Bus').then((m) => ({ ...m, default: m.Bus }))),
   'choluteca.mareapaseo': motor(() => import('./choluteca/Marea').then((m) => ({ ...m, default: m.Marea }))),
+  // Colón
+  'colon.salinidad': motor(() => import('./colon/Salinidad').then((m) => ({ ...m, default: m.Salinidad }))),
+  'colon.visualbahia': motor(() => import('./colon/VisualBahia').then((m) => ({ ...m, default: m.VisualBahia }))),
+  'colon.gajos': motor(() => import('./colon/Gajos').then((m) => ({ ...m, default: m.Gajos }))),
+  'colon.remolque': motor(() => import('./colon/Remolque').then((m) => ({ ...m, default: m.Remolque }))),
+  'colon.redjuvenil': motor(() => import('./colon/RedJuvenil').then((m) => ({ ...m, default: m.RedJuvenil }))),
+  'colon.plano': motor(() => import('./colon/Plano').then((m) => ({ ...m, default: m.Plano }))),
+  'colon.racimos': motor(() => import('./colon/Racimos').then((m) => ({ ...m, default: m.Racimos }))),
 
   'copan.cadera': motor(() => import('./copan/Cadera').then((m) => ({ ...m, default: m.Cadera }))),
   'copan.glifos': motor(() => import('./copan/Glifos').then((m) => ({ ...m, default: m.Glifos }))),

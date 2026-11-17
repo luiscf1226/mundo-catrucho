@@ -3,6 +3,7 @@ import { P } from '../../kit';
 import { bl, bx, cy, inR, type Pc, PI, place, py, ss } from '../lib';
 import { cannon, casa, garita, merlons, mont, stairs } from '../parts';
 import { ZB, type ZoneSpec } from '../zone';
+import { ColonDescubrimientos, cercaDeLocura } from './ColonDescubrimientos';
 
 const galeon = (): Pc[] => [
   bx(0, 1.2, 0, 5, 3.4, 16, 'wood', '#5a4028', { solid: false }),
@@ -29,6 +30,7 @@ export function fortaleza(d: Department): ZoneSpec {
     .plane('sand', B.sand, -0.08, [900, 6], [0, 0, -29]);
   Z.far = { mat: 'sand', color: B.sand, y: -2.62 };
   Z.stop(0, 42);
+  Z.n(<ColonDescubrimientos altura={Z.h} />);
   // murallas (3 m de ancho, se camina por arriba)
   Z.add(
     bx(0, 1.6, -23, 37, 3.2, 3, 'stone', C),
@@ -106,14 +108,17 @@ export function fortaleza(d: Department): ZoneSpec {
   Z.veg(
     'palm',
     26,
-    (x, z) => (Math.abs(x) > 22 && z > -33 && z < 46 && !inR(x, z, -24, 24, 20, 46)) || (z < -26.5 && z > -32.5),
+    (x, z) =>
+      ((Math.abs(x) > 22 && z > -33 && z < 46 && !inR(x, z, -24, 24, 20, 46)) || (z < -26.5 && z > -32.5)) &&
+      !cercaDeLocura(x, z),
     { sep: 4.5 },
   );
-  Z.veg('tree', 26, (x, z) => (Math.abs(x) > 30 && z > -20) || z > 50, { sep: 5.5 });
+  Z.veg('tree', 26, (x, z) => ((Math.abs(x) > 30 && z > -20) || z > 50) && !cercaDeLocura(x, z), { sep: 5.5 });
   Z.veg(
     'bush',
     20,
-    (x, z) => Math.abs(x) > 20 && Math.abs(x) < 46 && z > -24 && z < 44 && !inR(x, z, -24, 24, 20, 46),
+    (x, z) =>
+      Math.abs(x) > 20 && Math.abs(x) < 46 && z > -24 && z < 44 && !inR(x, z, -24, 24, 20, 46) && !cercaDeLocura(x, z),
     { sep: 3 },
   );
   Z.add(place(mont(60, 55, '#3a8a55'), -120, 0, 60), place(mont(70, 70, '#2f7d4a'), 60, 0, 150));

@@ -1104,5 +1104,96 @@
     "silver": 360,
     "gold": 600
   }
+},
+{
+  "id": "colon.salinidad",
+  "name": "Boca de Guaimoreto",
+  "place": "Colón",
+  "icon": "🎣",
+  "desc": "Ajustá aperturas de una laguna simulada y leé el frente de salinidad que avanza por canales. Ganás manteniendo zonas de mezcla aptas para tres especies; abrir todo homogeniza el refugio.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "colon.visualbahia",
+  "name": "Bahía por tres visuales",
+  "place": "Colón",
+  "icon": "🌀",
+  "desc": "Trazá líneas de posición sobre una carta desde tres perfiles costeros conocidos. Ganás ubicando una embarcación en su única intersección; referencias contradictorias dejan un triángulo de error.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "colon.gajos",
+  "name": "Nervaduras de Sonaguera",
+  "place": "Colón",
+  "icon": "🍊",
+  "desc": "Seguí con el cursor las membranas curvas de una naranja sin cortar la pulpa. Ganás gajos completos; cada tajo recto suelta jugo y borra una guía.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "colon.remolque",
+  "name": "Giro del Aguán",
+  "place": "Colón",
+  "icon": "🚜",
+  "desc": "Marcá trayectorias de tractor y remolque articulado en un patio estrecho. Ganás dejando la salida libre; la caja recorta la curva y puede encerrarte entre dos cargas.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "colon.redjuvenil",
+  "name": "Malla con escape",
+  "place": "Colón",
+  "icon": "🐟",
+  "desc": "Plegá una red de simulación conservando aberturas de talla mínima. Ganás demostrando que las siluetas juveniles salen; cerrar todas las puntas invalida el diseño.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "colon.plano",
+  "name": "Archivo de Santa Bárbara",
+  "place": "Colón",
+  "icon": "🏰",
+  "desc": "Ordená fragmentos de un plano por marcas de muralla que continúan entre bordes. Ganás cuando el recorrido cierra sobre sí mismo; orientar mal una garita desplaza todos los tramos posteriores.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+},
+{
+  "id": "colon.racimos",
+  "name": "Manos del mercado",
+  "place": "Colón",
+  "icon": "🍌",
+  "desc": "Separá racimos por un árbol de uniones para cumplir pedidos por mano completa. Ganás si conservás los dedos de cada mano; cortar una bifurcación equivocada impide completar dos pedidos.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
 }
 ]

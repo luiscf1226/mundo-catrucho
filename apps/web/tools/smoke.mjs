@@ -60,6 +60,14 @@ const JUEGOS = [
   'choluteca.cuero-que-queda-parejo',
   'choluteca.bus-sureno-con-brisa',
   'choluteca.cedeno-deja-tres-marcas',
+  // Colón
+  'colon.boca-de-guaimoreto',
+  'colon.trazas-de-la-bahia',
+  'colon.naranja-por-gajos',
+  'colon.el-remolque-corta-camino',
+  'colon.la-red-deja-crecer',
+  'colon.el-plano-del-castillo',
+  'colon.por-mano--no-por-dedo',
 ];
 const ok = await run('smoke', file, { hash: '#test' }, async (t) => {
   await t.ev(`localStorage.clear()`);
