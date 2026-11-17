@@ -184,6 +184,14 @@ const MOTORS = {
   'santabarbara.goteo': motor(() => import('./santabarbara/Goteo').then((m) => ({ ...m, default: m.Goteo }))),
   'santabarbara.juncocorte': motor(() => import('./santabarbara/Tiras').then((m) => ({ ...m, default: m.Tiras }))),
   'santabarbara.papel': motor(() => import('./santabarbara/Pliegos').then((m) => ({ ...m, default: m.Pliegos }))),
+  // Yoro
+  'yoro.cable': motor(() => import('./yoro/Cable').then((m) => ({ ...m, default: m.Cable }))),
+  'yoro.acuerdos': motor(() => import('./yoro/Archivo').then((m) => ({ ...m, default: m.Archivo }))),
+  'yoro.jamo': motor(() => import('./yoro/Jamo').then((m) => ({ ...m, default: m.Jamo }))),
+  'yoro.ulua': motor(() => import('./yoro/Crecida').then((m) => ({ ...m, default: m.Crecida }))),
+  'yoro.pijol': motor(() => import('./yoro/Cascadas').then((m) => ({ ...m, default: m.Cascadas }))),
+  'yoro.almohadilla': motor(() => import('./yoro/Almohadilla').then((m) => ({ ...m, default: m.Almohadilla }))),
+  'yoro.coyol': motor(() => import('./yoro/Miel').then((m) => ({ ...m, default: m.Miel }))),
 } satisfies Record<MinigameId, ReturnType<typeof motor>>;
 export const MINIGAME_SCENES = MOTORS;
 export function motorGuide(id: MinigameId) {

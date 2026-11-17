@@ -1,5 +1,8 @@
 // MOTOR 'atrapa' — «Atrapalo». Te movés libre con un recipiente sobre la cabeza y atrapás lo que cae.
 // Cada cosa avisa con su sombra en el suelo. Lo de `evita` resta y aturde. Rachas, doradas y ráfagas.
+// Opciones del tema (Yoro): `poza` (lo atrapado va a una cubeta de `cupo` lugares y paga al vaciarla en la poza;
+// lo de `evita` ocupa lugar en vez de aturdir), `tandas` (un relámpago marca dónde cae la tanda y cae con el
+// trueno) y `cubetas: [a, b]` (dos cubetas de distinta capacidad que reciben por turnos en vez de la poza).
 
 import { useThree } from '@react-three/fiber';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -44,6 +47,12 @@ export const guia: Guia = {
   metas: (p) => metas(p.dif).map((n) => `${n} pts`) as [string, string, string],
 };
 
+/** dónde se vacía la cubeta: una poza o dos cubetas grandes en las esquinas de adelante */
+const POZAS: [number, number][] = [
+  [-FX.x + 1.4, FX.z - 1.3],
+  [FX.x - 1.4, FX.z - 1.3],
+];
+const R_POZA = 1.35;
 interface Item {
   id: number;
   x: number;
@@ -73,6 +82,11 @@ export function Atrapa() {
   const con: string = P.tema.con ?? 'canasta';
   const fondo = fondoDe(P, 'finca');
   const storm = cae.some((c) => c[1] === 'pez');
+  const cubetas = Array.isArray(P.tema.cubetas) ? (P.tema.cubetas as number[]).slice(0, 2).map(Number) : null;
+  const poza = !!P.tema.poza || !!cubetas,
+    tandas = !!P.tema.tandas,
+    cupo = Math.max(2, Number(P.tema.cupo) || 6),
+    turnoDura = 9 - 3 * P.dif;
   const meta = useMemo(() => metas(P.dif), [P]),
     dur = DURACION(P.dif);
   const rnd = useMemo(() => rng(P.seed), [P]);
@@ -116,6 +130,21 @@ export function Atrapa() {
     done: false,
     elapsed: 0,
     equipo: 0,
+    /** lo que va en la cubeta: 'bueno' | 'oro' | 'malo' */
+    carga: [] as Item['kind'][],
+    vaciadas: 0,
+    completas: 0,
+    llenas: 0,
+    rebalses: 0,
+    /** nivel de las dos cubetas, cuál recibe y cuánto le falta a su turno */
+    nivel: [0, 0],
+    turno: 0,
+    reloj: 9 - 3 * P.dif,
+    /** relámpago: dónde cae la tanda y cuánto falta para el trueno */
+    rayo: null as null | { x: number; z: number; t: number },
+    zona: null as null | { x: number; z: number },
+    bot: false,
+    aviso: 0,
   }).current;
 
   const mult = () => (s.combo >= 10 ? 3 : s.combo >= 5 ? 2 : 1);
@@ -144,6 +173,30 @@ export function Atrapa() {
   function atrapa(it: Item, quien: Catcher | null) {
     s.items = s.items.filter((o) => o !== it);
     draw((n) => n + 1);
+    if (poza && !quien) {
+      if (s.carga.length >= cupo) {
+        s.rebalses++;
+        s.combo = 0;
+        audio.sfx('miss');
+        fx.pop(it.x, 2.6, it.z, '¡Cubeta llena!', '#ffb74d');
+        return;
+      }
+      s.carga.push(it.kind);
+      if (it.kind === 'malo') {
+        audio.sfx('error');
+        fx.pop(it.x, 2.6, it.z, `${evita[it.idx]?.[0] ?? 'Estorbo'}: ocupa lugar`, '#ffb74d');
+        return;
+      }
+      s.combo++;
+      s.best = Math.max(s.best, s.combo);
+      s.atrapadas++;
+      if (it.kind === 'oro') s.doradas++;
+      audio.sfx('pickup');
+      fx.pop(it.x, 2.6, it.z, `${s.carga.length}/${cupo}`, '#ffffff');
+      pop.current = 0.25;
+      if (s.carga.length >= cupo) useGame.getState().toast('¡Cubeta llena! Vaciala.', '🪣');
+      return;
+    }
     if (it.kind === 'malo') {
       fx.emit(it.x, 2, it.z, '#c62828', 12, 3);
       if (!quien) {
@@ -187,6 +240,46 @@ export function Atrapa() {
     if (s.combo > 0 && s.combo % 5 === 0) useGame.getState().toast(`¡Racha de ${s.combo}!`, '🔥');
   }
 
+  /** vaciar la cubeta en la poza (o en la cubeta grande de turno): ahí se pagan los peces */
+  function vaciar(k: number) {
+    const peces = s.carga.filter((x) => x !== 'malo');
+    if (!s.carga.length) return;
+    const toast = useGame.getState().toast;
+    if (cubetas && k !== s.turno) {
+      if (s.aviso <= 0) toast('Esa cubeta se está vaciando: andá a la otra.', '⏳');
+      s.aviso = 2;
+      return;
+    }
+    let pasan = peces;
+    if (cubetas) pasan = peces.slice(0, Math.max(0, cubetas[k] - s.nivel[k]));
+    const m = mult(),
+      p = pasan.reduce((t, x) => t + (x === 'oro' ? 30 : 10), 0) * m;
+    // tanda completa: la cubeta iba llena y sin estorbos, y paga doble
+    const completa = !cubetas && peces.length >= cupo;
+    let bono = completa ? p : 0;
+    if (cubetas) {
+      s.nivel[k] += pasan.length;
+      if (pasan.length && s.nivel[k] >= cubetas[k]) {
+        // llenar la cubeta grande paga 15 por lugar
+        bono = 15 * cubetas[k];
+        s.llenas++;
+        s.nivel[k] = 0;
+        toast(`¡Se llenó la cubeta de ${cubetas[k]}!`, '🪣');
+      }
+    }
+    // lo que no cupo se queda en tu cubeta; hojas y piedras se botan
+    const quedan = peces.slice(pasan.length);
+    s.carga = quedan;
+    if (!pasan.length && !bono) return;
+    s.vaciadas++;
+    if (completa) s.completas++;
+    const [x, z] = POZAS[k];
+    suma(p + bono, x, z, '#9be37a', `+${p + bono}${bono ? ' tanda' : ''}`);
+    fx.emit(x, 0.6, z, '#90e0ef', 14, 3);
+    audio.sfx('coin');
+    draw((n) => n + 1);
+  }
+
   const size = useThree((t) => t.size),
     k = Math.min(2.1, Math.max(1, 1.75 / (size.width / Math.max(1, size.height))));
   useEffect(() => {
@@ -212,11 +305,33 @@ export function Atrapa() {
           bots: bots.map((c) => ({ n: c.b.name, score: c.score })),
           items: s.items.map((i) => ({ x: i.x, z: i.z, y: i.y, kind: i.kind })),
           player: [player.pos[0], player.pos[2]],
+          poza,
+          cupo,
+          carga: s.carga.length,
+          vaciadas: s.vaciadas,
+          completas: s.completas,
+          llenas: s.llenas,
+          rebalses: s.rebalses,
+          nivel: [...s.nivel],
+          turno: s.turno,
+          rayos: s.rayo ? 1 : 0,
+          pozas: (cubetas ? POZAS : POZAS.slice(0, 1)).map((q) => [...q]),
         }),
         ...(location.hash.includes('test')
           ? {
               skip: (n: number) => {
                 s.t = Math.max(0, s.t - n);
+              },
+              /** simula `segundos` en pasos de 50 ms con las mismas reglas (sin saltar al resultado) */
+              avanzar: (segundos: number) => {
+                for (let k = 0; k < Math.min(123, segundos) / 0.05; k++) {
+                  if (useGame.getState().mg?.phase !== 'playing' || s.done) break;
+                  paso(0.05);
+                }
+              },
+              /** jugador automático: camina hacia lo que cae y vacía la cubeta cuando conviene */
+              jugarBot: (activo = true) => {
+                s.bot = activo;
               },
             }
           : {}),
@@ -229,8 +344,11 @@ export function Atrapa() {
     };
   }, [s, bots, P, meta, dur, k]);
 
-  useMgTick((dt) => {
+  useMgTick((dt) => paso(dt));
+  function paso(dt: number) {
+    if (s.bot) jugar(dt);
     s.t -= dt;
+    s.aviso -= dt;
     s.elapsed += dt;
     s.spawn -= dt;
     s.ola -= dt;
@@ -246,8 +364,10 @@ export function Atrapa() {
     if (s.t > 2.5 && s.spawn <= 0) {
       if (s.burst > 0) {
         const k = 6 - s.burst;
-        crea(-FX.x + 1 + (k / 5) * (FX.x * 2 - 2), (rnd() - 0.5) * 6);
+        if (s.zona) crea(s.zona.x + (rnd() - 0.5) * 2.4, s.zona.z + (rnd() - 0.5) * 2.4);
+        else crea(-FX.x + 1 + (k / 5) * (FX.x * 2 - 2), (rnd() - 0.5) * 6);
         s.burst--;
+        if (!s.burst) s.zona = null;
         s.spawn = 0.28;
       } else {
         const cerca = rnd() < 0.45;
@@ -264,16 +384,55 @@ export function Atrapa() {
         s.spawn = (1.25 - 0.7 * P.dif) * (0.75 + rnd() * 0.5);
       }
     }
-    if (s.ola <= 0 && s.t > 8) {
+    if (s.ola <= 0 && s.t > 8 && !s.rayo) {
       s.ola = 16 - 6 * P.dif + rnd() * 4;
-      s.burst = 6;
-      useGame.getState().toast('¡Ráfaga!', '🌪️');
-      audio.sfx('horn');
+      if (tandas) {
+        // relámpago primero: marca la zona; la tanda cae con el trueno, unos segundos después
+        s.rayo = {
+          x: (rnd() * 2 - 1) * (FX.x - 2),
+          z: (rnd() * 2 - 1) * (FX.z - 2),
+          t: 2.4 - 0.8 * P.dif + rnd() * 0.8,
+        };
+        useGame.getState().toast('⚡ ¡Relámpago! Contá hasta el trueno.', '⚡');
+        draw((n) => n + 1);
+      } else {
+        s.burst = 6;
+        useGame.getState().toast('¡Ráfaga!', '🌪️');
+        audio.sfx('horn');
+      }
     }
     if (s.frase <= 0) {
       s.frase = 18 + rnd() * 8;
       const f = P.tema.frases;
       if (Array.isArray(f) && f.length) useGame.getState().toast(String(f[Math.floor(rnd() * f.length)]), '💬');
+    }
+    if (poza) {
+      // al pisar la poza (o una cubeta grande) se vacía lo que llevás
+      (cubetas ? [0, 1] : [0]).forEach((k) => {
+        if (Math.hypot(player.pos[0] - POZAS[k][0], player.pos[2] - POZAS[k][1]) < R_POZA) vaciar(k);
+      });
+      if (cubetas) {
+        s.reloj -= dt;
+        if (s.reloj <= 0) {
+          // la que termina su turno se vacía sola; los peces que ya estaban cuentan
+          s.nivel[s.turno] = 0;
+          s.turno = 1 - s.turno;
+          s.reloj = turnoDura;
+          useGame.getState().toast(`Ahora recibe la cubeta de ${cubetas[s.turno]}.`, '🔁');
+          draw((n) => n + 1);
+        }
+      }
+    }
+    if (s.rayo) {
+      s.rayo.t -= dt;
+      if (s.rayo.t <= 0) {
+        s.zona = { x: s.rayo.x, z: s.rayo.z };
+        s.rayo = null;
+        s.burst = 6;
+        useGame.getState().toast('¡Trueno! Ahí cae la tanda.', '🌩️');
+        audio.sfx('horn');
+        draw((n) => n + 1);
+      }
     }
     // bots
     for (const c of bots) {
@@ -367,6 +526,11 @@ export function Atrapa() {
       score: `${s.score} pts`,
       objective: s.score >= meta[2] ? '¡Tres estrellas!' : `Meta: ${sig} pts`,
       lines: [
+        ...(poza
+          ? [
+              `Cubeta ${s.carga.length}/${cupo}${s.carga.includes('malo') ? ' · con estorbos' : ''}${cubetas ? ` · Recibe la de ${cubetas[s.turno]} (${s.nivel[s.turno]}/${cubetas[s.turno]}) · ${Math.ceil(s.reloj)} s` : ' · vaciala en la poza'}`,
+            ]
+          : []),
         `Racha ${s.combo}${m > 1 ? ` · x${m}` : ''} · mejor ${s.best}`,
         ...bots.map((c) => `${c.b.name}: ${c.score}`),
       ],
@@ -381,7 +545,47 @@ export function Atrapa() {
         stats: { atrapadas: s.atrapadas, mejorRacha: s.best, doradas: s.doradas, golpes: s.golpes },
       });
     }
-  });
+  }
+  /** el jugador automático de la prueba: mueve al muñeco como si caminara (5,2 m/s) */
+  function jugar(dt: number) {
+    const px = player.pos[0],
+      pz = player.pos[2];
+    let tx = px,
+      tz = pz;
+    const destino = cubetas ? s.turno : 0,
+      peces = s.carga.filter((x) => x !== 'malo').length;
+    const lleno = poza && (s.carga.length >= cupo || (cubetas && peces >= cubetas[destino] - s.nivel[destino]));
+    let mejor: Item | null = null,
+      d0 = 1e9;
+    for (const it of s.items) {
+      if (it.kind === 'malo' || it.land > 0 || it.y < 2.3) continue;
+      const d = Math.hypot(it.x - px, it.z - pz),
+        tt = (it.y - 2.0) / it.v;
+      if (d / 5.2 < tt + 0.05 && d < d0) {
+        d0 = d;
+        mejor = it;
+      }
+    }
+    if (poza && (lleno || (s.t < 4 && peces > 0))) {
+      [tx, tz] = POZAS[destino];
+    } else if (mejor) {
+      tx = mejor.x;
+      tz = mejor.z;
+    }
+    // esquiva lo malo que cae encima
+    for (const it of s.items)
+      if (it.kind === 'malo' && it.y < 4 && it.y > 1.5 && Math.hypot(it.x - tx, it.z - tz) < 1.1) {
+        tx += it.x < tx ? 1.2 : -1.2;
+      }
+    const dx = tx - px,
+      dz = tz - pz,
+      d = Math.hypot(dx, dz);
+    if (d > 0.05) {
+      const k = Math.min(d, 5.2 * dt) / d;
+      player.pos[0] = Math.max(-FX.x, Math.min(FX.x, px + dx * k));
+      player.pos[2] = Math.max(-FX.z, Math.min(FX.z, pz + dz * k));
+    }
+  }
 
   return (
     <>
@@ -396,10 +600,58 @@ export function Atrapa() {
         <Recipiente con={con} />
       </group>
       {s.stun > 0 && <Label pos={[player.pos[0], 2.9, player.pos[2]]} text="💫 aturdido" h={0.45} />}
+      {poza &&
+        (cubetas ? [0, 1] : [0]).map((k) => (
+          <Poza
+            key={k}
+            pos={POZAS[k]}
+            texto={
+              cubetas
+                ? `${k === s.turno ? '🪣 Recibe' : '⏳ Se vacía'} · ${s.nivel[k]}/${cubetas[k]}`
+                : `Poza · cubeta ${s.carga.length}/${cupo}`
+            }
+            activa={!cubetas || k === s.turno}
+            nivel={cubetas ? s.nivel[k] / Math.max(1, cubetas[k]) : 0.6}
+          />
+        ))}
+      {s.rayo && <Rayo x={s.rayo.x} z={s.rayo.z} t={s.rayo.t} />}
       {s.items.map((it) => (
         <Caida key={it.id} it={it} cosa={(it.kind === 'malo' ? evita : cae)[it.idx]} />
       ))}
     </>
+  );
+}
+
+/** poza (o cubeta grande) donde se vacía la cubeta: agua con borde y su letrero */
+function Poza({ pos, texto, activa, nivel }: { pos: [number, number]; texto: string; activa: boolean; nivel: number }) {
+  return (
+    <group position={[pos[0], 0, pos[1]]}>
+      <mesh position={[0, 0.04, 0]} rotation-x={-Math.PI / 2}>
+        <circleGeometry args={[R_POZA, 24]} />
+        <meshBasicMaterial color={activa ? '#2e86ab' : '#7a8b99'} transparent opacity={0.75} />
+      </mesh>
+      <mesh position={[0, 0.06, 0]} rotation-x={-Math.PI / 2}>
+        <ringGeometry args={[R_POZA * (1 - Math.min(1, nivel) * 0.8), R_POZA, 24]} />
+        <meshBasicMaterial color="#9be37a" transparent opacity={0.35} />
+      </mesh>
+      <Label pos={[0, 1.4, 0]} text={texto} h={0.38} />
+    </group>
+  );
+}
+/** relámpago: una columna de luz marca dónde caerá la tanda; la cuenta baja hasta el trueno */
+function Rayo({ x, z, t }: { x: number; z: number; t: number }) {
+  return (
+    <group position={[x, 0, z]}>
+      <mesh position={[0, 0.05, 0]} rotation-x={-Math.PI / 2}>
+        <ringGeometry args={[1.2, 1.6, 24]} />
+        <meshBasicMaterial color="#fff59d" transparent opacity={0.7} />
+      </mesh>
+      <mesh position={[0, 5, 0]}>
+        <cylinderGeometry args={[0.08, 0.3, 10, 6]} />
+        <meshBasicMaterial color="#fffde7" transparent opacity={0.35 + (Math.sin(t * 30) + 1) * 0.15} />
+      </mesh>
+      <Label pos={[0, 2.4, 0]} text={`⚡ ${Math.ceil(t)}…`} h={0.5} />
+    </group>
   );
 }
 

@@ -254,10 +254,11 @@ const peces = [
   ['Pez vela', 90, '#3f6fd1'],
 ];
 const res = [];
-res.push(await pruebaAtrapa('atrapa-catalogo-hortalizas', { juego: 'yoro.lluvia', motor: 'atrapa', golpe: true }));
-res.push(await pruebaAtrapa('atrapa-catalogo-cafe-duo', { juego: 'yoro.lluvia', motor: 'atrapa', modo: 'duo' }));
+// Los únicos juegos del catálogo con atrapa son los de Yoro (cubeta y poza): los prueba test-yoro.mjs.
 res.push(await pruebaAtrapa('atrapa-sin-tema', { motor: 'atrapa', modo: 'solo' }));
-res.push(await pruebaCocina('cocina-catalogo-baleadas', { juego: 'yoro.coyoles', motor: 'cocina', modo: 'duo' }));
+res.push(
+  await pruebaCocina('cocina-catalogo-baleadas', { juego: 'colon.casabe-de-santa-fe', motor: 'cocina', modo: 'duo' }),
+);
 res.push(
   await pruebaCocina('cocina-catalogo-tostado', {
     juego: 'colon.casabe-de-santa-fe',
@@ -286,7 +287,7 @@ res.push(
 res.push(
   await pruebaAtrapa(
     'captura-atrapa-hortalizas',
-    { juego: 'yoro.lluvia', motor: 'atrapa', shot: 'atrapa-hortalizas', sinFin: true },
+    { juego: 'yoro.el-pronostico-trae-escamas', motor: 'atrapa', shot: 'atrapa-hortalizas', sinFin: true },
     '#go',
   ),
 );
@@ -315,7 +316,7 @@ res.push(
   await pruebaCocina(
     'captura-cocina-baleadas',
     {
-      juego: 'yoro.coyoles',
+      juego: 'colon.casabe-de-santa-fe',
       motor: 'cocina',
       modo: 'duo',
       pedidos: 1,

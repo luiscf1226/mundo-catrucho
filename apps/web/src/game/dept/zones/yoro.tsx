@@ -4,6 +4,7 @@ import { FallingFish } from '../fx';
 import { bl, bx, cy, inR, PI, place, py } from '../lib';
 import { casa, fish, iglesia, mont } from '../parts';
 import { ZB, type ZoneSpec } from '../zone';
+import { YoroDescubrimientos } from './YoroDescubrimientos';
 
 /** Yoro: el pueblo donde «llueven peces». Llueve, hay peces en el suelo y pececitos cayendo del cielo. */
 export function lluvia(d: Department): ZoneSpec {
@@ -18,6 +19,7 @@ export function lluvia(d: Department): ZoneSpec {
     )
     .layer('dirt', '#7a6248', (x, z) => Math.min(-21 - x, 27 - Math.abs(z - 4)) / 2);
   Z.stop(0, 42);
+  Z.n(<YoroDescubrimientos altura={Z.h} />);
   Z.put(iglesia(9, 6, 13, '#fdfbf3'), 0, -26)
     .n(<P.Kiosk pos={[0, 0, -2]} />)
     .plaque('Parroquia de Yoro', 0, 3.4, -18.92, 0, 0.4, '#4d908e');

@@ -53,9 +53,10 @@ const ok = await run('trivia', file, { hash: '#test,go' }, async (t) => {
     if (!/ pts$/.test(r.label)) throw new Error(`${label}: etiqueta sin pts`);
     return r;
   };
-  const r1 = await etapa(`${S}.startJuego('yoro.huelga')`, 'yoro', 'duo', [2, 5]);
-  if (!r1.won) throw new Error('yoro: acertando casi todas debía ganar');
-  await t.shot(`${shots}/yoro-resultado.png`);
+  // ningún juego del catálogo usa ya el motor trivia: se abre el motor directo
+  const r1 = await etapa(`${S}.startMinigame('trivia')`, 'motor', 'duo', [2, 5]);
+  if (!r1.won) throw new Error('motor: acertando casi todas debía ganar');
+  await t.shot(`${shots}/motor-resultado.png`);
   await t.click('mg-exit').catch(() => t.ev(`${S}.exitMinigame()`));
   await t.sleep(1200);
   const r2 = await etapa(`${S}.startMinigame('trivia')`, 'sin-tema', 'abierto', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);

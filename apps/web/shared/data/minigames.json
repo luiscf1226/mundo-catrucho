@@ -1609,4 +1609,102 @@
     "gold": 600
   }
 }
+,
+{
+  "id": "yoro.cable",
+  "name": "Cable bananero",
+  "place": "Yoro",
+  "icon": "🚚",
+  "desc": "Accioná agujas para enrutar ganchos suspendidos manteniendo separación entre racimos. Ganás al llenar estaciones de lavado; juntar cargas pesadas atasca el cable.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+}
+,
+{
+  "id": "yoro.acuerdos",
+  "name": "Archivo de la jornada obrera",
+  "place": "Yoro",
+  "icon": "📜",
+  "desc": "Combiná recibos, horarios y fotografías para documentar una jornada histórica. Ganás afirmaciones sostenidas por tres evidencias; una contradicción obliga a dejar la ficha pendiente.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+}
+,
+{
+  "id": "yoro.jamo",
+  "name": "Visibilidad del Jamo",
+  "place": "Yoro",
+  "icon": "🦎",
+  "desc": "Guiá una figura de Jamo de utilería con campo visual estrecho usando señales laterales de su cola. Ganás curvas de desfile sin rozar casetas; girar sin observar oculta la salida.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+}
+,
+{
+  "id": "yoro.ulua",
+  "name": "Lectura de crecida",
+  "place": "Yoro",
+  "icon": "🎣",
+  "desc": "Ubicá tres sensores virtuales de nivel y proyectá su tendencia en una gráfica. Ganás retirando equipos con anticipación; esperar a que el agua llegue al último sensor deja material fuera de alcance.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+}
+,
+{
+  "id": "yoro.pijol",
+  "name": "Cascadas en cadena",
+  "place": "Yoro",
+  "icon": "💦",
+  "desc": "Desviá láminas de agua en una maqueta vertical para secar apoyos. Ganás creando un paso continuo; secar arriba aumenta el flujo sobre la siguiente plataforma.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+}
+,
+{
+  "id": "yoro.almohadilla",
+  "name": "Corte acompañado",
+  "place": "Yoro",
+  "icon": "🍌",
+  "desc": "Sincronizá una almohadilla móvil con la flexión lenta de un tallo de banano. Ganás racimos sin magulladuras; cortar antes de recibirlos divide su calidad.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+}
+,
+{
+  "id": "yoro.coyol",
+  "name": "Punto de miel",
+  "place": "Yoro",
+  "icon": "🍯",
+  "desc": "Hacé hasta tres pruebas con una cuchara que enfría el jarabe y medí su hilo. Ganás retirando al punto de espesor; probar consume líquido y demasiado frío falsea la lectura.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+}
 ]
