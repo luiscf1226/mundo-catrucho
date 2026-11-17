@@ -99,8 +99,8 @@ function getNetMat() {
     map: t,
     transparent: true,
     alphaTest: 0.25,
+    // la red es una caja de cuatro caras que escribe profundidad: necesita las dos pasadas
     side: THREE.DoubleSide,
-    forceSinglePass: true,
     toneMapped: false,
     opacity: 0.9,
   }));

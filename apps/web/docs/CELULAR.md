@@ -179,7 +179,7 @@ cuánto mejora el tiempo total de cuadro.
 | `src/game/kit/index.tsx` | Ola 11: `Plate` con `forceSinglePass`. |
 | `src/game/kit/art/base.tsx` | Ola 11: `Sign`, `PortalArch` y la red de la portería con `forceSinglePass`. |
 | `src/game/kit/art/hd/props2.tsx` | Ola 11: portal y red del arco con `forceSinglePass`. |
-| `src/game/kit/art/roblox/props.tsx`, `props2.tsx` | Ola 11: remolino y red del arco con `forceSinglePass`. |
+| `src/game/kit/art/roblox/props.tsx` | Ola 11: remolino con `forceSinglePass` (la red del arco roblox es una caja que escribe profundidad: sigue en dos pasadas). |
 | `tools/test-celular.mjs` | Ola 11: `MC_CPU`, tiempo de tarea por cuadro y guarda de materiales recompilando. |
 
 Las rutas de esta tabla son relativas a `apps/web`. Fue necesario tocar `GameCanvas`

@@ -428,7 +428,14 @@ export function makeBaseProps(m: M): ArtProps {
         <C m={m} p={[0, h, 0]} r={0.08} h={w} c="#ffffff" k="metal" rot={[0, 0, Math.PI / 2]} />
         <mesh position={[0, h / 2, -0.9]}>
           <planeGeometry args={[w, h]} />
-          <meshBasicMaterial color="#ffffff" transparent opacity={0.25} side={THREE.DoubleSide} forceSinglePass wireframe />
+          <meshBasicMaterial
+            color="#ffffff"
+            transparent
+            opacity={0.25}
+            side={THREE.DoubleSide}
+            forceSinglePass
+            wireframe
+          />
         </mesh>
       </Placed>
     ),
