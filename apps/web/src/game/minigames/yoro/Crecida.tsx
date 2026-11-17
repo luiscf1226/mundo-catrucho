@@ -221,29 +221,29 @@ const motor = defineMotor({
     }
     return (
       <Mesa titulo="Río Ulúa · lectura de crecida">
-        {/* regla de nivel con agua, sensores y equipos */}
-        <Block pos={[-4, H(5), 0.4]} size={[0.4, 3, 0.12]} color="#f1faee" mat="plastic" solid={false} />
+        {/* regla de nivel con sensores y cursor; al lado, el tanque con el agua y los equipos arriba */}
+        <Block pos={[-4.4, H(5), 0.4]} size={[0.5, 3, 0.12]} color="#f1faee" mat="plastic" solid={false} />
         {[0, 2, 4, 6, 8, 10].map((h) => (
-          <Label key={h} pos={[-4.65, H(h), 0.4]} text={`${h} m`} h={0.24} />
+          <Label key={h} pos={[-5.15, H(h), 0.4]} text={`${h} m`} h={0.24} />
         ))}
-        <Block
-          pos={[-4, (0.75 + H(Math.max(0, s.nivel))) / 2, 0.8]}
-          size={[1.8, Math.max(0.02, H(Math.max(0, s.nivel)) - 0.75), 0.6]}
-          color="#4a90b8"
-          mat="water"
-          solid={false}
-        />
-        <Block pos={[-3.3, H(EQUIPO), 0.6]} size={[1, 0.25, 0.6]} color="#e76f51" mat="metal" solid={false} />
-        <Label pos={[-3.3, H(EQUIPO) + 0.45, 0.6]} text={s.retirado ? '🚚 a salvo' : '🧰 equipos'} h={0.28} />
         {s.sensores.map((h) => (
           <Ball
             key={h}
-            pos={[-3.7, H(h), 0.5]}
+            pos={[-4.4, H(h), 0.55]}
             r={0.16}
             color={s.lecturas.some((l) => l.h === h) ? '#e63946' : '#57cc99'}
           />
         ))}
-        <Block pos={[-4.45, H(altura(s.y)), 0.5]} size={[0.5, 0.08, 0.3]} color="#ffd166" solid={false} />
+        <Block pos={[-4.4, H(altura(s.y)), 0.55]} size={[0.8, 0.08, 0.3]} color="#ffd166" solid={false} />
+        <Block
+          pos={[-3.2, (0.75 + H(Math.max(0, s.nivel))) / 2, 0.4]}
+          size={[1.2, Math.max(0.02, H(Math.max(0, s.nivel)) - 0.75), 0.8]}
+          color="#4a90b8"
+          mat="water"
+          solid={false}
+        />
+        <Block pos={[-3.2, H(EQUIPO), 0.4]} size={[1, 0.25, 0.6]} color="#e76f51" mat="metal" solid={false} />
+        <Label pos={[-3.2, H(EQUIPO) + 0.45, 0.4]} text={s.retirado ? '🚚 a salvo' : '🧰 equipos'} h={0.28} />
         {/* gráfica: lecturas, tendencia, equipos y fin del aguacero */}
         <Block pos={[1.9, 0.73, 0.1]} size={[5, 0.02, 5.6]} color="#fefae0" mat="cloth" solid={false} />
         <Block pos={[1.9, 0.75, GZ(EQUIPO)]} size={[5, 0.02, 0.08]} color="#e76f51" solid={false} />
