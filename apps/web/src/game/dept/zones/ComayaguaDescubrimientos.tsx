@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import type * as THREE from 'three';
 import { Block, Cyl, Label, P, Plate, useTick } from '../../kit';
+import { useLocuraCerca } from '../../reacciones';
 import puntos from './comayagua-puntos.json';
 
 /** Esténcil de práctica con bigotes que le pintó el viento, y el remolino con su pincel. */
@@ -116,6 +117,7 @@ function CuevaChismosa() {
 function Punto({ indice }: { indice: number }) {
   const p = puntos[indice];
   const loco = p.id.includes('locura');
+  useLocuraCerca(p.x, p.z);
 
   return (
     <group position={[p.x, 0, p.z]}>

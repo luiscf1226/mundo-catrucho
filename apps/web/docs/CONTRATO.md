@@ -88,7 +88,12 @@ textTexture(texto, { fg, bg, size })
 Materiales (`mat`): `plastic grass dirt sand stone cobble brick wood metal tile stucco roof water neon glass cloth
 asphalt concrete leaf gold`. El color lo eliges tú; la textura la pone el arte.
 
-Animaciones (`Anim`): `idle walk run jump fall dance dance2 celebrate wave clap kick throw carry drive sit`.
+Animaciones (`Anim`): `idle walk run jump fall dance dance2 celebrate wave clap kick throw carry drive sit gol
+victoria choque asombro mareo`. Las cinco últimas (MC-58) son exageradas: `gol` (emote), `victoria` (oro o nivel nuevo),
+`choque` (corre contra una pared), `asombro` (al activar una locura: `reaccionLocura()` o `useLocuraCerca(x, z)` de
+`game/reacciones.ts`) y `mareo`. El arte (`kit/art/exagera.ts`) aplasta y estira al muñeco y, al caer de alto, lo
+aplasta y lo deja mareado solo, sin cambiar la física. Si agregás una animación, sumala también a `ANIMACIONES` de
+`packages/reglas` (la sala reparte solo esas).
 
 ## Jugador (`import { player } from 'core/player'`)
 

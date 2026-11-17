@@ -17,6 +17,11 @@ export const ANIMACIONES = [
   'carry',
   'drive',
   'sit',
+  'gol',
+  'victoria',
+  'choque',
+  'asombro',
+  'mareo',
 ] as const;
 export type Animacion = (typeof ANIMACIONES)[number];
 

@@ -3,6 +3,7 @@ import type { Group } from 'three';
 import { player } from '../../../core/player';
 import { useGame } from '../../../core/store';
 import { Ball, Block, Cyl, Interactable, Label, useTick } from '../../kit';
+import { reaccionLocura } from '../../reacciones';
 import puntos from './lempira-puntos.json';
 
 const juegos = [
@@ -57,6 +58,7 @@ function Punto({ indice: i, altura }: { indice: number; altura: number }) {
       useGame.getState().startJuego(`lempira.${juegos[i]}`);
       return;
     }
+    if (p.id.includes('locura')) reaccionLocura();
     avanzar(paso + 1);
     if (i === 1) useGame.getState().toast('¡Decoración temporal lista, afuera del templo!', '🎨');
     if (i === 2) {

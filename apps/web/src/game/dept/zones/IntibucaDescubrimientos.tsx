@@ -3,6 +3,7 @@ import type { Group } from 'three';
 import { player } from '../../../core/player';
 import { useGame } from '../../../core/store';
 import { Ball, Block, Cyl, Interactable, Label, useTick } from '../../kit';
+import { reaccionLocura } from '../../reacciones';
 import puntos from './intibuca-puntos.json';
 
 function Punto({ indice }: { indice: number }) {
@@ -28,6 +29,7 @@ function Punto({ indice }: { indice: number }) {
       return;
     }
     hacer(true);
+    if (p.id.includes('locura')) reaccionLocura();
     if (indice === 3) useGame.getState().startJuego('intibuca.tela-del-mercado-lenca');
     else
       useGame.getState().showDialog({

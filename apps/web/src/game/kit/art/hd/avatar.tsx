@@ -2,10 +2,11 @@
 // cara dibujada en lienzo, ropa por atlas y animación procedural mezclada. Lee `state` en cada cuadro.
 
 import { useFrame } from '@react-three/fiber';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import type { AvatarConfig, AvatarState } from '../../../../core/types';
 import { textTexture } from '../../core';
+import { Exagera, Globito } from '../exagera';
 import type { AvatarProps } from '../types';
 import { ANIMS, type Ctx, PN, POSES } from './anim';
 import { avatarGeometry, B, NB, PARENT, REST } from './avatarGeo';
@@ -55,6 +56,9 @@ class Rig {
   mv = 0;
   air = 0;
   lastT = -1;
+  /** aplastar y estirar, golpe al caer y mareo (MC-58) */
+  ex = new Exagera();
+  globito = new Globito(0.82);
   constructor(cfg: AvatarConfig) {
     for (let i = 0; i < NB; i++) {
       const b = new THREE.Bone(),
@@ -77,10 +81,13 @@ class Rig {
     // la malla se deforma con los huesos: se usa una esfera fija y holgada para el descarte por cámara
     this.mesh.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, 1, 0), 1.9);
     this.bones[B.lid].scale.y = 0.03;
+    this.bones[B.head].add(this.globito.sprite);
   }
   update(state: AvatarState, t: number, dt: number) {
+    const anim = this.ex.update(state.anim, t, dt);
+    this.globito.update(this.ex, t);
     const w = this.w,
-      idx = Math.max(0, ANIMS.indexOf(state.anim)),
+      idx = Math.max(0, ANIMS.indexOf(anim)),
       sp = state.speed || 0;
     if (idx !== this.cur) {
       if (this.cur < 0) w[idx] = 1;
@@ -94,7 +101,7 @@ class Rig {
       if (w[i] < 0.003 && i !== idx) w[i] = 0;
       sum += w[i];
     }
-    this.ph += dt * (state.anim === 'run' ? 7.5 + sp * 0.85 : 5.5 + sp * 0.9);
+    this.ph += dt * (anim === 'run' ? 7.5 + sp * 0.85 : 5.5 + sp * 0.9);
     const ctx: Ctx = { t, tl: 0, ph: this.ph, speed: sp, seed: this.seed };
     acc.fill(0);
     for (let i = 0; i < w.length; i++) {
@@ -114,9 +121,10 @@ class Rig {
       bn[B.lid].scale.y = u >= 1 ? 0.03 : 0.03 + 0.97 * Math.sin(u * Math.PI) ** 0.6;
       if (u >= 1) this.blinkAt = t + 1.6 + Math.random() * 3.6;
     }
-    const moving = state.anim === 'walk' || state.anim === 'run' || state.anim === 'carry' ? Math.min(1, sp / 8) : 0,
-      inAir = state.anim === 'fall' || state.anim === 'jump' ? 1 : 0,
-      dance = state.anim === 'dance' || state.anim === 'dance2' || state.anim === 'celebrate' ? 1 : 0;
+    const moving = anim === 'walk' || anim === 'run' || anim === 'carry' ? Math.min(1, sp / 8) : 0,
+      inAir = anim === 'fall' || anim === 'jump' || anim === 'victoria' || anim === 'gol' ? 1 : 0,
+      dance =
+        anim === 'dance' || anim === 'dance2' || anim === 'celebrate' || anim === 'asombro' || anim === 'mareo' ? 1 : 0;
     this.mv += (moving - this.mv) * Math.min(1, dt * 5);
     this.air += (inAir - this.air) * Math.min(1, dt * 6);
     const m = this.mv + this.air * 0.5,
@@ -161,11 +169,19 @@ export function Avatar({ config, state, name, scale = 1 }: AvatarProps) {
   useEffect(
     () => () => {
       rig.skeleton.dispose();
+      rig.globito.dispose();
     },
     [rig],
   );
+  const cuerpo = useRef<THREE.Group>(null),
+    sube = useRef<THREE.Group>(null);
   const tag = useMemo(() => (name ? textTexture(name, { fg: '#ffffff', bg: 'rgba(12,22,34,0.8)' }) : null), [name]);
-  useFrame((st, dt) => rig.update(state, st.clock.elapsedTime, Math.min(dt, 0.1)));
+  useFrame((st, dt) => {
+    rig.update(state, st.clock.elapsedTime, Math.min(dt, 0.1));
+    cuerpo.current?.scale.set(rig.ex.sx, rig.ex.sy, rig.ex.sz);
+    // el nombre sube con el muñeco cuando brinca (victoria, gol, susto)
+    if (sube.current) sube.current.position.y = Math.max(0, rig.bones[0].position.y) * rig.ex.sy;
+  });
   const tall =
     config.hat === 'tocado_plumas'
       ? 0.4
@@ -182,11 +198,15 @@ export function Avatar({ config, state, name, scale = 1 }: AvatarProps) {
                 : 0;
   return (
     <group scale={scale}>
-      <primitive object={rig.mesh} scale={config.body === 'm' ? 0.965 : 1} />
+      <group ref={cuerpo} name="avatar-cuerpo" userData={{ exagera: rig.ex, state }}>
+        <primitive object={rig.mesh} scale={config.body === 'm' ? 0.965 : 1} />
+      </group>
       {tag && (
-        <sprite position={[0, SIT_TAG + tall, 0]} scale={[0.3 * (tag as any).aspect, 0.3, 1]}>
-          <spriteMaterial map={tag} transparent />
-        </sprite>
+        <group ref={sube}>
+          <sprite position={[0, SIT_TAG + tall, 0]} scale={[0.3 * (tag as any).aspect, 0.3, 1]}>
+            <spriteMaterial map={tag} transparent />
+          </sprite>
+        </group>
       )}
     </group>
   );

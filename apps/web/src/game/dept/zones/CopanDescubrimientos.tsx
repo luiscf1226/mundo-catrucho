@@ -1,10 +1,12 @@
 import { Ball, Block, Cyl, Label, P } from '../../kit';
+import { useLocuraCerca } from '../../reacciones';
 import puntos from './copan-puntos.json';
 
 function Punto({ indice }: { indice: number }) {
   const p = puntos[indice],
     x = indice < 5 ? -8 : 8,
     z = 36 - (indice % 5) * 6;
+  useLocuraCerca(x, z);
 
   return (
     <group position={[x, 0, z]}>

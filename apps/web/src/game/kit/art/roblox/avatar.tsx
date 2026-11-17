@@ -6,6 +6,7 @@ import { useLayoutEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import type { Anim, AvatarConfig } from '../../../../core/types';
 import { textTexture } from '../../core';
+import { asombro, brinco, choque, Exagera, Globito, victoria } from '../exagera';
 import type { AvatarProps } from '../types';
 import { botHalf, makeAtlas, pantsInfo, shirtInfo, strip, topHalf, UV } from './atlas';
 import { Build, cylGeo, icoGeo, mixHex, type Rect, shade, torGeo, type V3 } from './geo';
@@ -442,7 +443,12 @@ function makeRig() {
   mesh.receiveShadow = true;
   mesh.visible = false;
   mesh.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, 1, 0), 2.2);
+  // aplastar y estirar, golpe al caer, mareo y el globito sobre la cabeza (MC-58)
+  const globito = new Globito(0.78);
+  bones[HEAD].add(globito.sprite);
   return {
+    ex: new Exagera(),
+    globito,
     bones,
     mesh,
     skeleton,
@@ -582,39 +588,167 @@ function pose(P: Float32Array, anim: Anim, t: number, ph: number, k: number, spe
       break;
     }
     case 'celebrate': {
-      const j = Math.abs(Math.sin(t * 7.5)),
-        kb = (1 - j) * 0.55,
-        sh = Math.sin(t * 15) * 0.13;
-      P[1] = j * 0.24 - 0.03;
-      set(LAU, -2.95, 0, 0.32 + sh);
-      set(RAU, -2.95, 0, -0.32 - sh);
-      set(LAL, -0.2);
-      set(RAL, -0.2);
-      set(LLU, -kb * 0.5);
-      set(LLL, kb);
-      set(RLU, -kb * 0.5);
-      set(RLL, kb);
-      set(HEAD, -0.25);
-      set(CAPE, 0.3 + j * 0.5);
+      // brincos grandes con las rodillas encogidas y los puños arriba, uno y otro
+      const b = brinco(t),
+        dn = Math.max(0, -Math.sin(t * 8.5)),
+        alt = Math.sin(t * 4.25);
+      P[1] = b * 0.4 - dn * 0.08;
+      set(LAU, -0.1, 0, 2.7 + alt * 0.25);
+      set(RAU, -0.1, 0, -2.7 + alt * 0.25);
+      set(LAL, -0.8 * Math.max(0, alt));
+      set(RAL, -0.8 * Math.max(0, -alt));
+      set(LLU, -0.6 * b - dn * 0.3, 0, 0.15 * b);
+      set(LLL, b + dn * 0.6);
+      set(RLU, -0.6 * b - dn * 0.3, 0, -0.15 * b);
+      set(RLL, b + dn * 0.6);
+      set(HEAD, -0.3, 0, alt * 0.1);
+      set(TORSO, -0.08, 0, alt * 0.06);
+      set(CAPE, 0.3 + b * 0.7);
       break;
     }
-    case 'wave':
+    case 'wave': {
+      // brazo enorme de lado a lado, la otra mano en la cintura y brinquitos
+      const w = Math.sin(t * 10),
+        s5 = Math.sin(t * 5);
       relax();
-      set(RAU, 0, 0, -2.3);
-      set(RAL, 0, 0, -0.45 + Math.sin(t * 9) * 0.5);
-      set(HEAD, 0, 0, -0.1);
-      set(TORSO, 0, 0, -0.04);
-      P[1] = br * 0.006;
+      set(ROOT, 0, 0, 0.1 + s5 * 0.05);
+      set(RAU, -0.1, 0, -2.75 - w * 0.25);
+      set(RAL, 0, 0, -0.45 + w * 0.75);
+      set(LAU, 0.2, 0, 0.8);
+      set(LAL, 0, 0, -1.55);
+      set(HEAD, -0.12, w * 0.08, -0.16);
+      set(TORSO, -0.05, 0, -0.1);
+      P[1] = Math.max(0, s5) * 0.07;
       break;
+    }
     case 'clap': {
-      const q = Math.sin(t * 15) * 0.5 + 0.5;
-      set(LAU, -1.1, 0, -0.16 - q * 0.17);
-      set(LAL, -0.6);
-      set(RAU, -1.1, 0, 0.16 + q * 0.17);
-      set(RAL, -0.6);
-      P[1] = q * 0.012;
-      set(HEAD, 0.05);
-      set(TORSO, 0.03);
+      // un brinco por cada aplauso, con las manos arriba de la cabeza
+      const h = Math.sin(t * 7.5),
+        q = Math.sin(t * 15) * 0.5 + 0.5,
+        dn = Math.max(0, -h);
+      set(LAU, -0.1, 0, 2.55 + q * 0.4);
+      set(LAL, 0, 0, -0.2 - q * 0.25);
+      set(RAU, -0.1, 0, -2.55 - q * 0.4);
+      set(RAL, 0, 0, 0.2 + q * 0.25);
+      P[1] = Math.max(0, h) * 0.2 - dn * 0.05;
+      set(LLU, -0.3 * dn);
+      set(LLL, 0.6 * dn);
+      set(RLU, -0.3 * dn);
+      set(RLL, 0.6 * dn);
+      set(HEAD, -0.25);
+      set(TORSO, -0.08);
+      break;
+    }
+    case 'gol': {
+      // avioncito, brinco y barrida de rodillas gritando con los puños arriba
+      const u = k % 4.2,
+        av = 1 - sst(1.55, 1.8, u),
+        vu = sst(1.6, 1.8, u) * (1 - sst(1.85, 2.1, u)),
+        ro = sst(1.85, 2.1, u) * (1 - sst(3.9, 4.2, u)),
+        q = Math.sin(k * 13),
+        pu = Math.sin(u * 12),
+        bank = Math.sin(u * 5);
+      P[1] = av * Math.abs(Math.cos(k * 13)) * 0.05 + vu * 0.45 - ro * 0.3;
+      P[2] = ro * 0.9 * (1 - Math.exp(-Math.max(0, u - 1.9) * 3));
+      set(ROOT, 0.16 * av, Math.sin(u * 1.6) * 0.9 * av, bank * 0.32 * av);
+      set(TORSO, 0.06 * av - 0.45 * ro - 0.12 * vu, 0, -bank * 0.1 * av);
+      set(HEAD, -0.1 * av - 0.45 * ro - 0.3 * vu, 0, -bank * 0.2 * av + Math.sin(u * 20) * 0.05 * ro);
+      set(LAU, -0.2 * ro, 0, 1.5 * av + 2.8 * vu + (2.6 + 0.2 * pu) * ro);
+      set(LAL, -0.9 * Math.max(0, pu) * ro);
+      set(RAU, -0.2 * ro, 0, -1.5 * av - 2.8 * vu - (2.6 - 0.2 * pu) * ro);
+      set(RAL, -0.9 * Math.max(0, -pu) * ro);
+      set(LLU, av * (-0.6 * Math.max(0, q) - 0.15) - 0.9 * vu + 0.1 * ro, 0, 0.1 * ro);
+      set(LLL, av * (0.3 + 1.1 * Math.max(0, q)) + 1.4 * vu + 1.6 * ro);
+      set(RLU, av * (-0.6 * Math.max(0, -q) - 0.15) - 0.9 * vu + 0.1 * ro, 0, -0.1 * ro);
+      set(RLL, av * (0.3 + 1.1 * Math.max(0, -q)) + 1.4 * vu + 1.6 * ro);
+      set(CAPE, 0.4 + 0.6 * av + 0.8 * vu);
+      break;
+    }
+    case 'victoria': {
+      // se agacha, salta altísimo (la vuelta va aparte, en R.spin), cae aplastado y sigue con el puño
+      const v = victoria(k),
+        a = v.agacha,
+        f = sst(0.4, 0.5, k) * (1 - sst(1.0, 1.12, k)),
+        l = v.luego,
+        pump = Math.max(0, Math.sin(k * 9.35));
+      P[1] = v.salto - a * 0.2;
+      set(ROOT, a * 0.15);
+      set(LLU, -0.6 * a - f, 0, 0.12 * f);
+      set(LLL, 1.2 * a + 1.5 * f);
+      set(RLU, -0.6 * a - f, 0, -0.12 * f);
+      set(RLL, 1.2 * a + 1.5 * f);
+      set(LAU, a * 0.9 - f * 0.2 + l * 0.2, 0, a * 0.25 + f * 2.7 + l * 0.8);
+      set(LAL, -0.2 * a, 0, -1.55 * l);
+      set(RAU, a * 0.9 - f * 0.2 - l * 0.2, 0, -(a * 0.25 + f * 2.7 + l * 2.85));
+      set(RAL, -1.3 * pump * l);
+      set(TORSO, a * 0.3 - f * 0.2 - l * 0.1);
+      set(HEAD, a * 0.1 - f * 0.35 - l * 0.28);
+      set(CAPE, 0.3 + f * 1.3 + l * 0.3);
+      break;
+    }
+    case 'choque': {
+      // la cabeza se va para atrás, brazos al aire, una pierna arriba y se tambalea
+      const c = choque(k),
+        e = 1 - sst(0.5, 0.75, k),
+        w = Math.sin(k * 24) * e;
+      P[1] = -0.06 * e;
+      P[2] = -0.3 * sst(0, 0.12, k) * e;
+      set(ROOT, -0.25 * c - 0.08 * e, 0, w * 0.12);
+      set(TORSO, -0.3 * c, 0, w * 0.1);
+      set(HEAD, -0.45 * c + 0.15 * e, w * 0.3, 0);
+      set(LAU, 0.6 * e, 0, 1.2 * e + 0.3 * c);
+      set(LAL, -0.3);
+      set(RAU, 0.6 * e, 0, -1.2 * e - 0.3 * c);
+      set(RAL, -0.3);
+      set(LLU, -0.6 * c - 0.1 * e);
+      set(LLL, 0.7 * c + 0.2 * e);
+      set(RLU, -0.1 * e);
+      set(RLL, 0.2 * e);
+      set(CAPE, 0.2 + 0.8 * c);
+      break;
+    }
+    case 'asombro': {
+      // brinco del susto con todo abierto y después carcajada doblado, palmeándose la rodilla
+      const a = asombro(k),
+        s2 = a.susto,
+        r = a.risa,
+        q = Math.sin(t * 28),
+        sl = Math.max(0, Math.sin(t * 9));
+      P[1] = 0.4 * s2 - 0.1 * a.agacha - 0.06 * r + Math.abs(q) * 0.015 * r;
+      set(ROOT, 0.22 * r - 0.12 * s2);
+      set(TORSO, -0.25 * s2 + 0.3 * r, q * 0.06 * r, q * 0.05 * r);
+      set(HEAD, -0.35 * s2 - 0.3 * r, 0, q * 0.05 * r);
+      set(LAU, -0.4 * s2 - (0.45 + 0.4 * sl) * r, 0, 2.3 * s2 + 0.2 * r + 0.07);
+      set(LAL, -0.3 * s2 - 0.35 * r, 0, Math.sin(t * 30) * 0.4 * s2);
+      set(RAU, -0.4 * s2 - 0.65 * r, 0, -2.3 * s2 - 0.15 * r - 0.07);
+      set(RAL, -0.3 * s2 - 1.55 * r);
+      set(LLU, -0.25 * s2 - 0.2 * r, 0, 0.35 * s2);
+      set(LLL, 0.5 * s2 + 0.35 * r);
+      set(RLU, -0.25 * s2 - 0.2 * r, 0, -0.35 * s2);
+      set(RLL, 0.5 * s2 + 0.35 * r);
+      set(CAPE, 0.2 + 0.8 * s2);
+      break;
+    }
+    case 'mareo': {
+      // tambaleo en círculos, cabeza floja, brazos colgando y rodillas de gelatina
+      const a = t * 3.1,
+        cs = Math.cos(a),
+        sn = Math.sin(a);
+      P[0] = cs * 0.06;
+      P[1] = -0.05 + sn * 0.015;
+      P[2] = sn * 0.04;
+      set(ROOT, sn * 0.1, 0, cs * 0.12);
+      set(TORSO, 0.12 + sn * 0.08, sn * 0.15, -cs * 0.18);
+      set(HEAD, 0.15 + Math.cos(a * 1.3) * 0.18, Math.sin(a * 0.9) * 0.4, Math.sin(a * 1.3) * 0.3);
+      set(LAU, sn * 0.3, 0, 0.25 + cs * 0.2);
+      set(LAL, -0.15);
+      set(RAU, -sn * 0.3, 0, -0.25 + cs * 0.2);
+      set(RAL, -0.15);
+      set(LLU, -0.1, 0, 0.08 * cs);
+      set(LLL, 0.2 + 0.15 * Math.max(0, sn));
+      set(RLU, -0.1, 0, 0.08 * cs);
+      set(RLL, 0.2 + 0.15 * Math.max(0, -sn));
+      set(CAPE, 0.2 + sn * 0.1);
       break;
     }
     case 'kick': {
@@ -753,16 +887,21 @@ export function Avatar({ config, state, name, scale = 1 }: AvatarProps) {
   useLayoutEffect(
     () => () => {
       rig.skeleton.dispose();
+      rig.globito.dispose();
     },
     [rig],
   );
-  const seed = useRef(Math.random() * 10);
+  const seed = useRef(Math.random() * 10),
+    cuerpo = useRef<THREE.Group>(null),
+    sube = useRef<THREE.Group>(null);
   useFrame((st, d) => {
     const dt = Math.min(d, 0.05),
       t = st.clock.elapsedTime + seed.current,
-      a = state.anim,
-      sp = state.speed || 0,
-      R = rig;
+      R = rig,
+      a = R.ex.update(state.anim, t, dt),
+      sp = state.speed || 0;
+    R.globito.update(R.ex, t);
+    cuerpo.current?.scale.set(R.ex.sx, R.ex.sy, R.ex.sz);
     if (a !== R.anim) {
       R.anim = a;
       R.t0 = t;
@@ -772,19 +911,26 @@ export function Avatar({ config, state, name, scale = 1 }: AvatarProps) {
       (a === 'run' ? 13.5 * Math.min(1.35, Math.max(0.75, sp / 8.2)) : 9.4 * Math.min(1.4, Math.max(0.6, sp / 5.2)));
     pose(TGT, a, t, R.ph, t - R.t0, sp);
     const C = R.cur,
-      kk = R.init ? 1 - Math.exp(-dt * (a === 'kick' || a === 'throw' ? 30 : 16)) : 1;
+      kk = R.init
+        ? 1 - Math.exp(-dt * (a === 'kick' || a === 'throw' || a === 'choque' || a === 'victoria' ? 30 : 16))
+        : 1;
     R.init = true;
     for (let i = 0; i < NP; i++) C[i] += (TGT[i] - C[i]) * kk;
     // vuelta completa del sique (fuera del suavizado para que no "desenrolle")
     if (a === 'dance2') {
       const u = ((t - R.t0) % 3.4) / 3.4;
       R.spin = PI * 2 * sst(0.55, 0.95, u);
+    } else if (a === 'victoria') {
+      const tl = t - R.t0;
+      R.spin = tl < 1.05 ? victoria(tl).vuelta : 0;
     } else if (R.spin !== 0) {
       R.spin = R.spin > PI ? R.spin + (PI * 2 - R.spin) * Math.min(1, dt * 10) : R.spin * (1 - Math.min(1, dt * 10));
       if (R.spin < 0.01 || R.spin > PI * 2 - 0.01) R.spin = 0;
     }
     const B = R.bones;
     B[0].position.set(C[0], HIP + C[1], C[2]);
+    // el nombre sube con el muñeco cuando brinca (victoria, gol, susto)
+    if (sube.current) sube.current.position.y = Math.max(0, C[1]) * R.ex.sy;
     for (let i = 0; i < NB; i++) B[i].rotation.set(C[3 + i * 3], C[4 + i * 3] + (i === 0 ? R.spin : 0), C[5 + i * 3]);
   });
   const tag = useMemo(
@@ -802,11 +948,15 @@ export function Avatar({ config, state, name, scale = 1 }: AvatarProps) {
         : 2.36;
   return (
     <group scale={scale}>
-      <primitive object={rig.mesh} />
+      <group ref={cuerpo} name="avatar-cuerpo" userData={{ exagera: rig.ex, state }}>
+        <primitive object={rig.mesh} />
+      </group>
       {tag && (
-        <sprite position={[0, tall, 0]} scale={[0.25 * (tag as any).aspect, 0.25, 1]} renderOrder={3}>
-          <spriteMaterial map={tag} transparent depthWrite={false} toneMapped={false} />
-        </sprite>
+        <group ref={sube}>
+          <sprite position={[0, tall, 0]} scale={[0.25 * (tag as any).aspect, 0.25, 1]} renderOrder={3}>
+            <spriteMaterial map={tag} transparent depthWrite={false} toneMapped={false} />
+          </sprite>
+        </group>
       )}
     </group>
   );
