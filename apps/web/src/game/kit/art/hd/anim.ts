@@ -3,7 +3,7 @@
 // pasar de una animación a otra nunca da saltos.
 import type { Anim } from '../../../../core/types';
 import { asombro as curvaAsombro, choque as curvaChoque, victoria as curvaVictoria } from '../exagera';
-import { B, LEG } from './avatarGeo';
+import { B, LEG, SEAT } from './avatarGeo';
 
 /** 3 de posición de la raíz + 3 ángulos por cada uno de los 14 huesos animados */
 export const PN = 3 + 14 * 3;
@@ -312,7 +312,7 @@ function carry(p: P, c: Ctx) {
 }
 /** sentado sobre la superficie donde están los pies (banca, asiento, suelo), con las piernas hacia adelante */
 function seat(p: P, knee = 0.24) {
-  p[1] = -0.69;
+  p[1] = -SEAT;
   set(p, TL, -1.5, 0, 0.1);
   set(p, SL, knee);
   set(p, FTL, -0.25);

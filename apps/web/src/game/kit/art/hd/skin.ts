@@ -9,8 +9,11 @@ export const AW = 1024,
 export type Rect = readonly [number, number, number, number];
 /** pesos de un vértice: [hueso, peso, hueso, peso, ...] (hasta 4 pares) */
 export type WFn = (x: number, y: number, z: number) => number[];
+/** Deformación al agregar una pieza: mueve la posición `p` (y gira la normal `n`) según los pesos `ws`. */
+export type Warp = (p: THREE.Vector3, n: THREE.Vector3, ws: number[]) => void;
 
 const _v = new THREE.Vector3(),
+  _nv = new THREE.Vector3(),
   _n3 = new THREE.Matrix3(),
   _I = new THREE.Matrix4();
 export class SkinBuilder {
@@ -20,7 +23,9 @@ export class SkinBuilder {
   si: number[] = [];
   sw: number[] = [];
   idx: number[] = [];
-  add(geo: THREE.BufferGeometry, rect: Rect, w: WFn | number, m: THREE.Matrix4 = _I): this {
+  /** deformación para las piezas escritas en las medidas viejas (ver avatarGeo.ts); `null` = ya están en su sitio */
+  warp: Warp | null = null;
+  add(geo: THREE.BufferGeometry, rect: Rect, w: WFn | number, m: THREE.Matrix4 = _I, warp = this.warp): this {
     const flip = m.determinant() < 0;
     _n3.getNormalMatrix(m);
     const P = geo.attributes.position,
@@ -30,16 +35,14 @@ export class SkinBuilder {
       off = this.pos.length / 3;
     for (let i = 0; i < P.count; i++) {
       _v.fromBufferAttribute(P, i).applyMatrix4(m);
-      const x = _v.x,
-        y = _v.y,
-        z = _v.z;
-      this.pos.push(x, y, z);
-      _v.fromBufferAttribute(N, i).applyMatrix3(_n3).normalize();
-      this.nor.push(_v.x, _v.y, _v.z);
+      _nv.fromBufferAttribute(N, i).applyMatrix3(_n3).normalize();
+      const ws = typeof w === 'number' ? [w, 1] : w(_v.x, _v.y, _v.z);
+      if (warp) warp(_v, _nv, ws);
+      this.pos.push(_v.x, _v.y, _v.z);
+      this.nor.push(_nv.x, _nv.y, _nv.z);
       const u = U ? U.getX(i) : 0.5,
         v = U ? U.getY(i) : 0.5;
       this.uv.push((rect[0] + u * rect[2]) / AW, 1 - (rect[1] + (1 - v) * rect[3]) / AH);
-      const ws = typeof w === 'number' ? [w, 1] : w(x, y, z);
       let s = 0;
       for (let k = 1; k < ws.length; k += 2) s += ws[k];
       for (let k = 0; k < 4; k++) {

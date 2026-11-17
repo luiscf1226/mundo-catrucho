@@ -4,8 +4,9 @@
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import type { AvatarConfig, V3 } from '../../../../core/types';
-import { ellipsoidPatch, headHalf, inverted, loft, type Rect, SkinBuilder, type WFn } from './skin';
-import { rng } from './tex';
+import type { AddN } from './avatarAnat';
+import * as anat from './avatarAnat';
+import { inverted, loft, type Rect, SkinBuilder, type Warp, type WFn } from './skin';
 
 // --- huesos
 export const B = {
@@ -32,8 +33,9 @@ export const B = {
 } as const;
 export const NB = 20;
 export const PARENT = [-1, 0, 1, 2, 2, 4, 2, 6, 1, 8, 9, 1, 11, 12, 3, 3, 2, 16, 17, 1];
-/** posición de reposo de cada hueso en el espacio del avatar (pies en y = 0, mira a +Z) */
-export const REST: V3[] = [
+/** posición de reposo de cada hueso en las medidas VIEJAS (muñeco cabezón): la ropa, los sombreros y los accesorios
+ * siguen escritos en estas medidas y `warp` los lleva a las proporciones nuevas */
+const OLD: V3[] = [
   [0, 0, 0],
   [0, 0.8, 0],
   [0, 0.98, 0],
@@ -55,8 +57,46 @@ export const REST: V3[] = [
   [0, 0.7, -0.16],
   [0, 0.82, 0],
 ];
+/** escala de cada hueso de las medidas viejas a las nuevas (ancho, largo, fondo); null = familia de la cabeza */
+const SC: (V3 | null)[] = [
+  [1, 1, 1],
+  [0.8, 1.18, 0.76],
+  [0.77, 1.3, 0.76],
+  null,
+  [0.66, 1.12, 0.66],
+  [0.66, 1.26, 0.66],
+  [0.66, 1.12, 0.66],
+  [0.66, 1.26, 0.66],
+  [0.82, 1.27, 0.82],
+  [0.78, 1.152, 0.78],
+  [0.82, 1, 0.9],
+  [0.82, 1.27, 0.82],
+  [0.78, 1.152, 0.78],
+  [0.82, 1, 0.9],
+  null,
+  null,
+  [0.77, 1.3, 0.76],
+  [0.77, 1.3, 0.76],
+  [0.77, 1.3, 0.76],
+  [0.8, 1.18, 0.76],
+];
+/** posición de reposo de cada hueso (medidas reales, ~1,72 m a la coronilla, 7,5 cabezas de alto) */
+export const REST: V3[] = OLD.map((): V3 => [0, 0, 0]);
+{
+  const map = (b: number, o: V3): V3 => {
+    const s = SC[b] as V3,
+      q = OLD[b],
+      n = REST[b];
+    return [n[0] + (o[0] - q[0]) * s[0], n[1] + (o[1] - q[1]) * s[1], n[2] + (o[2] - q[2]) * s[2]];
+  };
+  REST[B.hips] = [0, 0.95, 0];
+  for (let i = 2; i < NB; i++) if (SC[i]) REST[i] = map(PARENT[i], OLD[i]);
+  REST[B.head] = map(B.chest, OLD[B.head]);
+}
 /** largo de muslo + pantorrilla, para agacharse sin que los pies se hundan */
-export const LEG = 0.695;
+export const LEG = REST[B.thighL][1] - REST[B.footL][1];
+/** cuánto baja la cadera al sentarse sobre la superficie de los pies */
+export const SEAT = REST[B.thighL][1] - 0.08;
 
 // --- regiones del atlas (ver avatarTex.ts)
 export const R = {
@@ -106,8 +146,8 @@ const S = (n: SwatchName): Rect => {
   return [c[0] + 12, c[1] + 12, 40, 40];
 };
 
-export const HC: V3 = [0, 1.45, 0],
-  HR: V3 = [0.285, 0.262, 0.265];
+/** centro y radios de la cabeza VIEJA (solo para los sombreros escritos en esas medidas) */
+const HC: V3 = [0, 1.45, 0];
 const sm = (a: number, b: number, x: number) => {
   const t = Math.max(0, Math.min(1, (x - a) / (b - a)));
   return t * t * (3 - 2 * t);
@@ -152,14 +192,6 @@ const wTorso: WFn = (_x, y) => {
   const k = sm(0.82, 0.98, y);
   return [B.hips, 1 - k, B.chest, k];
 };
-const wNeck: WFn = (_x, y) => {
-  const k = sm(1.15, 1.22, y);
-  return [B.chest, 1 - k, B.head, k];
-};
-const wHang: WFn = (_x, y) => {
-  const k = sm(1.08, 1.28, y);
-  return [B.head, k, B.chest, 1 - k];
-};
 const wSkirt: WFn = (x, y) => {
   const t = sm(0.86, 0.36, y),
     sl = sm(-0.12, 0.12, x);
@@ -173,141 +205,152 @@ const wCape: WFn = (_x, y) => {
   return [B.chest, 1 - a, B.cape1, a * (1 - b), B.cape2, b * (1 - c), B.cape3, c];
 };
 
-/** direcciones repartidas sobre el cuero cabelludo (sin la cara ni debajo de las orejas) */
-function scalp(n: number, seed: number, maxY = 2): V3[] {
-  const out: V3[] = [],
-    r = rng(seed),
-    ga = Math.PI * (3 - Math.sqrt(5));
-  for (let i = 0; i < n * 2 && out.length < n; i++) {
-    const y = 1 - ((i + 0.5) / (n * 2)) * 1.5,
-      rad = Math.sqrt(Math.max(0, 1 - y * y)),
-      th = i * ga + r() * 0.3,
-      x = Math.cos(th) * rad,
-      z = Math.sin(th) * rad;
-    if (y > maxY) continue;
-    if (z > 0.3 && y < 0.5) continue;
-    if (z > -0.2 ? y < 0.02 : y < -0.4) continue;
-    out.push([x, y, z]);
-  }
-  return out;
-}
-
-function body(add: Add, c: AvatarConfig) {
-  // torso (camisa arriba, pantalón o falda abajo: lo pinta el atlas)
+const torsoV = (y: number, fem: boolean) => {
+  const top: [number, number][] = fem
+    ? [
+        [1.09, 0.8],
+        [1.14, 0.86],
+        [1.17, 0.93],
+        [1.188, 0.97],
+        [1.2, 1],
+      ]
+    : [
+        [1.11, 0.8],
+        [1.15, 0.86],
+        [1.175, 0.93],
+        [1.19, 0.97],
+        [1.2, 1],
+      ];
+  for (const [ty, tv] of top) if (Math.abs(y - ty) < 1e-4) return tv;
+  return y < 0.7 ? 0 : Math.min(1, (y - 0.7) / 0.475);
+};
+function body(add: Add, c: AvatarConfig, nat: AddN) {
+  // torso (camisa arriba, pantalón o falda abajo: lo pinta el atlas). Perfiles en medidas viejas: `warp` los estira.
   const fem = c.body === 'm';
   const TH: [number, number, number, number?][] = [
     [0.692, 0.004, 0.004],
     [0.7, 0.11, 0.09],
-    [0.735, 0.18, 0.14],
-    [0.8, 0.202, 0.158],
-    [0.88, 0.194, 0.15],
-    [0.98, 0.204, 0.155],
-    [1.06, 0.216, 0.158],
-    [1.11, 0.206, 0.146],
-    [1.15, 0.152, 0.115],
-    [1.175, 0.08, 0.075],
+    [0.735, 0.185, 0.145],
+    [0.8, 0.205, 0.158],
+    [0.88, 0.186, 0.142],
+    [0.97, 0.2, 0.152, 0.002],
+    [1.05, 0.218, 0.16, 0.008],
+    [1.11, 0.232, 0.152, 0.004],
+    [1.15, 0.226, 0.13],
+    [1.175, 0.16, 0.1],
+    [1.19, 0.086, 0.076],
+    [1.2, 0.04, 0.04],
   ];
   const TM: [number, number, number, number?][] = [
     [0.692, 0.004, 0.004],
     [0.7, 0.12, 0.095],
     [0.735, 0.2, 0.152],
-    [0.8, 0.214, 0.166],
-    [0.88, 0.17, 0.136],
-    [0.96, 0.178, 0.15, 0.01],
-    [1.01, 0.188, 0.165, 0.016],
-    [1.06, 0.19, 0.148, 0.006],
-    [1.11, 0.184, 0.136],
-    [1.15, 0.14, 0.11],
-    [1.175, 0.076, 0.072],
+    [0.8, 0.216, 0.166],
+    [0.88, 0.168, 0.13],
+    [0.95, 0.172, 0.138, 0.004],
+    [1.0, 0.19, 0.16, 0.024],
+    [1.04, 0.192, 0.16, 0.026],
+    [1.09, 0.2, 0.14, 0.01],
+    [1.14, 0.205, 0.118],
+    [1.17, 0.15, 0.094],
+    [1.188, 0.08, 0.07],
+    [1.2, 0.04, 0.04],
   ];
   add(
     loft(
-      (fem ? TM : TH).map(([y, rx, rz, cz]) => ({ y, rx, rz, cz, v: y < 0.7 ? 0 : (y - 0.7) / 0.475 })),
-      20,
+      // arriba, la banda del cuello del atlas (v > 0,95) queda solo alrededor del cuello
+      (fem ? TM : TH).map(([y, rx, rz, cz]) => ({ y, rx, rz, cz, v: torsoV(y, fem) })),
+      24,
     ),
     R.torso,
     wTorso,
   );
-  add(
-    loft(
-      [
-        { y: 1.15, rx: 0.074 },
-        { y: 1.24, rx: 0.072 },
-      ],
-      12,
-    ),
-    S('skin'),
-    wNeck,
-  );
-  // cabeza: mitad delantera con la cara, mitad trasera lisa
-  add(headHalf(HR[0], HR[1], HR[2], true), R.face, B.head, M(HC));
-  add(headHalf(HR[0], HR[1], HR[2], false), S('skin'), B.head, M(HC));
-  for (const s of [-1, 1]) add(SPH_LO, S('skin'), B.head, M([s * 0.278, 1.432, 0.0], [0.034, 0.056, 0.045]));
-  add(SPH_LO, S('skin'), B.head, M([0, 1.405, 0.258], [0.03, 0.024, 0.026]));
-  if (c.face !== 'cara_lentes')
-    for (const s of [-1, 1])
-      add(
-        ellipsoidPatch(
-          HR[0] * 1.014,
-          HR[1] * 1.014,
-          HR[2] * 1.014,
-          s * 0.105 - 0.054,
-          s * 0.105 + 0.054,
-          -0.076,
-          0.026,
-        ),
-        S('lid'),
-        B.lid,
-        M(HC),
-      );
-  // brazos y manos
+  const skin = S('skin');
+  anat.neck(nat, fem, skin);
+  anat.head(nat, fem, R.face, skin);
+  anat.ears(nat, skin);
+  anat.eyes(nat, fem, [c.face === 'cara_feliz', c.face === 'cara_feliz' || c.face === 'cara_guino'], S('lid'));
+  if (c.face === 'cara_bigote') anat.mustache(nat, fem, S('hair'));
+  if (c.face === 'cara_lentes') anat.sunglasses(nat, fem, S('lens'), S('black'));
+  // brazos: hombro, bíceps, codo, antebrazo y muñeca
   for (const s of [-1, 1]) {
     add(
       loft(
         [
-          { y: 0.69, rx: 0.056 },
-          { y: 0.78, rx: 0.062 },
-          { y: 0.885, rx: 0.064 },
-          { y: 1.0, rx: 0.07 },
-          { y: 1.1, rx: 0.075 },
-          { y: 1.15, rx: 0.068 },
-          { y: 1.174, rx: 0.04 },
-          { y: 1.182, rx: 0.003 },
-        ].map((r) => ({ ...r, rx: r.rx * (fem ? 0.9 : 1), cx: s * (fem ? 0.255 : 0.262), v: (r.y - 0.69) / 0.488 })),
-        12,
+          { y: 0.69, rx: 0.041 },
+          { y: 0.72, rx: 0.045 },
+          { y: 0.78, rx: 0.056, rz: 0.052 },
+          { y: 0.84, rx: 0.062, rz: 0.058 },
+          { y: 0.885, rx: 0.055 },
+          { y: 0.93, rx: 0.058 },
+          { y: 1.0, rx: 0.067, rz: 0.07, cz: 0.004 },
+          { y: 1.07, rx: 0.072 },
+          { y: 1.11, rx: 0.071 },
+          { y: 1.135, rx: 0.062 },
+          { y: 1.155, rx: 0.04 },
+          { y: 1.162, rx: 0.003 },
+        ].map((r) => ({
+          ...r,
+          rx: r.rx * (fem ? 0.88 : 1),
+          rz: (r.rz ?? r.rx) * (fem ? 0.88 : 1),
+          cx: s * (fem ? 0.255 : 0.262),
+          v: Math.min(1, (r.y - 0.69) / 0.488),
+        })),
+        14,
       ),
       R.arm,
       wArm(s),
     );
-    const f = s > 0 ? B.foreL : B.foreR;
-    add(SPH, S('skin'), f, M([s * 0.262, 0.635, 0.006], [0.058, 0.074, 0.066]));
-    add(SPH_LO, S('skin'), f, M([s * 0.232, 0.655, 0.052], [0.024, 0.036, 0.027]));
+    const f = REST[s > 0 ? B.foreL : B.foreR];
+    anat.hand(nat, s, fem, [f[0] + s * 0.002, f[1] - (0.885 - 0.69) * 1.26 + 0.004, 0.004], skin);
   }
-  // piernas y zapatos
-  const wide = c.pants === 'pantalon_manta' || (cut(c) === 'pants' && c.pants !== 'falda_lenca') ? 1.14 : 1;
-  for (const s of [-1, 1]) {
+  // piernas: pantalón recto o pierna con pantorrilla, rodilla y tobillo
+  const k = cut(c),
+    straight = k === 'pants' && c.pants !== 'short_futbol' && c.pants !== 'falda_lenca',
+    LEGP: [number, number][] = straight
+      ? [
+          [0.07, 0.062],
+          [0.12, 0.064],
+          [0.2, 0.068],
+          [0.3, 0.072],
+          [0.44, 0.072],
+          [0.6, 0.086],
+          [0.7, 0.096],
+          [0.76, 0.1],
+          [0.8, 0.086],
+          [0.82, 0.03],
+        ]
+      : [
+          [0.07, 0.04],
+          [0.12, 0.045],
+          [0.2, 0.056],
+          [0.3, 0.07],
+          [0.38, 0.066],
+          [0.44, 0.06],
+          [0.5, 0.062],
+          [0.6, 0.079],
+          [0.7, 0.091],
+          [0.76, 0.098],
+          [0.8, 0.084],
+          [0.82, 0.03],
+        ];
+  for (const s of [-1, 1])
     add(
       loft(
-        [
-          { y: 0.07, rx: 0.064 },
-          { y: 0.12, rx: 0.066 },
-          { y: 0.21, rx: 0.07 * wide },
-          { y: 0.3, rx: 0.075 * wide },
-          { y: 0.44, rx: 0.08 * wide },
-          { y: 0.6, rx: 0.092 },
-          { y: 0.74, rx: 0.1 },
-          { y: 0.8, rx: 0.08 },
-          { y: 0.82, rx: 0.03 },
-        ].map((r) => ({ ...r, cx: s * 0.102, v: (r.y - 0.07) / 0.75 })),
-        12,
+        LEGP.map(([y, rx]) => ({
+          y,
+          rx: rx * (fem ? 0.95 : 1),
+          rz: rx * (fem ? 0.95 : 1) * (y > 0.5 ? 1.02 : 0.97),
+          cz: !straight && y > 0.15 && y < 0.42 ? -0.006 : 0,
+          cx: s * 0.102,
+          v: (y - 0.07) / 0.75,
+        })),
+        14,
       ),
       R.leg,
       wLeg(s),
     );
-    const f = s > 0 ? B.footL : B.footR;
-    add(SPH, S('shoe'), f, M([s * 0.102, 0.064, 0.045], [0.082, 0.064, 0.14]));
-    add(SPH, S('sole'), f, M([s * 0.102, 0.024, 0.045], [0.087, 0.024, 0.147]));
-  }
+  anat.shoes(nat, REST[B.footL], S('shoe'), S('sole'), c.hat === 'sombrero_vaquero');
   clothes(add, c);
   if (c.shirt === 'blusa_tipica')
     add(
@@ -438,71 +481,9 @@ function clothes(add: Add, c: AvatarConfig) {
   }
 }
 
-function hair(add: Add, c: AvatarConfig) {
-  const h = c.hair,
-    hat = c.hat !== 'sin_sombrero' && c.hat !== 'corona_carnaval' && c.hat !== 'flores_pelo',
-    HS = S('hair');
-  if (h === 'calvo') return;
-  const cap = new THREE.SphereGeometry(1, 20, 10, 0, Math.PI * 2, 0, 1.68);
-  add(cap, HS, B.head, M([0, HC[1] + 0.02, -0.012], [0.303, 0.286, 0.293], [-0.5, 0, 0]));
-  const at = (d: V3, k: number): V3 => [d[0] * HR[0] * k, HC[1] + d[1] * HR[1] * k, d[2] * HR[2] * k];
-  if (h === 'pelo_corto') {
-    if (!hat) {
-      add(SPH_LO, HS, B.head, M([-0.09, 1.672, 0.15], [0.13, 0.05, 0.1], [0.5, 0, 0.25]));
-      add(SPH_LO, HS, B.head, M([0.1, 1.668, 0.14], [0.13, 0.052, 0.1], [0.5, 0, -0.3]));
-      add(SPH_LO, HS, B.head, M([0.02, 1.705, 0.05], [0.16, 0.04, 0.14], [0.2, 0, 0.1]));
-    }
-    for (const s of [-1, 1]) add(SPH_LO, HS, B.head, M([s * 0.272, 1.5, 0.06], [0.03, 0.07, 0.05]));
-  } else if (h === 'pelo_largo') {
-    add(
-      loft(
-        [
-          { y: 0.99, rx: 0.1, rz: 0.03, cz: -0.15 },
-          { y: 1.02, rx: 0.17, rz: 0.06, cz: -0.15 },
-          { y: 1.1, rx: 0.22, rz: 0.09, cz: -0.145 },
-          { y: 1.22, rx: 0.26, rz: 0.14, cz: -0.12 },
-          { y: 1.34, rx: 0.3, rz: 0.2, cz: -0.09 },
-          { y: 1.46, rx: 0.308, rz: 0.25, cz: -0.06 },
-          { y: 1.6, rx: 0.26, rz: 0.2, cz: -0.05 },
-        ],
-        16,
-      ),
-      HS,
-      wHang,
-    );
-    for (const s of [-1, 1]) add(SPH_LO, HS, wHang, M([s * 0.268, 1.36, 0.07], [0.048, 0.19, 0.075], [0.1, 0, 0]));
-    if (!hat) add(SPH_LO, HS, B.head, M([0, 1.69, 0.1], [0.2, 0.05, 0.14], [0.45, 0, 0]));
-  } else if (h === 'pelo_rizado') {
-    for (const d of scalp(34, 5, hat ? 0.45 : 2)) add(SPH_LO, HS, B.head, M(at(d, 1.07), 0.078));
-  } else if (h === 'pelo_afro') {
-    for (const d of scalp(26, 9, hat ? 0.5 : 2)) add(SPH_LO, HS, B.head, M(at(d, 1.02), hat ? 0.115 : 0.155));
-  } else if (h === 'pelo_coleta') {
-    add(new THREE.TorusGeometry(0.045, 0.02, 6, 12), S('red'), B.head, M([0, 1.565, -0.275], 1, [0.9, 0, 0]));
-    add(SPH_LO, HS, B.tail, M([0, 1.52, -0.335], [0.07, 0.085, 0.07]));
-    add(SPH_LO, HS, B.tail, M([0, 1.4, -0.365], [0.066, 0.1, 0.06]));
-    add(SPH_LO, HS, B.tail, M([0, 1.27, -0.36], [0.046, 0.085, 0.044]));
-    if (!hat) add(SPH_LO, HS, B.head, M([0, 1.69, 0.1], [0.2, 0.05, 0.14], [0.45, 0, 0]));
-  } else if (h === 'pelo_trenzas') {
-    for (const s of [-1, 1]) {
-      for (let i = 0; i < 7; i++)
-        add(
-          SPH_LO,
-          HS,
-          wHang,
-          M(
-            [s * (0.282 - i * 0.004), 1.42 - i * 0.068, -0.01 + i * 0.016 + (i % 2 ? 0.014 : -0.014)],
-            [0.05 - i * 0.003, 0.055, 0.05 - i * 0.003],
-          ),
-        );
-      add(SPH_LO, S('red'), wHang, M([s * 0.256, 0.95, 0.1], [0.036, 0.022, 0.036]));
-      add(SPH_LO, HS, wHang, M([s * 0.256, 0.905, 0.1], [0.03, 0.045, 0.03]));
-    }
-  }
-}
-
 function hats(add: Add, c: AvatarConfig) {
-  const lift = c.hair === 'pelo_afro' ? 0.045 : c.hair === 'pelo_rizado' ? 0.02 : 0,
-    k = c.hair === 'pelo_afro' ? 1.1 : 1;
+  const lift = c.hair === 'pelo_afro' ? 0.03 : c.hair === 'pelo_rizado' ? 0.012 : 0,
+    k = c.hair === 'pelo_afro' ? 1.06 : 1;
   const G = new THREE.Matrix4()
     .makeTranslation(0, lift + 1.45 * (1 - k), 0)
     .multiply(new THREE.Matrix4().makeScale(k, k, k));
@@ -1010,25 +991,94 @@ export const styleKey = (c: AvatarConfig) =>
     c.hat,
     c.acc,
     cut(c),
-    c.pants === 'pantalon_manta' || (cut(c) === 'pants' && c.pants.startsWith('falda')) ? c.pants : '',
+    c.pants === 'pantalon_manta' || c.pants === 'short_futbol' || (cut(c) === 'pants' && c.pants.startsWith('falda'))
+      ? c.pants
+      : '',
     c.shirt === 'blusa_tipica' ? 'b' : '',
-    c.face === 'cara_lentes' ? 'l' : '',
+    c.face === 'cara_lentes' || c.face === 'cara_bigote' || c.face === 'cara_feliz' || c.face === 'cara_guino'
+      ? c.face
+      : '',
   ].join('|');
+
+// --- de las medidas viejas a las nuevas: cada hueso escala su pieza alrededor de su articulación y la lleva a su
+// sitio nuevo; los sombreros (familia de la cabeza) se ajustan al cráneo nuevo y el ala crece aparte.
+const HAT_Y0 = 1.535,
+  HAT_Y1 = anat.HC[1] + 0.045,
+  HAT: V3 = [0.27, 0.37, 0.34],
+  BRIM = 0.6;
+function mapPoint(b: number, x: number, y: number, z: number, o: number[]) {
+  const s = SC[b];
+  if (s) {
+    const q = OLD[b],
+      n = REST[b];
+    o[0] = n[0] + (x - q[0]) * s[0];
+    o[1] = n[1] + (y - q[1]) * s[1];
+    o[2] = n[2] + (z - q[2]) * s[2];
+    return;
+  }
+  const rho = Math.hypot(x / 0.3, z / 0.31);
+  let hx = x * HAT[0],
+    hz = z * HAT[2];
+  if (rho > 1) {
+    const k = 1 / rho;
+    hx = x * k * HAT[0] + x * (1 - k) * BRIM;
+    hz = z * k * HAT[2] + z * (1 - k) * BRIM;
+  }
+  o[0] = hx;
+  o[1] = HAT_Y1 + (y - HAT_Y0) * HAT[1];
+  o[2] = anat.HC[2] + 0.004 + hz;
+}
+const _o = [0, 0, 0];
+const warp: Warp = (p, n, ws) => {
+  let x = 0,
+    y = 0,
+    z = 0,
+    W = 0,
+    best = 0,
+    bw = -1;
+  for (let k = 0; k < ws.length; k += 2) {
+    const w = ws[k + 1];
+    if (!w) continue;
+    mapPoint(ws[k], p.x, p.y, p.z, _o);
+    x += _o[0] * w;
+    y += _o[1] * w;
+    z += _o[2] * w;
+    W += w;
+    if (w > bw) {
+      bw = w;
+      best = ws[k];
+    }
+  }
+  p.set(x / W, y / W, z / W);
+  const s = SC[best] ?? HAT;
+  n.set(n.x / s[0], n.y / s[1], n.z / s[2]).normalize();
+};
+REST[B.lid] = anat.lidPivot(false);
+REST[B.tail] = anat.TAIL;
+
 const cache = new Map<string, THREE.BufferGeometry>();
-/** geometría con huesos del avatar, cacheada por estilo (cabello, sombrero, accesorio, tipo de prenda) */
+/** geometría con huesos del avatar, cacheada por estilo (cabello, sombrero, accesorio, tipo de prenda, cara) */
 export function avatarGeometry(c: AvatarConfig): THREE.BufferGeometry {
   const key = styleKey(c);
   let g = cache.get(key);
   if (g) return g;
-  const b = new SkinBuilder(),
-    add: Add = (geo, rect, w, m) => {
+  const b = new SkinBuilder();
+  b.warp = warp;
+  const add: Add = (geo, rect, w, m) => {
       b.add(geo, rect, w, m);
+    },
+    nat: AddN = (geo, rect, w, m) => {
+      b.add(geo, rect, w, m, null);
     };
-  body(add, c);
-  hair(add, c);
+  body(add, c, nat);
+  anat.hair(nat, c.hair, c.body === 'm', hatOnHair(c), S('hair'), S('red'));
   hats(add, c);
   accessory(add, c);
   g = b.build();
+  g.computeBoundingSphere();
   cache.set(key, g);
   return g;
 }
+/** el sombrero aplasta el pelo de arriba */
+const hatOnHair = (c: AvatarConfig) =>
+  c.hat !== 'sin_sombrero' && c.hat !== 'corona_carnaval' && c.hat !== 'flores_pelo' && c.hat !== 'tocado_plumas';
