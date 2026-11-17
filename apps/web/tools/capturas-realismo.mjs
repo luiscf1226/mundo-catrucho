@@ -21,6 +21,8 @@ const VISTAS = [
   ['valle', 'valle', 15.5, [0, 72, Math.PI], { pos: [-7, 6, 56], target: [2, 2.5, 90], fov: 55 }],
   ['olancho-noche', 'olancho', 21, [0, 62, Math.PI], { pos: [9, 5, 47], target: [-3, 2.5, 80], fov: 55 }],
   ['yoro-lluvia', 'yoro', 15.5, [0, 62, Math.PI], { pos: [-7, 6, 46], target: [2, 2.5, 80], fov: 55 }],
+  // contraluz al atardecer (resplandor del sol y bruma)
+  ['atardecer', null, 17.7, [-49, 121, 0], { pos: [-40, 6, 125], target: [-90, 6, 118], fov: 55 }],
   // agua: el Río Plátano en Gracias a Dios y el mar de Roatán
   ['rio', 'graciasadios', 15.5, [-8, 30, -1.2], { pos: [-4, 5, 40], target: [16, 0, 18], fov: 55 }],
   ['mar', 'islas', 15.5, [0, -12, Math.PI], { pos: [10, 5, -8], target: [-6, 0, -42], fov: 55 }],

@@ -246,6 +246,8 @@ function crear(nivel: Nivel) {
     size: new THREE.Vector2(),
     w: 0,
     h: 0,
+    /** llamadas de dibujo del posproceso en el último cuadro (las pruebas las leen en __mc.postPasadas) */
+    pasadas: 0,
     dispose() {
       for (const r of [escena, aoA, aoB, pre, ...down, ...up]) r.dispose();
       depth.dispose();
@@ -259,13 +261,20 @@ function Post({ nivel }: { nivel: Nivel }) {
   const gl = useThree((s) => s.gl);
   const P = useMemo(() => crear(nivel), [nivel]);
   useEffect(() => {
-    const prev = gl.info.autoReset;
+    const prev = gl.info.autoReset,
+      mc = (window as Window & { __mc?: { post?: Nivel; postPasadas?: () => number } }).__mc;
     gl.info.autoReset = false;
+    // para las pruebas: qué posproceso está activo y cuántas llamadas suma
+    if (mc) {
+      mc.post = nivel;
+      mc.postPasadas = () => P.pasadas;
+    }
     return () => {
       gl.info.autoReset = prev;
+      if (mc) mc.post = mc.postPasadas = undefined;
       P.dispose();
     };
-  }, [gl, P]);
+  }, [gl, P, nivel]);
 
   useFrame((st) => {
     const cam = st.camera as THREE.PerspectiveCamera;
@@ -289,6 +298,7 @@ function Post({ nivel }: { nivel: Nivel }) {
     // 1. la escena
     gl.setRenderTarget(P.escena);
     gl.render(st.scene, cam);
+    const c0 = gl.info.render.calls;
     const draw = (m: THREE.ShaderMaterial, target: THREE.WebGLRenderTarget | null) => {
       P.quad.material = m;
       gl.setRenderTarget(target);
@@ -338,6 +348,7 @@ function Post({ nivel }: { nivel: Nivel }) {
     c.uAspect.value = W / H;
     c.uBloomK.value = 0.35 + 0.35 * noche;
     draw(P.comp, prevRT);
+    P.pasadas = gl.info.render.calls - c0;
   }, 1);
   return null;
 }
