@@ -92,6 +92,12 @@ const choluteca = kit(
   (d) => [120 + r(d * 120), 360, 600],
   () => 75,
 );
+// Ocotepeque
+/** Ocotepeque: metas y reloj de minigames/ocotepeque/comun.tsx. */
+const ocotepeque = kit(
+  (d) => [120 + r(d * 120), 360, 600],
+  () => 75,
+);
 const islas = (a: number, b: number, c: number, k: number, base: number, extra: number) =>
   kit(lineal(a, b, c, k), (d) => base + r(d * extra));
 /** Comayagua: `metasLineales` y `reloj` de apps/web/src/game/minigames/comayagua/comun.tsx */
@@ -387,6 +393,15 @@ export const TOPES: Record<string, TopeMotor> = {
     puntosPorSegundo: 1,
     ganarPideMeta: true,
   },
+  // Ocotepeque
+  'ocotepeque.trifinio': conRitmo(ocotepeque, 40),
+  'ocotepeque.archivoagua': conRitmo(ocotepeque, 40),
+  'ocotepeque.boveda': conRitmo(ocotepeque, 40),
+  'ocotepeque.mercadomadruga': conRitmo(ocotepeque, 40),
+  'ocotepeque.gotasviento': conRitmo(ocotepeque, 40),
+  'ocotepeque.reservas': conRitmo(ocotepeque, 40),
+  'ocotepeque.moras': conRitmo(ocotepeque, 40),
+  'ocotepeque.rotulos': conRitmo(ocotepeque, 40),
 };
 
 export interface Resultado {

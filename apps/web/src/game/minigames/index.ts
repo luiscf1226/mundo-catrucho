@@ -138,6 +138,15 @@ const MOTORS = {
   cocina: motor(() => import('./Cocina').then((m) => ({ ...m, default: m.Cocina }))),
   trivia: motor(() => import('./Trivia').then((m) => ({ ...m, default: m.Trivia }))),
   manejo: motor(() => import('./Manejo').then((m) => ({ ...m, default: m.Manejo }))),
+  // Ocotepeque
+  'ocotepeque.trifinio': motor(() => import('./ocotepeque/Trifinio').then((m) => ({ ...m, default: m.Trifinio }))),
+  'ocotepeque.archivoagua': motor(() => import('./ocotepeque/Archivo').then((m) => ({ ...m, default: m.Archivo }))),
+  'ocotepeque.boveda': motor(() => import('./ocotepeque/Boveda').then((m) => ({ ...m, default: m.Boveda }))),
+  'ocotepeque.mercadomadruga': motor(() => import('./ocotepeque/Mercado').then((m) => ({ ...m, default: m.Mercado }))),
+  'ocotepeque.gotasviento': motor(() => import('./ocotepeque/Brujula').then((m) => ({ ...m, default: m.Brujula }))),
+  'ocotepeque.reservas': motor(() => import('./ocotepeque/Reservas').then((m) => ({ ...m, default: m.Reservas }))),
+  'ocotepeque.moras': motor(() => import('./ocotepeque/Cesta').then((m) => ({ ...m, default: m.Cesta }))),
+  'ocotepeque.rotulos': motor(() => import('./ocotepeque/Rotulos').then((m) => ({ ...m, default: m.Rotulos }))),
 } satisfies Record<MinigameId, ReturnType<typeof motor>>;
 export const MINIGAME_SCENES = MOTORS;
 export function motorGuide(id: MinigameId) {

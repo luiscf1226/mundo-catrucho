@@ -1105,4 +1105,116 @@
     "gold": 600
   }
 }
+,
+{
+  "id": "ocotepeque.trifinio",
+  "name": "Tres vertientes, una cumbre",
+  "place": "Ocotepeque",
+  "icon": "🌄",
+  "desc": "Ensamblá tres cuencas que comparten cumbre con piezas de relieve acopladas. Ganás manteniendo conectadas las tres vertientes; mover una divisoria obliga a reajustar otras dos.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+}
+,
+{
+  "id": "ocotepeque.archivoagua",
+  "name": "Rótulos de la memoria de Antigua",
+  "place": "Ocotepeque",
+  "icon": "🏚️",
+  "desc": "Recuperá letras tapadas en reproducciones ficticias de rótulos antiguos alternando filtros de tinta y presión de calco digital. Ganás una leyenda legible sin borrar los trazos débiles; un filtro fuerte elimina también partes originales.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+}
+,
+{
+  "id": "ocotepeque.boveda",
+  "name": "Bóvedas de Belén Gualcho",
+  "place": "Ocotepeque",
+  "icon": "🌀",
+  "desc": "Montá arcos con dovelas y contrafuertes que reciben fuerzas laterales en una maqueta. Ganás al retirar la cimbra sin colapso; un apoyo desbalanceado abre la bóveda.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+}
+,
+{
+  "id": "ocotepeque.mercadomadruga",
+  "name": "Lotes del mercado de Belén",
+  "place": "Ocotepeque",
+  "icon": "🧺",
+  "desc": "Negociá trueques entre lotes indivisibles a precios revelados por rondas de madrugada. Ganás cubriendo la lista con todos los sacos cerrados; abrir un lote lo excluye del trueque.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+}
+,
+{
+  "id": "ocotepeque.gotasviento",
+  "name": "Brújula de Güisayote",
+  "place": "Ocotepeque",
+  "icon": "🌫️",
+  "desc": "Observá el lado húmedo de troncos virtuales y deducí viento constante para orientar desvíos. Ganás enlazando marcas bajo niebla; confundir sotavento con barlovento invierte tu orientación.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+}
+,
+{
+  "id": "ocotepeque.reservas",
+  "name": "Asientos de frontera",
+  "place": "Ocotepeque",
+  "icon": "🚌",
+  "desc": "Bloqueá y liberá reservas numeradas de un bus según segmentos de viaje superpuestos. Ganás sentando a quienes suben después; vender una plaza ocupada en el próximo tramo obliga a devolver el boleto.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+}
+,
+{
+  "id": "ocotepeque.moras",
+  "name": "Presión de la cesta",
+  "place": "Ocotepeque",
+  "icon": "🫐",
+  "desc": "Distribuí bayas virtuales en celdas que transmiten presión hacia abajo. Ganás sin superar el umbral de ninguna capa; una fruta nueva puede aplastar otra dos niveles más abajo.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+}
+,
+{
+  "id": "ocotepeque.rotulos",
+  "name": "Tres salidas fronterizas",
+  "place": "Ocotepeque",
+  "icon": "🪧",
+  "desc": "Conectá indicaciones de carretera con destinos y países en un tablero de rutas. Ganás detectando el rótulo que contradice dos referencias; elegirlo te regresa al nodo de control.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+}
 ]

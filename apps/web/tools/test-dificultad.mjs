@@ -27,7 +27,7 @@ const JUEGO = {
   manejo: 'franciscomorazan.rapidito',
   feria: 'lapaz.feriamarcala',
   pulperia: 'franciscomorazan.pulperia',
-  futbol: 'ocotepeque.tresfronteras',
+  futbol: 'yoro.riberenos',
   exploradores: 'lapaz.pintadas',
 };
 
