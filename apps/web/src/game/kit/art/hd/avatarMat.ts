@@ -131,6 +131,7 @@ uniform vec3 uSky;
 uniform float uCurl;
 uniform vec3 uHair;
 varying vec3 vObjP;
+varying float vAO;
 float mcCls;
 float mcSkin;
 float mcHairK;
@@ -150,7 +151,7 @@ void RE_Direct_Avatar( const in IncidentLight directLight, const in vec3 geometr
   float ndl = dot( geometryNormal, directLight.direction );
   if ( mcSkin > 0.0 ) {
     float wrap = max( 0.0, ( ndl + 0.5 ) / 1.5 ) - saturate( ndl );
-    reflectedLight.directDiffuse += directLight.color * material.diffuseColor * vec3( 1.0, 0.38, 0.24 ) * wrap * 0.75 * mcSkin;
+    reflectedLight.directDiffuse += directLight.color * material.diffuseColor * vec3( 1.0, 0.36, 0.22 ) * wrap * 0.5 * mcSkin;
   }
   if ( mcHairK > 0.0 ) {
     vec3 up = normalize( ( viewMatrix * vec4( 0.0, 1.0, 0.0, 0.0 ) ).xyz );
@@ -222,8 +223,8 @@ export function avatarMaterial(cfg: AvatarConfig) {
     sh.uniforms.uCurl = uCurl;
     sh.uniforms.uHair = uHair;
     sh.vertexShader = sh.vertexShader
-      .replace('#include <common>', `#include <common>\nvarying vec3 vObjP;`)
-      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvObjP = position;');
+      .replace('#include <common>', `#include <common>\nvarying vec3 vObjP;\nattribute float mcAO;\nvarying float vAO;`)
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvObjP = position;\nvAO = mcAO;');
     sh.fragmentShader = sh.fragmentShader
       .replace('#include <common>', `#include <common>\n${FRAG_PARS}`)
       .replace('#include <lights_physical_pars_fragment>', `#include <lights_physical_pars_fragment>\n${DIRECT}`)
@@ -231,7 +232,9 @@ export function avatarMaterial(cfg: AvatarConfig) {
       .replace(
         '#include <lights_fragment_end>',
         `#include <lights_fragment_end>
-        reflectedLight.indirectDiffuse *= mix( vec3( 1.0 ), vec3( 1.1, 0.96, 0.92 ), mcSkin );`,
+        reflectedLight.indirectDiffuse *= mix( vec3( 1.0 ), vec3( 1.05, 0.99, 0.97 ), mcSkin ) * vAO;
+        reflectedLight.indirectSpecular *= vAO;
+        reflectedLight.directDiffuse *= mix( 1.0, vAO, 0.45 );`,
       )
       .replace(
         '#include <opaque_fragment>',
@@ -240,7 +243,7 @@ export function avatarMaterial(cfg: AvatarConfig) {
         #include <opaque_fragment>`,
       );
   };
-  m.customProgramCacheKey = () => 'hd-avatar-2';
+  m.customProgramCacheKey = () => 'hd-avatar-3';
   mats.set(key, m);
   return m;
 }

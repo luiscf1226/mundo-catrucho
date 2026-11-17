@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import apodos from '../../../../../shared/data/apodos.json';
 import type { AvatarConfig } from '../../../../core/types';
-import { EYE_RECT } from './avatarAnat';
+import { EYE_RECT, hairline, lineAt } from './avatarAnat';
 import { cut, R, SWATCH, type SwatchName, swatchCell } from './avatarGeo';
 import { AH, AW, type Rect } from './skin';
 import { rng } from './tex';
@@ -224,20 +224,47 @@ function face(c: Ctx, cfg: AvatarConfig) {
         rad = 0.55 + r() * 0.45,
         sx = Math.cos(a) * rad * 0.8,
         sy = -0.38 - Math.sin(a) * rad * 0.6;
-      if (sy > -0.42 && Math.abs(sx) < 0.3) continue;
-      if (Math.abs(sx) < 0.3 && sy < -0.47 && sy > -0.64) continue;
-      c.globalAlpha = 0.05 + r() * 0.07 * (L > 0.6 ? 1 : 0.6);
+      if (sy > -0.5 && Math.abs(sx) < 0.34) continue;
+      if (Math.abs(sx) < 0.3 && sy < -0.47 && sy > -0.66) continue;
+      c.globalAlpha = 0.035 + r() * 0.05 * (L > 0.6 ? 1 : 0.6);
       c.fillRect(X(sx), Y(sy), 1.4, 1.4);
     }
     c.globalAlpha = 1;
+  }
+  // nacimiento del pelo: la piel toma el color del pelo justo donde empieza (pelitos finos), así el borde no se ve cortado
+  const line = hairline(cfg.hair);
+  if (line) {
+    const t = c.getTransform(),
+      img = c.getImageData(t.e, t.f, 256, 256),
+      d = img.data,
+      hc = Number.parseInt(cfg.hairColor.slice(1), 16),
+      hr = hc >> 16,
+      hg = (hc >> 8) & 255,
+      hb = hc & 255,
+      q = rng(5);
+    for (let y = 0; y < 256; y++)
+      for (let x = 0; x < 256; x++) {
+        const sx = (x - 128) / 128,
+          sy = (128 - y) / 128,
+          r2 = sx * sx + sy * sy;
+        if (r2 >= 1) continue;
+        const m = sy - lineAt(line, Math.atan2(sx, Math.sqrt(1 - r2)));
+        if (m < -0.03) continue;
+        const k = Math.min(1, Math.max(0, (m + 0.03) / 0.09)) ** 1.5 * (0.55 + 0.45 * q()) * 0.92,
+          i = (y * 256 + x) * 4;
+        d[i] += (hr - d[i]) * k;
+        d[i + 1] += (hg - d[i + 1]) * k;
+        d[i + 2] += (hb - d[i + 2]) * k;
+      }
+    c.putImageData(img, t.e, t.f);
   }
   // nariz: luz en el tabique, sombra en las aletas y las fosas
   blob(X(0), Y(-0.1), 6, 22, light(skin, 0.5), 0.18);
   blob(X(0), Y(-0.25), 7, 6, light(skin, 0.5), 0.22);
   for (const s of [-1, 1]) {
-    blob(X(s * 0.15), Y(-0.31), 7, 7, shadow, 0.5);
-    c.fillStyle = mix(skin, '#1a0a06', 0.7);
-    c.globalAlpha = 0.85;
+    blob(X(s * 0.15), Y(-0.31), 7, 7, shadow, 0.3);
+    c.fillStyle = mix(skin, '#1a0a06', 0.6);
+    c.globalAlpha = 0.7;
     ell(c, X(s * 0.085), Y(-0.345), 4.2, 2.2, s * 0.35);
     c.fill();
     c.globalAlpha = 1;
@@ -301,6 +328,23 @@ function face(c: Ctx, cfg: AvatarConfig) {
     }
   }
   c.globalAlpha = 1;
+  if (f === 'cara_bigote') {
+    // bigote: pelitos que salen del centro hacia las comisuras
+    const q = rng(13);
+    c.strokeStyle = mix(cfg.hairColor, '#000000', 0.2);
+    c.lineCap = 'round';
+    for (let i = 0; i < 260; i++) {
+      const sx = (q() - 0.5) * 0.66,
+        sy = -0.4 - 0.22 * (sx / 0.33) ** 2 - q() * 0.06;
+      c.globalAlpha = 0.45 + q() * 0.4;
+      c.lineWidth = 0.8 + q() * 0.7;
+      c.beginPath();
+      c.moveTo(X(sx), Y(sy));
+      c.lineTo(X(sx) + Math.sign(sx) * (2 + q() * 2), Y(sy) + 3 + q() * 2);
+      c.stroke();
+    }
+    c.globalAlpha = 1;
+  }
   if (f === 'cara_pecas') {
     const q = rng(77);
     c.fillStyle = mix(skin, '#6b2f14', 0.55);
@@ -2031,8 +2075,13 @@ function ormFor(cfg: AvatarConfig, cv: HTMLCanvasElement): THREE.DataTexture {
         metal = 0;
       if (inR(EYE_RECT, X, Y)) cls = CLS.ojo;
       else if (inR(R.face, X, Y)) {
+        // zona T (frente, nariz) y labios brillan un poco más
+        const sx = (X - 128) / 128,
+          sy = (128 - Y) / 128,
+          tz = Math.abs(sx) < 0.16 && sy > -0.35 && sy < 0.65 ? 1 : sy > 0.3 && sy < 0.65 ? 0.6 : 0,
+          lips = Math.abs(sx) < 0.25 && sy < -0.46 && sy > -0.64 ? 1 : 0;
         cls = CLS.piel;
-        rough = 0.48;
+        rough = 0.52 - 0.1 * tz - 0.14 * lips;
       } else {
         const dr = px[i] / 255 - sk.r,
           dg = px[i + 1] / 255 - sk.g,

@@ -60,25 +60,25 @@ const OLD: V3[] = [
 /** escala de cada hueso de las medidas viejas a las nuevas (ancho, largo, fondo); null = familia de la cabeza */
 const SC: (V3 | null)[] = [
   [1, 1, 1],
-  [0.8, 1.18, 0.76],
-  [0.77, 1.3, 0.76],
+  [0.83, 1.18, 0.78],
+  [0.79, 1.3, 0.78],
   null,
   [0.66, 1.12, 0.66],
   [0.66, 1.26, 0.66],
   [0.66, 1.12, 0.66],
   [0.66, 1.26, 0.66],
-  [0.82, 1.27, 0.82],
-  [0.78, 1.152, 0.78],
+  [0.86, 1.27, 0.86],
+  [0.82, 1.152, 0.82],
   [0.82, 1, 0.9],
-  [0.82, 1.27, 0.82],
-  [0.78, 1.152, 0.78],
+  [0.86, 1.27, 0.86],
+  [0.82, 1.152, 0.82],
   [0.82, 1, 0.9],
   null,
   null,
-  [0.77, 1.3, 0.76],
-  [0.77, 1.3, 0.76],
-  [0.77, 1.3, 0.76],
-  [0.8, 1.18, 0.76],
+  [0.79, 1.3, 0.78],
+  [0.79, 1.3, 0.78],
+  [0.79, 1.3, 0.78],
+  [0.83, 1.18, 0.78],
 ];
 /** posición de reposo de cada hueso (medidas reales, ~1,72 m a la coronilla, 7,5 cabezas de alto) */
 export const REST: V3[] = OLD.map((): V3 => [0, 0, 0]);
@@ -482,7 +482,9 @@ function clothes(add: Add, c: AvatarConfig) {
 }
 
 function hats(add: Add, c: AvatarConfig) {
-  const lift = c.hair === 'pelo_afro' ? 0.03 : c.hair === 'pelo_rizado' ? 0.012 : 0,
+  const lift =
+      (c.hair === 'pelo_afro' ? 0.03 : c.hair === 'pelo_rizado' ? 0.012 : 0) +
+      (c.hat === 'casco_explorador' ? 0.04 : 0),
     k = c.hair === 'pelo_afro' ? 1.06 : 1;
   const G = new THREE.Matrix4()
     .makeTranslation(0, lift + 1.45 * (1 - k), 0)
@@ -526,7 +528,7 @@ function hats(add: Add, c: AvatarConfig) {
         ),
         S('straw'),
         H,
-        M([0, 0.15, -0.02], 1, [-0.09, 0, 0]),
+        M([0, 0.02, -0.02], 1, [-0.09, 0, 0]),
       );
       put(
         lathe(
@@ -540,7 +542,7 @@ function hats(add: Add, c: AvatarConfig) {
         ),
         S('black'),
         H,
-        M([0, 0.15, -0.02], 1, [-0.09, 0, 0]),
+        M([0, 0.02, -0.02], 1, [-0.09, 0, 0]),
       );
       break;
     case 'sombrero_vaquero': {
@@ -569,7 +571,7 @@ function hats(add: Add, c: AvatarConfig) {
         } else if (P.getY(i) > 1.7) P.setX(i, x * 0.86);
       }
       g.computeVertexNormals();
-      put(g, S('leather'), H, M([0, 0.14, -0.02], 1, [-0.08, 0, 0]));
+      put(g, S('leather'), H, M([0, 0.02, -0.02], 1, [-0.08, 0, 0]));
       put(
         lathe(
           [
@@ -582,7 +584,7 @@ function hats(add: Add, c: AvatarConfig) {
         ),
         S('black'),
         H,
-        M([0, 0.14, -0.02], 1, [-0.08, 0, 0]),
+        M([0, 0.02, -0.02], 1, [-0.08, 0, 0]),
       );
       break;
     }
@@ -998,6 +1000,7 @@ export const styleKey = (c: AvatarConfig) =>
     c.face === 'cara_lentes' || c.face === 'cara_bigote' || c.face === 'cara_feliz' || c.face === 'cara_guino'
       ? c.face
       : '',
+    c.skin,
   ].join('|');
 
 // --- de las medidas viejas a las nuevas: cada hueso escala su pieza alrededor de su articulación y la lleva a su
@@ -1064,6 +1067,10 @@ export function avatarGeometry(c: AvatarConfig): THREE.BufferGeometry {
   if (g) return g;
   const b = new SkinBuilder();
   b.warp = warp;
+  // los rasgos de la cara salen de la piel y el cuerpo: la misma persona aunque cambie de ropa o peinado
+  let h = 2166136261;
+  for (const ch of `${c.skin}|${c.body ?? 'h'}`) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
+  anat.setFace(c.body === 'm', h);
   const add: Add = (geo, rect, w, m) => {
       b.add(geo, rect, w, m);
     },
@@ -1075,9 +1082,64 @@ export function avatarGeometry(c: AvatarConfig): THREE.BufferGeometry {
   hats(add, c);
   accessory(add, c);
   g = b.build();
+  bakeAO(g, c.body === 'm');
   g.computeBoundingSphere();
   cache.set(key, g);
   return g;
+}
+/**
+ * Oclusión ambiental horneada por vértice (atributo `mcAO`): el cuerpo se aproxima con esferas y cada vértice se
+ * oscurece según cuánto de su cielo tapan las que tiene enfrente (axilas, entre las piernas, bajo el mentón, el forro
+ * de la falda). En pose de reposo; con la animación queda aproximada, que es lo que se busca: barato y creíble.
+ */
+function bakeAO(g: THREE.BufferGeometry, fem: boolean) {
+  const h = anat.HC,
+    w = fem ? 0.94 : 1,
+    S: [number, number, number, number][] = [
+      [0, h[1], h[2], 0.1],
+      [0, 1.47, -0.005, 0.05],
+      [0, 1.28, 0, 0.14 * w],
+      [0, 1.1, 0, 0.13 * w],
+      [0, 0.93, 0, 0.14],
+    ];
+  for (const s of [-1, 1]) {
+    const x = REST[s > 0 ? B.armL : B.armR][0];
+    S.push(
+      [x, 1.22, 0, 0.045],
+      [x, 1.1, 0, 0.04],
+      [x, 0.96, 0, 0.04],
+      [x, 0.88, 0.005, 0.035],
+      [x, 0.76, 0.01, 0.035],
+      [s * 0.085, 0.8, 0, 0.08],
+      [s * 0.085, 0.62, 0, 0.07],
+      [s * 0.085, 0.38, 0, 0.055],
+      [s * 0.085, 0.2, 0, 0.045],
+      [s * 0.085, 0.04, 0.06, 0.05],
+    );
+  }
+  const P = g.attributes.position,
+    N = g.attributes.normal,
+    ao = new Float32Array(P.count);
+  for (let i = 0; i < P.count; i++) {
+    const px = P.getX(i),
+      py = P.getY(i),
+      pz = P.getZ(i),
+      nx = N.getX(i),
+      ny = N.getY(i),
+      nz = N.getZ(i);
+    let occ = 0;
+    for (const [cx, cy, cz, r] of S) {
+      const dx = cx - px,
+        dy = cy - py,
+        dz = cz - pz,
+        d = Math.hypot(dx, dy, dz);
+      if (d < r * 1.02) continue;
+      const k = (nx * dx + ny * dy + nz * dz) / d;
+      if (k > 0) occ += k * (r / d) ** 2;
+    }
+    ao[i] = 1 - Math.min(0.65, occ * 0.9);
+  }
+  g.setAttribute('mcAO', new THREE.BufferAttribute(ao, 1));
 }
 /** el sombrero aplasta el pelo de arriba */
 const hatOnHair = (c: AvatarConfig) =>

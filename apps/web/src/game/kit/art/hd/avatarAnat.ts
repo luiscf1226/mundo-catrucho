@@ -38,41 +38,60 @@ const M = (p: V3, s: V3 | number = 1, r: V3 = [0, 0, 0]) => {
 let SPH: THREE.SphereGeometry | null = null;
 const sph = () => (SPH ??= new THREE.SphereGeometry(1, 10, 7));
 
-/** relieve de la cara (cm de más o de menos hacia adelante) en coordenadas de la esfera unitaria */
-function relief(sx: number, sy: number, fem: boolean) {
+/** rasgos de la persona que se está construyendo: cada piel y cuerpo da una cara un poco distinta */
+const F = { nose: 1, noseW: 1, jaw: 0.5, chin: 1, lips: 1, cheek: 1, brow: 1 };
+/** elige los rasgos (semilla estable) antes de construir cabeza, pelo y adornos */
+export function setFace(fem: boolean, seed: number) {
+  let a = seed >>> 0;
+  const r = () => {
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  F.nose = (fem ? 0.78 : 0.95) + r() * 0.25;
+  F.noseW = (fem ? 0.85 : 0.95) + r() * 0.35;
+  F.jaw = fem ? r() * 0.4 : 0.35 + r() * 0.65;
+  F.chin = 0.75 + r() * 0.5;
+  F.lips = (fem ? 1.15 : 0.85) + r() * 0.4;
+  F.cheek = 0.7 + r() * 0.7;
+  F.brow = fem ? 0.5 : 0.8 + r() * 0.5;
+}
+/** relieve de la cara (m hacia adelante) en coordenadas de la esfera unitaria */
+function relief(sx: number, sy: number) {
   const ax = Math.abs(sx);
   let d = -0.0105 * g2(ax, sy, EYE.x, EYE.y, 0.2, 0.1); // cuencas de los ojos
-  d += (fem ? 0.0022 : 0.0042) * g2(ax, sy, 0.36, 0.27, 0.22, 0.065); // arco de las cejas
+  d += 0.0042 * F.brow * g2(ax, sy, 0.36, 0.27, 0.22, 0.065); // arco de las cejas
   d += 0.003 * g2(sx, sy, 0, 0.24, 0.1, 0.08); // entrecejo
   // nariz: tabique que crece hasta la punta y se corta abajo
   const np = sm(0.18, -0.27, sy) * (1 - sm(-0.29, -0.38, sy)),
-    nw = 0.055 + 0.05 * sm(0.1, -0.3, sy);
-  d += (fem ? 0.02 : 0.024) * np * Math.exp(-0.5 * (sx / nw) ** 2);
-  d += 0.004 * g2(sx, sy, 0, -0.26, 0.08, 0.06); // punta
-  d += 0.0065 * g2(ax, sy, 0.11, -0.3, 0.055, 0.05); // aletas
-  d += 0.004 * g2(ax, sy, 0.5, -0.08, 0.16, 0.12); // pómulos
+    nw = (0.05 + 0.05 * sm(0.1, -0.3, sy)) * F.noseW;
+  d += 0.022 * F.nose * np * Math.exp(-0.5 * (sx / nw) ** 2);
+  d += 0.004 * F.noseW * g2(sx, sy, 0, -0.26, 0.08 * F.noseW, 0.06); // punta
+  d += 0.0065 * g2(ax, sy, 0.11 * F.noseW, -0.3, 0.055, 0.05); // aletas
+  d += 0.004 * F.cheek * g2(ax, sy, 0.5, -0.08, 0.16, 0.12); // pómulos
   d -= 0.0012 * g2(sx, sy, 0, -0.42, 0.03, 0.04); // surco del labio
-  d += 0.005 * g2(sx, sy, 0, -0.49, 0.2, 0.05); // labio de arriba
-  d += (fem ? 0.0064 : 0.0055) * g2(sx, sy, 0, -0.6, 0.16, 0.045); // labio de abajo
-  d -= 0.003 * g2(sx, sy, 0, -0.545, 0.22, 0.025); // línea de la boca
-  d -= 0.0025 * g2(ax, sy, 0.23, -0.55, 0.04, 0.04); // comisuras
+  d += 0.0048 * F.lips * g2(sx, sy, 0, -0.49, 0.22, 0.05); // labio de arriba
+  d += 0.0055 * F.lips * g2(sx, sy, 0, -0.6, 0.18, 0.045); // labio de abajo
+  d -= 0.003 * g2(sx, sy, 0, -0.545, 0.25, 0.025); // línea de la boca
+  d -= 0.0025 * g2(ax, sy, 0.27, -0.55, 0.04, 0.04); // comisuras
   d -= 0.002 * g2(sx, sy, 0, -0.69, 0.14, 0.03); // hoyo bajo el labio
-  d += (fem ? 0.005 : 0.007) * g2(sx, sy, 0, -0.8, 0.2, 0.1); // mentón
+  d += 0.006 * F.chin * g2(sx, sy, 0, -0.8, 0.22, 0.1); // mentón
   return d;
 }
 /** punto de la piel de la cabeza (relativo a HC) para la dirección (sx, sy, sz) de la esfera unitaria */
-export function headPoint(sx: number, sy: number, sz: number, fem: boolean, feat = 1, out = new THREE.Vector3()) {
+export function headPoint(sx: number, sy: number, sz: number, _fem: boolean, feat = 1, out = new THREE.Vector3()) {
   const front = sm(-0.2, 0.7, sz);
   let ax = HA[0],
     az = HA[2];
-  ax *= 1 - (fem ? 0.3 : 0.22) * sm(-0.1, -0.95, sy) * (0.45 + 0.55 * front); // mandíbula
+  ax *= 1 - (0.3 - 0.16 * F.jaw) * sm(-0.1, -0.95, sy) * (0.45 + 0.55 * front); // mandíbula
   ax *= 1 - 0.05 * sm(0.15, 0.55, sy) * sm(0.2, 0.8, sz); // sienes
   ax *= 1 + 0.09 * Math.sin(Math.max(0, sy) * Math.PI) * (1 - 0.6 * front); // cráneo ancho arriba
   if (sz < 0) az *= 1.05 - 0.22 * sm(-0.3, -1, sy); // occipital y nuca
-  const y = sy * HA[1] * (sy < 0 ? 1 + 0.07 * sm(0.1, 0.7, sz) : 1 - 0.05 * sm(0.6, 1, sy));
+  const y = sy * HA[1] * (sy < 0 ? 1 + 0.03 * sm(0.1, 0.7, sz) : 1 - 0.05 * sm(0.6, 1, sy));
   let z = sz * az;
   if (sz > 0) z -= az * 0.08 * sz ** 4;
-  if (feat && sz > 0.2) z += relief(sx, sy, fem) * sm(0.2, 0.65, sz) * feat;
+  if (feat && sz > 0.2) z += relief(sx, sy) * sm(0.2, 0.65, sz) * feat;
   return out.set(sx * ax, y, z);
 }
 /** normal aproximada (del elipsoide) para separar pelo y adornos de la piel */
@@ -191,7 +210,7 @@ export function eyes(add: AddN, fem: boolean, closed: [boolean, boolean], lid: R
     const c = eyeCenter(s, fem),
       shut = closed[s > 0 ? 1 : 0];
     if (!shut) add(eyeball(), EYE_RECT, B.head, M(c));
-    add(lidCap(EYE.r * 1.1, 0, 1.24), lid, B.head, M(c, 1, [0.12, 0, 0]));
+    if (!shut) add(lidCap(EYE.r * 1.1, 0, 1.24), lid, B.head, M(c, 1, [0.12, 0, 0]));
     add(lidCap(EYE.r * 1.08, Math.PI - 1.02, Math.PI, 1.7), lid, B.head, M(c));
     if (shut) add(lidCap(EYE.r * 1.09, 0, 2.3), lid, B.head, M(c, 1, [0.05, 0, 0]));
     else add(lidCap(EYE.r * 1.05, 0, 2.25), lid, B.lid, M(c));
@@ -345,7 +364,7 @@ export function resetAnat() {
 
 // ---------------------------------------------------------------- pelo
 /** borde del nacimiento del pelo: altura (sy) mínima para cada ángulo |θ| desde el frente */
-type Line = [number, number][];
+export type Line = [number, number][];
 const LINE_CORTO: Line = [
   [0, 0.56],
   [0.5, 0.5],
@@ -368,7 +387,20 @@ const LINE_LARGO: Line = [
   [2.0, -0.6],
   [Math.PI + 0.01, -0.62],
 ];
-const lineAt = (L: Line, th: number) => {
+export const LINE_AFRO: Line = [
+  [0, 0.52],
+  [0.6, 0.44],
+  [1.0, 0.25],
+  [1.2, -0.05],
+  [1.42, 0.22],
+  [1.72, 0.22],
+  [1.95, -0.3],
+  [Math.PI + 0.01, -0.55],
+];
+/** nacimiento del pelo de cada peinado (para pintar la sombra del pelo en la frente); null = calvo */
+export const hairline = (style: string): Line | null =>
+  style === 'calvo' ? null : style === 'pelo_largo' ? LINE_LARGO : style === 'pelo_afro' ? LINE_AFRO : LINE_CORTO;
+export const lineAt = (L: Line, th: number) => {
   const a = Math.abs(th);
   for (let i = 1; i < L.length; i++)
     if (a <= L[i][0]) {
@@ -387,8 +419,8 @@ interface Shell {
 }
 /** casco de pelo sobre el cuero cabelludo: el borde se mete bajo la piel, así el nacimiento queda limpio */
 function shell(add: AddN, fem: boolean, hat: boolean, o: Shell, rect: Rect) {
-  const NL = o.lat ?? 30,
-    NO = o.lon ?? 48,
+  const NL = o.lat ?? 44,
+    NO = o.lon ?? 64,
     lats = Array.from({ length: NL + 1 }, (_, i) => 0.02 + ((Math.PI * 0.86 - 0.02) * i) / NL),
     lons = Array.from({ length: NO + 1 }, (_, j) => -Math.PI + (2 * Math.PI * j) / NO),
     margin: number[] = [];
@@ -401,7 +433,7 @@ function shell(add: AddN, fem: boolean, hat: boolean, o: Shell, rect: Rect) {
       margin.push(m);
       let t = o.thick(sx, sy, sz, th);
       if (hat) t = t + (Math.min(t, 0.006) - t) * sm(0.3, 0.42, sy);
-      t = -0.0035 + (t + 0.0035) * sm(-0.03, 0.1, m);
+      t = -0.004 + (t + 0.004) * sm(-0.05, 0.16, m);
       headPoint(sx, sy, sz, fem, 1, out);
       nE(sx, sy, sz, n);
       out.set(out.x + n.x * t + HC[0], out.y + n.y * t + HC[1], out.z + n.z * t + HC[2]);
@@ -416,7 +448,7 @@ function shell(add: AddN, fem: boolean, hat: boolean, o: Shell, rect: Rect) {
     const a = I.getX(i),
       b = I.getX(i + 1),
       c = I.getX(i + 2);
-    if (Math.max(margin[a], margin[b], margin[c]) > -0.02) keep.push(a, b, c);
+    if (Math.max(margin[a], margin[b], margin[c]) > -0.045) keep.push(a, b, c);
   }
   g.setIndex(keep);
   add(g, rect, B.head);
@@ -494,6 +526,7 @@ function curtain(add: AddN, rect: Rect, len: number) {
   add(g, rect, wHangN);
   add(inverted(g), rect, wHangN);
 }
+/** trenza: un tubo que baja por delante del hombro con los cruces marcados (el radio late a lo largo) */
 function braid(add: AddN, s: number, rect: Rect, tie: Rect) {
   const pts = [
     [0.07, 1.6, -0.05],
@@ -502,37 +535,33 @@ function braid(add: AddN, s: number, rect: Rect, tie: Rect) {
     [0.112, 1.39, 0.06],
     [0.11, 1.31, 0.1],
     [0.104, 1.23, 0.11],
-  ].map(([x, y, z]) => new THREE.Vector3(s * x, y + DY, z));
+  ].map(([x, y, z]) => {
+    const p = new THREE.Vector3(s * x, y + DY, z);
+    pushOut(p, 0.02);
+    return p;
+  });
   const cur = new THREE.CatmullRomCurve3(pts),
-    N = 16,
-    up = new THREE.Vector3(0, 1, 0);
-  for (let i = 0; i <= N; i++) {
-    const t = i / N,
-      p = cur.getPoint(t),
-      d = cur.getTangent(t).normalize(),
-      r = 0.017 - 0.005 * t;
-    pushOut(p, r + 0.004);
-    const side = new THREE.Vector3()
-      .crossVectors(d, up)
-      .normalize()
-      .multiplyScalar(i % 2 ? 0.0045 : -0.0045);
-    p.add(side);
-    const q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, -1, 0), d);
-    add(
-      sph(),
-      rect,
-      wHangN,
-      new THREE.Matrix4().compose(
-        p,
-        q.multiply(new THREE.Quaternion().setFromAxisAngle(up, i % 2 ? 0.5 : -0.5)),
-        new THREE.Vector3(r, r * 1.35, r * 0.85),
-      ),
-    );
-    if (i === N) {
-      add(sph(), tie, wHangN, M([p.x, p.y - 0.012, p.z], [0.012, 0.008, 0.012]));
-      add(sph(), rect, wHangN, M([p.x, p.y - 0.032, p.z + 0.004], [0.011, 0.024, 0.011]));
+    NS = 56,
+    NR = 8,
+    g = new THREE.TubeGeometry(cur, NS, 0.014, NR, false),
+    P = g.attributes.position,
+    c = new THREE.Vector3();
+  for (let i = 0; i <= NS; i++) {
+    const t = i / NS;
+    cur.getPointAt(t, c);
+    for (let j = 0; j <= NR; j++) {
+      const k = i * (NR + 1) + j,
+        a = (j / NR) * Math.PI * 2,
+        lobe = 0.8 + 0.28 * Math.abs(Math.sin(t * Math.PI * 14 + (Math.cos(a) > 0 ? 0 : Math.PI / 2))),
+        f = lobe * (1 - 0.3 * t) * (i === 0 || i === NS ? 0.4 : 1);
+      P.setXYZ(k, c.x + (P.getX(k) - c.x) * f, c.y + (P.getY(k) - c.y) * f, c.z + (P.getZ(k) - c.z) * f);
     }
   }
+  g.computeVertexNormals();
+  add(g, rect, wHangN);
+  const end = cur.getPointAt(1);
+  add(sph(), tie, wHangN, M([end.x, end.y - 0.004, end.z], [0.011, 0.007, 0.011]));
+  add(sph(), rect, wHangN, M([end.x, end.y - 0.022, end.z + 0.003], [0.01, 0.02, 0.01]));
 }
 
 /** peinados: casco de pelo + cortina, cola o trenzas */
@@ -564,8 +593,8 @@ export function hair(add: AddN, style: string, fem: boolean, hat: boolean, rect:
         hat,
         {
           line: LINE_CORTO,
-          lat: 40,
-          lon: 64,
+          lat: 52,
+          lon: 80,
           thick: (sx, sy, sz) =>
             (0.017 + 0.012 * sm(0.1, 1, sy)) * (1 + 0.42 * noise3(sx, sy, sz, 24) + 0.2 * noise3(sx, sy, sz, 47, 1)),
         },
@@ -578,18 +607,9 @@ export function hair(add: AddN, style: string, fem: boolean, hat: boolean, rect:
         fem,
         hat,
         {
-          line: [
-            [0, 0.52],
-            [0.6, 0.44],
-            [1.0, 0.25],
-            [1.2, -0.05],
-            [1.42, 0.22],
-            [1.72, 0.22],
-            [1.95, -0.3],
-            [Math.PI + 0.01, -0.55],
-          ],
-          lat: 40,
-          lon: 64,
+          line: LINE_AFRO,
+          lat: 52,
+          lon: 80,
           thick: (sx, sy, sz) =>
             (0.036 + 0.026 * sm(-0.2, 0.9, sy)) *
             (hat ? 0.55 : 1) *
@@ -655,13 +675,13 @@ export function hair(add: AddN, style: string, fem: boolean, hat: boolean, rect:
 /** posición del hueso de la cola de caballo */
 export const TAIL: V3 = [0, 1.655 + DY, -0.1];
 
-/** bigote sobre el labio de arriba */
+/** bigote: mechones finos que bajan por las comisuras */
 export function mustache(add: AddN, fem: boolean, rect: Rect) {
   const n = new THREE.Vector3(),
     p = new THREE.Vector3();
-  for (let i = -4; i <= 4; i++) {
-    const sx = i * 0.07,
-      sy = -0.415 - 0.18 * (sx / 0.3) ** 2,
+  for (let i = -7; i <= 7; i++) {
+    const sx = i * 0.04,
+      sy = -0.42 - 0.2 * (sx / 0.3) ** 2,
       sz = Math.sqrt(1 - sx * sx - sy * sy);
     headPoint(sx, sy, sz, fem, 1, p);
     nE(sx, sy, sz, n);
@@ -670,9 +690,9 @@ export function mustache(add: AddN, fem: boolean, rect: Rect) {
       rect,
       B.head,
       M(
-        [HC[0] + p.x + n.x * 0.0025, HC[1] + p.y + n.y * 0.0025, HC[2] + p.z + 0.003],
-        [0.0125, 0.0062 - Math.abs(i) * 0.0003, 0.006],
-        [0.25, 0, -sx * 1.1],
+        [HC[0] + p.x + n.x * 0.001, HC[1] + p.y - 0.001, HC[2] + p.z + 0.0008],
+        [0.0085, 0.0048 - Math.abs(i) * 0.00016, 0.0018],
+        [0.35, 0, -sx * 1.6],
       ),
     );
   }
