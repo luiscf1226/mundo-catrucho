@@ -340,8 +340,8 @@ const GEN: Record<LayerName, Gen> = {
   dirt: (a, h, r) => {
     // manchas de humedad y tierra suelta más clara
     stains(a, r, 10, 40, 110, (r) => (r() < 0.5 ? [0.62, 0.52, 0.42, 0.35] : [1, 0.94, 0.82, 0.3]), h, 0.35);
-    // huellas de zapato que cruzan el mosaico (dos caminantes)
-    for (let tr = 0; tr < 2; tr++) {
+    // huellas de zapato que cruzan el mosaico (un caminante; más se notaría la repetición)
+    for (let tr = 0; tr < 1; tr++) {
       const ang = r() * Math.PI * 2,
         x0 = r() * W,
         y0 = r() * W,
@@ -351,7 +351,7 @@ const GEN: Record<LayerName, Gen> = {
         const side = st % 2 ? 1 : -1,
           cx = x0 + dx * st * 62 - dy * side * 9,
           cy = y0 + dy * st * 62 + dx * side * 9,
-          al = 0.1 + r() * 0.08,
+          al = 0.07 + r() * 0.07,
           rot = ang + (r() - 0.5) * 0.2;
         wrap([a, h], (c, k) => {
           c.translate(cx, cy);
@@ -617,7 +617,10 @@ const GEN: Record<LayerName, Gen> = {
         c.stroke();
       });
     }
-    return { n: 0.5, r0: 0.38, r1: 0.25, px: (u, v) => [0.94 + fbm(u, v, 5, 3) * 0.1, 0] };
+    // huellas de manos, polvo y puntitos de óxido
+    stains(a, r, 7, 20, 60, (r) => (r() < 0.6 ? [0.62, 0.6, 0.56, 0.22] : [1, 1, 1, 0.18]));
+    stains(a, r, 14, 2, 7, () => [0.62, 0.36, 0.2, 0.5]);
+    return { n: 0.5, r0: 0.38, r1: 0.25, px: (u, v) => [0.9 + fbm(u, v, 5, 3) * 0.14, 0] };
   },
   tile: (a, h, r) => {
     a.clearRect(0, 0, W, W);
@@ -690,23 +693,18 @@ const GEN: Record<LayerName, Gen> = {
         c.stroke();
       });
     }
-    // descascarados: se ve el bloque/repello de abajo, más gris y hundido
-    for (let i = 0; i < 4; i++) {
+    // un descascarado grande y suave: se ve el repello de abajo, apenas más gris y hundido
+    for (let i = 0; i < 1; i++) {
       const x = r() * W,
         y = r() * W,
-        rx = 10 + r() * 22,
-        ry = 6 + r() * 14,
+        rx = 26 + r() * 20,
+        ry = 14 + r() * 10,
         rot = r() * 3,
         sd = Math.floor(r() * 1e6);
       wrap([a, h], (c, k) => {
-        blob(c, x, y, rx, ry, rot, rng(sd), 0.5);
-        c.fillStyle = k ? g(0.12) : 'rgba(150,140,124,0.55)';
+        blob(c, x, y, rx, ry, rot, rng(sd), 0.6);
+        c.fillStyle = k ? 'rgba(0,0,0,0.25)' : 'rgba(150,140,124,0.22)';
         c.fill();
-        if (!k) {
-          c.strokeStyle = 'rgba(255,255,250,0.5)';
-          c.lineWidth = 1.2;
-          c.stroke();
-        }
       });
     }
     for (let i = 0; i < 3; i++) crack(a, h, r, r() * W, r() * W, { n: 7, step: 14, w: 0.8, al: 0.3, branch: 0.2 });
@@ -823,20 +821,20 @@ const GEN: Record<LayerName, Gen> = {
     // agregado: piedrín claro y oscuro bien tupido
     specks(a, h, r, 7000, 0.5, 1.7, 0.35, 0.6);
     // bacheos: parches rectangulares más oscuros con su borde de corte
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 1; i++) {
       const x = r() * W,
         y = r() * W,
         w = 70 + r() * 140,
         hh = 50 + r() * 90,
         rot = (r() - 0.5) * 0.3,
-        al = 0.18 + r() * 0.14;
+        al = 0.1 + r() * 0.06;
       wrap([a, h], (c, k) => {
         c.translate(x, y);
         c.rotate(rot);
         c.fillStyle = k ? 'rgba(255,255,255,0.12)' : `rgba(16,16,18,${al})`;
         c.fillRect(-w / 2, -hh / 2, w, hh);
-        c.strokeStyle = k ? g(0.1) : 'rgba(10,10,12,0.5)';
-        c.lineWidth = 1.6;
+        c.strokeStyle = k ? g(0.1) : 'rgba(10,10,12,0.3)';
+        c.lineWidth = 1.4;
         c.strokeRect(-w / 2, -hh / 2, w, hh);
       });
     }
