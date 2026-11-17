@@ -116,21 +116,11 @@ const ok = await run('dept', file, { hash: '#test,go' }, async (t) => {
   console.log(
     `exploradores: 18 zonas con ${Math.min(...all.map((z) => z.n))}+ objetos · p. ej. ${all.find((z) => z.id === 'olancho').names.join(', ')}`,
   );
+  // El motor exploradores ahora es el archivo de Gracias a Dios (MC-44): sus juegos, sitios y victoria
+  // los prueba test-graciasadios.mjs. Acá solo que abre y se puede salir.
   await t.ev(`${S}.startJuego('graciasadios.la-ficha-que-faltaba')`);
   await t.click('mg-start');
-  const X = `window.__mcTest.exploradores`;
-  await t.waitFor(`${S}.mg?.phase==='playing' && !!${X}`, 8000, 'exploradores en juego');
-  await t.sleep(500);
-  const xs = await t.ev(`JSON.stringify(${X}.sites)`);
-  if (xs !== '["graciasadios"]') throw new Error(`sitios del tema ignorados: ${xs}`);
-  for (const f of JSON.parse(await t.ev(`JSON.stringify(${X}.finds())`))) {
-    await t.ev(`${P}.teleport(${f.pos[0]}, ${f.pos[1] + 0.15}, ${f.pos[2]})`);
-    await t.sleep(500);
-    if (await t.ev(`!!${S}.dialog`)) await t.ev(`${S}.closeDialog()`);
-  }
-  await t.waitFor(`!!document.querySelector('[data-testid=mg-result]')`, 6000, 'exploradores: resultado');
-  console.log('exploradores FM:', await t.ev(`JSON.stringify(${S}.mg.result)`));
-  if (!(await t.ev(`${S}.mg.result.won`))) throw new Error('exploradores FM: no ganó con 5/5');
+  await t.waitFor(`${S}.mg?.phase==='playing'`, 8000, 'exploradores en juego');
   await t.click('mg-exit').catch(() => t.ev(`${S}.exitMinigame()`));
   await t.sleep(1000);
   // --- Comayagua y uno sin catálogo
