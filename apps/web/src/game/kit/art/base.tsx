@@ -308,7 +308,7 @@ export function makeBaseProps(m: M): ArtProps {
           <C m={m} p={[0, 1, 0]} r={0.06} h={2} c="#444" k="metal" />
           <mesh position={[0, 2.2, 0]}>
             <planeGeometry args={[ww, ww / (tex as any).aspect]} />
-            <meshBasicMaterial map={tex} transparent side={THREE.DoubleSide} />
+            <meshBasicMaterial map={tex} transparent side={THREE.DoubleSide} forceSinglePass />
           </mesh>
         </Placed>
       );
@@ -324,11 +324,11 @@ export function makeBaseProps(m: M): ArtProps {
           <B m={m} p={[0, 3.6, 0]} s={[3.6, 0.6, 0.6]} c={col} />
           <mesh position={[0, 1.7, 0]}>
             <planeGeometry args={[2.4, 3.2]} />
-            <meshBasicMaterial color={col} transparent opacity={0.4} side={THREE.DoubleSide} />
+            <meshBasicMaterial color={col} transparent opacity={0.4} side={THREE.DoubleSide} forceSinglePass />
           </mesh>
           <mesh position={[0, 4.4, 0.02]}>
             <planeGeometry args={[Math.min(4.4, 0.7 * (tex as any).aspect), 0.7]} />
-            <meshBasicMaterial map={tex} transparent side={THREE.DoubleSide} />
+            <meshBasicMaterial map={tex} transparent side={THREE.DoubleSide} forceSinglePass />
           </mesh>
         </Placed>
       );
@@ -428,7 +428,7 @@ export function makeBaseProps(m: M): ArtProps {
         <C m={m} p={[0, h, 0]} r={0.08} h={w} c="#ffffff" k="metal" rot={[0, 0, Math.PI / 2]} />
         <mesh position={[0, h / 2, -0.9]}>
           <planeGeometry args={[w, h]} />
-          <meshBasicMaterial color="#ffffff" transparent opacity={0.25} side={THREE.DoubleSide} wireframe />
+          <meshBasicMaterial color="#ffffff" transparent opacity={0.25} side={THREE.DoubleSide} forceSinglePass wireframe />
         </mesh>
       </Placed>
     ),

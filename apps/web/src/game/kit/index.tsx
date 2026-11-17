@@ -314,7 +314,7 @@ export function Plate({
   return (
     <mesh position={pos} rotation-y={rot}>
       <planeGeometry args={[h * (tex as any).aspect, h]} />
-      <meshBasicMaterial map={tex} transparent side={THREE.DoubleSide} />
+      <meshBasicMaterial map={tex} transparent side={THREE.DoubleSide} forceSinglePass />
     </mesh>
   );
 }

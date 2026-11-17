@@ -100,6 +100,7 @@ function getNetMat() {
     transparent: true,
     alphaTest: 0.25,
     side: THREE.DoubleSide,
+    forceSinglePass: true,
     toneMapped: false,
     opacity: 0.9,
   }));
