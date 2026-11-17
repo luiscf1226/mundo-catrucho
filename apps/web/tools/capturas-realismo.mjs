@@ -21,15 +21,24 @@ const VISTAS = [
   ['valle', 'valle', 15.5, [0, 72, Math.PI], { pos: [-7, 6, 56], target: [2, 2.5, 90], fov: 55 }],
   ['olancho-noche', 'olancho', 21, [0, 62, Math.PI], { pos: [9, 5, 47], target: [-3, 2.5, 80], fov: 55 }],
   ['yoro-lluvia', 'yoro', 15.5, [0, 62, Math.PI], { pos: [-7, 6, 46], target: [2, 2.5, 80], fov: 55 }],
+  // contraluz al atardecer (resplandor del sol y bruma)
+  ['atardecer', null, 17.7, [-49, 121, 0], { pos: [-40, 6, 125], target: [-90, 6, 118], fov: 55 }],
+  // agua: el Río Plátano en Gracias a Dios y el mar de Roatán
+  ['rio', 'graciasadios', 15.5, [-8, 30, -1.2], { pos: [-4, 5, 40], target: [16, 0, 18], fov: 55 }],
+  ['mar', 'islas', 15.5, [0, -12, Math.PI], { pos: [10, 5, -8], target: [-6, 0, -42], fov: 55 }],
 ];
+// MC_VISTAS=rio,mar saca solo esas vistas (y salta el fútbol) para iterar rápido
+const SOLO = process.env.MC_VISTAS?.split(',');
+// MC_HASH=ver-ao agrega esa marca a la dirección (p. ej. para ver solo la oclusión del posproceso)
+const EXTRA = process.env.MC_HASH ? `,${process.env.MC_HASH}` : '';
 let vuelta = 0;
 // cambiar el hash dispara `hashchange`: el cielo pone esa hora (el contador hace que el hash siempre cambie)
-const hora = (t, h) => t.ev(`location.hash = '#go,hora=${h},v${vuelta++}'`);
+const hora = (t, h) => t.ev(`location.hash = '#go,hora=${h},v${vuelta++}${EXTRA}'`);
 
-const ok = await run('capturas-realismo', file, { hash: '#go', width: 1280, height: 720 }, async (t) => {
+const ok = await run('capturas-realismo', file, { hash: `#go${EXTRA}`, width: 1280, height: 720 }, async (t) => {
   await t.waitFor(`${S}.scene.kind==='lobby' && !!window.__mc.gl`, 20000, 'el lobby');
   const tabla = [];
-  for (const [nombre, dept, h, [x, z, yaw], cam] of VISTAS) {
+  for (const [nombre, dept, h, [x, z, yaw], cam] of VISTAS.filter(([n]) => !SOLO || SOLO.includes(n))) {
     if (dept && (await t.ev(`${S}.scene.id`)) !== dept) {
       await t.ev(`${S}.travel('${dept}')`);
       await t.waitFor(`${S}.scene.kind==='dept' && ${S}.scene.id==='${dept}'`, 30000, dept);
@@ -47,6 +56,7 @@ const ok = await run('capturas-realismo', file, { hash: '#go', width: 1280, heig
     console.log('captura', `${prefijo}-${nombre}.png`);
   }
   // minijuego de fútbol con su propia cámara
+  if (SOLO && !SOLO.includes('futbol')) return void imprimir(tabla);
   await t.ev(`${P}.fixedCam = null`);
   await t.ev(`${S}.goLobby()`);
   await t.waitFor(`${S}.scene.kind==='lobby'`, 20000, 'volver al lobby');
@@ -57,7 +67,10 @@ const ok = await run('capturas-realismo', file, { hash: '#go', width: 1280, heig
   tabla.push(['futbol', (await t.calls())?.calls ?? '?']);
   await t.shot(`${prefijo}-futbol.png`);
   console.log('captura', `${prefijo}-futbol.png`);
+  imprimir(tabla);
+});
+function imprimir(tabla) {
   console.log('\nvista           llamadas');
   for (const [n, c] of tabla) console.log(`${n.padEnd(16)}${c}`);
-});
+}
 process.exit(ok ? 0 : 1);

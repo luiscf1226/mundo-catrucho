@@ -2,7 +2,7 @@
 // espacio del objeto sin su giro, de modo que la textura mantiene su escala en cualquier tamaño de bloque.
 import * as THREE from 'three';
 import type { MatKind } from '../types';
-import { LAYERS, type LayerName, layerIndex, layerTextures, TILE } from './tex';
+import { LAYERS, type LayerName, layerIndex, layerTextures, TILE, texCalidad } from './tex';
 
 /** Uniformes globales que actualiza el SkyRig en cada cuadro. */
 export const G = {
@@ -39,8 +39,41 @@ export const kindInfo = (k: MatKind | LayerName) =>
   (KIND as any)[k] as { l: LayerName; r: number; m: number } | undefined;
 
 const NL = LAYERS.length,
-  MACRO = layerIndex('macro');
-const tileArr = `const float TRI_TILE[${NL}] = float[${NL}](${LAYERS.map((l) => TILE[l].toFixed(2)).join(', ')});`;
+  MACRO = layerIndex('macro'),
+  GRASS = layerIndex('grass');
+/** cuánto varía el tono a escala de decenas de metros (rompe la repetición en pisos grandes) */
+const MAC: Partial<Record<LayerName, number>> = {
+  grass: 0.5,
+  dirt: 0.42,
+  sand: 0.3,
+  stone: 0.34,
+  cobble: 0.3,
+  asphalt: 0.36,
+  concrete: 0.34,
+  stucco: 0.26,
+  roof: 0.3,
+  brick: 0.26,
+  wood: 0.24,
+  bark: 0.24,
+  straw: 0.24,
+  leaf: 0.24,
+};
+/** suciedad al pie de las paredes y chorreados (solo caras verticales) */
+const GRIME: Partial<Record<LayerName, number>> = {
+  stucco: 0.75,
+  concrete: 0.6,
+  brick: 0.5,
+  stone: 0.45,
+  wood: 0.35,
+  cobble: 0.3,
+};
+const arr = (n: string, f: (l: LayerName) => number) =>
+  `const float ${n}[${NL}] = float[${NL}](${LAYERS.map((l) => f(l).toFixed(2)).join(', ')});`;
+const tileArr = [
+  arr('TRI_TILE', (l) => TILE[l]),
+  arr('TRI_MAC', (l) => MAC[l] ?? 0.14),
+  arr('TRI_GRIME', (l) => GRIME[l] ?? 0),
+].join('\n');
 
 const VERT_PARS = /* glsl */ `
 varying vec3 vTriPos; varying vec3 vTriN; varying mat3 vTriM;
@@ -67,9 +100,10 @@ const FRAG_PARS = /* glsl */ `
 uniform sampler2DArray tAlb; uniform sampler2DArray tNrm;
 uniform float uWet; uniform float uTime; uniform float uNight; uniform vec3 uSky;
 varying vec3 vTriPos; varying vec3 vTriN; varying mat3 vTriM;
+${tileArr}
+const mat2 TRI_ROT = mat2( 0.8, 0.6, -0.6, 0.8 );
 #ifdef TRI_ATTR
   varying vec4 vMat; varying vec3 vCol; varying vec2 vTriUv;
-  ${tileArr}
 #else
   uniform vec4 uMat;
 #endif
@@ -102,25 +136,82 @@ const FRAG_MAP = /* glsl */ `
     vec2 uvX = tp.zy, uvY = tp.xz, uvZ = tp.xy;
   #endif
   #ifdef TRI_WATER
-    vec2 wo = uTime * vec2( 0.045, 0.03 );
-    vec4 nX = 0.5 * ( texture( tNrm, vec3( uvX + wo, tl ) ) + texture( tNrm, vec3( uvX * 1.9 - wo.yx * 1.6, tl ) ) );
-    vec4 nY = 0.5 * ( texture( tNrm, vec3( uvY + wo, tl ) ) + texture( tNrm, vec3( uvY * 1.9 - wo.yx * 1.6, tl ) ) );
-    vec4 nZ = 0.5 * ( texture( tNrm, vec3( uvZ + wo, tl ) ) + texture( tNrm, vec3( uvZ * 1.9 - wo.yx * 1.6, tl ) ) );
+    // tres capas de olas en direcciones distintas: marejada lenta, ola media y rizo fino; de lejos se aplana
+    // (sin centelleo) y el rizo pesa menos
+    vec2 wo = uTime * vec2( 0.045, 0.03 ), ws = uTime * vec2( -0.012, 0.021 );
+    float wFar = smoothstep( 18.0, 80.0, length( vViewPosition ) );
+    #define TRI_WN( uv ) ( texture( tNrm, vec3( uv * 0.29 + ws, tl ) ) * 0.42 + texture( tNrm, vec3( uv + wo, tl ) ) * 0.36 + texture( tNrm, vec3( uv * 2.1 - wo.yx * 1.6, tl ) ) * 0.22 )
+    vec4 nX = TRI_WN( uvX ), nY = TRI_WN( uvY ), nZ = TRI_WN( uvZ );
+    tk *= 1.6 - 0.9 * wFar;
     vec4 ta = vec4( 1.0 );
   #else
-    vec4 nX = texture( tNrm, vec3( uvX, tl ) ), nY = texture( tNrm, vec3( uvY, tl ) ), nZ = texture( tNrm, vec3( uvZ, tl ) );
-    vec4 ta = texture( tAlb, vec3( uvX, tl ) ) * tw.x + texture( tAlb, vec3( uvY, tl ) ) * tw.y + texture( tAlb, vec3( uvZ, tl ) ) * tw.z;
+    vec4 aY = texture( tAlb, vec3( uvY, tl ) );
+    #ifndef TRI_LOW
+      // piso: una segunda lectura girada y corrida se alterna por zonas de varios metros, así la cuadrícula
+      // del mosaico (la misma grieta cada 3 m) deja de verse
+      vec2 uvY2 = TRI_ROT * uvY + vec2( 0.37, 0.71 );
+      float bomb = 0.0;
+      if ( tw.y > 0.02 ) {
+        bomb = smoothstep( 0.4, 0.6, texture( tAlb, vec3( vTriPos.xz * 0.045 + vec2( 0.13, 0.57 ), ${MACRO}.0 ) ).r );
+        if ( bomb > 0.0 ) aY = mix( aY, texture( tAlb, vec3( uvY2, tl ) ), bomb );
+      }
+    #endif
+    vec4 ta = texture( tAlb, vec3( uvX, tl ) ) * tw.x + aY * tw.y + texture( tAlb, vec3( uvZ, tl ) ) * tw.z;
   #endif
-  vec4 tnb = nX * tw.x + nY * tw.y + nZ * tw.z;
-  vec3 tx = triUnpack( nX, tk ), ty = triUnpack( nY, tk ), tz = triUnpack( nZ, tk );
-  triTan = tz;
-  tx = vec3( tx.xy + tn0.zy, abs( tx.z ) * tn0.x ); ty = vec3( ty.xy + tn0.xz, abs( ty.z ) * tn0.y ); tz = vec3( tz.xy + tn0.xy, abs( tz.z ) * tn0.z );
-  triNp = normalize( tx.zyx * tw.x + ty.xzy * tw.y + tz.xyz * tw.z );
+  #if defined( TRI_LOW ) && !defined( TRI_WATER )
+    // calidad baja: sin mapas de normales (tres lecturas menos por píxel); rugosidad pareja
+    vec4 tnb = vec4( 0.5 ); triTan = vec3( 0.0, 0.0, 1.0 ); triNp = tn0;
+  #else
+    #ifndef TRI_WATER
+      vec4 nX = texture( tNrm, vec3( uvX, tl ) ), nY = texture( tNrm, vec3( uvY, tl ) ), nZ = texture( tNrm, vec3( uvZ, tl ) );
+      if ( bomb > 0.0 ) {
+        vec4 n2 = texture( tNrm, vec3( uvY2, tl ) );
+        n2.xy = transpose( TRI_ROT ) * ( n2.xy - 0.5 ) + 0.5;
+        nY = mix( nY, n2, bomb );
+      }
+    #endif
+    vec4 tnb = nX * tw.x + nY * tw.y + nZ * tw.z;
+    vec3 tx = triUnpack( nX, tk ), ty = triUnpack( nY, tk ), tz = triUnpack( nZ, tk );
+    triTan = tz;
+    tx = vec3( tx.xy + tn0.zy, abs( tx.z ) * tn0.x ); ty = vec3( ty.xy + tn0.xz, abs( ty.z ) * tn0.y ); tz = vec3( tz.xy + tn0.xy, abs( tz.z ) * tn0.z );
+    triNp = normalize( tx.zyx * tw.x + ty.xzy * tw.y + tz.xyz * tw.z );
+  #endif
+  int li = int( tl );
+  #if !defined( TRI_LOW ) && !defined( TRI_WATER )
+  {
+    // antirrepetición en el plano del piso: la misma capa a otra escala y girada, usada como variación de tono
+    vec3 big = texture( tAlb, vec3( mat2( 0.8, -0.6, 0.6, 0.8 ) * uvY * 0.29 + vec2( 0.37, 0.71 ), tl ) ).rgb;
+    vec3 avg = max( textureLod( tAlb, vec3( 0.5, 0.5, tl ), 12.0 ).rgb, vec3( 0.04 ) );
+    ta.rgb *= mix( vec3( 1.0 ), clamp( big / avg, vec3( 0.65 ), vec3( 1.35 ) ), 0.5 * tw.y );
+  }
+  #endif
   float macro = texture( tAlb, vec3( vTriPos.xz * 0.025 + vTriPos.y * 0.013, ${MACRO}.0 ) ).r;
-  vec3 alb = ta.rgb * mix( vec3( 1.0 ), triTint, ta.a ) * ( 0.88 + 0.24 * macro );
+  float macro2 = texture( tAlb, vec3( vTriPos.xz * 0.0063 + vec2( 0.5, 0.25 ), ${MACRO}.0 ) ).r;
+  float mv = macro * 0.6 + macro2 * 0.4;
+  vec3 alb = ta.rgb * mix( vec3( 1.0 ), triTint, ta.a ) * ( 1.0 + TRI_MAC[ li ] * ( mv - 0.45 ) * 1.6 );
+  if ( li == ${GRASS} ) {
+    // zacate: zonas secas amarillentas, zonas húmedas más verdes y algún parche pelón
+    float dry = smoothstep( 0.56, 0.22, mv ), lush = smoothstep( 0.5, 0.8, mv );
+    alb *= mix( vec3( 1.0 ), vec3( 1.3, 1.1, 0.55 ), dry * 0.75 ) * mix( vec3( 1.0 ), vec3( 0.74, 0.92, 0.78 ), lush * 0.6 );
+    float pm = texture( tAlb, vec3( vTriPos.xz * 0.06 + vec2( 0.21, 0.63 ), ${MACRO}.0 ) ).r;
+    float bare = smoothstep( 0.66, 0.84, pm ) * smoothstep( 0.62, 0.32, mv ) * tw.y;
+    alb = mix( alb, vec3( 0.2, 0.14, 0.08 ) * ( 0.7 + 0.5 * ta.g ), bare * 0.65 );
+  }
+  float gk = TRI_GRIME[ li ];
+  if ( gk > 0.0 ) {
+    // paredes: tierra salpicada abajo (desde el suelo, y ≈ 0) y chorreados de lluvia hacia abajo
+    float wall = 1.0 - smoothstep( 0.3, 0.7, abs( tn0.y ) );
+    float foot = 1.0 - smoothstep( 0.0, 0.9 + 0.7 * macro, vTriPos.y );
+    float streak = texture( tAlb, vec3( ( vTriPos.x + vTriPos.z ) * 0.09, vTriPos.y * 0.012, ${MACRO}.0 ) ).r;
+    float gr = wall * gk * ( foot * 0.8 + smoothstep( 0.5, 0.85, streak ) * 0.3 );
+    alb *= mix( vec3( 1.0 ), vec3( 0.58, 0.52, 0.44 ), clamp( gr, 0.0, 1.0 ) );
+  }
   float wetK = uWet * ( 0.35 + 0.65 * smoothstep( 0.2, 0.9, tn0.y ) ) * ( 0.5 + 0.5 * smoothstep( 0.25, 0.6, macro ) );
   alb *= 1.0 - 0.3 * wetK;
   triRoughMul = mix( 1.0, 0.22, wetK ); triRough = tnb.b;
+  #ifdef TRI_WATER
+    alb *= 0.82;
+  #endif
   diffuseColor.rgb = alb;
 }
 `;
@@ -150,12 +241,30 @@ const FRAG_EMIS = /* glsl */ `
 #endif
 `;
 /** brillo de Fresnel para agua y vidrio: más opaco y con reflejo del cielo en ángulos rasantes */
+// El agua usa Fresnel de Schlick (F0 = 0.02) con el reflejo del mapa de entorno (cielo y monte lejano): mirando
+// hacia abajo se ve el fondo y el color del agua; en ángulo rasante es casi un espejo del cielo.
 const FRAG_FRESNEL = /* glsl */ `
+#ifdef TRI_WATER
+{
+  vec3 wV = normalize( vViewPosition );
+  float wF = 0.02 + 0.98 * pow( 1.0 - saturate( dot( normal, wV ) ), 5.0 );
+  diffuseColor.a = mix( diffuseColor.a * 0.88, 1.0, saturate( wF * 1.7 ) );
+  #ifdef USE_ENVMAP
+    // con scene.environment la intensidad es la del relleno del cielo: aquí se quita para ver el cielo tal cual;
+    // el agua se queda con un poco de su color en el reflejo
+    vec3 wR = getIBLRadiance( wV, normal, 0.04 ) / max( envMapIntensity, 0.3 );
+    outgoingLight = mix( outgoingLight, wR * mix( vec3( 1.0 ), triTint * 1.6, 0.3 ), wF * 0.72 );
+  #else
+    outgoingLight += uSky * wF * 0.5;
+  #endif
+}
+#else
 {
   float fres = pow( 1.0 - saturate( dot( normal, normalize( vViewPosition ) ) ), 3.0 );
   diffuseColor.a = mix( diffuseColor.a, 1.0, fres * 0.85 );
   outgoingLight += uSky * fres * 0.4;
 }
+#endif
 #include <opaque_fragment>
 `;
 
@@ -176,7 +285,13 @@ export function triplanar<T extends THREE.MeshStandardMaterial>(
   const uMat = {
     value: new THREE.Vector4(layerIndex(o.layer ?? 'plastic'), 1 / TILE[o.layer ?? 'plastic'], o.nk ?? 1, 0),
   };
-  mat.defines = { ...(mat.defines ?? {}), ...(o.attr ? { TRI_ATTR: '' } : {}), ...(o.water ? { TRI_WATER: '' } : {}) };
+  const low = texCalidad() === 'baja';
+  mat.defines = {
+    ...(mat.defines ?? {}),
+    ...(o.attr ? { TRI_ATTR: '' } : {}),
+    ...(o.water ? { TRI_WATER: '' } : {}),
+    ...(low ? { TRI_LOW: '' } : {}),
+  };
   mat.onBeforeCompile = (sh) => {
     shared(sh);
     sh.uniforms.uMat = uMat;
@@ -193,7 +308,7 @@ export function triplanar<T extends THREE.MeshStandardMaterial>(
     if (o.fresnel) f = f.replace('#include <opaque_fragment>', FRAG_FRESNEL);
     sh.fragmentShader = f;
   };
-  mat.customProgramCacheKey = () => `tri|${o.attr ? 1 : 0}|${o.water ? 1 : 0}|${o.fresnel ? 1 : 0}`;
+  mat.customProgramCacheKey = () => `tri|${o.attr ? 1 : 0}|${o.water ? 1 : 0}|${o.fresnel ? 1 : 0}|${low ? 1 : 0}`;
   return mat;
 }
 

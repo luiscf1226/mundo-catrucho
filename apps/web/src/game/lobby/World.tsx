@@ -42,7 +42,7 @@ export function World() {
     k.flat([185, 0.16, 0], [18, 0.14, 250], '#d4c398', 'stone');
     k.flat([0, 0.16, -115], [390, 0.14, 16], '#d4c398', 'stone');
     k.flat([-49, 0.17, 108], [65, 0.15, 30], '#d4c398', 'stone');
-    k.flat([-48, 0.17, 113], [62, 0.18, 9], '#637879', 'asphalt');
+    k.flat([-48, 0.17, 113], [62, 0.18, 9], '#5d6265', 'asphalt');
     for (let x = -77; x < -21; x += 7) k.flat([x, 0.28, 113], [3, 0.03, 0.18], '#f6e5b1', 'concrete');
     for (const d of DEPTOS) {
       if (d.biome === 'valle' || d.biome === 'sur') {
