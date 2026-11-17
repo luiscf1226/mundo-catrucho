@@ -52,6 +52,13 @@ const ok = await run('capturas-personajes', file, { hash: '#go', width: 1280, he
   await t.ev(cam(2.1, 0.75, 1.5, 1.2, 40));
   await t.sleep(600);
   await foto(t, 'cerca-34');
+  // la cara de cerca (encuadre que sirve para la cabeza vieja y la nueva)
+  await t.ev(cam(0.9, 0.05, 1.55, 1.52, 36));
+  await t.sleep(600);
+  await foto(t, 'cara-frente');
+  await t.ev(cam(0.95, 0.7, 1.56, 1.52, 36));
+  await t.sleep(600);
+  await foto(t, 'cara-34');
   await t.ev(
     `window.__mc.store.setState((s) => ({ profile: { ...s.profile, avatar: { ...s.profile.avatar, ...${JSON.stringify(LOOK)} } } }))`,
   );

@@ -157,13 +157,15 @@ void RE_Direct_Avatar( const in IncidentLight directLight, const in vec3 geometr
     vec3 up = normalize( ( viewMatrix * vec4( 0.0, 1.0, 0.0, 0.0 ) ).xyz );
     vec3 T = normalize( up - geometryNormal * dot( up, geometryNormal ) + 1e-4 );
     vec3 H = normalize( directLight.direction + geometryViewDir );
-    float th = dot( T, H );
-    float s1 = pow( sqrt( max( 0.0, 1.0 - th * th ) ), 90.0 );
-    vec3 T2 = normalize( T + geometryNormal * 0.3 );
+    // Kajiya-Kay con tangentes corridas: la banda de brillo se mueve con la normal y queda angosta
+    vec3 T1 = normalize( T - geometryNormal * 0.35 );
+    float th1 = dot( T1, H );
+    float s1 = pow( sqrt( max( 0.0, 1.0 - th1 * th1 ) ), 220.0 );
+    vec3 T2 = normalize( T + geometryNormal * 0.45 );
     float th2 = dot( T2, H );
-    float s2 = pow( sqrt( max( 0.0, 1.0 - th2 * th2 ) ), 24.0 );
+    float s2 = pow( sqrt( max( 0.0, 1.0 - th2 * th2 ) ), 60.0 );
     float vis = saturate( ndl * 0.8 + 0.2 );
-    reflectedLight.directSpecular += directLight.color * vis * mcHairK * ( vec3( 0.16 ) * s1 + uHair * 0.4 * s2 ) * ( 1.0 - 0.6 * uCurl );
+    reflectedLight.directSpecular += directLight.color * vis * mcHairK * ( vec3( 0.1 ) * s1 + uHair * 0.25 * s2 ) * ( 1.0 - 0.6 * uCurl );
   }
 }
 #undef RE_Direct
@@ -195,7 +197,7 @@ const DETAIL = /* glsl */ `
     fw = max( length( fwidth( p * 260.0 ) ), 1e-4 );
     freq = 4.0;
   }
-  float amp = ( mcCls < 0.5 ? 1.8 : mcCls < 1.5 ? 2.4 : mcCls < 2.5 ? 2.0 : mcCls < 3.5 ? 1.2 : mcCls < 4.5 ? 0.0 : mcCls < 5.5 ? 4.0 : 0.0 ) * 1e-4;
+  float amp = ( mcCls < 0.5 ? 1.8 : mcCls < 1.5 ? 2.4 : mcCls < 2.5 ? 2.0 : mcCls < 3.5 ? 1.2 : mcCls < 4.5 ? 0.0 : mcCls < 5.5 ? 1.4 : 0.0 ) * 1e-4;
   amp *= 1.0 - smoothstep( 0.12, 0.4, fw * freq / 6.2832 );
   if ( amp > 0.0 ) normal = mcBump( - vViewPosition, normal, h * amp, faceDirection );
 }
@@ -233,7 +235,7 @@ export function avatarMaterial(cfg: AvatarConfig) {
         '#include <lights_fragment_end>',
         `#include <lights_fragment_end>
         reflectedLight.indirectDiffuse *= mix( vec3( 1.0 ), vec3( 1.05, 0.99, 0.97 ), mcSkin ) * vAO;
-        reflectedLight.indirectSpecular *= vAO;
+        reflectedLight.indirectSpecular *= vAO * ( 1.0 - 0.7 * mcHairK );
         reflectedLight.directDiffuse *= mix( 1.0, vAO, 0.45 );`,
       )
       .replace(

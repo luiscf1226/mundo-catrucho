@@ -249,8 +249,8 @@ function face(c: Ctx, cfg: AvatarConfig) {
           r2 = sx * sx + sy * sy;
         if (r2 >= 1) continue;
         const m = sy - lineAt(line, Math.atan2(sx, Math.sqrt(1 - r2)));
-        if (m < -0.03) continue;
-        const k = Math.min(1, Math.max(0, (m + 0.03) / 0.09)) ** 1.5 * (0.55 + 0.45 * q()) * 0.92,
+        if (m < -0.01) continue;
+        const k = Math.min(1, Math.max(0, (m + 0.01) / 0.07)) ** 1.5 * (0.55 + 0.45 * q()) * 0.9,
           i = (y * 256 + x) * 4;
         d[i] += (hr - d[i]) * k;
         d[i + 1] += (hg - d[i + 1]) * k;
@@ -2047,7 +2047,7 @@ function ormFor(cfg: AvatarConfig, cv: HTMLCanvasElement): THREE.DataTexture {
   const sw: Partial<Record<SwatchName, [Cls, number, number?]>> = {
     skin: [CLS.piel, 0.52],
     lid: [CLS.piel, 0.45],
-    hair: [CLS.pelo, 0.42],
+    hair: [CLS.pelo, 0.58],
     hat: [hatC, hatC === CLS.duro ? 0.6 : 0.88],
     hat2: [hatC, hatC === CLS.duro ? 0.6 : 0.88],
     acc: [CLS.tejido, 0.62],
