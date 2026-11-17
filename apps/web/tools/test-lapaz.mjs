@@ -136,6 +136,14 @@ const ok = await run('lapaz', file, { hash: '#test', width: 1280, height: 800 },
     assert.equal(await t.ev(`${S}.mg.result.stars`), 3, `${motor} sin tema llega a oro`);
   }
   console.log('PASA teclado, mando y ocho motores sin tema');
+
+  // saludar alternando las dos comitivas sin pensar en quién va debiendo no gana
+  await abrir('lapaz.dos-pueblos-se-saludan', 'lapaz.reciprocidad');
+  await t.ev(
+    `for(let i=0;i<1500;i++){if(i%18===0){window.__mc.input.px=(i/18)%2?0.5:-0.5;window.__mc.input.press('fire')}${M}.avanzar(0.05)}`,
+  );
+  assert.equal(await t.ev(`${S}.mg.result.won`), false, 'alternar comitivas a ciegas pierde');
+  console.log('PASA alternar comitivas a ciegas pierde');
   assert.equal(t.errors.length, 0, t.errors.join('\n'));
 });
 

@@ -56,17 +56,14 @@ function actuar(m: Sesion) {
     otro = 1 - g;
   if (s.camino[g] > 0) return suspender(m, 'Esa comitiva todavía viene en camino: se adelantó.');
   if (s.ofrecio < 0) {
-    // ofrecer: la hospitalidad debe quedar pareja y cuesta una provisión
+    // ofrecer fuera de turno también es adelantarse: la hospitalidad debe quedar pareja y cuesta una provisión
     if (m.parametros.provisiones && s.provisiones[g] <= 0) {
       s.desiguales++;
-      m.sumar(-20);
-      return;
+      return suspender(m, 'Esa comitiva no trae provisiones: le toca recibir.');
     }
     if (s.hosp[g] > s.hosp[otro]) {
       s.desiguales++;
-      m.sumar(-20);
-      useGame.getState().toast('Le toca ofrecer a la otra comitiva.', '🤝');
-      return;
+      return suspender(m, 'Le tocaba ofrecer a la otra comitiva: se suspende el encuentro.');
     }
     s.ofrecio = g;
     s.hosp[g]++;
