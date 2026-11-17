@@ -35,8 +35,15 @@ const M = (p: V3, s: V3 | number = 1, r: V3 = [0, 0, 0]) => {
   else _s.set(...s);
   return new THREE.Matrix4().compose(_p, _q, _s);
 };
-let SPH: THREE.SphereGeometry | null = null;
-const sph = () => (SPH ??= new THREE.SphereGeometry(1, 10, 7));
+/** detalle de lo que se construye: 1 = completo, menor = versión liviana para lejos o celular */
+let LOD = 1;
+export const setDetail = (lite: boolean) => {
+  LOD = lite ? 0.55 : 1;
+};
+/** segmentos según el detalle (nunca menos de `min`) */
+const seg = (n: number, min = 4) => Math.max(min, Math.round(n * LOD));
+const SPHS: Record<number, THREE.SphereGeometry> = {};
+const sph = () => (SPHS[LOD] ??= new THREE.SphereGeometry(1, seg(10, 6), seg(7, 5)));
 
 /** rasgos de la persona que se está construyendo: cada piel y cuerpo da una cara un poco distinta */
 const F = { nose: 1, noseW: 1, jaw: 0.5, chin: 1, lips: 1, cheek: 1, brow: 1 };
@@ -165,9 +172,9 @@ function weld(a: THREE.BufferGeometry, ca: number, na: number, b: THREE.BufferGe
 
 /** cabeza esculpida: mitad delantera con la cara del atlas, mitad trasera con la piel lisa */
 export function head(add: AddN, fem: boolean, face: Rect, skin: Rect) {
-  const lats = spread(46, 0.015, Math.PI - 0.015, (p) => 1 + 2.4 * sm(0.95, 1.2, p) * (1 - sm(2.45, 2.75, p))),
-    front = spread(32, -Math.PI / 2, Math.PI / 2, (t) => 1 + 2.6 * Math.exp(-((t / 0.55) ** 2))),
-    back = spread(12, Math.PI / 2, Math.PI * 1.5, () => 1);
+  const lats = spread(seg(46), 0.015, Math.PI - 0.015, (p) => 1 + 2.4 * sm(0.95, 1.2, p) * (1 - sm(2.45, 2.75, p))),
+    front = spread(seg(32), -Math.PI / 2, Math.PI / 2, (t) => 1 + 2.6 * Math.exp(-((t / 0.55) ** 2))),
+    back = spread(seg(12), Math.PI / 2, Math.PI * 1.5, () => 1);
   const at = (sx: number, sy: number, sz: number, _t: number, o: THREE.Vector3) => {
     headPoint(sx, sy, sz, fem, 1, o);
     o.set(o.x + HC[0], o.y + HC[1], o.z + HC[2]);
@@ -188,7 +195,7 @@ export function eyeCenter(s: number, fem: boolean): V3 {
   return [HC[0] + p.x * 0.97, HC[1] + p.y, HC[2] + p.z - (EYE.r + 0.0012)];
 }
 function eyeball() {
-  const g = new THREE.SphereGeometry(EYE.r, 18, 12),
+  const g = new THREE.SphereGeometry(EYE.r, seg(18), seg(12)),
     P = g.attributes.position,
     U = g.attributes.uv;
   for (let i = 0; i < P.count; i++) {
@@ -202,7 +209,7 @@ function eyeball() {
 }
 /** casquete de párpado frente al ojo: de `t0` a `t1` radianes desde arriba */
 const lidCap = (r: number, t0: number, t1: number, half = 1.85) =>
-  new THREE.SphereGeometry(r, 18, 6, Math.PI / 2 - half, half * 2, t0, t1 - t0);
+  new THREE.SphereGeometry(r, seg(18), seg(6, 3), Math.PI / 2 - half, half * 2, t0, t1 - t0);
 
 /** ojos con globo, párpados fijos y el párpado que parpadea (hueso `lid`, gira sobre la línea de los ojos) */
 export function eyes(add: AddN, fem: boolean, closed: [boolean, boolean], lid: Rect) {
@@ -222,9 +229,9 @@ export const lidPivot = (fem: boolean): V3 => {
   return [0, c[1], c[2]];
 };
 
-let EAR: THREE.BufferGeometry | null = null;
+let EAR: Record<number, THREE.BufferGeometry> = {};
 export function ears(add: AddN, skin: Rect) {
-  EAR ??= new THREE.LatheGeometry(
+  EAR[LOD] ??= new THREE.LatheGeometry(
     (
       [
         [0.001, -0.58],
@@ -239,11 +246,11 @@ export function ears(add: AddN, skin: Rect) {
         [0.001, -0.26],
       ] as const
     ).map(([r, y]) => new THREE.Vector2(r, y)),
-    16,
+    seg(16),
   );
   for (const s of [-1, 1])
     add(
-      EAR,
+      EAR[LOD],
       skin,
       B.head,
       new THREE.Matrix4()
@@ -284,6 +291,12 @@ export function hand(add: AddN, s: number, fem: boolean, wrist: V3, skin: Rect) 
   put(sph(), M([0.001, -0.006, 0], [0.02, 0.028, 0.026]));
   put(sph(), M([0, -0.05, 0.002], [0.016, 0.05, 0.041]));
   put(sph(), M([-0.004, -0.05, 0.026], [0.013, 0.032, 0.016])); // base del pulgar
+  if (LOD < 1) {
+    // de lejos: dedos juntos en un solo bloque doblado y el pulgar
+    put(sph(), M([-0.009, -0.118, 0.001], [0.0125, 0.038, 0.036], [0, 0, -0.45]));
+    put(sph(), M([-0.014, -0.075, 0.042], [0.009, 0.026, 0.01], [-0.6, 0, -0.3]));
+    return;
+  }
   const fz = [0.027, 0.009, -0.009, -0.026],
     fl = [0.068, 0.076, 0.071, 0.056],
     fr = [0.0082, 0.0086, 0.0081, 0.0072],
@@ -328,7 +341,7 @@ export function hand(add: AddN, s: number, fem: boolean, wrist: V3, skin: Rect) 
 
 /** zapato (empeine redondeado, punta, talón) o su suela; medidas desde el tobillo hacia adelante */
 function shoeGeo(sole: boolean, boot: boolean) {
-  const g = new THREE.SphereGeometry(1, 20, 12),
+  const g = new THREE.SphereGeometry(1, seg(20), seg(12)),
     P = g.attributes.position;
   for (let i = 0; i < P.count; i++) {
     const ux = P.getX(i),
@@ -346,20 +359,21 @@ function shoeGeo(sole: boolean, boot: boolean) {
 }
 let SHOES: Record<string, THREE.BufferGeometry> = {};
 export function shoes(add: AddN, ankle: V3, shoe: Rect, sole: Rect, boot = false) {
-  const k = boot ? 'b' : 'z';
+  const k = `${boot ? 'b' : 'z'}${LOD}`,
+    ks = `s${LOD}`;
   SHOES[k] ??= shoeGeo(false, boot);
-  SHOES.s ??= shoeGeo(true, false);
+  SHOES[ks] ??= shoeGeo(true, false);
   for (const s of [-1, 1]) {
     const f = s > 0 ? B.footL : B.footR,
       m = M([s * (ankle[0] + 0.004), 0, 0], 1, [0, s * 0.1, 0]);
     add(SHOES[k], shoe, f, m);
-    add(SHOES.s, sole, f, m);
+    add(SHOES[ks], sole, f, m);
   }
 }
 /** para pruebas en caliente: vuelve a construir las piezas cacheadas */
 export function resetAnat() {
   SHOES = {};
-  EAR = null;
+  EAR = {};
 }
 
 // ---------------------------------------------------------------- pelo
@@ -419,8 +433,8 @@ interface Shell {
 }
 /** casco de pelo sobre el cuero cabelludo: el borde se mete bajo la piel, así el nacimiento queda limpio */
 function shell(add: AddN, fem: boolean, hat: boolean, o: Shell, rect: Rect) {
-  const NL = o.lat ?? 44,
-    NO = o.lon ?? 64,
+  const NL = seg(o.lat ?? 44, 12),
+    NO = seg(o.lon ?? 64, 16),
     lats = Array.from({ length: NL + 1 }, (_, i) => 0.02 + ((Math.PI * 0.86 - 0.02) * i) / NL),
     lons = Array.from({ length: NO + 1 }, (_, j) => -Math.PI + (2 * Math.PI * j) / NO),
     margin: number[] = [];
@@ -487,8 +501,8 @@ const wHangN: WFn = (_x, y) => {
 
 /** cortina de pelo largo que cae por la espalda, por fuera de hombros y cuello */
 function curtain(add: AddN, rect: Rect, len: number) {
-  const NA = 30,
-    NY = 18,
+  const NA = seg(30, 12),
+    NY = seg(18, 8),
     pos: number[] = [],
     uv: number[] = [],
     idx: number[] = [],
@@ -541,8 +555,8 @@ function braid(add: AddN, s: number, rect: Rect, tie: Rect) {
     return p;
   });
   const cur = new THREE.CatmullRomCurve3(pts),
-    NS = 56,
-    NR = 8,
+    NS = seg(56, 20),
+    NR = seg(8, 5),
     g = new THREE.TubeGeometry(cur, NS, 0.014, NR, false),
     P = g.attributes.position,
     c = new THREE.Vector3();

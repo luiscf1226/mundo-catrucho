@@ -224,7 +224,7 @@ const torsoV = (y: number, fem: boolean) => {
   for (const [ty, tv] of top) if (Math.abs(y - ty) < 1e-4) return tv;
   return y < 0.7 ? 0 : Math.min(1, (y - 0.7) / 0.475);
 };
-function body(add: Add, c: AvatarConfig, nat: AddN) {
+function body(add: Add, c: AvatarConfig, nat: AddN, lite: boolean) {
   // torso (camisa arriba, pantalón o falda abajo: lo pinta el atlas). Perfiles en medidas viejas: `warp` los estira.
   const fem = c.body === 'm';
   const TH: [number, number, number, number?][] = [
@@ -260,7 +260,7 @@ function body(add: Add, c: AvatarConfig, nat: AddN) {
     loft(
       // arriba, la banda del cuello del atlas (v > 0,95) queda solo alrededor del cuello
       (fem ? TM : TH).map(([y, rx, rz, cz]) => ({ y, rx, rz, cz, v: torsoV(y, fem) })),
-      24,
+      lite ? 16 : 24,
     ),
     R.torso,
     wTorso,
@@ -296,7 +296,7 @@ function body(add: Add, c: AvatarConfig, nat: AddN) {
           cx: s * (fem ? 0.255 : 0.262),
           v: Math.min(1, (r.y - 0.69) / 0.488),
         })),
-        14,
+        lite ? 10 : 14,
       ),
       R.arm,
       wArm(s),
@@ -345,7 +345,7 @@ function body(add: Add, c: AvatarConfig, nat: AddN) {
           cx: s * 0.102,
           v: (y - 0.07) / 0.75,
         })),
-        14,
+        lite ? 10 : 14,
       ),
       R.leg,
       wLeg(s),
@@ -1060,9 +1060,12 @@ REST[B.lid] = anat.lidPivot(false);
 REST[B.tail] = anat.TAIL;
 
 const cache = new Map<string, THREE.BufferGeometry>();
-/** geometría con huesos del avatar, cacheada por estilo (cabello, sombrero, accesorio, tipo de prenda, cara) */
-export function avatarGeometry(c: AvatarConfig): THREE.BufferGeometry {
-  const key = styleKey(c);
+/**
+ * Geometría con huesos del avatar, cacheada por estilo (cabello, sombrero, accesorio, tipo de prenda, cara, piel).
+ * `lite` = la misma figura con menos segmentos (mismos huesos y atlas) para lejos de la cámara o celular.
+ */
+export function avatarGeometry(c: AvatarConfig, lite = false): THREE.BufferGeometry {
+  const key = `${styleKey(c)}|${lite ? 'L' : 'H'}`;
   let g = cache.get(key);
   if (g) return g;
   const b = new SkinBuilder();
@@ -1071,16 +1074,18 @@ export function avatarGeometry(c: AvatarConfig): THREE.BufferGeometry {
   let h = 2166136261;
   for (const ch of `${c.skin}|${c.body ?? 'h'}`) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
   anat.setFace(c.body === 'm', h);
+  anat.setDetail(lite);
   const add: Add = (geo, rect, w, m) => {
       b.add(geo, rect, w, m);
     },
     nat: AddN = (geo, rect, w, m) => {
       b.add(geo, rect, w, m, null);
     };
-  body(add, c, nat);
+  body(add, c, nat, lite);
   anat.hair(nat, c.hair, c.body === 'm', hatOnHair(c), S('hair'), S('red'));
   hats(add, c);
   accessory(add, c);
+  anat.setDetail(false);
   g = b.build();
   bakeAO(g, c.body === 'm');
   g.computeBoundingSphere();
