@@ -176,21 +176,20 @@ const motor = defineMotor({
         ))}
         {/* tabla de países */}
         <Plate
-          pos={[-4, 1.5, 2.4]}
-          rot={0.3}
+          pos={[-1, 1.05, 3.6]}
           text={DESTINOS.map(([d, p]) => `${d}: ${p}`).join('  ·  ')}
-          h={0.3}
+          h={0.36}
           bg="#264653"
         />
         {s.rotulos.map((r, i) => {
-          const x = 1.6 * (i - (n - 1) / 2) + 0.6;
+          const x = 1.9 * (i - (n - 1) / 2) + 0.9;
           return (
             <group key={i}>
               <Block pos={[x, 1.3, -1]} size={[0.08, 1.2, 0.08]} color="#adb5bd" mat="metal" solid={false} />
               <Plate
                 pos={[x, 2.1, -0.95]}
                 text={`${FLECHAS[r.flecha]} ${DESTINOS[r.destino][0]}`}
-                h={0.3}
+                h={0.38}
                 bg={i === k ? '#b8860b' : '#1b6b3a'}
               />
               <Plate pos={[x, 1.75, -0.95]} text={PAISES[r.pais]} h={0.3} bg="#14532d" />
