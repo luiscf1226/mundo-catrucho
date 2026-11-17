@@ -238,7 +238,9 @@
       "burger king",
       "pizza hut",
       "\\bkfc\\b",
-      "\\bwendy'?s\\b"
+      "\\bwendy'?s\\b",
+      "pololandia",
+      "almacenes carri[oó]n|\\bcarri[oó]n\\b"
     ]
   }
 }

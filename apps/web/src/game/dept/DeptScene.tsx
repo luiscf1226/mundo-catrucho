@@ -3,6 +3,7 @@ import { useEffect, useMemo } from 'react';
 import { DEPARTMENTS, deptById } from '../../core/data';
 import { DecoracionEventos } from '../eventos/Decoracion';
 import { Spawn } from '../kit';
+import { Ciudad } from './ciudad';
 import { MuroMemes } from './muro';
 import { Lugares } from './stations';
 import { Turismo } from './turismo';
@@ -37,6 +38,7 @@ export function DeptScene({ id }: { id: string }) {
       <DecoracionEventos dept={id} pos={spec.spawn} />
       <ZoneLife d={d} spec={spec} />
       <Lugares d={d} spec={spec} />
+      <Ciudad d={d} spec={spec} />
       <MuroMemes d={d} spec={spec} />
       <Turismo dept={id} spec={spec} />
     </>
