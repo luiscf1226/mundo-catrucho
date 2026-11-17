@@ -254,6 +254,7 @@ function swirlMat(color: string) {
       fragmentShader: SW_FS,
       transparent: true,
       side: THREE.DoubleSide,
+      forceSinglePass: true,
       depthWrite: false,
       uniforms: { uT: TIME, uC: { value: new THREE.Color(color) } },
     });

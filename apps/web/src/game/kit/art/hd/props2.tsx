@@ -962,6 +962,7 @@ function portalMaterial(color: string) {
     transparent: true,
     depthWrite: false,
     side: THREE.DoubleSide,
+    forceSinglePass: true,
     uniforms: { uTime: G.uTime, uCol: { value: new THREE.Color(color) } },
     vertexShader:
       'varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 ); }',
@@ -999,6 +1000,7 @@ function netMaterial() {
     map: t,
     transparent: true,
     side: THREE.DoubleSide,
+    forceSinglePass: true,
     depthWrite: false,
     opacity: 0.9,
   });
