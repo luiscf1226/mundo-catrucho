@@ -172,14 +172,17 @@ try {
     assert.equal(inc.ok, false);
     assert.equal(inc.motivo, 'incompleta');
     // una etapa todavía bloqueada no se abre
-    assert.deepEqual(await m(fn.abrir, { invitado: secretoA, motor: 'trivia', juegoId: 'yoro.huelga', etapa: 1 }), {
-      ok: false,
-      motivo: 'etapa bloqueada',
-    });
+    assert.deepEqual(
+      await m(fn.abrir, { invitado: secretoA, motor: 'trivia', juegoId: 'graciasadios.naksa', etapa: 1 }),
+      {
+        ok: false,
+        motivo: 'etapa bloqueada',
+      },
+    );
 
     // 2. cerrar una partida guarda etapa, estrellas, visita y marca, y da «Primera victoria» una vez
     await t.sleep(1100);
-    await t.ev(`${S}.startJuego('yoro.huelga')`);
+    await t.ev(`${S}.startJuego('graciasadios.naksa')`);
     await t.waitFor(`${S}.mg?.phase === 'intro'`);
     await t.ev(`${S}.beginMinigame()`);
     await t.sleep(9500);
@@ -187,16 +190,16 @@ try {
     await t.waitFor(`${S}.mg?.pago === 'pagado'`, 20000, 'pago del servidor');
     assert.deepEqual(await st('s.mg.rewards.newAchievements'), ['primera_victoria']);
     assert.equal(await st('s.mg.avance'), true);
-    assert.equal(await st(`s.profile.juegos['yoro.huelga'].etapa`), 1);
+    assert.equal(await st(`s.profile.juegos['graciasadios.naksa'].etapa`), 1);
     await t.waitFor(`!!document.querySelector('[data-testid=mg-ach-primera_victoria]')`);
     await t.sleep(2500); // que terminen de contar los premios
     await t.shot(join(capturas, '01-logro-del-servidor.png'));
     const e2 = await q(fn.estado, { invitado: secretoA });
     assert.deepEqual(
-      e2.juegos.find((j) => j.juegoId === 'yoro.huelga'),
-      { juegoId: 'yoro.huelga', etapa: 1, estrellas: [1], mejor: 480, veces: 1 },
+      e2.juegos.find((j) => j.juegoId === 'graciasadios.naksa'),
+      { juegoId: 'graciasadios.naksa', etapa: 1, estrellas: [1], mejor: 480, veces: 1 },
     );
-    assert(e2.visitas.includes('yoro'), 'la partida cuenta como visita');
+    assert(e2.visitas.includes('graciasadios'), 'la partida cuenta como visita');
     const premioGanar = R.minigame.win.coins + R.minigame.perStar.coins,
       primeraVisita = R.world.firstVisit.coins;
     const xpGanada = R.minigame.win.xp + R.minigame.perStar.xp + R.world.firstVisit.xp,
@@ -209,8 +212,22 @@ try {
     await t.ev(`${S}.exitMinigame()`);
     await m(fn.entrar, { invitado: secretoB, nombre: `${nombreB}!!<>` });
     const [rA, rB] = await Promise.all([
-      partida(secretoA, { motor: 'trivia', juegoId: 'yoro.huelga', seg: 9, puntos: 470, estrellas: 1, gano: true }),
-      partida(secretoB, { motor: 'trivia', juegoId: 'yoro.huelga', seg: 9, puntos: 420, estrellas: 1, gano: true }),
+      partida(secretoA, {
+        motor: 'trivia',
+        juegoId: 'graciasadios.naksa',
+        seg: 9,
+        puntos: 470,
+        estrellas: 1,
+        gano: true,
+      }),
+      partida(secretoB, {
+        motor: 'trivia',
+        juegoId: 'graciasadios.naksa',
+        seg: 9,
+        puntos: 420,
+        estrellas: 1,
+        gano: true,
+      }),
     ]);
     assert(rA.ok && rB.ok);
     assert.deepEqual(rA.logros, [], 'el logro se da una sola vez');
@@ -220,7 +237,7 @@ try {
     );
     assert.equal((await q(fn.estado, { invitado: secretoA })).logros.filter((l) => l === 'primera_victoria').length, 1);
     // la marca guarda la mejor: 470 no baja los 480
-    const tabla = await q(fn.porJuego, { juegoId: 'yoro.huelga', invitado: secretoA });
+    const tabla = await q(fn.porJuego, { juegoId: 'graciasadios.naksa', invitado: secretoA });
     const iA = tabla.filas.findIndex((f) => f.nombre === nombreA),
       iB = tabla.filas.findIndex((f) => f.nombre === nombreB);
     assert(iA >= 0 && iB > iA, `A antes que B: ${JSON.stringify(tabla.filas)}`);
@@ -229,12 +246,12 @@ try {
     assert.equal(tabla.filas[iB].nombre, nombreB, 'nombre limpio');
 
     // 4. la pantalla de clasificación muestra a los dos, en orden, con datos del servidor
-    await t.ev(`${S}.travel('yoro')`);
+    await t.ev(`${S}.travel('graciasadios')`);
     await t.ev(`${S}.openPanel('clasificacion')`);
     await t.waitFor(`!!document.querySelector('[data-testid=lb-juego]')`);
     await t.ev(`(() => {
       const el = document.querySelector('[data-testid=lb-juego]');
-      Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(el, 'yoro.huelga');
+      Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(el, 'graciasadios.naksa');
       el.dispatchEvent(new Event('change', { bubbles: true }));
     })()`);
     await t.waitFor(
@@ -261,7 +278,7 @@ try {
       'tabla por departamento',
     );
     await t.shot(join(capturas, '03-clasificacion-por-departamento.png'));
-    const depto = await q(fn.porDepto, { deptId: 'yoro' });
+    const depto = await q(fn.porDepto, { deptId: 'graciasadios' });
     assert.equal(depto.filas.filter((f) => f.nombre === nombreA).length, 1, 'una fila por jugador');
     await t.ev(`${S}.closePanel()`);
 

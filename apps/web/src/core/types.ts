@@ -134,7 +134,15 @@ export type MinigameId =
   | 'ocotepeque.gotasviento'
   | 'ocotepeque.reservas'
   | 'ocotepeque.moras'
-  | 'ocotepeque.rotulos';
+  | 'ocotepeque.rotulos'
+  // Yoro
+  | 'yoro.cable'
+  | 'yoro.acuerdos'
+  | 'yoro.jamo'
+  | 'yoro.ulua'
+  | 'yoro.pijol'
+  | 'yoro.almohadilla'
+  | 'yoro.coyol';
 /** solo = vos contra bots · duo = vos y un compa contra parejas · abierto = sala abierta (se llena con bots si no hay gente) */
 export type Modo = 'solo' | 'duo' | 'abierto';
 export type Vehiculo =

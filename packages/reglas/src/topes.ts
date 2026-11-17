@@ -109,6 +109,12 @@ const ocotepeque = kit(
   (d) => [120 + r(d * 120), 360, 600],
   () => 75,
 );
+// Yoro
+/** Yoro: metas y reloj de minigames/yoro/comun.tsx. */
+const yoro = kit(
+  (d) => [120 + r(d * 120), 360, 600],
+  () => 75,
+);
 const islas = (a: number, b: number, c: number, k: number, base: number, extra: number) =>
   kit(lineal(a, b, c, k), (d) => base + r(d * extra));
 /** Comayagua: `metasLineales` y `reloj` de apps/web/src/game/minigames/comayagua/comun.tsx */
@@ -432,6 +438,16 @@ export const TOPES: Record<string, TopeMotor> = {
   'ocotepeque.moras': conRitmo(ocotepeque, 40),
   // 45 pts por cruce, otro cada segundo
   'ocotepeque.rotulos': conRitmo(ocotepeque, 45),
+  // Yoro: puntos por acierto ÷ espera mínima entre aciertos (con la pausa entre tandas)
+  'yoro.cable': conRitmo(yoro, 40),
+  'yoro.acuerdos': conRitmo(yoro, 40),
+  'yoro.jamo': conRitmo(yoro, 40),
+  // con dos sensores casi juntos se puede retirar a los 0,5 s: 70 pts cada 1,5 s
+  'yoro.ulua': conRitmo(yoro, 60),
+  // un desviador y cruzar: 80 pts cada 1,75 s
+  'yoro.pijol': conRitmo(yoro, 60),
+  'yoro.almohadilla': conRitmo(yoro, 40),
+  'yoro.coyol': conRitmo(yoro, 40),
 };
 
 export interface Resultado {
