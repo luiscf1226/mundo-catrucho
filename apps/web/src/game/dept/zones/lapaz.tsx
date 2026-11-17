@@ -3,6 +3,7 @@ import { P } from '../../kit';
 import { bl, bx, cy, inR, PI, place, py, ss } from '../lib';
 import { basket, mont, stairs } from '../parts';
 import { ZB, type ZoneSpec } from '../zone';
+import { cercaDeLocura, LaPazDescubrimientos } from './LaPazDescubrimientos';
 
 /** La Paz: finca de café en la ladera de Marcala: surcos de cafetos, patio de secado, beneficio y mirador arriba. */
 export function cafetal(d: Department): ZoneSpec {
@@ -13,6 +14,7 @@ export function cafetal(d: Department): ZoneSpec {
     Math.max(Math.min(1.6 - Math.abs(x), 30 - z) * 2, Math.min(27 - Math.abs(x), z - 1, 21 - z) / 1.5),
   );
   Z.stop(0, 42);
+  Z.n(<LaPazDescubrimientos />);
   // surcos de cafetos con cerezas rojas
   for (let z = -8; z > -43; z -= 3.4)
     for (let x = -44; x <= 44; x += 1.75) {
@@ -105,12 +107,17 @@ export function cafetal(d: Department): ZoneSpec {
     .label('Mirador del cafetal', 20, 19.4, -47, 0.6)
     .label('Cafetales de Marcala', 0, 7.5, -14, 0.8);
   Z.veg('pine', 34, (x, z) => (Math.abs(x) > 46 || z < -49 || z > 48) && !inR(x, z, 12, 26, -52, -44), { sep: 5 });
-  Z.veg('tree', 22, (x, z) => z > 0 && (Math.abs(x) > 30 || z > 46), { sep: 5.5 });
+  Z.veg('tree', 22, (x, z) => z > 0 && (Math.abs(x) > 30 || z > 46) && !cercaDeLocura(x, z), { sep: 5.5 });
   Z.veg(
     'bush',
     18,
     (x, z) =>
-      z > 23 && Math.abs(x) > 5 && Math.abs(x) < 46 && !inR(x, z, 18, 32, 24, 36) && !inR(x, z, -14, 10, 22, 48),
+      z > 23 &&
+      Math.abs(x) > 5 &&
+      Math.abs(x) < 46 &&
+      !inR(x, z, 18, 32, 24, 36) &&
+      !inR(x, z, -14, 10, 22, 48) &&
+      !cercaDeLocura(x, z),
     { sep: 3 },
   );
   Z.add(

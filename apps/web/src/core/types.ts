@@ -44,6 +44,23 @@ export type MinigameId =
   | 'choluteca.cincha'
   | 'choluteca.ventanasbus'
   | 'choluteca.mareapaseo'
+  // La Paz
+  | 'lapaz.catacion'
+  | 'lapaz.cafe'
+  | 'lapaz.tostador'
+  | 'lapaz.reciprocidad'
+  | 'lapaz.vapor'
+  | 'lapaz.pesas'
+  | 'lapaz.abrasigo'
+  | 'lapaz.estiba'
+  // Colón
+  | 'colon.salinidad'
+  | 'colon.visualbahia'
+  | 'colon.gajos'
+  | 'colon.remolque'
+  | 'colon.redjuvenil'
+  | 'colon.plano'
+  | 'colon.racimos'
   | 'copan.cadera'
   | 'copan.glifos'
   | 'copan.guaras'
@@ -108,7 +125,16 @@ export type MinigameId =
   | 'atlantida.manati'
   | 'atlantida.lancetilla'
   | 'atlantida.canopy'
-  | 'atlantida.carnaval';
+  | 'atlantida.carnaval'
+  // Ocotepeque
+  | 'ocotepeque.trifinio'
+  | 'ocotepeque.archivoagua'
+  | 'ocotepeque.boveda'
+  | 'ocotepeque.mercadomadruga'
+  | 'ocotepeque.gotasviento'
+  | 'ocotepeque.reservas'
+  | 'ocotepeque.moras'
+  | 'ocotepeque.rotulos';
 /** solo = vos contra bots · duo = vos y un compa contra parejas · abierto = sala abierta (se llena con bots si no hay gente) */
 export type Modo = 'solo' | 'duo' | 'abierto';
 export type Vehiculo =

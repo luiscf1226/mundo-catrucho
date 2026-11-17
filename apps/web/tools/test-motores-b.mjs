@@ -254,13 +254,15 @@ const peces = [
   ['Pez vela', 90, '#3f6fd1'],
 ];
 const res = [];
-res.push(await pruebaAtrapa('atrapa-catalogo-hortalizas', { juego: 'lapaz.hortalizas', motor: 'atrapa', golpe: true }));
-res.push(await pruebaAtrapa('atrapa-catalogo-cafe-duo', { juego: 'lapaz.cortecafe', motor: 'atrapa', modo: 'duo' }));
+res.push(
+  await pruebaAtrapa('atrapa-catalogo-hortalizas', { juego: 'graciasadios.cacao', motor: 'atrapa', golpe: true }),
+);
+res.push(await pruebaAtrapa('atrapa-catalogo-cafe-duo', { juego: 'yoro.lluvia', motor: 'atrapa', modo: 'duo' }));
 res.push(await pruebaAtrapa('atrapa-sin-tema', { motor: 'atrapa', modo: 'solo' }));
-res.push(await pruebaCocina('cocina-catalogo-baleadas', { juego: 'lapaz.ticucos', motor: 'cocina', modo: 'duo' }));
+res.push(await pruebaCocina('cocina-catalogo-baleadas', { juego: 'yoro.coyoles', motor: 'cocina', modo: 'duo' }));
 res.push(
   await pruebaCocina('cocina-catalogo-tostado', {
-    juego: 'lapaz.tostado',
+    juego: 'santabarbara.gallina',
     motor: 'cocina',
     modo: 'solo',
     pedidos: 1,
@@ -286,7 +288,7 @@ res.push(
 res.push(
   await pruebaAtrapa(
     'captura-atrapa-hortalizas',
-    { juego: 'lapaz.hortalizas', motor: 'atrapa', shot: 'atrapa-hortalizas', sinFin: true },
+    { juego: 'graciasadios.cacao', motor: 'atrapa', shot: 'atrapa-hortalizas', sinFin: true },
     '#go',
   ),
 );
@@ -315,7 +317,7 @@ res.push(
   await pruebaCocina(
     'captura-cocina-baleadas',
     {
-      juego: 'lapaz.ticucos',
+      juego: 'yoro.coyoles',
       motor: 'cocina',
       modo: 'duo',
       pedidos: 1,
@@ -328,7 +330,7 @@ res.push(
 res.push(
   await pruebaCocina(
     'captura-cocina-tostado',
-    { juego: 'lapaz.tostado', motor: 'cocina', modo: 'solo', pedidos: 1, shot: 'cocina-tostado', sinFin: true },
+    { juego: 'santabarbara.gallina', motor: 'cocina', modo: 'solo', pedidos: 1, shot: 'cocina-tostado', sinFin: true },
     '#go',
   ),
 );

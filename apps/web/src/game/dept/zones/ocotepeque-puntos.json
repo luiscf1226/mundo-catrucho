@@ -1,0 +1,20 @@
+[
+  {
+    "id": "ocotepeque.locura-0",
+    "nombre": "Tres saludos para un cerro",
+    "texto": "Tres flechas de maqueta saludan juntas a la cumbre del Trifinio, donde se juntan Honduras, Guatemala y El Salvador. Es pura ficción del juego, no un ritual de nadie.",
+    "pos": [-6, -15]
+  },
+  {
+    "id": "ocotepeque.locura-1",
+    "nombre": "El repollo hace mandado",
+    "texto": "Un repollo de cartón sale al mercado de práctica con una lista más larga que él. El mercado de Belén Gualcho sí es tradición; el repollo mandadero es invento nuestro.",
+    "pos": [-7, 38]
+  },
+  {
+    "id": "ocotepeque.locura-2",
+    "nombre": "La nube se puso suéter",
+    "texto": "En Güisayote hace frío de bosque nublado: esta nubecita se arropó con su suéter y se acostó encima del mapita. Chiste del clima, nada más.",
+    "pos": [4, 14]
+  }
+]

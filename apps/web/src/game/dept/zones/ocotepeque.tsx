@@ -3,6 +3,7 @@ import { P } from '../../kit';
 import { bl, bx, cy, dist, distToPath, inR, PI, place, ss } from '../lib';
 import { casa, flagOf, mont } from '../parts';
 import { ZB, type ZoneSpec } from '../zone';
+import { OcotepequeDescubrimientos } from './OcotepequeDescubrimientos';
 
 /** Ocotepeque: bosque nublado de Montecristo, árboles gigantes entre la neblina y el mojón del Trifinio en la cumbre. */
 export function bosque(d: Department): ZoneSpec {
@@ -27,6 +28,7 @@ export function bosque(d: Department): ZoneSpec {
     .layer('dirt', '#6b5236', (x, z) => (1.5 - Math.min(distToPath(x, z, way), distToPath(x, z, side) + 0.3)) * 2)
     .layer('dirt', '#8a7a5a', (x, z) => (6.8 - top(x, z)) / 1.5);
   Z.stop(0, 42);
+  Z.n(<OcotepequeDescubrimientos altura={Z.h} />);
   // mojón del Trifinio con las tres banderas
   const A = [0, (2 * PI) / 3, (4 * PI) / 3],
     NAMES = ['HONDURAS', 'EL SALVADOR', 'GUATEMALA'],

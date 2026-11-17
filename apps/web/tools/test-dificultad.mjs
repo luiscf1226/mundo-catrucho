@@ -21,14 +21,14 @@ const JUEGO = {
   ritmo: 'atlantida.punta-en-sambo-creek',
   atrapa: 'yoro.lluvia',
   pesca: 'cortes.pesca-en-yojoa',
-  trivia: 'lapaz.catacion',
-  cocina: 'lapaz.ticucos',
+  trivia: 'santabarbara.patepluma',
+  cocina: 'yoro.coyoles',
   ruta: 'santabarbara.pencaligue',
   manejo: 'franciscomorazan.rapidito',
-  feria: 'lapaz.feriamarcala',
+  feria: 'yoro.santiago',
   pulperia: 'franciscomorazan.pulperia',
-  futbol: 'ocotepeque.tresfronteras',
-  exploradores: 'lapaz.pintadas',
+  futbol: 'yoro.riberenos',
+  exploradores: 'yoro.tolupan',
 };
 
 // ------------------------------------------------------------------ bots (corren dentro de la página)
