@@ -255,7 +255,7 @@ const peces = [
 ];
 const res = [];
 res.push(
-  await pruebaAtrapa('atrapa-catalogo-hortalizas', { juego: 'graciasadios.cacao', motor: 'atrapa', golpe: true }),
+  await pruebaAtrapa('atrapa-catalogo-hortalizas', { juego: 'yoro.lluvia', motor: 'atrapa', golpe: true }),
 );
 res.push(await pruebaAtrapa('atrapa-catalogo-cafe-duo', { juego: 'yoro.lluvia', motor: 'atrapa', modo: 'duo' }));
 res.push(await pruebaAtrapa('atrapa-sin-tema', { motor: 'atrapa', modo: 'solo' }));
@@ -288,7 +288,7 @@ res.push(
 res.push(
   await pruebaAtrapa(
     'captura-atrapa-hortalizas',
-    { juego: 'graciasadios.cacao', motor: 'atrapa', shot: 'atrapa-hortalizas', sinFin: true },
+    { juego: 'yoro.lluvia', motor: 'atrapa', shot: 'atrapa-hortalizas', sinFin: true },
     '#go',
   ),
 );
