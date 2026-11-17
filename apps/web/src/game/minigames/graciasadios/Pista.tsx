@@ -22,6 +22,7 @@ type Estado = ReturnType<typeof cursor> & {
   sinPermiso: number;
   camas: number;
   aviso: boolean;
+  usos: number;
   azar: () => number;
 };
 type Param = { abierta: number; cerrada: number; no: number; cama: number; seed: number };
@@ -81,6 +82,7 @@ function cruzar(m: Sesion) {
     toast = useGame.getState().toast;
   if (s.espera > 0) return;
   s.espera = 0.4;
+  s.usos++;
   const v = ventana(m);
   if (s.cruce) {
     m.sumar(-5);
@@ -130,6 +132,7 @@ const motor = defineMotor({
       sinPermiso: 0,
       camas: 0,
       aviso: false,
+      usos: 0,
       azar: rng(p.seed),
     };
     while (s.fila.length < FILA) s.fila.push(persona(s, p));
@@ -187,6 +190,7 @@ const motor = defineMotor({
       devueltos: s.devueltos,
       sinPermiso: s.sinPermiso,
       cruces: s.cruzaron + s.devueltos + (s.cruce ? 1 : 0),
+      usos: s.usos,
     };
   },
   bot(m) {

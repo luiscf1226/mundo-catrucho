@@ -20,6 +20,7 @@ type Estado = ReturnType<typeof cursor> & {
   placas: number;
   pasadas: number;
   golpe: number;
+  volteos: number;
   azar: () => number;
 };
 type Param = { grumo: number; seed: number };
@@ -79,6 +80,7 @@ function voltear(m: Sesion) {
   const s = m.datos;
   if (s.espera > 0.3) return;
   s.dir = s.dir === 'h' ? 'v' : 'h';
+  s.volteos++;
   s.espera = Math.max(s.espera, 0.15);
 }
 
@@ -104,6 +106,7 @@ const motor = defineMotor({
       placas: 0,
       pasadas: 0,
       golpe: 0,
+      volteos: 0,
       azar: rng(p.seed),
     };
     tanda(s, p);
@@ -122,7 +125,15 @@ const motor = defineMotor({
       `${placas ? `Placas ${placas}: cruzalas` : 'Sin placas'} · Tandas listas ${s.tandas}`,
       `Grumos deshechos ${s.deshechos} · Aplastados ${s.placas} · Pasadas ${s.pasadas}`,
     ];
-    m.stats = { x: s.x, y: s.y, deshechos: s.deshechos, placas: s.placas, pasadas: s.pasadas, tandas: s.tandas };
+    m.stats = {
+      x: s.x,
+      y: s.y,
+      deshechos: s.deshechos,
+      placas: s.placas,
+      pasadas: s.pasadas,
+      tandas: s.tandas,
+      volteos: s.volteos,
+    };
   },
   bot(m) {
     const s = m.datos;

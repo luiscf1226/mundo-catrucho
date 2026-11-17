@@ -82,6 +82,7 @@ type Estado = ReturnType<typeof cursor> & {
   fallos: number;
   excluidas: number;
   aviso: number;
+  marcas: number;
   azar: () => number;
 };
 type Param = { vitrinas: number; contraste: boolean; seed: number };
@@ -163,6 +164,7 @@ function registrar(m: Sesion) {
   }
   if (cerca.v.sinProcedencia) return anular(m, 'Esa pieza no tiene procedencia: no entra al inventario.');
   cerca.k.hecha = true;
+  s.marcas++;
   m.sumar(25);
   if (cerca.v.marcas.every((k) => k.hecha)) {
     cerca.v.lista = true;
@@ -222,6 +224,7 @@ const motor = defineMotor({
     fallos: 0,
     excluidas: 0,
     aviso: 0,
+    marcas: 0,
     azar: rng(p.seed),
   }),
   actualizar(m, dt) {
@@ -254,7 +257,15 @@ const motor = defineMotor({
       `Fichas ${s.fichas} · Anuladas ${s.anuladas} · Sin marca ${s.fallos}${m.parametros.contraste ? ` · Excluidas ${s.excluidas}` : ''}`,
       'Réplica de exposición: no es el sitio real',
     ];
-    m.stats = { x: s.x, y: s.y, fichas: s.fichas, anuladas: s.anuladas, fallos: s.fallos, excluidas: s.excluidas };
+    m.stats = {
+      x: s.x,
+      y: s.y,
+      fichas: s.fichas,
+      anuladas: s.anuladas,
+      fallos: s.fallos,
+      excluidas: s.excluidas,
+      marcas: s.marcas,
+    };
   },
   bot(m) {
     const s = m.datos;

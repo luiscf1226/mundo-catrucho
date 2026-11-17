@@ -26,6 +26,7 @@ type Estado = ReturnType<typeof cursor> & {
   mal: number;
   quitados: number;
   perdidas: number;
+  usos: number;
   azar: () => number;
 };
 type Param = { margen: number; ruido: number; doble: number; paciencia: number; huecos: boolean; seed: number };
@@ -91,6 +92,7 @@ function quitar(m: Sesion) {
     c = s.cols[s.i];
   if (s.espera > 0 || !c) return;
   s.espera = 0.35;
+  s.usos++;
   const toast = useGame.getState().toast;
   const puntos = [
     ...(c.hueco ? [] : [{ h: c.suelo, tipo: 'suelo' as const, k: 0 }]),
@@ -147,6 +149,7 @@ const motor = defineMotor({
       mal: 0,
       quitados: 0,
       perdidas: 0,
+      usos: 0,
       azar: rng(p.seed),
     };
     while (s.cols.length < 6) s.cols.push(nueva(s, p));
@@ -186,7 +189,7 @@ const motor = defineMotor({
       `Columna ${s.i + 1} · ${Math.max(0, s.paciencia).toFixed(0)} s${s.achis > 0 ? ' · 🤧 colores revueltos' : ''}`,
       `Bien ${s.bien} · Mal ${s.mal} · Ruido quitado ${s.quitados} · Perdidas ${s.perdidas}`,
     ];
-    m.stats = { x: s.x, y: s.y, bien: s.bien, mal: s.mal, quitados: s.quitados, perdidas: s.perdidas };
+    m.stats = { x: s.x, y: s.y, bien: s.bien, mal: s.mal, quitados: s.quitados, perdidas: s.perdidas, usos: s.usos };
   },
   bot(m) {
     const s = m.datos,

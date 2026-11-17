@@ -21,6 +21,7 @@ type Estado = ReturnType<typeof cursor> & {
   pasados: number;
   hundidas: number;
   errores: number;
+  intentos: number;
   azar: () => number;
 };
 type Param = { dobles: number; seed: number };
@@ -63,6 +64,7 @@ function pasar(m: Sesion) {
     toast = useGame.getState().toast;
   if (s.espera > 0) return;
   s.espera = 0.5;
+  s.intentos++;
   const i = casilla(s.x, SLOTS * 2),
     de = s.botes[i < SLOTS ? 0 : 1],
     a = s.botes[i < SLOTS ? 1 : 0],
@@ -119,6 +121,7 @@ const motor = defineMotor({
     pasados: 0,
     hundidas: 0,
     errores: 0,
+    intentos: 0,
     azar: rng(p.seed),
   }),
   actualizar(m, dt) {
@@ -135,7 +138,14 @@ const motor = defineMotor({
       `Bote de la izquierda: le caben ${caben(A)} · Bote de la derecha: le caben ${caben(B)}`,
       `Entregas ${s.entregas} · Pasados ${s.pasados} · Bordes hundidos ${s.hundidas} · Errores ${s.errores}`,
     ];
-    m.stats = { x: s.x, entregas: s.entregas, pasados: s.pasados, hundidas: s.hundidas, errores: s.errores };
+    m.stats = {
+      x: s.x,
+      entregas: s.entregas,
+      pasados: s.pasados,
+      hundidas: s.hundidas,
+      errores: s.errores,
+      intentos: s.intentos,
+    };
   },
   bot(m) {
     const s = m.datos;
