@@ -44,9 +44,9 @@ const BOT_MONTA = `(()=>{ const T=window.__mcTest.monta, I=window.__mc.input; if
 if (!only || only === 'corte')
   all =
     (await run('corte', file, { hash: '#go' }, async (t) => {
-      await abre(t, 'santabarbara.junco', 'corte', 'solo');
+      await abre(t, 'olancho.la-tajada-pidio-escritura', 'corte', 'solo');
       const g = await t.ev(`window.__mc.store.getState().mg.juego`);
-      assert.equal(g, 'santabarbara.junco');
+      assert.equal(g, 'olancho.la-tajada-pidio-escritura');
       await t.ev(BOT_CORTE);
       await sleep(14000);
       const s1 = await t.ev(
@@ -87,7 +87,7 @@ if (!only || only === 'monta')
       assert(r.res.won, 'el piloto automático aguanta');
       await t.ev(`clearInterval(window.__b); window.__mc.store.getState().goLobby()`);
       await sleep(500);
-      await abre(t, 'santabarbara.jaripeo', 'monta', 'abierto');
+      await abre(t, 'olancho.el-toro-se-cree-resorte', 'monta', 'abierto');
       await sleep(6000);
       await t.shot(`${out}/monta-jaripeo.png`);
       // sin corregir la aguja se cae: derrota
@@ -166,12 +166,12 @@ if (!only || only === 'ruta')
       assert(r.res.won, 'llegó a la meta');
       await t.ev(`clearInterval(window.__b); window.__mc.store.getState().goLobby()`);
       await sleep(500);
-      await abre(t, 'santabarbara.pencaligue', 'ruta', 'abierto');
+      await abre(t, 'lempira.la-mochila-pide-descanso', 'ruta', 'abierto');
       await sleep(1500);
       await t.hold('w', 800);
-      await t.shot(`${out}/ruta-pencaligue.png`);
+      await t.shot(`${out}/ruta-mochila.png`);
       await t.ev(`window.__mcTest.ruta.warp(window.__mcTest.ruta.TL+1)`);
-      const r2 = await resultado(t, 'ruta pencaligue (se acaba el tiempo)');
+      const r2 = await resultado(t, 'ruta mochila (se acaba el tiempo)');
       assert(!r2.res.won, 'sin llegar, pierde');
       await t.ev(`window.__mc.store.getState().goLobby()`);
       await sleep(500);

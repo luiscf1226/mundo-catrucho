@@ -109,6 +109,12 @@ const ocotepeque = kit(
   (d) => [120 + r(d * 120), 360, 600],
   () => 75,
 );
+// Santa Bárbara
+/** Santa Bárbara: metas y reloj de minigames/santabarbara/comun.tsx. */
+const santabarbara = kit(
+  (d) => [120 + r(d * 120), 360, 600],
+  () => 75,
+);
 const islas = (a: number, b: number, c: number, k: number, base: number, extra: number) =>
   kit(lineal(a, b, c, k), (d) => base + r(d * extra));
 /** Comayagua: `metasLineales` y `reloj` de apps/web/src/game/minigames/comayagua/comun.tsx */
@@ -432,6 +438,15 @@ export const TOPES: Record<string, TopeMotor> = {
   'ocotepeque.moras': conRitmo(ocotepeque, 40),
   // 45 pts por cruce, otro cada segundo
   'ocotepeque.rotulos': conRitmo(ocotepeque, 45),
+  // Santa Bárbara: el ritmo sale de cuánto paga cada acierto y la espera mínima entre aciertos
+  'santabarbara.chimenea': conRitmo(santabarbara, 100),
+  'santabarbara.junco': conRitmo(santabarbara, 100),
+  'santabarbara.caliza': conRitmo(santabarbara, 100),
+  'santabarbara.perspectiva': conRitmo(santabarbara, 100),
+  // 60 pts por coincidencia y 0,6 s de espera entre marcas
+  'santabarbara.goteo': conRitmo(santabarbara, 100),
+  'santabarbara.juncocorte': conRitmo(santabarbara, 100),
+  'santabarbara.papel': conRitmo(santabarbara, 100),
 };
 
 export interface Resultado {

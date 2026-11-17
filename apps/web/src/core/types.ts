@@ -134,7 +134,15 @@ export type MinigameId =
   | 'ocotepeque.gotasviento'
   | 'ocotepeque.reservas'
   | 'ocotepeque.moras'
-  | 'ocotepeque.rotulos';
+  | 'ocotepeque.rotulos'
+  // Santa Bárbara
+  | 'santabarbara.chimenea'
+  | 'santabarbara.junco'
+  | 'santabarbara.caliza'
+  | 'santabarbara.perspectiva'
+  | 'santabarbara.goteo'
+  | 'santabarbara.juncocorte'
+  | 'santabarbara.papel';
 /** solo = vos contra bots · duo = vos y un compa contra parejas · abierto = sala abierta (se llena con bots si no hay gente) */
 export type Modo = 'solo' | 'duo' | 'abierto';
 export type Vehiculo =

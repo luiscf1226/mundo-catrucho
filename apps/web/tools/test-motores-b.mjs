@@ -262,7 +262,7 @@ res.push(await pruebaAtrapa('atrapa-sin-tema', { motor: 'atrapa', modo: 'solo' }
 res.push(await pruebaCocina('cocina-catalogo-baleadas', { juego: 'yoro.coyoles', motor: 'cocina', modo: 'duo' }));
 res.push(
   await pruebaCocina('cocina-catalogo-tostado', {
-    juego: 'santabarbara.gallina',
+    juego: 'colon.casabe-de-santa-fe',
     motor: 'cocina',
     modo: 'solo',
     pedidos: 1,
@@ -330,7 +330,14 @@ res.push(
 res.push(
   await pruebaCocina(
     'captura-cocina-tostado',
-    { juego: 'santabarbara.gallina', motor: 'cocina', modo: 'solo', pedidos: 1, shot: 'cocina-tostado', sinFin: true },
+    {
+      juego: 'colon.casabe-de-santa-fe',
+      motor: 'cocina',
+      modo: 'solo',
+      pedidos: 1,
+      shot: 'cocina-tostado',
+      sinFin: true,
+    },
     '#go',
   ),
 );

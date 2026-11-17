@@ -77,6 +77,15 @@ const JUEGOS = [
   'colon.la-red-deja-crecer',
   'colon.el-plano-del-castillo',
   'colon.por-mano--no-por-dedo',
+  // Santa Bárbara
+  'santabarbara.argollas-pateplumas',
+  'santabarbara.chimeneas-de-trinidad',
+  'santabarbara.junco-que-se-vuelve-sombrero',
+  'santabarbara.maroncho-por-debajo',
+  'santabarbara.el-castillo-desde-afuera',
+  'santabarbara.cuando-caen-las-tres',
+  'santabarbara.el-junco-rinde-entero',
+  'santabarbara.papel-para-el-gigante',
 ];
 const ok = await run('smoke', file, { hash: '#test' }, async (t) => {
   await t.ev(`localStorage.clear()`);
