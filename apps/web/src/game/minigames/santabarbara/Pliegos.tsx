@@ -178,8 +178,12 @@ const motor = defineMotor({
           Array.from({ length: q.ancho * q.alto }, (_, i) => (
             <Block
               key={i}
-              pos={[-1.6 + (i % q.ancho) * 0.62, 0.78, -1.9 + Math.floor(i / q.ancho) * 0.62]}
-              size={[0.56, 0.06, 0.56]}
+              pos={[
+                -1.2 + ((i % q.ancho) - (q.ancho - 1) / 2) * 0.82,
+                0.78,
+                -0.4 + (Math.floor(i / q.ancho) - 1) * 0.82,
+              ]}
+              size={[0.76, 0.06, 0.76]}
               color={(i + Math.floor(i / q.ancho)) % 2 ? '#f4efe6' : '#e9e4d8'}
               mat="cloth"
               solid={false}
@@ -187,7 +191,7 @@ const motor = defineMotor({
           ))}
         {q && (
           <Label
-            pos={[0, 1.6, -2.6]}
+            pos={[-1.2, 1.6, -2.4]}
             text={`${FORMAS[q.forma].nombre} · ${q.ancho}×${q.alto} · ${FORMAS[q.forma].curva} (${FORMAS[q.forma].cubre} por pliego)`}
             h={0.28}
           />

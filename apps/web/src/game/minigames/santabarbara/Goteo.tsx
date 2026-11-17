@@ -142,9 +142,9 @@ const motor = defineMotor({
             k = Math.min(1, fase / 1.2);
           return (
             <group key={i}>
-              <Cyl pos={[x, 4.3, -3.4]} r={0.05} rTop={0.35} h={1.2} color="#7f7466" mat="stone" solid={false} />
-              <Ball pos={[x, 3.6 - k * 2.6, -3.4]} r={0.12} color={FILAS[i]} />
-              <Label pos={[x, 5.2, -3.4]} text={`${NOMBRES[i]}`} h={0.24} />
+              <Cyl pos={[x, 2.9, -3.3]} r={0.05} rTop={0.35} h={1.2} color="#7f7466" mat="stone" solid={false} />
+              <Ball pos={[x, 2.3 - k * 1.5, -3.3]} r={0.12} color={FILAS[i]} />
+              <Label pos={[x, 3.7, -3.3]} text={`${NOMBRES[i]}`} h={0.24} />
             </group>
           );
         })}
