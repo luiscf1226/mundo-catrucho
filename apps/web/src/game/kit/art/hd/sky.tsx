@@ -12,8 +12,8 @@ import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { env } from '../../../../core/env';
 import { player } from '../../../../core/player';
-import { isPaused } from '../../../../core/store';
-import { COMPACT_QUALITY } from '../../../quality';
+import { isPaused, useGame } from '../../../../core/store';
+import { COMPACT_QUALITY, calidadEfectiva } from '../../../quality';
 import type { SkyRigProps } from '../types';
 import { G } from './materials';
 
@@ -35,6 +35,33 @@ if (GRADE)
     TM_DEFAULT,
     GRADE_GLSL,
   );
+// Perspectiva aérea: además de la niebla de siempre (que funde lo lejano con el horizonte), una bruma azulada que
+// crece con la distancia y pesa más abajo que arriba: los cerros lejanos se azulan y el monte cercano no se lava.
+// Va en el fragmento de niebla de three, así que vale para todos los materiales con niebla y no suma pasadas.
+const C = THREE.ShaderChunk;
+if (C.fog_vertex.includes('vFogDepth = - mvPosition.z;') && !C.fog_vertex.includes('vFogH')) {
+  C.fog_pars_vertex = C.fog_pars_vertex.replace(
+    'varying float vFogDepth;',
+    'varying float vFogDepth; varying float vFogH;',
+  );
+  // altura del punto en el mundo: la columna «arriba» de la vista aplicada a la posición en la vista
+  C.fog_vertex = C.fog_vertex.replace(
+    'vFogDepth = - mvPosition.z;',
+    'vFogDepth = - mvPosition.z; vFogH = dot( mvPosition.xyz, viewMatrix[ 1 ].xyz ) + cameraPosition.y;',
+  );
+  C.fog_pars_fragment = C.fog_pars_fragment.replace(
+    'varying float vFogDepth;',
+    'varying float vFogDepth; varying float vFogH;',
+  );
+  C.fog_fragment = C.fog_fragment.replace(
+    'gl_FragColor.rgb = mix( gl_FragColor.rgb, fogColor, fogFactor );',
+    `#ifndef FOG_EXP2
+      float fogAer = ( 1.0 - exp( - vFogDepth / ( fogFar * 0.5 ) ) ) * exp( - max( vFogH, 0.0 ) * 0.02 );
+      gl_FragColor.rgb = mix( gl_FragColor.rgb, fogColor * vec3( 0.84, 0.93, 1.06 ), fogAer * 0.5 );
+    #endif
+    gl_FragColor.rgb = mix( gl_FragColor.rgb, fogColor, fogFactor );`,
+  );
+}
 /** Mapeo de tonos del arte HD (si una versión nueva de three cambia el fragmento, queda ACES a secas). */
 const TONE = GRADE ? THREE.CustomToneMapping : THREE.ACESFilmicToneMapping;
 
@@ -274,12 +301,16 @@ void main() {
 }
 `;
 // escena mínima para el mapa de entorno (valores lineales)
+// lleva una silueta de cerros y monte lejano sobre el horizonte: el agua, los carros y los vidrios la reflejan
 const ENV_FRAG = /* glsl */ `
-uniform vec3 uZen, uHor, uGround, uSunCol, uSunDir; varying vec3 vDir;
+uniform vec3 uZen, uHor, uGround, uSunCol, uSunDir, uLand; varying vec3 vDir;
 void main() {
   vec3 d = normalize( vDir ); float h = max( d.y, 0.0 );
   vec3 col = mix( uHor, uZen, pow( h, 0.5 ) );
   col = mix( col, uGround, smoothstep( 0.02, -0.2, d.y ) );
+  float az = atan( d.z, d.x );
+  float ridge = 0.05 + 0.035 * sin( az * 3.0 + 1.0 ) + 0.02 * sin( az * 7.0 + 2.0 ) + 0.01 * sin( az * 19.0 );
+  col = mix( col, uLand, smoothstep( ridge + 0.012, ridge - 0.012, d.y ) * smoothstep( -0.3, -0.04, d.y ) );
   float s = max( dot( d, uSunDir ), 0.0 );
   col += uSunCol * ( pow( s, 60.0 ) * 6.0 + pow( s, 6.0 ) * 0.35 );
   gl_FragColor = vec4( col, 1.0 );
@@ -351,6 +382,8 @@ export function SkyRig({
     splash = useRef<THREE.Points>(null);
   const scene = useThree((s) => s.scene),
     gl = useThree((s) => s.gl);
+  // en alta, mapa de sombras de 4096: sombras nítidas cerca del jugador (misma luz, mismas llamadas de dibujo)
+  const sombra = useGame((s) => calidadEfectiva(s.profile.settings)) === 'alta' ? 4096 : 2048;
   const fogC = useMemo(() => (fogColor ? hex(`#${new THREE.Color(fogColor).getHexString()}`) : null), [fogColor]);
 
   const R = useMemo(() => {
@@ -392,6 +425,7 @@ export function SkyRig({
         uGround: { value: new THREE.Color() },
         uSunCol: { value: new THREE.Color() },
         uSunDir: { value: new THREE.Vector3(0, 1, 0) },
+        uLand: { value: new THREE.Color() },
       },
     });
     const envScene = new THREE.Scene();
@@ -685,6 +719,7 @@ export function SkyRig({
         e.uHor.value.set('#6a5038');
         e.uGround.value.set('#3a2c20');
         e.uSunCol.value.set('#000000');
+        e.uLand.value.set('#3a2c20');
       } else {
         e.uZen.value.setRGB(zen[0], zen[1], zen[2], THREE.SRGBColorSpace);
         e.uHor.value.setRGB(hor[0], hor[1], hor[2], THREE.SRGBColorSpace);
@@ -693,6 +728,10 @@ export function SkyRig({
           .setRGB(c.sun[0], c.sun[1], c.sun[2], THREE.SRGBColorSpace)
           .multiplyScalar((useSun ? sunVis : moonVis * 0.6) * (1 - ov * 0.85));
         e.uSunDir.value.copy(useSun ? sunDir : moonDir);
+        // monte lejano: verde del rebote del suelo, oscuro y con la bruma del horizonte encima
+        e.uLand.value
+          .setRGB(c.hg[0] * 0.42, c.hg[1] * 0.55, c.hg[2] * 0.36, THREE.SRGBColorSpace)
+          .lerp(tmpC.setRGB(hor[0], hor[1], hor[2], THREE.SRGBColorSpace), 0.3);
       }
       const rt = gl.getRenderTarget();
       R.cubeCam.update(gl, R.envScene);
@@ -722,10 +761,11 @@ export function SkyRig({
     <>
       <hemisphereLight ref={hemi} args={['#d4e6ff', '#94896a', 0.9]} />
       <directionalLight
+        key={sombra}
         ref={sun}
         intensity={3}
         castShadow
-        shadow-mapSize={[2048, 2048]}
+        shadow-mapSize={[sombra, sombra]}
         shadow-camera-left={-shadowRadius}
         shadow-camera-right={shadowRadius}
         shadow-camera-top={shadowRadius}
