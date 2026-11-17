@@ -134,7 +134,15 @@ export type MinigameId =
   | 'ocotepeque.gotasviento'
   | 'ocotepeque.reservas'
   | 'ocotepeque.moras'
-  | 'ocotepeque.rotulos';
+  | 'ocotepeque.rotulos'
+  // Gracias a Dios
+  | 'graciasadios.lidar'
+  | 'graciasadios.pipante'
+  | 'graciasadios.pistalempira'
+  | 'graciasadios.caratasca'
+  | 'graciasadios.rastros'
+  | 'graciasadios.wabul'
+  | 'graciasadios.truequeflotante';
 /** solo = vos contra bots · duo = vos y un compa contra parejas · abierto = sala abierta (se llena con bots si no hay gente) */
 export type Modo = 'solo' | 'duo' | 'abierto';
 export type Vehiculo =

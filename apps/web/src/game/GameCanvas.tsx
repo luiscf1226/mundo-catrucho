@@ -116,7 +116,8 @@ export function GameCanvas() {
   return (
     <div ref={wrap} className="absolute inset-0 touch-none" data-testid="canvas-wrap">
       <Canvas
-        shadows={quality !== 'baja' && !test}
+        // 'percentage': PCF filtrado (three ya no tiene PCFSoft; con `true` avisa y cae en este mismo)
+        shadows={quality !== 'baja' && !test ? 'percentage' : false}
         dpr={test ? 0.6 : quality === 'alta' ? [1, 2] : quality === 'media' ? 1 : 0.75}
         camera={{ fov: 60, near: 0.1, far: 700, position: [0, 6, 10] }}
         gl={{ antialias: quality !== 'baja', powerPreference: 'high-performance' }}
