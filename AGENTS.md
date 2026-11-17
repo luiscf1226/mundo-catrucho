@@ -37,6 +37,7 @@ pnpm web:build     # solo el HTML autónomo del juego (apps/web/dist/mundo-catru
 pnpm web:test      # pruebas de punta a punta del juego sobre ese HTML (corré web:build antes)
 pnpm salas:test    # pruebas de la sala en vivo (dos clientes por WebSocket)
 pnpm convex:check  # tipos de las funciones de Convex
+node apps/web/tools/test-produccion.mjs  # dos jugadores en el juego publicado (red de verdad; ver docs/ENTORNOS.md)
 ```
 
 Antes de dar algo por terminado: `pnpm check` y `pnpm test` en verde. Si tocaste algo que se ve, corre `pnpm capturas`
