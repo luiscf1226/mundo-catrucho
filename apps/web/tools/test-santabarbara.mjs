@@ -10,8 +10,8 @@ import { run } from './harness.mjs';
 const file = process.argv[2] ?? 'apps/web/dist/mundo-catrucho-hd.html';
 const juegos = JSON.parse(readFileSync(new URL('../shared/data/catalogo/occidente.json', import.meta.url))).santabarbara
   .juegos;
-const turismo = JSON.parse(readFileSync(new URL('../../../docs/generador/contenido.json', import.meta.url))).santabarbara
-  .turismo;
+const turismo = JSON.parse(readFileSync(new URL('../../../docs/generador/contenido.json', import.meta.url)))
+  .santabarbara.turismo;
 const puntos = JSON.parse(readFileSync(new URL('../src/game/dept/zones/santabarbara-puntos.json', import.meta.url)));
 // MC_SOLO=<texto> juega solo los juegos y motores que lo contengan y se salta el recorrido de la zona
 const solo = process.env.MC_SOLO;
