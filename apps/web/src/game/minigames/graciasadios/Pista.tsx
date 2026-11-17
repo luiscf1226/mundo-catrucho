@@ -12,6 +12,8 @@ type Tipo = 'ok' | 'no' | 'cama';
 type Cruce = { n: number; que: 'grupo' | 'cama1' | 'cama2'; t: number; dur: number };
 type Estado = ReturnType<typeof cursor> & {
   fila: Tipo[];
+  /** segundos que lleva cada uno en la fila: quien no tiene permiso se retira solo al rato */
+  edad: number[];
   grupo: number;
   cama: 'lista' | 'medio' | null;
   cruce: Cruce | null;
@@ -46,7 +48,9 @@ function persona(s: Estado, p: Param): Tipo {
 }
 function sacar(s: Estado, p: Param, i: number) {
   s.fila.splice(i, 1);
+  s.edad.splice(i, 1);
   s.fila.push(persona(s, p));
+  s.edad.push(0);
 }
 function agregar(m: Sesion) {
   const s = m.datos,
@@ -106,7 +110,7 @@ const motor = defineMotor({
   modos: { duo: { tipo: 'compartido', cada: 1.5 }, abierto: { tipo: 'ambiente', bots: 3 } },
   fondo: 'costa',
   guia: {
-    goal: 'Elegí en la fila a quien tiene permiso (chaleco verde) y F lo suma al grupo. E lo hace cruzar la pista: solo si la ventana alcanza para todo el cruce. Si te agarra el aviso con gente en la franja, vuelven al refugio.',
+    goal: 'Elegí en la fila a quien tiene permiso (chaleco verde) y F lo suma al grupo. E lo hace cruzar la pista: solo si la ventana alcanza para todo el cruce. Si te agarra el aviso con gente en la franja, vuelven al refugio. Los de chaleco rojo se retiran solos.',
     ...controles('sumar al grupo', 'cruzar la pista', 'elegir en la fila'),
   },
   etapa: (p) => ({
@@ -122,6 +126,7 @@ const motor = defineMotor({
     const s: Estado = {
       ...cursor(),
       fila: [],
+      edad: [],
       grupo: 0,
       cama: null,
       cruce: null,
@@ -135,7 +140,10 @@ const motor = defineMotor({
       usos: 0,
       azar: rng(p.seed),
     };
-    while (s.fila.length < FILA) s.fila.push(persona(s, p));
+    while (s.fila.length < FILA) {
+      s.fila.push(persona(s, p));
+      s.edad.push(0);
+    }
     return s;
   },
   actualizar(m, dt) {
@@ -143,6 +151,10 @@ const motor = defineMotor({
       toast = useGame.getState().toast;
     mover(s, dt);
     s.espera = Math.max(0, s.espera - dt);
+    for (let i = s.fila.length - 1; i >= 0; i--) {
+      s.edad[i] += dt;
+      if (s.fila[i] === 'no' && s.edad[i] > 4) sacar(s, m.parametros, i);
+    }
     const antes = ventana(m);
     s.reloj += dt;
     const v = ventana(m);
