@@ -130,11 +130,19 @@ function llega(m: Sesion, g: Gancho, k: number) {
     toast(`¡Se llenó la estación ${NOMBRES[k]}: a lavar!`, '💦');
   }
 }
-/** estación que le sirve al gancho: la suya, o para la espuma la primera con dos lugares y sin pesado */
+/** carga que tiene o lleva en camino la estación `k` */
+const cargaDe = (s: Estado, k: number) =>
+  s.estaciones[k].carga + s.linea.filter((o) => rumbo(o) === k).reduce((t, o) => t + lugares(o), 0);
+/** estación que le sirve al gancho: la suya, o para la espuma la más vacía con dos lugares y sin pesados */
 function meta(s: Estado, p: Param, g: Gancho) {
   if (g.destino >= 0) return g.destino;
-  const libre = s.estaciones.findIndex((e) => e.lavando <= 0 && e.pesado <= 0.6 && e.carga + 2 <= p.cupo);
-  return libre;
+  let mejor = -1;
+  s.estaciones.forEach((e, k) => {
+    const pesado = e.pesado > 0.6 || s.linea.some((o) => rumbo(o) === k && o.peso >= 2);
+    if (e.lavando > 0 || pesado || cargaDe(s, k) + 2 > p.cupo) return;
+    if (mejor < 0 || cargaDe(s, k) < cargaDe(s, mejor)) mejor = k;
+  });
+  return mejor;
 }
 const motor = defineMotor({
   id: 'yoro.cable',
@@ -146,7 +154,7 @@ const motor = defineMotor({
   },
   etapa: (p) => ({
     n: 3 + Math.round(p.dif),
-    cupo: p.tema.variante === 'el-racimo-pidio-asiento' ? 3 : 4,
+    cupo: 4,
     vel: 1.4 + p.dif * 0.6,
     pesados: 0.3 + p.dif * 0.2,
     separacion: 1.6 + p.dif * 0.6,
@@ -256,7 +264,7 @@ const motor = defineMotor({
     // no manda a una estación que va a estar lavando o con un pesado cuando llegue
     const viaje = (xAguja(k, n) - X0) / p.vel,
       enCamino = s.linea.filter((o) => rumbo(o) === k);
-    const carga = e.carga + enCamino.reduce((t, o) => t + lugares(o), 0);
+    const carga = cargaDe(s, k);
     if (e.lavando > 0 && e.lavando > viaje - 0.2) return;
     if (carga + lugares(g) > p.cupo) return;
     if (g.peso >= 2 && (e.pesado > viaje - 0.3 || enCamino.some((o) => o.peso >= 2))) return;

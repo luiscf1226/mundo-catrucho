@@ -160,6 +160,12 @@ function botAtrapa({ normal }) {
       dx = tgt.x + off[0] - px;
       dz = tgt.z + off[1] - pz;
     }
+    // con cubeta (Lluvia de Peces): llena, o sin nada que alcanzar y con algo adentro, se va a vaciarla
+    if (s.poza && (s.carga >= s.cupo || (!tgt && s.carga >= 3))) {
+      const [qx, qz] = s.pozas[s.pozas.length > 1 ? s.turno : 0];
+      dx = qx - px;
+      dz = qz - pz;
+    }
     // esquivar lo malo que cae encima
     if (Math.random() < esquiva)
       for (const it of s.items)

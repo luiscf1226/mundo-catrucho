@@ -446,7 +446,8 @@ export const TOPES: Record<string, TopeMotor> = {
   'yoro.ulua': conRitmo(yoro, 60),
   // un desviador y cruzar: 80 pts cada 1,75 s
   'yoro.pijol': conRitmo(yoro, 60),
-  'yoro.almohadilla': conRitmo(yoro, 40),
+  // tres cortes cada 0,55 s y 1,2 s de pausa: 80 pts cada 2,3 s
+  'yoro.almohadilla': conRitmo(yoro, 45),
   'yoro.coyol': conRitmo(yoro, 40),
 };
 
