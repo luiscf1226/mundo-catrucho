@@ -1,0 +1,20 @@
+[
+  {
+    "id": "colon.locura-0",
+    "nombre": "Casabe con abanico",
+    "texto": "En Santa Fe se sigue haciendo casabe. En esta mesa de práctica el disco de utilería se abanica solito por el calor del comal.",
+    "pos": [28, 18]
+  },
+  {
+    "id": "colon.locura-1",
+    "nombre": "El castillo parpadea",
+    "texto": "La fortaleza de Santa Bárbara es colonial y aquí no se toca. Su réplica de museo, en cambio, cierra dos ventanas como ojos cuando le sacás la foto.",
+    "pos": [27, -8]
+  },
+  {
+    "id": "colon.locura-2",
+    "nombre": "La laguna cambia de sombrero",
+    "texto": "Guaimoreto se conecta con la Bahía de Trujillo. En este modelo el agua cambia de gorro según la mezcla: paja si es dulce, de marinero si es salada. Pura ficción para aprender.",
+    "pos": [-28, 14]
+  }
+]

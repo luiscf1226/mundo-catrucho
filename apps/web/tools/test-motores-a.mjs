@@ -44,9 +44,9 @@ const BOT_MONTA = `(()=>{ const T=window.__mcTest.monta, I=window.__mc.input; if
 if (!only || only === 'corte')
   all =
     (await run('corte', file, { hash: '#go' }, async (t) => {
-      await abre(t, 'lapaz.hornilla', 'corte', 'solo');
+      await abre(t, 'santabarbara.junco', 'corte', 'solo');
       const g = await t.ev(`window.__mc.store.getState().mg.juego`);
-      assert.equal(g, 'lapaz.hornilla');
+      assert.equal(g, 'santabarbara.junco');
       await t.ev(BOT_CORTE);
       await sleep(14000);
       const s1 = await t.ev(
@@ -87,9 +87,9 @@ if (!only || only === 'monta')
       assert(r.res.won, 'el piloto automático aguanta');
       await t.ev(`clearInterval(window.__b); window.__mc.store.getState().goLobby()`);
       await sleep(500);
-      await abre(t, 'lapaz.mula', 'monta', 'abierto');
+      await abre(t, 'santabarbara.jaripeo', 'monta', 'abierto');
       await sleep(6000);
-      await t.shot(`${out}/monta-mula.png`);
+      await t.shot(`${out}/monta-jaripeo.png`);
       // sin corregir la aguja se cae: derrota
       await resultado(t, 'monta sin corregir (se cae)');
       await t.ev(`clearInterval(window.__b); window.__mc.store.getState().goLobby()`);
@@ -105,7 +105,7 @@ if (!only || only === 'monta')
 if (!only || only === 'ritmo')
   all =
     (await run('ritmo', file, { hash: '#go' }, async (t) => {
-      await abre(t, 'lapaz.guancasco', 'ritmo', 'solo');
+      await abre(t, 'graciasadios.baile', 'ritmo', 'solo');
       await t.ev(`window.__mcTest.ritmo.auto(0)`);
       await sleep(11000);
       const s1 = await t.ev(
@@ -115,7 +115,7 @@ if (!only || only === 'ritmo')
       assert(JSON.parse(s1).score > 0, 'las teclas A S D F puntúan');
       await t.shot(`${out}/ritmo-tambor.png`);
       await calls(t, 'ritmo');
-      const r = await resultado(t, 'ritmo guancasco (autoplay)');
+      const r = await resultado(t, 'ritmo baile miskito (autoplay)');
       assert(r.res.won, 'autoplay perfecto gana');
       await t.ev(`window.__mcTest.ritmo.stop(); window.__mc.store.getState().goLobby()`);
       await sleep(500);
@@ -139,7 +139,7 @@ const PILOTO_RUTA = `(()=>{ const T=window.__mcTest.ruta, M=window.__mc, g=T.G; 
 if (!only || only === 'ruta')
   all =
     (await run('ruta', file, { hash: '#go' }, async (t) => {
-      await abre(t, 'lapaz.estanzuela', 'ruta', 'solo');
+      await abre(t, 'lempira.sendero-de-celaque', 'ruta', 'solo');
       await t.press(' ');
       await sleep(200);
       assert(await t.ev(`window.__mc.player.pos[1]>0.3`), 'Espacio salta');

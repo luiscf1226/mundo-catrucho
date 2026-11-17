@@ -92,6 +92,17 @@ const choluteca = kit(
   (d) => [120 + r(d * 120), 360, 600],
   () => 75,
 );
+// La Paz
+/** La Paz: metas y reloj de minigames/lapaz/comun.tsx. */
+const lapaz = kit(
+  (d) => [120 + r(d * 120), 360, 600],
+  () => 75,
+);
+/** Colón: metas y reloj de minigames/colon/comun.tsx. */
+const colon = kit(
+  (d) => [120 + r(d * 120), 360, 600],
+  () => 75,
+);
 // Ocotepeque
 /** Ocotepeque: metas y reloj de minigames/ocotepeque/comun.tsx. */
 const ocotepeque = kit(
@@ -262,6 +273,23 @@ export const TOPES: Record<string, TopeMotor> = {
   'choluteca.cincha': conRitmo(choluteca, 67),
   'choluteca.ventanasbus': choluteca,
   'choluteca.mareapaseo': choluteca,
+  // La Paz
+  'lapaz.catacion': conRitmo(lapaz, 45),
+  'lapaz.cafe': conRitmo(lapaz, 35),
+  'lapaz.tostador': conRitmo(lapaz, 30),
+  'lapaz.reciprocidad': conRitmo(lapaz, 35),
+  'lapaz.vapor': conRitmo(lapaz, 25),
+  'lapaz.pesas': conRitmo(lapaz, 60),
+  'lapaz.abrasigo': conRitmo(lapaz, 40),
+  'lapaz.estiba': conRitmo(lapaz, 35),
+  // Colón: el ritmo sale de cuánto paga cada acierto y la espera mínima entre aciertos
+  'colon.salinidad': colon,
+  'colon.visualbahia': conRitmo(colon, 45),
+  'colon.gajos': conRitmo(colon, 35),
+  'colon.remolque': conRitmo(colon, 45),
+  'colon.redjuvenil': conRitmo(colon, 40),
+  'colon.plano': conRitmo(colon, 40),
+  'colon.racimos': conRitmo(colon, 45),
   'copan.cadera': copan,
   'copan.estelas': copan,
   'copan.estratigrafia': copan,

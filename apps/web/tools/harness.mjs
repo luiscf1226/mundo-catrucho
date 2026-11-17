@@ -42,11 +42,25 @@ const KEY = {
 
 export async function launch(
   file,
-  { url, width = 1280, height = 720, hash = '', touch = false, red, gpu = process.env.MC_GPU !== '0' } = {},
+  {
+    url,
+    width = 1280,
+    height = 720,
+    hash = '',
+    touch = false,
+    red,
+    gpu = process.env.MC_GPU !== '0',
+    // solo test-produccion.mjs: abrir el juego publicado (https) en vez de un servidor local
+    publico = false,
+  } = {},
 ) {
   const target = url ? new URL(url) : null;
-  if (target && (target.protocol !== 'http:' || target.hostname !== '127.0.0.1'))
-    throw new Error('El arnés HTTP solo acepta http://127.0.0.1:<puerto>');
+  if (
+    target &&
+    !(publico && target.protocol === 'https:') &&
+    (target.protocol !== 'http:' || target.hostname !== '127.0.0.1')
+  )
+    throw new Error('El arnés HTTP solo acepta http://127.0.0.1:<puerto> (o https con `publico: true`)');
   const port = 9300 + Math.floor(Math.random() * 600),
     prof = mkdtempSync(join(tmpdir(), 'mc-test-'));
   const flags = gpu
