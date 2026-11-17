@@ -3,6 +3,7 @@ import { P } from '../../kit';
 import { bl, bx, cy, distToPath, inR, type Pc, PI, place, py, ss } from '../lib';
 import { pipante, stairs } from '../parts';
 import { ZB, type ZoneSpec } from '../zone';
+import { cercaDeLocura, GraciasADiosDescubrimientos } from './GraciasADiosDescubrimientos';
 
 /** Gracias a Dios: el Río Plátano en plena selva: casa sobre pilotes, pipantes, tronco para cruzar y petroglifos. */
 export function rio(d: Department): ZoneSpec {
@@ -28,6 +29,7 @@ export function rio(d: Department): ZoneSpec {
     .layer('dirt', '#6b5236', (x, z) => (1.5 - Math.min(distToPath(x, z, t1), distToPath(x, z, t2))) * 2);
   Z.sea(-0.6, '#4a8f78');
   Z.stop(-10, 42);
+  Z.n(<GraciasADiosDescubrimientos altura={Z.h} />);
   // casa sobre pilotes
   const house: Pc[] = [
     bx(0, 2, 0, 7, 0.3, 6, 'wood', '#8a6a45'),
@@ -135,7 +137,8 @@ export function rio(d: Department): ZoneSpec {
     !inR(x, z, -23.5, -12, -2, 11) &&
     !inR(x, z, -18, 0, 34, 50) &&
     Math.hypot(x - 25, z + 21) > 5.5 &&
-    Math.hypot(x - 28.4, z + 23.4) > 2.5;
+    Math.hypot(x - 28.4, z + 23.4) > 2.5 &&
+    !cercaDeLocura(x, z);
   Z.veg('giant', 6, ok, { sep: 18, smin: 0.8, smax: 1.1 });
   Z.veg('jungle', 110, ok, { sep: 4.6 });
   Z.veg('palm', 26, ok, { sep: 4 });
@@ -144,7 +147,12 @@ export function rio(d: Department): ZoneSpec {
     'fern',
     80,
     (x, z) =>
-      dr(x, z) > 10 && distToPath(x, z, t1) > 2 && distToPath(x, z, t2) > 2 && Math.abs(x) < 56 && Math.abs(z) < 56,
+      dr(x, z) > 10 &&
+      distToPath(x, z, t1) > 2 &&
+      distToPath(x, z, t2) > 2 &&
+      Math.abs(x) < 56 &&
+      Math.abs(z) < 56 &&
+      !cercaDeLocura(x, z),
     { sep: 2 },
   );
   Z.trail(

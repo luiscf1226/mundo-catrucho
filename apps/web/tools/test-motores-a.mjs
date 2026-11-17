@@ -105,7 +105,8 @@ if (!only || only === 'monta')
 if (!only || only === 'ritmo')
   all =
     (await run('ritmo', file, { hash: '#go' }, async (t) => {
-      await abre(t, 'graciasadios.baile', 'ritmo', 'solo');
+      // el baile genérico de Gracias a Dios se cambió por sus juegos propios (MC-44): se prueba la punta de Atlántida
+      await abre(t, 'atlantida.punta-en-sambo-creek', 'ritmo', 'solo');
       await t.ev(`window.__mcTest.ritmo.auto(0)`);
       await sleep(11000);
       const s1 = await t.ev(
@@ -115,7 +116,7 @@ if (!only || only === 'ritmo')
       assert(JSON.parse(s1).score > 0, 'las teclas A S D F puntúan');
       await t.shot(`${out}/ritmo-tambor.png`);
       await calls(t, 'ritmo');
-      const r = await resultado(t, 'ritmo baile miskito (autoplay)');
+      const r = await resultado(t, 'ritmo punta en Sambo Creek (autoplay)');
       assert(r.res.won, 'autoplay perfecto gana');
       await t.ev(`window.__mcTest.ritmo.stop(); window.__mc.store.getState().goLobby()`);
       await sleep(500);

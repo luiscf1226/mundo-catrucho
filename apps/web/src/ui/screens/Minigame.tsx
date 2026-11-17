@@ -129,7 +129,8 @@ function LoadedIntro() {
         place: `${lugar ?? ''}${lugar ? ', ' : ''}${deptById(j.dept).name}`,
       }
     : base;
-  const old = GUIDE[mg.id],
+  // el archivo de Ciudad Blanca (Gracias a Dios) reutiliza «exploradores» con otra mecánica: trae su propia guía
+  const old = P.tema.archivo ? undefined : GUIDE[mg.id],
     nu = motorGuide(mg.id),
     guide = old ?? nu!,
     stars = old ? old.stars(base.rules) : nu!.metas(P);

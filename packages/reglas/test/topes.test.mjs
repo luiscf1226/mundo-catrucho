@@ -110,13 +110,15 @@ test('motor sin tabla: topes sueltos y conocido = false', () => {
 test('cada motor del kit: el oro justo en el reloj justo pasa, y una estrella de más no', () => {
   for (const [motor, t] of Object.entries(TOPES)) {
     if (!t.reloj) continue;
+    // exploradores solo tiene reloj de kit con el tema del archivo de Ciudad Blanca (Gracias a Dios)
+    const tema = motor === 'exploradores' ? { archivo: true } : undefined;
     for (const etapa of [0, 1, 2]) {
       const dif = difDe(etapa, 3),
-        metas = t.metas(dif),
-        reloj = t.reloj(dif);
+        metas = t.metas(dif, tema ?? {}),
+        reloj = t.reloj(dif, tema);
       assert.equal(estrellasPara(metas[2], metas), 3);
-      pasa({ motor, puntos: metas[2], estrellas: 3, duracion: reloj + 3, etapa });
-      falla({ motor, puntos: metas[0], estrellas: 2, duracion: reloj + 3, etapa }, 'estrellas');
+      pasa({ motor, puntos: metas[2], estrellas: 3, duracion: reloj + 3, etapa, tema });
+      falla({ motor, puntos: metas[0], estrellas: 2, duracion: reloj + 3, etapa, tema }, 'estrellas');
       assert.ok(reloj >= 60 && reloj <= 120, `${motor}: reloj ${reloj}`);
     }
   }

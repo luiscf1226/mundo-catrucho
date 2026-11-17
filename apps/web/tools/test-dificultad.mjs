@@ -21,7 +21,7 @@ const JUEGO = {
   ritmo: 'atlantida.punta-en-sambo-creek',
   atrapa: 'yoro.lluvia',
   pesca: 'cortes.pesca-en-yojoa',
-  trivia: 'graciasadios.naksa',
+  trivia: 'yoro.huelga',
   cocina: 'yoro.coyoles',
   ruta: 'lempira.sendero-de-celaque',
   manejo: 'franciscomorazan.rapidito',

@@ -1415,6 +1415,104 @@
 }
 ,
 {
+  "id": "graciasadios.lidar",
+  "name": "Volumen bajo el dosel",
+  "place": "Gracias a Dios",
+  "icon": "📡",
+  "desc": "Clasificá retornos de un escaneo LiDAR simulado en suelo, copa y ruido. Ganás reconstruyendo un relieve continuo; borrar puntos bajos junto con hojas destruye la evidencia del terreno.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+}
+,
+{
+  "id": "graciasadios.pipante",
+  "name": "Confluencias del Patuca",
+  "place": "Gracias a Dios",
+  "icon": "🛶",
+  "desc": "Girás proa y popa por separado con impulsos de remo mientras leés remolinos móviles. Ganás cruzando una confluencia en diagonal; orientar solo la proa deja la popa atravesada.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+}
+,
+{
+  "id": "graciasadios.pistalempira",
+  "name": "Cruce de pista",
+  "place": "Gracias a Dios",
+  "icon": "🛬",
+  "desc": "Agrupá traslados en un tablero de permisos antes del aviso de aterrizaje. Ganás cuando nadie espera en la zona restringida; iniciar un cruce tarde devuelve el grupo al refugio.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+}
+,
+{
+  "id": "graciasadios.caratasca",
+  "name": "Carta que gira",
+  "place": "Gracias a Dios",
+  "icon": "🧭",
+  "desc": "Separá con dos mandos la rotación de una carta y la traslación de tu posición bajo viento lateral. Ganás manteniendo rumbo entre dos marcas bajas de costa; confundir giro con deriva te saca del canal.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+}
+,
+{
+  "id": "graciasadios.rastros",
+  "name": "Distancia del jaguar",
+  "place": "Gracias a Dios",
+  "icon": "🐾",
+  "desc": "Superponé huellas y marcas de tiempo para delimitar una zona de exclusión en el mapa. Ganás eligiendo un lugar remoto de observación; seguir al animal cancela el recorrido.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+}
+,
+{
+  "id": "graciasadios.wabul",
+  "name": "Textura del wabul",
+  "place": "Gracias a Dios",
+  "icon": "🥣",
+  "desc": "Triturá plátano en una simulación de textura alternando trayectorias cruzadas del mazo. Ganás al reducir grumos sin compactar; repetir dirección forma placas difíciles de deshacer.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+}
+,
+{
+  "id": "graciasadios.truequeflotante",
+  "name": "Mostrador de Brus",
+  "place": "Gracias a Dios",
+  "icon": "⚖️",
+  "desc": "Intercambiá bultos simultáneamente entre dos embarcaciones para conservar su desplazamiento. Ganás cerrando entregas sin sobrecarga transitoria; recibir antes de soltar hunde el borde virtual.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+}
+,
+{
   "id": "santabarbara.chimenea",
   "name": "Estructura efímera de Trinidad",
   "place": "Santa Bárbara",

@@ -77,6 +77,14 @@ const JUEGOS = [
   'colon.la-red-deja-crecer',
   'colon.el-plano-del-castillo',
   'colon.por-mano--no-por-dedo',
+  // Gracias a Dios
+  'graciasadios.el-bosque-deja-ver',
+  'graciasadios.pipante-por-el-patuca',
+  'graciasadios.aterriza-el-encargo',
+  'graciasadios.caratasca-sin-perder-el-norte',
+  'graciasadios.huellas-para-alejarse',
+  'graciasadios.wabul-sin-grumos',
+  'graciasadios.entrega-a-peso-parejo',
   // Santa Bárbara
   'santabarbara.chimeneas-de-trinidad',
   'santabarbara.junco-que-se-vuelve-sombrero',
