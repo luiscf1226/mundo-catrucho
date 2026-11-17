@@ -11,18 +11,26 @@ import { basePack } from '../base';
 import type { ArtPack } from '../types';
 import { Avatar } from './avatar';
 import { roundedBox } from './geo';
-import { hdMaterial } from './materials';
+import { hdMaterial, kindInfo, propMaterial } from './materials';
 import { Effects } from './post';
 import { props1 } from './props1';
 import { props2 } from './props2';
 import { props3 } from './props3';
 import { SkyRig } from './sky';
+import { layerIndex } from './tex';
 
 export const pack: ArtPack = {
   ...basePack,
   name: 'hd',
   material: hdMaterial,
   boxGeometry: (w, h, d) => roundedBox(w, h, d),
+  fused: {
+    material: () => propMaterial(),
+    info: (k) => {
+      const i = kindInfo(k) ?? { l: 'plastic' as const, r: 0.42, m: 0 };
+      return [layerIndex(i.l), i.r, i.m];
+    },
+  },
   SkyRig,
   Avatar,
   Effects,
