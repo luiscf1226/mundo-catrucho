@@ -7,7 +7,9 @@ import { defineMotor, type Motor } from '../kit';
 import { controles, cursor, duracion, Mesa, metas, mover } from './comun';
 
 const CRACK = 196,
-  CARBON = 232;
+  CARBON = 245,
+  /** ritmo de desarrollo después del primer crack: bajá el calor o se carboniza */
+  DESARROLLO = 5;
 const PERFILES: [string, number, number][] = [
   ['Claro', 2, 3],
   ['Medio', 4, 5],
@@ -38,7 +40,7 @@ type Sesion = Motor<{ banda: number; humedo: boolean; semilla: number }, Estado>
 const aire = (s: Estado) => (s.x + 1) / 2;
 const calor = (s: Estado) => (s.y + 1) / 2;
 function nuevoLote(s: Estado, humedo: boolean) {
-  s.temp = 150;
+  s.temp = 160;
   s.meta = 8 + Math.round(s.azar() * 5);
   s.perfil = Math.floor(s.azar() * 3);
   s.humedad = humedo ? 1 : 0;
@@ -62,7 +64,7 @@ function descargar(m: Sesion) {
     m.sumar(-30);
   } else {
     s.lotes++;
-    m.sumar(40 + Math.round(calidad * 40));
+    m.sumar(50 + Math.round(calidad * 40));
   }
   nuevoLote(s, m.parametros.humedo);
 }
@@ -71,7 +73,7 @@ const motor = defineMotor({
   modos: { duo: { tipo: 'compartido', cada: 3 }, abierto: { tipo: 'ambiente', bots: 3 } },
   fondo: 'finca',
   guia: {
-    goal: 'A/D es el aire y W/S el calor del tambor. Seguí el ritmo pedido, contá los chasquidos y descargá con F en la ventana del perfil.',
+    goal: 'A/D es el aire y W/S el calor del tambor. Seguí el ritmo pedido; al crack bajá el calor, contá los chasquidos y descargá con F en la ventana del perfil.',
     ...controles(),
   },
   etapa: (p) => ({
@@ -85,7 +87,7 @@ const motor = defineMotor({
     const s: Estado = {
       ...cursor(),
       azar: rng(p.semilla),
-      temp: 150,
+      temp: 160,
       ritmo: 0,
       meta: 10,
       humedad: 0,
@@ -117,6 +119,9 @@ const motor = defineMotor({
       s.muestras += dt;
       if (Math.abs(s.ritmo - s.meta) <= m.parametros.banda) s.seguimiento += dt;
     } else {
+      if (s.meta !== DESARROLLO) s.meta = DESARROLLO;
+      s.muestras += dt;
+      if (Math.abs(s.ritmo - s.meta) <= m.parametros.banda) s.seguimiento += dt;
       s.proximo -= dt;
       if (s.proximo <= 0) {
         s.pops++;
@@ -153,7 +158,7 @@ const motor = defineMotor({
   Escena: ({ motor: m }) => {
     const s = m.datos,
       ciego = m.parametros.humedo || s.temp > 180,
-      tueste = Math.min(1, Math.max(0, (s.temp - 150) / (CARBON - 150))),
+      tueste = Math.min(1, Math.max(0, (s.temp - 160) / (CARBON - 160))),
       grano = ciego ? '#7a7a7a' : `hsl(${30 - tueste * 15}, ${55 - tueste * 25}%, ${62 - tueste * 45}%)`;
     return (
       <Mesa titulo={`${m.partida.juego?.name ?? 'Chasquido del tostado'} · Al oído`}>
