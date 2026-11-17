@@ -164,16 +164,17 @@ const motor = defineMotor({
       sel = casilla(s.x, 3);
     return (
       <Mesa titulo={`${m.partida.juego?.name ?? 'Olla de ticucos'} · Presión pareja`}>
-        <Cyl pos={[-1.5, 1.9, -0.6]} r={2.6} h={2.4} color="#5b5f66" mat="metal" solid={false} />
+        <Cyl pos={[-1.5, 1.45, -0.6]} r={2.4} h={1.5} color="#8a8f96" mat="plastic" solid={false} />
+        <Cyl pos={[-1.5, 2.21, -0.6]} r={2.25} h={0.04} color="#6aa84f" mat="leaf" solid={false} />
         {[0, 1, 2].map((c) => {
           const x = -1.5 + (c - 1) * 1.55;
           return (
             <group key={c}>
-              <Ball pos={[x, 0.75, 0.9]} r={0.2 + s.calor[c] * 0.25} color="#ff8a2a" mat="neon" />
+              <Ball pos={[x, 0.85, 2]} r={0.15 + s.calor[c] * 0.2} color="#ff8a2a" mat="neon" />
               {Array.from({ length: s.carga[c] }, (_, k) => (
                 <Block
                   key={k}
-                  pos={[x, 3.25 + k * 0.32, -0.6]}
+                  pos={[x, 2.4 + k * 0.32, -0.6]}
                   size={[1.1, 0.28, 0.8]}
                   color={k % 2 ? '#5f9a3a' : '#6aa84f'}
                   mat="leaf"
@@ -193,22 +194,22 @@ const motor = defineMotor({
                 color={s.presion[c] > ALTA ? '#d9503a' : '#e8e2d0'}
                 solid={false}
               />
-              {c === sel && <Ball pos={[x, 5.1, -0.6]} r={0.12} color="#ffffff" mat="neon" />}
+              {c === sel && <Ball pos={[x, 4.2, -0.6]} r={0.12} color="#ffffff" mat="neon" />}
             </group>
           );
         })}
         <Label pos={[3.35, 3.9, -2.4]} text="Presión" h={0.3} />
         <Cyl
-          pos={[-3.6, 3.3, -0.6]}
+          pos={[-3.6, 2.5, -0.6]}
           r={0.15}
           h={0.6}
           color={s.valvula ? '#7cc47a' : '#a8473b'}
           mat="metal"
           solid={false}
         />
-        {s.valvula && <Ball pos={[-3.6, 4 + (m.tiempo % 1) * 0.6, -0.6]} r={0.3} color="#f4f4f4" mat="glass" />}
-        {s.llevando && <Plate pos={[-1, 5.6, 1]} text="🫔 Envoltorio en la mano" h={0.26} />}
-        <Block pos={[-1.5, 0.75, 2.4]} size={[4 * s.coccion + 0.02, 0.1, 0.3]} color="#e8c77a" solid={false} />
+        {s.valvula && <Ball pos={[-3.6, 3.1 + (m.tiempo % 1) * 0.6, -0.6]} r={0.3} color="#f4f4f4" mat="glass" />}
+        {s.llevando && <Plate pos={[-1, 4.8, 1]} text="🫔 Envoltorio en la mano" h={0.26} />}
+        <Block pos={[-1.5, 0.75, 2.9]} size={[4 * s.coccion + 0.02, 0.1, 0.3]} color="#e8c77a" solid={false} />
         <Puntero x={centro(sel, 3) * 0.528 - 0.114} y={0.2} />
       </Mesa>
     );

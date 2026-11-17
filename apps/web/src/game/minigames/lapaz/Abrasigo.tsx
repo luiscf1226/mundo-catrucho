@@ -192,7 +192,7 @@ const motor = defineMotor({
       sel = celda(s);
     return (
       <Mesa titulo={`${m.partida.juego?.name ?? 'Lectura rupestre sin contacto'} · ${ESTACIONES[s.estacion]}`}>
-        <Block pos={[-1, 3.3, -3.8]} size={[9.6, 4.2, 0.3]} color="#9a7b5c" mat="stone" solid={false} />
+        <Block pos={[-1, 2.3, -3.8]} size={[9.6, 3.2, 0.3]} color="#9a7b5c" mat="stone" solid={false} />
         {s.contorno.map((i) => {
           const c = i % COLS,
             f = Math.floor(i / COLS);
@@ -200,8 +200,8 @@ const motor = defineMotor({
           return (
             <Block
               key={i}
-              pos={[-1 + centro(c, COLS) * 4.4, 3.3 + centro(f, FILAS) * 1.8, -3.62]}
-              size={[1, 0.7, 0.05]}
+              pos={[-1 + centro(c, COLS) * 4.4, 2.3 + centro(f, FILAS) * 1.4, -3.62]}
+              size={[1, 0.55, 0.05]}
               color="#a33a24"
               solid={false}
             />
@@ -212,8 +212,8 @@ const motor = defineMotor({
           visible(s.estacion, c, m.parametros.vista) ? null : (
             <Block
               key={c}
-              pos={[-1 + centro(c, COLS) * 4.4, 3.3, -3.6]}
-              size={[1.45, 4, 0.04]}
+              pos={[-1 + centro(c, COLS) * 4.4, 2.3, -3.6]}
+              size={[1.45, 3.1, 0.04]}
               color="#3b2f25"
               solid={false}
             />

@@ -170,7 +170,7 @@ const motor = defineMotor({
             <group key={i} position={[x, 1.05, z]}>
               <Ball pos={[0, 0.02, 0]} r={0.13} color={n.fase === 'muerto' ? '#3a2a1e' : '#8a6a45'} mat="wood" />
               {n.hoja ? (
-                <Cyl pos={[0, 0.38, 0]} r={0.08} rTop={0.42} h={0.3} color="#3f8a46" mat="leaf" solid={false} />
+                <Cyl pos={[0, 0.42, 0]} r={0.1} rTop={0.5} h={0.22} color="#2f5f2a" mat="leaf" solid={false} />
               ) : n.fase === 'roja' ? (
                 <Ball pos={[0, 0.3, 0]} r={0.22} color="#c8222a" mat="plastic" />
               ) : n.fase === 'verde' ? (

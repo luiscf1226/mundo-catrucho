@@ -163,9 +163,9 @@ const motor = defineMotor({
     return (
       <Mesa titulo={`${m.partida.juego?.name ?? 'Chasquido del tostado'} · Al oído`}>
         <group position={[-2, 0.7, -0.8]} scale={[1 + s.bigote * 0.08, 1, 1]}>
-          <Block pos={[0, 0.9, 0]} size={[2.6, 1.8, 2]} color="#3c3f45" mat="metal" solid={false} />
-          <Cyl pos={[1.4, 1.1, 0]} r={0.8} h={0.3} color="#2b2d31" mat="metal" solid={false} />
-          <Cyl pos={[0, 2.3, 0]} r={0.35} h={1} color="#55595f" mat="metal" solid={false} />
+          <Block pos={[0, 0.9, 0]} size={[2.6, 1.8, 2]} color="#a8473b" mat="plastic" solid={false} />
+          <Cyl pos={[1.4, 1.1, 0]} r={0.8} h={0.3} color="#d9d2c1" mat="plastic" solid={false} />
+          <Cyl pos={[0, 2.3, 0]} r={0.35} h={1} color="#8a8f96" mat="plastic" solid={false} />
           {s.bigote > 0 &&
             [-1, 1].map((l) => (
               // cada chasquido infla un bigote de vapor
