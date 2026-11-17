@@ -17,6 +17,27 @@ import { COMPACT_QUALITY } from '../../../quality';
 import type { SkyRigProps } from '../types';
 import { G } from './materials';
 
+// Revelado: ACES y encima un poco de saturación y una curva en S suave (contraste en los medios tonos). Son unas
+// pocas operaciones por píxel dentro del mismo shader de cada material, sin pasada extra: vale en todas las calidades.
+// El cielo y la niebla van en espacio de pantalla y no pasan por aquí (así el horizonte y la niebla coinciden).
+const GRADE_GLSL = /* glsl */ `vec3 CustomToneMapping( vec3 color ) {
+  vec3 c = ACESFilmicToneMapping( color );
+  float l = dot( c, vec3( 0.2126, 0.7152, 0.0722 ) );
+  c = max( vec3( l ) + ( c - vec3( l ) ) * 1.12, 0.0 );
+  vec3 p = sqrt( min( c, 1.0 ) );
+  p = mix( p, p * p * ( 3.0 - 2.0 * p ), 0.22 );
+  return p * p;
+}`;
+const TM_DEFAULT = 'vec3 CustomToneMapping( vec3 color ) { return color; }';
+const GRADE = THREE.ShaderChunk.tonemapping_pars_fragment.includes(TM_DEFAULT);
+if (GRADE)
+  THREE.ShaderChunk.tonemapping_pars_fragment = THREE.ShaderChunk.tonemapping_pars_fragment.replace(
+    TM_DEFAULT,
+    GRADE_GLSL,
+  );
+/** Mapeo de tonos del arte HD (si una versión nueva de three cambia el fragmento, queda ACES a secas). */
+const TONE = GRADE ? THREE.CustomToneMapping : THREE.ACESFilmicToneMapping;
+
 type RGB = [number, number, number];
 const hex = (h: string): RGB => {
   const n = parseInt(h.slice(1), 16);
@@ -84,16 +105,18 @@ const NOCHE = [
   '#56648f',
   '#1f2848',
 ] as const;
+// De día el relleno (hemisferio + entorno) es bajo frente al sol cálido: la sombra se nota y queda azulada como
+// afuera de verdad. El rebote del suelo es verde tierra (monte y potrero), no gris.
 const KEYS: Key[] = [
   K(0, ...NOCHE),
   K(4.8, '#0e1d48', '#33508a', '#aac4ff', 1.4, '#7c94d4', '#3e4a6e', 1.6, 1.7, 1.16, 1, '#5a6894', '#21294a'),
   K(5.5, '#1f3672', '#8a74a6', '#b8c2ff', 1.2, '#8c94cc', '#4a4a6e', 1.6, 1.4, 1.16, 0.5, '#c79aaa', '#4a4470'),
-  K(6.3, '#3d78c4', '#ffc08a', '#ffb877', 2, '#bcc6e6', '#7a6a58', 1.15, 0.75, 1.05, 0, '#ffe1c2', '#b98a86'),
-  K(8, '#3388e2', '#c4e3f8', '#ffe9c8', 2.9, '#cfe2ff', '#8c8266', 0.9, 0.8, 1, 0, '#ffffff', '#b7c4d6'),
-  K(11, '#2a7be0', '#b4dcfb', '#fff4de', 3.3, '#d4e6ff', '#94896a', 0.9, 0.85, 1, 0, '#ffffff', '#b9c6d8'),
-  K(15, '#2a7be0', '#b6dcf8', '#fff1d6', 3.2, '#d4e6ff', '#94896a', 0.9, 0.85, 1, 0, '#ffffff', '#b9c6d8'),
-  K(16.8, '#3478cf', '#ffe0ad', '#ffcf94', 2.9, '#d9d6e6', '#96825e', 0.95, 0.8, 1, 0, '#fff0d6', '#c8a998'),
-  K(17.6, '#4064b0', '#ffaa62', '#ffa864', 2.6, '#dcc4c4', '#9a7a52', 1.1, 0.8, 1.03, 0, '#ffc89a', '#b07a80'),
+  K(6.3, '#3570c0', '#ffc08a', '#ffb070', 2.3, '#aebfe6', '#6e6a4c', 0.95, 0.62, 1.04, 0, '#ffe1c2', '#b98a86'),
+  K(8, '#2470d4', '#cfe5f4', '#ffe4bc', 3.4, '#b6cdf2', '#6f7a4a', 0.6, 0.6, 0.95, 0, '#ffffff', '#b2c0d4'),
+  K(11, '#1762cc', '#c6e0f2', '#fff0d8', 3.8, '#b9d0f4', '#738050', 0.58, 0.58, 0.93, 0, '#ffffff', '#b4c2d6'),
+  K(15, '#1964c8', '#cce2f0', '#ffe8c8', 3.7, '#bccff0', '#7a7e4e', 0.6, 0.6, 0.94, 0, '#ffffff', '#b8c2d4'),
+  K(16.8, '#2560bc', '#f6dcb2', '#ffc890', 3.4, '#c4c8e6', '#84764c', 0.68, 0.62, 0.97, 0, '#fff0d6', '#c8a998'),
+  K(17.6, '#3858a6', '#ffa862', '#ffa25c', 3, '#d0b8c4', '#8a6c48', 0.86, 0.7, 1.03, 0, '#ffc89a', '#b07a80'),
   K(18.2, '#34407e', '#ff8a5c', '#ff9a5c', 1.3, '#bca4c0', '#6e5a62', 1.5, 1, 1.1, 0.1, '#f8948a', '#6a4a78'),
   K(18.8, '#1c2b64', '#9a6c94', '#b4bcff', 1.25, '#8e90cc', '#4a4a6c', 1.65, 1.4, 1.16, 0.5, '#9a7aa8', '#2c2c58'),
   K(19.6, ...NOCHE),
@@ -220,7 +243,8 @@ float fbm( vec2 p ) { float s = 0.0, a = 0.5; for ( int i = 0; i < 5; i++ ) { s 
 void main() {
   vec3 d = normalize( vDir );
   float h = max( d.y, 0.0 );
-  vec3 col = mix( uHor, uZen, pow( h, 0.48 ) );
+  // el azul se hace hondo al subir y queda una franja ancha de bruma clara sobre el horizonte
+  vec3 col = mix( uHor, uZen, pow( h, 0.56 ) );
   col = mix( col, uHor * 0.94, smoothstep( 0.0, -0.25, d.y ) );
   float s = max( dot( d, uSunDir ), 0.0 ), m = max( dot( d, uMoonDir ), 0.0 );
   // halo del sol: más ancho y cálido cerca del horizonte
@@ -637,7 +661,8 @@ export function SkyRig({
       L.position.copy(tA).addScaledVector(lightDir, 90);
       L.target.updateMatrixWorld();
     }
-    gl.toneMappingExposure = indoor ? 1 : c.exp * (1 - ov * 0.06);
+    if (gl.toneMapping !== TONE) gl.toneMapping = TONE;
+    gl.toneMappingExposure = indoor ? 1 : c.exp * (1 - ov * 0.14);
 
     // --- mapa de entorno: se regenera solo cuando el cielo cambió lo suficiente
     const sig = indoor
