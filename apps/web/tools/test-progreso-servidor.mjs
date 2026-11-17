@@ -125,7 +125,7 @@ try {
       collected: ['lapaz', 'olancho'],
       achievements: LOGROS.map((l) => l.id),
       juegos: {
-        'santabarbara.patepluma': { etapa: 2, stars: [3, 9], best: 1e9, label: 'mil millones', veces: 1e6 },
+        'santabarbara.cuando-caen-las-tres': { etapa: 2, stars: [3, 9], best: 1e9, label: 'mil millones', veces: 1e6 },
         'inventado.juego': { etapa: 3, stars: [3, 3, 3], best: 5, label: '5', veces: 3 },
       },
       daily: {
@@ -149,17 +149,19 @@ try {
     assert.deepEqual(e1.visitas.sort(), ['cortes', 'lapaz']);
     assert.deepEqual(e1.recuerdos, ['lapaz']);
     // el avance local no desbloquea etapas en el servidor: solo cuenta las veces
-    assert.deepEqual(e1.juegos, [{ juegoId: 'santabarbara.patepluma', etapa: 0, estrellas: [], mejor: 0, veces: 500 }]);
+    assert.deepEqual(e1.juegos, [
+      { juegoId: 'santabarbara.cuando-caen-las-tres', etapa: 0, estrellas: [], mejor: 0, veces: 500 },
+    ]);
     assert.deepEqual(e1.logros, ['primer_paso'], 'solo el logro de entrar; nada del avance inventado');
     const p1 = await q(fn.perfil, { invitado: secretoA });
     assert.equal(p1.monedas, 100 + coins('primer_paso'), 'el saldo inventado no sube');
     assert.equal(p1.nivel, 1);
     assert.equal(await st('s.profile.coins'), p1.monedas);
     assert.deepEqual(await st('s.profile.achievements'), ['primer_paso']);
-    assert.equal(await st(`s.profile.juegos['santabarbara.patepluma'].etapa`), 0);
+    assert.equal(await st(`s.profile.juegos['santabarbara.cuando-caen-las-tres'].etapa`), 0);
     assert.equal(await st(`s.profile.juegos['inventado.juego'] ?? null`), null);
     assert.equal(
-      (await q(fn.porJuego, { juegoId: 'santabarbara.patepluma' })).filas.some((f) => f.nombre === nombreA),
+      (await q(fn.porJuego, { juegoId: 'santabarbara.cuando-caen-las-tres' })).filas.some((f) => f.nombre === nombreA),
       false,
     );
     // las misiones son las del servidor: sin progreso, no se cobran
@@ -173,7 +175,7 @@ try {
     assert.equal(inc.motivo, 'incompleta');
     // una etapa todavía bloqueada no se abre
     assert.deepEqual(
-      await m(fn.abrir, { invitado: secretoA, motor: 'trivia', juegoId: 'graciasadios.naksa', etapa: 1 }),
+      await m(fn.abrir, { invitado: secretoA, motor: 'yoro.acuerdos', juegoId: 'yoro.tres-pruebas-del-54', etapa: 1 }),
       {
         ok: false,
         motivo: 'etapa bloqueada',
@@ -182,22 +184,22 @@ try {
 
     // 2. cerrar una partida guarda etapa, estrellas, visita y marca, y da «Primera victoria» una vez
     await t.sleep(1100);
-    await t.ev(`${S}.startJuego('graciasadios.naksa')`);
+    await t.ev(`${S}.startJuego('yoro.tres-pruebas-del-54')`);
     await t.waitFor(`${S}.mg?.phase === 'intro'`);
     await t.ev(`${S}.beginMinigame()`);
     await t.sleep(9500);
-    await t.ev(`${S}.finishMinigame({ won: true, stars: 1, score: 480, label: '480 pts' })`);
+    await t.ev(`${S}.finishMinigame({ won: true, stars: 1, score: 300, label: '300 pts' })`);
     await t.waitFor(`${S}.mg?.pago === 'pagado'`, 20000, 'pago del servidor');
     assert.deepEqual(await st('s.mg.rewards.newAchievements'), ['primera_victoria']);
     assert.equal(await st('s.mg.avance'), true);
-    assert.equal(await st(`s.profile.juegos['graciasadios.naksa'].etapa`), 1);
+    assert.equal(await st(`s.profile.juegos['yoro.tres-pruebas-del-54'].etapa`), 1);
     await t.waitFor(`!!document.querySelector('[data-testid=mg-ach-primera_victoria]')`);
     await t.sleep(2500); // que terminen de contar los premios
     await t.shot(join(capturas, '01-logro-del-servidor.png'));
     const e2 = await q(fn.estado, { invitado: secretoA });
     assert.deepEqual(
-      e2.juegos.find((j) => j.juegoId === 'graciasadios.naksa'),
-      { juegoId: 'graciasadios.naksa', etapa: 1, estrellas: [1], mejor: 480, veces: 1 },
+      e2.juegos.find((j) => j.juegoId === 'yoro.tres-pruebas-del-54'),
+      { juegoId: 'yoro.tres-pruebas-del-54', etapa: 1, estrellas: [1], mejor: 300, veces: 1 },
     );
     assert(e2.visitas.includes('graciasadios'), 'la partida cuenta como visita');
     const premioGanar = R.minigame.win.coins + R.minigame.perStar.coins,
@@ -213,18 +215,18 @@ try {
     await m(fn.entrar, { invitado: secretoB, nombre: `${nombreB}!!<>` });
     const [rA, rB] = await Promise.all([
       partida(secretoA, {
-        motor: 'trivia',
-        juegoId: 'graciasadios.naksa',
+        motor: 'yoro.acuerdos',
+        juegoId: 'yoro.tres-pruebas-del-54',
         seg: 9,
-        puntos: 470,
+        puntos: 290,
         estrellas: 1,
         gano: true,
       }),
       partida(secretoB, {
-        motor: 'trivia',
-        juegoId: 'graciasadios.naksa',
+        motor: 'yoro.acuerdos',
+        juegoId: 'yoro.tres-pruebas-del-54',
         seg: 9,
-        puntos: 420,
+        puntos: 260,
         estrellas: 1,
         gano: true,
       }),
@@ -236,12 +238,12 @@ try {
       ['primera_victoria'],
     );
     assert.equal((await q(fn.estado, { invitado: secretoA })).logros.filter((l) => l === 'primera_victoria').length, 1);
-    // la marca guarda la mejor: 470 no baja los 480
-    const tabla = await q(fn.porJuego, { juegoId: 'graciasadios.naksa', invitado: secretoA });
+    // la marca guarda la mejor: 290 no baja los 300
+    const tabla = await q(fn.porJuego, { juegoId: 'yoro.tres-pruebas-del-54', invitado: secretoA });
     const iA = tabla.filas.findIndex((f) => f.nombre === nombreA),
       iB = tabla.filas.findIndex((f) => f.nombre === nombreB);
     assert(iA >= 0 && iB > iA, `A antes que B: ${JSON.stringify(tabla.filas)}`);
-    assert.equal(tabla.filas[iA].puntos, 480);
+    assert.equal(tabla.filas[iA].puntos, 300);
     assert.equal(tabla.filas[iA].tu, true);
     assert.equal(tabla.filas[iB].nombre, nombreB, 'nombre limpio');
 
@@ -251,7 +253,7 @@ try {
     await t.waitFor(`!!document.querySelector('[data-testid=lb-juego]')`);
     await t.ev(`(() => {
       const el = document.querySelector('[data-testid=lb-juego]');
-      Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(el, 'graciasadios.naksa');
+      Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(el, 'yoro.tres-pruebas-del-54');
       el.dispatchEvent(new Event('change', { bubbles: true }));
     })()`);
     await t.waitFor(

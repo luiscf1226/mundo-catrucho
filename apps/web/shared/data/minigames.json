@@ -1415,6 +1415,202 @@
 }
 ,
 {
+  "id": "graciasadios.lidar",
+  "name": "Volumen bajo el dosel",
+  "place": "Gracias a Dios",
+  "icon": "📡",
+  "desc": "Clasificá retornos de un escaneo LiDAR simulado en suelo, copa y ruido. Ganás reconstruyendo un relieve continuo; borrar puntos bajos junto con hojas destruye la evidencia del terreno.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+}
+,
+{
+  "id": "graciasadios.pipante",
+  "name": "Confluencias del Patuca",
+  "place": "Gracias a Dios",
+  "icon": "🛶",
+  "desc": "Girás proa y popa por separado con impulsos de remo mientras leés remolinos móviles. Ganás cruzando una confluencia en diagonal; orientar solo la proa deja la popa atravesada.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+}
+,
+{
+  "id": "graciasadios.pistalempira",
+  "name": "Cruce de pista",
+  "place": "Gracias a Dios",
+  "icon": "🛬",
+  "desc": "Agrupá traslados en un tablero de permisos antes del aviso de aterrizaje. Ganás cuando nadie espera en la zona restringida; iniciar un cruce tarde devuelve el grupo al refugio.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+}
+,
+{
+  "id": "graciasadios.caratasca",
+  "name": "Carta que gira",
+  "place": "Gracias a Dios",
+  "icon": "🧭",
+  "desc": "Separá con dos mandos la rotación de una carta y la traslación de tu posición bajo viento lateral. Ganás manteniendo rumbo entre dos marcas bajas de costa; confundir giro con deriva te saca del canal.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+}
+,
+{
+  "id": "graciasadios.rastros",
+  "name": "Distancia del jaguar",
+  "place": "Gracias a Dios",
+  "icon": "🐾",
+  "desc": "Superponé huellas y marcas de tiempo para delimitar una zona de exclusión en el mapa. Ganás eligiendo un lugar remoto de observación; seguir al animal cancela el recorrido.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+}
+,
+{
+  "id": "graciasadios.wabul",
+  "name": "Textura del wabul",
+  "place": "Gracias a Dios",
+  "icon": "🥣",
+  "desc": "Triturá plátano en una simulación de textura alternando trayectorias cruzadas del mazo. Ganás al reducir grumos sin compactar; repetir dirección forma placas difíciles de deshacer.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+}
+,
+{
+  "id": "graciasadios.truequeflotante",
+  "name": "Mostrador de Brus",
+  "place": "Gracias a Dios",
+  "icon": "⚖️",
+  "desc": "Intercambiá bultos simultáneamente entre dos embarcaciones para conservar su desplazamiento. Ganás cerrando entregas sin sobrecarga transitoria; recibir antes de soltar hunde el borde virtual.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+}
+,
+{
+  "id": "santabarbara.chimenea",
+  "name": "Estructura efímera de Trinidad",
+  "place": "Santa Bárbara",
+  "icon": "🔥",
+  "desc": "Encajá costillas y papel en una figura monumental y simulá el orden de encendido a distancia. Ganás si la silueta dura hasta el remate; una unión débil la derrumba antes del cierre.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+}
+,
+{
+  "id": "santabarbara.junco",
+  "name": "De copa a ala",
+  "place": "Santa Bárbara",
+  "icon": "👒",
+  "desc": "Trenzá tiras de junco alternando cruces mientras aumentás el radio del tejido. Ganás un sombrero plano en el ala; mantener la misma densidad de la copa lo arruga.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+}
+,
+{
+  "id": "santabarbara.caliza",
+  "name": "Huecos del Maroncho",
+  "place": "Santa Bárbara",
+  "icon": "⛰️",
+  "desc": "Sondeá placas de caliza en un tablero de cargas para inferir cavidades ocultas. Ganás repartiendo la expedición sobre placas conectadas firmes; concentrar peso rompe una placa hueca.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+}
+,
+{
+  "id": "santabarbara.perspectiva",
+  "name": "Ventanas del Bográn",
+  "place": "Santa Bárbara",
+  "icon": "🏰",
+  "desc": "Corregí puntos de fuga de fotos exteriores hasta deducir alturas de ventanas. Ganás identificando el piso desde donde se tomó cada imagen; confundir escala con profundidad deja líneas incompatibles.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+}
+,
+{
+  "id": "santabarbara.goteo",
+  "name": "Ciclos de Pencaligüe",
+  "place": "Santa Bárbara",
+  "icon": "🦇",
+  "desc": "Observá tres ciclos de goteo y marcá en una recta temporal su próxima coincidencia. Ganás prediciendo sin acelerar el agua; cada intento erróneo consume un marcador de observación.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+}
+,
+{
+  "id": "santabarbara.juncocorte",
+  "name": "Medidas sin empalme",
+  "place": "Santa Bárbara",
+  "icon": "🌾",
+  "desc": "Repartí longitudes de tiras en un patrón de cortes con anchos complementarios. Ganás completando el tejido con sobrantes enteros; un empalme no satisface la longitud exigida.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+}
+,
+{
+  "id": "santabarbara.papel",
+  "name": "Superficie del gigante",
+  "place": "Santa Bárbara",
+  "icon": "📜",
+  "desc": "Teselá un molde tridimensional con pliegos recortables siguiendo sus curvaturas. Ganás cubriendo superficie con poco sobrante; contar hojas sin medirlas deja huecos en las uniones.",
+  "rules": {
+    "duration": 75,
+    "bronze": 120,
+    "silver": 360,
+    "gold": 600
+  }
+}
+,
+{
   "id": "yoro.cable",
   "name": "Cable bananero",
   "place": "Yoro",

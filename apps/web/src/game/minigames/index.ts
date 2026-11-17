@@ -144,7 +144,7 @@ const MOTORS = {
   carrera: motor(() => import('./Carrera').then((m) => ({ ...m, default: m.Carrera }))),
   futbol: motor(() => import('./Futbol').then((m) => ({ ...m, default: m.Futbol }))),
   feria: motor(() => import('./Feria').then((m) => ({ ...m, default: m.Feria }))),
-  exploradores: motor(() => import('./Exploradores').then((m) => ({ ...m, default: m.Exploradores }))),
+  exploradores: motor(() => import('./graciasadios/Archivo').then((m) => ({ ...m, default: m.Exploradores }))),
   pulperia: motor(() => import('./Pulperia').then((m) => ({ ...m, default: m.Pulperia }))),
   corte: motor(() => import('./Corte').then((m) => ({ ...m, default: m.Corte }))),
   monta: motor(() => import('./Monta').then((m) => ({ ...m, default: m.Monta }))),
@@ -164,6 +164,26 @@ const MOTORS = {
   'ocotepeque.reservas': motor(() => import('./ocotepeque/Reservas').then((m) => ({ ...m, default: m.Reservas }))),
   'ocotepeque.moras': motor(() => import('./ocotepeque/Cesta').then((m) => ({ ...m, default: m.Cesta }))),
   'ocotepeque.rotulos': motor(() => import('./ocotepeque/Rotulos').then((m) => ({ ...m, default: m.Rotulos }))),
+  // Gracias a Dios
+  'graciasadios.lidar': motor(() => import('./graciasadios/Lidar').then((m) => ({ ...m, default: m.Lidar }))),
+  'graciasadios.pipante': motor(() => import('./graciasadios/Pipante').then((m) => ({ ...m, default: m.Pipante }))),
+  'graciasadios.pistalempira': motor(() => import('./graciasadios/Pista').then((m) => ({ ...m, default: m.Pista }))),
+  'graciasadios.caratasca': motor(() => import('./graciasadios/Carta').then((m) => ({ ...m, default: m.Carta }))),
+  'graciasadios.rastros': motor(() => import('./graciasadios/Rastros').then((m) => ({ ...m, default: m.Rastros }))),
+  'graciasadios.wabul': motor(() => import('./graciasadios/Wabul').then((m) => ({ ...m, default: m.Wabul }))),
+  'graciasadios.truequeflotante': motor(() =>
+    import('./graciasadios/Mostrador').then((m) => ({ ...m, default: m.Mostrador })),
+  ),
+  // Santa Bárbara
+  'santabarbara.chimenea': motor(() => import('./santabarbara/Chimenea').then((m) => ({ ...m, default: m.Chimenea }))),
+  'santabarbara.junco': motor(() => import('./santabarbara/Copa').then((m) => ({ ...m, default: m.Copa }))),
+  'santabarbara.caliza': motor(() => import('./santabarbara/Caliza').then((m) => ({ ...m, default: m.Caliza }))),
+  'santabarbara.perspectiva': motor(() =>
+    import('./santabarbara/Ventanas').then((m) => ({ ...m, default: m.Ventanas })),
+  ),
+  'santabarbara.goteo': motor(() => import('./santabarbara/Goteo').then((m) => ({ ...m, default: m.Goteo }))),
+  'santabarbara.juncocorte': motor(() => import('./santabarbara/Tiras').then((m) => ({ ...m, default: m.Tiras }))),
+  'santabarbara.papel': motor(() => import('./santabarbara/Pliegos').then((m) => ({ ...m, default: m.Pliegos }))),
   // Yoro
   'yoro.cable': motor(() => import('./yoro/Cable').then((m) => ({ ...m, default: m.Cable }))),
   'yoro.acuerdos': motor(() => import('./yoro/Archivo').then((m) => ({ ...m, default: m.Archivo }))),

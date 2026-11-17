@@ -116,7 +116,7 @@ const ok = await run('dept', file, { hash: '#test,go' }, async (t) => {
   console.log(
     `exploradores: 18 zonas con ${Math.min(...all.map((z) => z.n))}+ objetos · p. ej. ${all.find((z) => z.id === 'olancho').names.join(', ')}`,
   );
-  await t.ev(`${S}.startJuego('graciasadios.rioplatano')`);
+  await t.ev(`${S}.startJuego('graciasadios.la-ficha-que-faltaba')`);
   await t.click('mg-start');
   const X = `window.__mcTest.exploradores`;
   await t.waitFor(`${S}.mg?.phase==='playing' && !!${X}`, 8000, 'exploradores en juego');

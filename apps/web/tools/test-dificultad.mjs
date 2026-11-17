@@ -21,14 +21,13 @@ const JUEGO = {
   ritmo: 'atlantida.punta-en-sambo-creek',
   atrapa: 'yoro.lluvia-de-peces',
   pesca: 'cortes.pesca-en-yojoa',
-  trivia: 'santabarbara.patepluma',
   cocina: 'colon.casabe-de-santa-fe',
-  ruta: 'santabarbara.pencaligue',
+  ruta: 'lempira.sendero-de-celaque',
   manejo: 'franciscomorazan.rapidito',
-  feria: 'santabarbara.feriasb',
+  feria: 'santabarbara.argollas-pateplumas',
   pulperia: 'franciscomorazan.pulperia',
   futbol: 'franciscomorazan.potra-de-dos-colores',
-  exploradores: 'graciasadios.rioplatano',
+  exploradores: 'graciasadios.la-ficha-que-faltaba',
 };
 
 // ------------------------------------------------------------------ bots (corren dentro de la página)

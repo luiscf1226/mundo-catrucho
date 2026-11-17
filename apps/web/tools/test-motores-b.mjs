@@ -255,7 +255,11 @@ const peces = [
 ];
 const res = [];
 res.push(
-  await pruebaAtrapa('atrapa-catalogo-hortalizas', { juego: 'graciasadios.cacao', motor: 'atrapa', golpe: true }),
+  await pruebaAtrapa('atrapa-catalogo-hortalizas', {
+    juego: 'yoro.el-pronostico-trae-escamas',
+    motor: 'atrapa',
+    golpe: true,
+  }),
 );
 res.push(
   await pruebaAtrapa('atrapa-catalogo-cafe-duo', { juego: 'yoro.lluvia-de-peces', motor: 'atrapa', modo: 'duo' }),
@@ -266,7 +270,7 @@ res.push(
 );
 res.push(
   await pruebaCocina('cocina-catalogo-tostado', {
-    juego: 'santabarbara.gallina',
+    juego: 'colon.casabe-de-santa-fe',
     motor: 'cocina',
     modo: 'solo',
     pedidos: 1,
@@ -292,7 +296,7 @@ res.push(
 res.push(
   await pruebaAtrapa(
     'captura-atrapa-hortalizas',
-    { juego: 'graciasadios.cacao', motor: 'atrapa', shot: 'atrapa-hortalizas', sinFin: true },
+    { juego: 'yoro.el-pronostico-trae-escamas', motor: 'atrapa', shot: 'atrapa-hortalizas', sinFin: true },
     '#go',
   ),
 );
@@ -334,7 +338,14 @@ res.push(
 res.push(
   await pruebaCocina(
     'captura-cocina-tostado',
-    { juego: 'santabarbara.gallina', motor: 'cocina', modo: 'solo', pedidos: 1, shot: 'cocina-tostado', sinFin: true },
+    {
+      juego: 'colon.casabe-de-santa-fe',
+      motor: 'cocina',
+      modo: 'solo',
+      pedidos: 1,
+      shot: 'cocina-tostado',
+      sinFin: true,
+    },
     '#go',
   ),
 );

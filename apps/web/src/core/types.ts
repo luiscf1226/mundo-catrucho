@@ -135,6 +135,22 @@ export type MinigameId =
   | 'ocotepeque.reservas'
   | 'ocotepeque.moras'
   | 'ocotepeque.rotulos'
+  // Gracias a Dios
+  | 'graciasadios.lidar'
+  | 'graciasadios.pipante'
+  | 'graciasadios.pistalempira'
+  | 'graciasadios.caratasca'
+  | 'graciasadios.rastros'
+  | 'graciasadios.wabul'
+  | 'graciasadios.truequeflotante'
+  // Santa Bárbara
+  | 'santabarbara.chimenea'
+  | 'santabarbara.junco'
+  | 'santabarbara.caliza'
+  | 'santabarbara.perspectiva'
+  | 'santabarbara.goteo'
+  | 'santabarbara.juncocorte'
+  | 'santabarbara.papel'
   // Yoro
   | 'yoro.cable'
   | 'yoro.acuerdos'

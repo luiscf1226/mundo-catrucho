@@ -29,7 +29,7 @@ interface Flight {
   t: number;
   duration: number;
 }
-function targets(booth: number): Target[] {
+function targets(booth: number, moviles = false): Target[] {
   return booth === 2
     ? Array.from({ length: 10 }, (_, i) => {
         let row = 0,
@@ -71,16 +71,20 @@ function targets(booth: number): Target[] {
             down: false,
             v: [0, 0, 0],
             rot: 0,
-            moving: i % 4 === 3,
+            moving: moviles || i % 4 === 3,
           };
         });
 }
 export function Feria() {
   const { camera, size } = useThree();
   // etapas: los blancos y el aro se mueven más rápido y más lejos (las metas de puntos no cambian)
-  const { dif } = useMemo(partida, []),
+  const { dif, tema } = useMemo(partida, []),
     mov = 1 + 0.6 * dif,
-    amp = 1 + 0.4 * dif;
+    amp = 1 + 0.4 * dif,
+    // tema del catálogo: nombre del puesto, frases y, en «El premio no cabe en la puerta», todos los blancos móviles
+    nombre = typeof tema.nombre === 'string' ? tema.nombre.toUpperCase() : 'FERIA CATRACHA',
+    frases: string[] = Array.isArray(tema.frases) ? tema.frases.filter((f: unknown) => typeof f === 'string') : [],
+    moviles = tema.variante === 'el-premio-no-cabe-en-la-puerta';
   const [, render] = useState(0);
   const fx = useRef(new Fx()).current;
   const s = useRef({
@@ -88,7 +92,8 @@ export function Feria() {
     shots: 0,
     scores: [0, 0, 0],
     done: [false, false, false],
-    targets: targets(0),
+    targets: targets(0, moviles),
+    frase: 6,
     flight: null as Flight | null,
     time: 0,
     power: 0.5,
@@ -122,7 +127,7 @@ export function Feria() {
     if (s.booth >= 0 || s.done[i] || s.ending || useGame.getState().mg?.phase !== 'playing') return;
     s.booth = i;
     s.shots = Number(rulesOf('feria').shotsPerBooth);
-    s.targets = targets(i);
+    s.targets = targets(i, moviles);
     s.reset = false;
     player.control = false;
     player.visible = false;
@@ -161,6 +166,8 @@ export function Feria() {
         done: s.done,
         flight: !!s.flight,
         ready: !s.flight && s.wait <= 0,
+        nombre,
+        moviles,
       }),
       targets: () =>
         s.targets
@@ -184,11 +191,15 @@ export function Feria() {
       player.visible = true;
       player.fixedCam = null;
     };
-  }, [camera, size, s, mov, amp]);
+  }, [camera, size, s, mov, amp, nombre, moviles]);
   useMgTick((dt) => {
     s.time += dt;
     s.refresh += dt;
     s.power = (Math.sin(s.time * 2.5) + 1) / 2;
+    if (frases.length && s.time >= s.frase) {
+      useGame.getState().toast(frases[Math.floor(s.frase / 20) % frases.length], '💬');
+      s.frase += 20;
+    }
     if (s.ending) {
       s.ending -= dt;
       if (s.ending <= 0) {
@@ -352,7 +363,7 @@ export function Feria() {
       <Ground size={70} mat="dirt" color="#b58a55" />
       <Scenery />
       <FxLayer fx={fx} />
-      {s.booth < 0 && <Label pos={[0, 6, -16]} text={`FERIA CATRACHA · ${total()} pts`} h={1} />}
+      {s.booth < 0 && <Label pos={[0, 6, -16]} text={`${nombre} · ${total()} pts`} h={1} />}
       {xs.map((x, i) => (
         <group key={i}>
           <Block pos={[x, 1, -3]} size={[7, 1.1, 1]} mat="wood" color={['#d94e54', '#248c92', '#7771bd'][i]} />
@@ -378,7 +389,7 @@ export function Feria() {
           />
         </group>
       ))}
-      {(s.booth >= 0 ? s.targets : xs.flatMap((_, i) => targets(i))).map((t, i) => (
+      {(s.booth >= 0 ? s.targets : xs.flatMap((_, i) => targets(i, moviles))).map((t, i) => (
         <group key={i} position={t.p} rotation-z={t.rot} visible={!t.down || s.booth === 2}>
           {s.booth === 1 ? (
             <Cyl pos={[0, 0.2, 0]} r={0.13} h={0.6} color="#29a879" mat="glass" solid={false} />

@@ -13,12 +13,12 @@ export interface TopeMotor {
    * el servidor no tiene (semilla, canción), son una cota inferior: nunca más altas que las reales.
    */
   metas?: (dif: number, tema: Tema) => Metas;
-  /** reloj fijo del motor en segundos: la partida no puede durar menos */
-  reloj?: (dif: number) => number;
+  /** reloj fijo del motor en segundos: la partida no puede durar menos (algunos motores solo lo tienen con cierto tema) */
+  reloj?: (dif: number, tema?: Tema) => number | undefined;
   /** duración mínima según el resultado (motores sin reloj fijo, o donde terminar rápido da más puntos) */
   duracionMin?: (r: { puntos: number; dif: number; gano: boolean | undefined }) => number;
   /** puntaje máximo absoluto */
-  puntosMax?: (dif: number) => number;
+  puntosMax?: (dif: number, tema?: Tema) => number;
   /** puntos por segundo que nadie supera (sobre el reloj si existe; si no, sobre la duración reportada) */
   puntosPorSegundo: number | ((dif: number, tema: Tema) => number);
   /** se gana exactamente al llegar a la primera meta (motores del kit) */
@@ -109,6 +109,18 @@ const ocotepeque = kit(
   (d) => [120 + r(d * 120), 360, 600],
   () => 75,
 );
+// Gracias a Dios
+/** Gracias a Dios: metas y reloj de minigames/graciasadios/comun.tsx. */
+const graciasadios = kit(
+  (d) => [120 + r(d * 120), 360, 600],
+  () => 75,
+);
+// Santa Bárbara
+/** Santa Bárbara: metas y reloj de minigames/santabarbara/comun.tsx. */
+const santabarbara = kit(
+  (d) => [120 + r(d * 120), 360, 600],
+  () => 75,
+);
 // Yoro
 /** Yoro: metas y reloj de minigames/yoro/comun.tsx. */
 const yoro = kit(
@@ -133,6 +145,18 @@ const fijas = (g: Record<string, number | undefined>, b: number, s: number, o: n
   num(g.gold, o),
 ];
 const preguntas = (d: number) => 8 + r(d * 2);
+/** Exploradores clásico: con menos sitios en el tema, las metas se achican igual que en exploradores/Scene.tsx. */
+function metasExploradores(tema: Tema | undefined): Metas {
+  const base = num(exploradores.bronze, 8),
+    plata = num(exploradores.silver, 12),
+    porSitio = num(exploradores.objectsPerSite, 5),
+    todos = Array.isArray(exploradores.sites) ? (exploradores.sites as unknown[]).length : 3;
+  const sitios = Array.isArray(tema?.sitios) && tema.sitios.length ? tema.sitios.length : todos,
+    k = sitios / todos,
+    tot = sitios * porSitio,
+    sc = (v: number) => Math.min(tot, Math.max(1, r(v * k)));
+  return [sc(base), Math.max(sc(base) + 1, sc(plata)), sitios === todos ? num(exploradores.gold, 15) : tot];
+}
 
 // ------------------------------------------------------------------ motores propios sin tabla en minigames.json
 /** Ritmo (Ritmo.tsx, ritmo/musica.ts): la canción dura L = 60 + 26·dif s y las metas son 15–52 % del máximo. */
@@ -408,10 +432,13 @@ export const TOPES: Record<string, TopeMotor> = {
     ganarPideMeta: true,
   },
   pulperia: { metas: fijas(pulperia, 100, 180, 260), puntosPorSegundo: 20, ganarPideMeta: true },
+  // con `tema.archivo` es el archivo de Ciudad Blanca (Gracias a Dios): motor del kit con las metas de graciasadios;
+  // 25 pts por marca y 50 por ficha, con 0,4 s entre registros y la ruta caminada: menos de 110 pts por segundo
   exploradores: {
-    metas: fijas(exploradores, 8, 12, 15),
-    puntosMax: () => 3 * num(exploradores.objectsPerSite, 5),
-    puntosPorSegundo: 1,
+    metas: (d, tema) => (tema?.archivo ? (graciasadios.metas?.(d, tema) ?? [0, 0, 0]) : metasExploradores(tema)),
+    reloj: (d, tema) => (tema?.archivo ? graciasadios.reloj?.(d) : undefined),
+    puntosMax: (_d, tema) => (tema?.archivo ? Number.POSITIVE_INFINITY : 3 * num(exploradores.objectsPerSite, 5)),
+    puntosPorSegundo: (_d, tema) => (tema?.archivo ? 110 : 1),
     ganarPideMeta: true,
   },
   carrera: {
@@ -438,6 +465,36 @@ export const TOPES: Record<string, TopeMotor> = {
   'ocotepeque.moras': conRitmo(ocotepeque, 40),
   // 45 pts por cruce, otro cada segundo
   'ocotepeque.rotulos': conRitmo(ocotepeque, 45),
+  // Gracias a Dios
+  // 30 pts por columna + 10 de relieve continuo, 0,6 s entre columnas
+  'graciasadios.lidar': conRitmo(graciasadios, 70),
+  // 50 pts por confluencia, una cada 2,8 s como mínimo
+  'graciasadios.pipante': graciasadios,
+  // un grupo de cinco paga 75 y tarda 3 s en cruzar
+  'graciasadios.pistalempira': conRitmo(graciasadios, 30),
+  // 40 pts por par de marcas, uno cada 2,7 s como mínimo
+  'graciasadios.caratasca': graciasadios,
+  // 30 + 15 por casilla de la zona (hasta seis), 0,25 s por casilla y 0,8 s tras observar
+  'graciasadios.rastros': conRitmo(graciasadios, 55),
+  // 8 pts por grumo, cinco por pasada cada 0,45 s, y 40 por tanda de 20 grumos o más
+  'graciasadios.wabul': conRitmo(graciasadios, 120),
+  // 15 pts por bulto cada 0,5 s y 40 al cerrar una entrega de dos bultos
+  'graciasadios.truequeflotante': conRitmo(graciasadios, 75),
+  // Santa Bárbara: el ritmo sale de cuánto paga cada acierto y la espera mínima entre aciertos
+  // 30 pts por costilla justa cada 0,6 s (+40 al remate, que pide armar toda la figura)
+  'santabarbara.chimenea': conRitmo(santabarbara, 80),
+  // 35 pts por vuelta cada 0,6 s
+  'santabarbara.junco': conRitmo(santabarbara, 70),
+  // 20 pts por carga cada 0,5 s y 40 al cruzar (un paso pide al menos cinco cargas)
+  'santabarbara.caliza': conRitmo(santabarbara, 70),
+  // 15 por la fuga y 40 por el piso, cada uno con 0,6 s de espera
+  'santabarbara.perspectiva': conRitmo(santabarbara, 60),
+  // 60 pts por coincidencia y 0,6 s de espera entre marcas
+  'santabarbara.goteo': conRitmo(santabarbara, 110),
+  // 15 pts por pieza cada 0,5 s y 40 al completar el tejido (cinco piezas o más)
+  'santabarbara.juncocorte': conRitmo(santabarbara, 50),
+  // 35 pts por parte cada 0,6 s y 30 al terminar el gigante (tres partes o más)
+  'santabarbara.papel': conRitmo(santabarbara, 90),
   // Yoro: puntos por acierto ÷ espera mínima entre aciertos (con la pausa entre tandas)
   'yoro.cable': conRitmo(yoro, 40),
   'yoro.acuerdos': conRitmo(yoro, 40),
@@ -493,13 +550,13 @@ export function validarResultado(res: Resultado): Veredicto {
   if (motivos.length) return { ok: false, motivos, estrellasPosibles: null, conocido: !!tope };
 
   const dif = difDe(etapa, etapas),
-    reloj = t.reloj?.(dif);
+    reloj = t.reloj?.(dif, tema);
   const minimo = Math.max(DURACION_MIN_S, reloj ?? 0, t.duracionMin?.({ puntos, dif, gano: res.gano }) ?? 0);
   if (duracion < minimo - HOLGURA_S) motivos.push(`duró ${r(duracion)} s; no se puede en menos de ${r(minimo)} s`);
   if (duracion > DURACION_MAX_S) motivos.push('partida abandonada');
   const segundos = reloj ?? Math.min(duracion, DURACION_MAX_S),
     pps = typeof t.puntosPorSegundo === 'function' ? t.puntosPorSegundo(dif, tema) : t.puntosPorSegundo,
-    maximo = Math.min(t.puntosMax?.(dif) ?? Number.POSITIVE_INFINITY, pps * segundos);
+    maximo = Math.min(t.puntosMax?.(dif, tema) ?? Number.POSITIVE_INFINITY, pps * segundos);
   if (puntos > maximo) motivos.push(`${puntos} pts no caben en ${r(segundos)} s (máximo ${r(maximo)})`);
   const metas = t.metas?.(dif, tema),
     posibles = metas ? estrellasPara(puntos, metas) : null;

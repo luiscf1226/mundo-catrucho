@@ -19,11 +19,10 @@ const JUEGOS = [
   'cortes.pesca-en-yojoa',
   'yoro.lluvia-de-peces',
   'colon.casabe-de-santa-fe',
-  'santabarbara.patepluma',
   'franciscomorazan.rapidito',
   'franciscomorazan.potra-de-dos-colores',
-  'santabarbara.feriasb',
-  'graciasadios.rioplatano',
+  'santabarbara.argollas-pateplumas',
+  'graciasadios.la-ficha-que-faltaba',
   'franciscomorazan.pulperia',
   'carrera',
   'lempira.barro-de-la-campa',
@@ -77,6 +76,22 @@ const JUEGOS = [
   'colon.la-red-deja-crecer',
   'colon.el-plano-del-castillo',
   'colon.por-mano--no-por-dedo',
+  // Gracias a Dios
+  'graciasadios.el-bosque-deja-ver',
+  'graciasadios.pipante-por-el-patuca',
+  'graciasadios.aterriza-el-encargo',
+  'graciasadios.caratasca-sin-perder-el-norte',
+  'graciasadios.huellas-para-alejarse',
+  'graciasadios.wabul-sin-grumos',
+  'graciasadios.entrega-a-peso-parejo',
+  // Santa Bárbara
+  'santabarbara.chimeneas-de-trinidad',
+  'santabarbara.junco-que-se-vuelve-sombrero',
+  'santabarbara.maroncho-por-debajo',
+  'santabarbara.el-castillo-desde-afuera',
+  'santabarbara.cuando-caen-las-tres',
+  'santabarbara.el-junco-rinde-entero',
+  'santabarbara.papel-para-el-gigante',
 ];
 const ok = await run('smoke', file, { hash: '#test' }, async (t) => {
   await t.ev(`localStorage.clear()`);
