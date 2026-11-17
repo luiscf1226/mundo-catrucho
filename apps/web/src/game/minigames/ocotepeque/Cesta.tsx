@@ -140,9 +140,11 @@ function poner(m: Sesion) {
 }
 function sacar(m: Sesion) {
   const s = m.datos,
-    c = casilla(s.x, COLUMNAS),
-    t = s.cesta[c].pop();
-  if (s.espera > 0 || s.listo > 0 || t === undefined) return;
+    c = casilla(s.x, COLUMNAS);
+  // validar antes de tocar la cesta: si no, E durante la espera bota la mora sin devolverla
+  if (s.espera > 0 || s.listo > 0) return;
+  const t = s.cesta[c].pop();
+  if (t === undefined) return;
   s.espera = 0.4;
   s.sacadas++;
   s.cola.unshift({ t, col: c });

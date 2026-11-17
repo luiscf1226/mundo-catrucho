@@ -426,10 +426,12 @@ export const TOPES: Record<string, TopeMotor> = {
   'ocotepeque.archivoagua': conRitmo(ocotepeque, 40),
   'ocotepeque.boveda': conRitmo(ocotepeque, 40),
   'ocotepeque.mercadomadruga': conRitmo(ocotepeque, 40),
-  'ocotepeque.gotasviento': conRitmo(ocotepeque, 40),
+  // 40 pts por acierto con media espera de 0,5 s
+  'ocotepeque.gotasviento': conRitmo(ocotepeque, 80),
   'ocotepeque.reservas': conRitmo(ocotepeque, 40),
   'ocotepeque.moras': conRitmo(ocotepeque, 40),
-  'ocotepeque.rotulos': conRitmo(ocotepeque, 40),
+  // 45 pts por cruce, otro cada segundo
+  'ocotepeque.rotulos': conRitmo(ocotepeque, 45),
 };
 
 export interface Resultado {
