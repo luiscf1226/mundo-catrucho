@@ -17,6 +17,23 @@ El flujo [`despliegue.yml`](../.github/workflows/despliegue.yml) publica en este
 falta una llave, ese paso se salta con un aviso y el flujo queda en verde. A mano: Actions → Despliegue → Run
 workflow → `preview` o `production`.
 
+## Producción hoy
+
+| | Dirección |
+|---|---|
+| Juego | https://mundo-catrucho-web.luiscf1226.workers.dev |
+| Sala en vivo | https://mundo-catrucho-salas.luiscf1226.workers.dev (el juego abre `wss://` solo) |
+| Convex | `modest-newt-846` (https://modest-newt-846.convex.cloud) |
+
+Cada push a `main` publica la sala y el juego. **Convex no se publica solo** mientras no exista el secreto
+`CONVEX_DEPLOY_KEY`: si un cambio toca `convex/` o `packages/reglas`, corré `npx convex deploy` (con tu sesión de
+Convex) o cargá la llave. El catálogo de producción no se sube a la tabla: el juego y Convex usan el empaquetado,
+que se actualiza en cada publicación. Prueba de humo contra producción (dos jugadores en la misma sala):
+
+```bash
+node apps/web/tools/test-produccion.mjs        # capturas en capturas/produccion/
+```
+
 ## Dónde va cada llave
 
 **Nunca en el código.** `.env*` (menos `.env.example`) y `.dev.vars` están ignorados por git.
@@ -33,7 +50,7 @@ workflow → `preview` o `production`.
 Variables de GitHub (no secretas), por entorno: `VITE_CONVEX_URL` (`https://….convex.cloud`; solo hace falta si no
 hay `CONVEX_DEPLOY_KEY`), `CONVEX_SITE_URL` (`https://….convex.site`; en vista previa dejala vacía: hay un Convex por rama pero una sola sala
 de vista previa, así que la sala no reporta cuánta gente hay) y, si
-querés fijarla, `VITE_SALAS_URL`. De repositorio, opcional: `CLOUDFLARE_ACCOUNT_ID` (si el token ve varias cuentas).
+querés fijarla, `VITE_SALAS_URL` (con `https://`, no `wss://`). De repositorio, opcional: `CLOUDFLARE_ACCOUNT_ID` (si el token ve varias cuentas).
 
 ## Host del juego: Cloudflare
 
