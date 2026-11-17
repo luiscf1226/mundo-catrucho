@@ -26,7 +26,7 @@ function Locura({ indice: i, altura }: { indice: number; altura: number }) {
       repollo.current.position.x = -0.9 + k * 1.8;
       repollo.current.position.y = k > 0 && k < 1 ? Math.abs(Math.sin(t * 9)) * 0.25 : 0;
     }
-    if (lista.current) lista.current.scale.y = 1 + k * 2.2;
+    if (lista.current) lista.current.scale.x = 1 + k * 2.6;
     if (nube.current) {
       nube.current.position.y = 2.2 - k * 1.05 + Math.sin(t * 1.5) * 0.05;
       nube.current.position.z = -0.1 + k * 0.25;
@@ -80,8 +80,11 @@ function Locura({ indice: i, altura }: { indice: number; altura: number }) {
               <Ball pos={[0, 0.4, 0.2]} r={0.35} color="#9bc47a" />
               <Ball pos={[0.12, 0.5, 0.48]} r={0.06} color="#1b1b1b" />
               <Ball pos={[-0.12, 0.5, 0.48]} r={0.06} color="#1b1b1b" />
-              <group ref={lista} position={[0.42, 0.75, 0.25]}>
-                <Block pos={[0, -0.25, 0]} size={[0.26, 0.5, 0.02]} color="#ffffff" solid={false} />
+              {/* la lista se desenrolla hasta quedar más larga que el repollo */}
+              <group ref={lista} position={[0.3, 0.45, 0.45]}>
+                <Block pos={[0.25, 0, 0]} size={[0.5, 0.32, 0.02]} color="#ffffff" solid={false} />
+                <Block pos={[0.25, 0.06, 0.012]} size={[0.4, 0.03, 0.01]} color="#457b9d" solid={false} />
+                <Block pos={[0.25, -0.06, 0.012]} size={[0.4, 0.03, 0.01]} color="#457b9d" solid={false} />
               </group>
             </group>
           </>

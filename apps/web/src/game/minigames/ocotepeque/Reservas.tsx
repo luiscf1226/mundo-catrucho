@@ -6,8 +6,8 @@ import { defineMotor, type Motor } from '../kit';
 import { casilla, controles, cursor, duracion, Mesa, metas, mover, revolver, xDe } from './comun';
 
 const COLORES = ['#e76f51', '#2a9d8f', '#e9c46a', '#8ab17d', '#9c6644', '#6d597a', '#457b9d', '#f4a261'];
-/** un pasajero sube en la parada `de` y se baja en la parada `a` (el asiento queda libre desde ahí) */
-type Viaje = { de: number; a: number; color: string };
+/** un pasajero sube en la parada `de` y se baja en la parada `a`; `asiento` es donde iba cuando se armó la tanda */
+type Viaje = { de: number; a: number; color: string; asiento: number };
 type Estado = ReturnType<typeof cursor> & {
   cola: Viaje[];
   asientos: Viaje[][];
@@ -22,20 +22,19 @@ type Estado = ReturnType<typeof cursor> & {
 type Sesion = Motor<{ asientos: number; paradas: number; seed: number }, Estado>;
 const choca = (lista: Viaje[], v: Viaje) => lista.some((o) => o.de < v.a && v.de < o.a);
 /** reparte el resto de la cola sin chocar (búsqueda con límite); devuelve el asiento del primero o −1 */
+/**
+ * Asiento para la primera reserva de la cola que deja repartir todas las demás. Si todo va como se armó la tanda,
+ * basta su asiento de origen; si alguien se desvió, se busca (con límite) probando primero ese asiento.
+ */
 function plan(asientos: Viaje[][], cola: Viaje[]) {
+  if (asientos.every((a, k) => a.every((o) => o.asiento === k))) return cola[0].asiento;
   let pasos = 0;
   const copia = asientos.map((a) => [...a]);
+  const orden = (v: Viaje) => [v.asiento, ...copia.map((_, k) => k).filter((k) => k !== v.asiento)];
   function va(i: number): boolean {
     if (i >= cola.length) return true;
-    if (++pasos > 4000) return false;
-    // primero el asiento que queda más justo
-    const orden = copia
-      .map((a, k) => ({
-        k,
-        holgura: a.length ? Math.min(...a.map((o) => Math.abs(o.de - cola[i].a) + Math.abs(o.a - cola[i].de))) : 99,
-      }))
-      .sort((x, y) => x.holgura - y.holgura);
-    for (const { k } of orden) {
+    if (++pasos > 6000) return false;
+    for (const k of orden(cola[i])) {
       if (choca(copia[k], cola[i])) continue;
       copia[k].push(cola[i]);
       if (va(i + 1)) return true;
@@ -43,7 +42,7 @@ function plan(asientos: Viaje[][], cola: Viaje[]) {
     }
     return false;
   }
-  for (let k = 0; k < asientos.length; k++) {
+  for (const k of orden(cola[0])) {
     if (choca(asientos[k], cola[0])) continue;
     copia[k].push(cola[0]);
     if (va(1)) return k;
@@ -60,7 +59,7 @@ function tanda(m: Sesion) {
     let t = s.azar() < 0.3 ? 1 : 0;
     while (t < p.paradas) {
       const a = Math.min(p.paradas, t + 1 + Math.floor(s.azar() * 3));
-      viajes.push({ de: t, a, color: COLORES[viajes.length % COLORES.length] });
+      viajes.push({ de: t, a, color: COLORES[viajes.length % COLORES.length], asiento: k });
       t = a + (s.azar() < 0.2 ? 1 : 0);
     }
   }
@@ -148,7 +147,14 @@ const motor = defineMotor({
       `Asiento ${k + 1}${v && choca(s.asientos[k] ?? [], v) ? ' · ocupado en ese tramo' : ''}${v && !cabe ? ' · no cabe: liberá una (E)' : ''} · En fila ${s.cola.length}`,
       `Buses ${s.buses} · Boletos devueltos ${s.devueltos} · Liberadas ${s.liberados}`,
     ];
-    m.stats = { x: s.x, buses: s.buses, devueltos: s.devueltos, liberados: s.liberados, fila: s.cola.length };
+    m.stats = {
+      x: s.x,
+      vendidos: s.puestos.length,
+      buses: s.buses,
+      devueltos: s.devueltos,
+      liberados: s.liberados,
+      fila: s.cola.length,
+    };
   },
   bot(m) {
     const s = m.datos;
@@ -179,7 +185,7 @@ const motor = defineMotor({
         {Array.from({ length: T + 1 }, (_, t) => (
           <group key={t}>
             <Block pos={[-0.8, 0.72, Z(t)]} size={[7.6, 0.03, 0.04]} color="#f1faee" solid={false} />
-            <Label pos={[-5, 0.95, Z(t)]} text={`Parada ${t + 1}`} h={0.2} />
+            <Label pos={[-5, 0.95, Z(t)]} text={`Parada ${t + 1}`} h={0.3} />
           </group>
         ))}
         {s.asientos.map((a, i) => (
@@ -215,7 +221,7 @@ const motor = defineMotor({
         <Label
           pos={[-1, 3.2, -2.6]}
           text={s.listo > 0 ? '¡Salió el bus! 🚌' : v ? `Reserva: parada ${v.de + 1} → ${v.a + 1}` : 'Bus listo'}
-          h={0.34}
+          h={0.42}
         />
         {s.cola.length > 1 && (
           <Label
@@ -224,7 +230,7 @@ const motor = defineMotor({
               .slice(1, 4)
               .map((o) => `${o.de + 1}→${o.a + 1}`)
               .join(' · ')}`}
-            h={0.24}
+            h={0.3}
           />
         )}
       </Mesa>

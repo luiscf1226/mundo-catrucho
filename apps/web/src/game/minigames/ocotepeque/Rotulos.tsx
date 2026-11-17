@@ -171,7 +171,7 @@ const motor = defineMotor({
               mat="asphalt"
               solid={false}
             />
-            <Label pos={[cx + DIR[d][0] * 1.3, 1.1, cz + DIR[d][1] * 1.3]} text={DESTINOS[j][0]} h={0.2} />
+            <Label pos={[cx + DIR[d][0] * 1.3, 1.1, cz + DIR[d][1] * 1.3]} text={DESTINOS[j][0]} h={0.3} />
           </group>
         ))}
         {/* tabla de países */}
@@ -179,7 +179,7 @@ const motor = defineMotor({
           pos={[-4, 1.5, 2.4]}
           rot={0.3}
           text={DESTINOS.map(([d, p]) => `${d}: ${p}`).join('  ·  ')}
-          h={0.26}
+          h={0.3}
           bg="#264653"
         />
         {s.rotulos.map((r, i) => {
@@ -190,10 +190,10 @@ const motor = defineMotor({
               <Plate
                 pos={[x, 2.1, -0.95]}
                 text={`${FLECHAS[r.flecha]} ${DESTINOS[r.destino][0]}`}
-                h={0.32}
+                h={0.3}
                 bg={i === k ? '#b8860b' : '#1b6b3a'}
               />
-              <Plate pos={[x, 1.75, -0.95]} text={PAISES[r.pais]} h={0.22} bg="#14532d" />
+              <Plate pos={[x, 1.75, -0.95]} text={PAISES[r.pais]} h={0.3} bg="#14532d" />
             </group>
           );
         })}
@@ -211,7 +211,7 @@ const motor = defineMotor({
         <Label
           pos={[0.6, 3.3, -1]}
           text={s.listo > 0 ? '¡Salida correcta! 🪧' : `Destino: ${DESTINOS[s.pide][0]}`}
-          h={0.34}
+          h={0.42}
         />
       </Mesa>
     );

@@ -191,7 +191,7 @@ const motor = defineMotor({
                   />
                 );
               })}
-              <Label pos={[cx, 1.9, cz]} text={NOMBRES[i]} h={0.2} />
+              <Label pos={[cx, 1.9, cz]} text={NOMBRES[i]} h={0.3} />
             </group>
           );
         })}
@@ -243,7 +243,7 @@ const motor = defineMotor({
         <Label
           pos={[-1, 3.3, -2.6]}
           text={s.listo > 0 ? '¡Cumbre armada! 🌄' : `Unidas ${conectadas(ps)} de 3`}
-          h={0.36}
+          h={0.42}
         />
       </Mesa>
     );

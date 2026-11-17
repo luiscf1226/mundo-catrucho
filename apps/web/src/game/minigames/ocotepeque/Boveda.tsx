@@ -154,6 +154,7 @@ const motor = defineMotor({
       `Bóvedas ${s.arcos} · Colapsos ${s.colapsos} · Desbalance ${d > 0 ? '+' : ''}${d}`,
     ];
     m.stats = {
+      contras: (s.contra[0] ? 1 : 0) + (s.contra[1] ? 1 : 0),
       x: s.x,
       arcos: s.arcos,
       colapsos: s.colapsos,
@@ -251,7 +252,7 @@ const motor = defineMotor({
             solid={false}
           />
         ))}
-        {s.cola.length > 0 && <Label pos={[-4.4, 1.6, 2.6]} text={`Sigue: peso ${s.cola[0]}`} h={0.24} />}
+        {s.cola.length > 0 && <Label pos={[-4.4, 1.6, 2.6]} text={`Sigue: peso ${s.cola[0]}`} h={0.3} />}
         <Label
           pos={[-1, 3.6, -0.6]}
           text={
@@ -261,7 +262,7 @@ const motor = defineMotor({
                 : '¡Aguantó! 🌀'
               : `Izq ${suma(s.lados[0])} · Der ${suma(s.lados[1])}`
           }
-          h={0.34}
+          h={0.42}
         />
       </Mesa>
     );

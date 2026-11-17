@@ -173,7 +173,14 @@ const motor = defineMotor({
       `Letra ${letra?.l ?? '-'}: ${letra?.borrada ? 'borrada' : `${letra?.capas.length ?? 0} capas`}${letra?.debil ? ' · trazo débil' : ''}`,
       `Leyendas ${s.leyendas} · Borradas ${s.borradas} · Raspones ${s.raspones + s.manchas}`,
     ];
-    m.stats = { x: s.x, leyendas: s.leyendas, borradas: s.borradas, raspones: s.raspones, manchas: s.manchas };
+    m.stats = {
+      x: s.x,
+      fuerte: s.fuerte ? 1 : s.tinta,
+      leyendas: s.leyendas,
+      borradas: s.borradas,
+      raspones: s.raspones,
+      manchas: s.manchas,
+    };
   },
   bot(m) {
     const s = m.datos,
@@ -209,7 +216,7 @@ const motor = defineMotor({
                 <Plate
                   pos={[x, 1.6, -1.12]}
                   text={l.l}
-                  h={0.8}
+                  h={1.5}
                   fg={l.debil ? '#a89a86' : '#2b2118'}
                   bg="rgba(0,0,0,0)"
                 />
@@ -224,8 +231,8 @@ const motor = defineMotor({
                 />
               ))}
               <Block
-                pos={[x, 0.66, -0.9]}
-                size={[0.6, 0.06, 0.1]}
+                pos={[x, 0.78, -1]}
+                size={[0.6, 0.08, 0.1]}
                 color={i === k ? '#ffd166' : l.debil ? '#c7b9a0' : '#6b5440'}
                 solid={false}
               />
@@ -242,12 +249,12 @@ const motor = defineMotor({
         <Label
           pos={[-4.6, 1.5, 1.6]}
           text={p.vocales ? `Tinta ${NOMBRE_TINTA[s.tinta]}` : s.fuerte ? 'Calco fuerte' : 'Filtro suave'}
-          h={0.24}
+          h={0.3}
         />
         <Label
           pos={[-1, 3.2, -1.2]}
           text={s.listo > 0 ? 'Leyenda recuperada 🏚️' : 'Cuidá los trazos débiles'}
-          h={0.32}
+          h={0.42}
         />
       </Mesa>
     );

@@ -13,6 +13,8 @@ const PRODUCTOS: [string, string][] = [
   ['Frijol', '#6b2e2e'],
   ['Café', '#5a3a22'],
   ['Aguacate', '#4f772d'],
+  ['Durazno', '#f5b041'],
+  ['Cebolla', '#e8d5f0'],
 ];
 type Oferta = { da: number; pide: number; usada: boolean };
 type Estado = ReturnType<typeof cursor> & {
@@ -254,7 +256,7 @@ const motor = defineMotor({
               <Label
                 pos={[x, 2.15, z]}
                 text={o.usada ? 'Ya cambió' : `Da ${PRODUCTOS[o.da][0]} ⇄ pide ${PRODUCTOS[o.pide][0]}`}
-                h={0.22}
+                h={0.3}
               />
             </group>
           );
@@ -277,11 +279,11 @@ const motor = defineMotor({
             solid={false}
           />
         ))}
-        <Label pos={[-2.6, 1.7, 3]} text={`Tu carga: ${nombres(s.carga)}`} h={0.24} />
+        <Label pos={[-2.6, 1.7, 3]} text={`Tu carga: ${nombres(s.carga)}`} h={0.3} />
         <Label
           pos={[-1, 3.4, -2.6]}
           text={s.listo > 0 ? '¡Lista cubierta! 🥬' : `Lista: ${nombres(s.lista)}`}
-          h={0.3}
+          h={0.42}
         />
       </Mesa>
     );

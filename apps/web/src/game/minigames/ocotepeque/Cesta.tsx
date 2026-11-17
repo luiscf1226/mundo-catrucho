@@ -193,7 +193,14 @@ const motor = defineMotor({
       `Columna ${c + 1} · ${s.cesta[c]?.length ?? 0} de ${m.parametros.alto} · Faltan ${s.cola.length}`,
       `Cestas ${s.cestas} · Apachurradas ${s.aplastadas} · Sacadas ${s.sacadas}`,
     ];
-    m.stats = { x: s.x, cestas: s.cestas, aplastadas: s.aplastadas, llenas: s.llenas, sacadas: s.sacadas };
+    m.stats = {
+      x: s.x,
+      puestas: s.cesta.reduce((t, c) => t + c.length, 0),
+      cestas: s.cestas,
+      aplastadas: s.aplastadas,
+      llenas: s.llenas,
+      sacadas: s.sacadas,
+    };
   },
   bot(m) {
     const s = m.datos;
@@ -253,13 +260,9 @@ const motor = defineMotor({
           />
         ))}
         {s.cola[0] && (
-          <Label
-            pos={[-4.2, 1.85, 2.6]}
-            text={`${BAYAS[s.cola[0].t][0]} · aguanta ${BAYAS[s.cola[0].t][2]}`}
-            h={0.22}
-          />
+          <Label pos={[-4.2, 1.85, 2.6]} text={`${BAYAS[s.cola[0].t][0]} · aguanta ${BAYAS[s.cola[0].t][2]}`} h={0.3} />
         )}
-        <Label pos={[-1, 3.6, -1.2]} text={s.listo > 0 ? 'Cesta lista 🫐' : `Columna ${k + 1}`} h={0.32} />
+        <Label pos={[-1, 3.6, -1.2]} text={s.listo > 0 ? 'Cesta lista 🫐' : `Columna ${k + 1}`} h={0.42} />
       </Mesa>
     );
   },
