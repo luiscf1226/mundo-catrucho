@@ -18,6 +18,7 @@ type Estado = ReturnType<typeof cursor> & {
   aptas: number;
   fallas: number;
   homogenea: number;
+  ajustes: number;
   espera: number;
   aviso: string;
 };
@@ -37,6 +38,7 @@ function ajustar(m: Sesion) {
   const s = m.datos;
   if (s.espera > 0) return;
   s.espera = 0.35;
+  s.ajustes++;
   const i = columna(s.x, 3),
     meta = aperturaDe(s.y);
   if (i === trabada(m)) {
@@ -73,6 +75,7 @@ const motor = defineMotor({
     aptas: 0,
     fallas: 0,
     homogenea: 0,
+    ajustes: 0,
     espera: 0,
     aviso: '',
   }),
@@ -111,7 +114,7 @@ const motor = defineMotor({
       ).join(' · '),
       `Marea ${marea(m) > 0.81 ? 'subiendo agua salada' : 'bajando'}${lluvia(m) < 1 ? ' · 🌧️ lluvia' : ''}${t >= 0 ? ` · trabada: ${ZONAS[t].especie}` : ''}${todoAbierto ? ' · ¡Todo abierto: la laguna se volvió una sola!' : ''} · ${s.aviso}`,
     ];
-    m.stats = { x: s.x, y: s.y, aptas: s.aptas, fallas: s.fallas, homogenea: s.homogenea };
+    m.stats = { x: s.x, y: s.y, aptas: s.aptas, fallas: s.fallas, homogenea: s.homogenea, ajustes: s.ajustes };
   },
   bot(m) {
     const s = m.datos;
@@ -145,7 +148,7 @@ const motor = defineMotor({
     return (
       <Mesa titulo={`${m.partida.juego?.name ?? 'Boca de Guaimoreto'} · Mezcla para tres especies`}>
         <Block pos={[wx(0), 0.76, wz(0.92)]} size={[9.4, 0.08, 0.9]} color="#1f6fb5" mat="water" solid={false} />
-        <Label pos={[wx(0.85), 1.4, wz(0.92)]} text="Bahía de Trujillo" h={0.26} />
+        <Label pos={[wx(0.85), 1.4, wz(0.92)]} text="Bahía de Trujillo" h={0.32} />
         {ZONAS.map((z, i) => {
           const x = wx(xCol(i, 3));
           return (
@@ -172,31 +175,31 @@ const motor = defineMotor({
                 solid={false}
               />
               <Block
-                pos={[x - 1.45, 0.8 + s.sal[i], wz(-0.25)]}
+                pos={[x - 1.05, 0.8 + s.sal[i], wz(-0.25)]}
                 size={[0.14, s.sal[i] * 2, 0.14]}
                 color="#f0e2a8"
                 solid={false}
               />
               <Block
-                pos={[x - 1.45, 0.8 + z.medio * 2, wz(-0.25)]}
+                pos={[x - 1.05, 0.8 + z.medio * 2, wz(-0.25)]}
                 size={[0.34, m.parametros.banda * 4, 0.06]}
                 color="#7fe08a"
                 mat="neon"
                 solid={false}
               />
               {apta(m, i) && <Block pos={[x, 0.82, wz(0.32)]} size={[2.2, 0.04, 0.12]} color="#ffffff" solid={false} />}
-              <Label pos={[x, 2.2, wz(-0.25)]} text={`${z.especie} ${apta(m, i) ? '😊' : '😣'}`} h={0.26} />
+              <Label pos={[x, 2.2, wz(-0.25)]} text={`${z.especie} ${apta(m, i) ? '😊' : '😣'}`} h={0.36} />
             </group>
           );
         })}
         <Block pos={[wx(0), 0.77, wz(-0.92)]} size={[9.4, 0.06, 0.5]} color="#8fc99a" mat="water" solid={false} />
-        <Label pos={[wx(-0.8), 1.3, wz(-0.92)]} text="Río" h={0.24} />
+        <Label pos={[wx(-0.8), 1.3, wz(-0.92)]} text="Río" h={0.32} />
         {m.parametros.loco && (
           <group position={[wx(0.95), 0.7, wz(-0.6)]}>
             <Ball pos={[0, 0.5, 0]} r={0.45} color={tono((s.sal[0] + s.sal[1] + s.sal[2]) / 3)} mat="water" />
             <Cyl pos={[0, 1.15, 0]} r={0.55} rTop={0.12} h={0.5} color={dulce ? '#4a90d9' : '#f2c14e'} solid={false} />
             <Block pos={[0, 0.42, 0.42]} size={[0.6, 0.08, 0.06]} color="#ffffff" solid={false} />
-            <Plate pos={[0, 2, 0]} text={dulce ? '🌧️ ¡Sombrero de lluvia!' : '🎩 La laguna te mira'} h={0.2} />
+            <Plate pos={[0, 2, 0]} text={dulce ? '🌧️ ¡Sombrero de lluvia!' : '🎩 La laguna te mira'} h={0.3} />
           </group>
         )}
         <Puntero x={s.x} y={s.y} />

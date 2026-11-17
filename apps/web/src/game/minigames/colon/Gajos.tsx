@@ -155,7 +155,7 @@ const motor = defineMotor({
             <Ball
               key={j}
               pos={[p[0], 0.9, p[1]]}
-              r={j === s.nodo ? 0.13 : 0.09}
+              r={j === s.nodo ? 0.22 : 0.14}
               color={j === s.nodo ? '#2e7d32' : '#7cb342'}
               mat="neon"
             />
@@ -170,8 +170,8 @@ const motor = defineMotor({
               color="#ffb347"
             />
           ))}
-        {s.jugo > 0 && <Plate pos={[wx(s.x), 2.4, wz(s.y)]} text="💦 ¡Jugo!" h={0.26} bg="#e67e22" />}
-        <Label pos={[wx(0.85), 1.6, wz(0.7)]} text={`🍊 Naranjas ${s.naranjas}`} h={0.26} />
+        {s.jugo > 0 && <Plate pos={[wx(s.x), 2.4, wz(s.y)]} text="💦 ¡Jugo!" h={0.36} bg="#e67e22" />}
+        <Label pos={[wx(0.85), 1.6, wz(0.7)]} text={`🍊 Naranjas ${s.naranjas}`} h={0.34} />
         <Puntero x={s.x} y={s.y} />
       </Mesa>
     );

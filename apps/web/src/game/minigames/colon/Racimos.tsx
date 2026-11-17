@@ -226,14 +226,14 @@ const motor = defineMotor({
           );
         })}
         <group position={[wx(0.75), 0.7, wz(0.2)]}>
-          <Block pos={[0, 0.6, 0]} size={[1.8, 1.2, 0.1]} color="#f5ecd7" mat="wood" solid={false} />
-          <Label pos={[0, 1.6, 0]} text="🧾 Pedidos" h={0.24} />
+          <Block pos={[0, 0.9, 0]} size={[2.4, 1.8, 0.1]} color="#f5ecd7" mat="wood" solid={false} />
+          <Label pos={[0, 2.2, 0]} text="🧾 Pedidos" h={0.36} />
           {s.pedidos.slice(0, 4).map((n, i) => (
             <Plate
               key={i}
-              pos={[0, 1 - i * 0.28, 0.1]}
+              pos={[0, 1.55 - i * 0.4, 0.1]}
               text={`${i ? '' : '👉 '}Mano de ${n}`}
-              h={0.18}
+              h={0.3}
               bg={i ? '#6d6f73' : '#2e7d32'}
             />
           ))}

@@ -88,8 +88,8 @@ function colocar(m: Sesion) {
 function Tramo({ x, z, izq, der, volteado }: { x: number; z: number; izq: number; der: number; volteado: boolean }) {
   const marca = (t: number, lado: number) => (
     <Block
-      pos={[x + lado * 0.72, 0.85 + ALTURAS[t % 3] * 0.9, z]}
-      size={[0.16, 0.18, 0.5]}
+      pos={[x + lado * 0.74, 0.85 + ALTURAS[t % 3] * 0.95, z]}
+      size={[0.22, 0.24, 0.7]}
       color={PIEDRAS[Math.floor(t / 3)]}
       mat="stone"
       solid={false}
@@ -163,7 +163,7 @@ const motor = defineMotor({
     const s = m.datos;
     return (
       <Mesa titulo={`${m.partida.juego?.name ?? 'El plano del castillo'} · Archivo de Santa Bárbara`}>
-        <Label pos={[wx(0), 1, wz(0.95)]} text="Fragmentos sueltos" h={0.24} />
+        <Label pos={[wx(0), 2.6, wz(0.95)]} text="Fragmentos sueltos" h={0.34} />
         {s.sueltos.map((f, c) =>
           f ? (
             <Tramo
@@ -176,7 +176,7 @@ const motor = defineMotor({
             />
           ) : null,
         )}
-        <Label pos={[wx(0), 1, wz(-0.05)]} text="Plano armado" h={0.24} />
+        <Label pos={[wx(0), 0.9, wz(-0.95)]} text="Plano armado" h={0.34} />
         {Array.from({ length: s.puestos }, (_, k) => (
           <Tramo
             key={k}
@@ -190,7 +190,7 @@ const motor = defineMotor({
         <Plate
           pos={[wx(xCol(Math.min(s.puestos, TRAMOS - 1), TRAMOS)), 2.6, wz(-0.5)]}
           text="Sigue aquí ▼"
-          h={0.22}
+          h={0.32}
           bg="#3b3f4a"
         />
         <Puntero x={s.x} y={s.y} color={s.y < 0 ? '#e57373' : '#f7dc80'} />

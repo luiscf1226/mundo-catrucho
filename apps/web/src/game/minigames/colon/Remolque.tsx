@@ -200,7 +200,7 @@ const motor = defineMotor({
         <Block pos={[PARED - 0.15, 1, 0]} size={[0.3, 0.6, 7.4]} color="#8a7f6c" mat="concrete" solid={false} />
         <Block pos={[-1, 1, -3.45]} size={[9.2, 0.6, 0.3]} color="#8a7f6c" mat="concrete" solid={false} />
         <Block pos={[PORTON + 0.2, 0.74, Z_SALIDA]} size={[0.4, 0.04, 1]} color="#7fe08a" mat="neon" solid={false} />
-        <Label pos={[PORTON - 0.2, 1.6, Z_SALIDA]} text="Salida" h={0.24} />
+        <Label pos={[PORTON - 0.2, 1.6, Z_SALIDA]} text="Salida" h={0.34} />
         {s.cargas.map((k, i) => (
           <group key={i}>
             <Block
@@ -210,14 +210,13 @@ const motor = defineMotor({
               mat="wood"
               solid={false}
             />
-            <Label pos={[k.x, 1.9, k.z]} text={i ? 'Naranjas' : 'Palma'} h={0.2} />
+            <Label pos={[k.x, 1.9, k.z]} text={i ? 'Naranjas' : 'Palma'} h={0.32} />
           </group>
         ))}
-        {s.anima < 0 &&
-          puntos.map((pt, i) => <Ball key={i} pos={[pt[0], 0.82, pt[1]]} r={0.07} color="#f7dc80" mat="neon" />)}
-        {s.anima < 0 &&
-          q.ayuda &&
-          caja.map((pt, i) => <Ball key={`c${i}`} pos={[pt[0], 0.82, pt[1]]} r={0.06} color="#e57373" />)}
+        {puntos.map((pt, i) => (
+          <Ball key={i} pos={[pt[0], 0.82, pt[1]]} r={0.09} color="#f7dc80" mat="neon" />
+        ))}
+        {q.ayuda && caja.map((pt, i) => <Ball key={`c${i}`} pos={[pt[0], 0.82, pt[1]]} r={0.06} color="#e57373" />)}
         <Block pos={[cab[0], 1.05, cab[1]]} size={[0.7, 0.6, 0.7]} color="#2e7d32" mat="metal" solid={false} />
         <Block
           pos={[(cab[0] + atras[0]) / 2, 1.0, (cab[1] + atras[1]) / 2]}

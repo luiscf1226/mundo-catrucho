@@ -134,9 +134,18 @@ const motor = defineMotor({
   Escena: ({ motor: m }) => {
     const s = m.datos,
       pt = (p: P2): P2 => [wx(p[0]), wz(p[1])];
-    // visual extendida más allá del objetivo, como en la carta
-    const largo = (a: P2, b: P2): P2 => [a[0] + (b[0] - a[0]) * 1.6, a[1] + (b[1] - a[1]) * 1.6];
-    const faro: P2 = [-1, -0.95];
+    // visual extendida más allá del objetivo hasta el borde de la carta
+    const largo = (a: P2, b: P2): P2 => {
+      const dx = b[0] - a[0],
+        dy = b[1] - a[1];
+      let k = 3;
+      if (dx > 1e-6) k = Math.min(k, (0.98 - a[0]) / dx);
+      if (dx < -1e-6) k = Math.min(k, (-0.98 - a[0]) / dx);
+      if (dy > 1e-6) k = Math.min(k, (0.9 - a[1]) / dy);
+      if (dy < -1e-6) k = Math.min(k, (-0.95 - a[1]) / dy);
+      return [a[0] + dx * k, a[1] + dy * k];
+    };
+    const faro: P2 = [-0.95, -0.9];
     return (
       <Mesa titulo={`${m.partida.juego?.name ?? 'Trazas de la bahía'} · Tres visuales, un solo cruce`}>
         <Block pos={[wx(0), 0.72, wz(-0.1)]} size={[9.6, 0.04, 5.6]} color="#cfe3ea" mat="cloth" solid={false} />
@@ -147,7 +156,7 @@ const motor = defineMotor({
           return (
             <group key={n}>
               <Cyl pos={[wx(o[0]), 1.05, wz(o[1])]} r={0.25} h={0.6} color="#8a7f6c" mat="stone" solid={false} />
-              <Label pos={[wx(o[0]), 1.8, wz(o[1])]} text={n} h={0.24} />
+              <Label pos={[wx(o[0]), 1.8, wz(o[1])]} text={n} h={0.36} />
               {!malo && <Raya a={pt(o)} b={pt(largo(o, blanco(s, i)))} color="#2a5c8a" />}
             </group>
           );
@@ -156,7 +165,7 @@ const motor = defineMotor({
           <>
             <Cyl pos={[wx(faro[0]), 1.1, wz(faro[1])]} r={0.18} h={0.8} color="#f4efe2" solid={false} />
             <Raya a={pt(faro)} b={pt(largo(faro, s.barco))} color="#e9c46a" ancho={0.05} />
-            <Label pos={[wx(faro[0]), 1.9, wz(faro[1])]} text="Faro de control" h={0.2} />
+            <Label pos={[wx(faro[0]), 1.9, wz(faro[1])]} text="Faro de control" h={0.32} />
           </>
         )}
         {m.parametros.loco && (

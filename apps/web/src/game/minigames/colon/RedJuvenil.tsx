@@ -148,8 +148,8 @@ const motor = defineMotor({
               <group position={[x + 0.6, 1.2, wz(-0.45)]} scale={[1.6, 0.6, 0.6]}>
                 <Ball pos={[0, 0, 0]} r={0.18 + p.adulto * 0.3} color="#7f97a6" />
               </group>
-              <Label pos={[x, 3, wz(0.1)]} text={`${PANELES[i]} ${sirve(p) ? '✅' : ''}`} h={0.22} />
-              <Label pos={[x, 0.95, wz(-0.85)]} text={`🐟 ${cm(p.juvenil)} · 🐠 ${cm(p.adulto)} cm`} h={0.2} />
+              <Label pos={[x, 3, wz(0.1)]} text={`${PANELES[i]} ${sirve(p) ? '✅' : ''}`} h={0.34} />
+              <Label pos={[x, 0.95, wz(-0.85)]} text={`🐟 sale ${cm(p.juvenil)} · 🐠 queda ${cm(p.adulto)}`} h={0.3} />
             </group>
           );
         })}
