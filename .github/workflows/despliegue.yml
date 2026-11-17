@@ -62,7 +62,7 @@ jobs:
           [ -n "$CONVEX_DEPLOY_KEY" ] || [ -n "$VITE_CONVEX_URL" ] ||
             avisar "Sin CONVEX_DEPLOY_KEY ni VITE_CONVEX_URL: el juego sale sin servidor (LocalNet, sin sala en vivo)."
 
-      # La sala primero: el juego necesita su dirección (wss://…workers.dev) para compilarse.
+      # La sala primero: el juego necesita su dirección (https://…workers.dev; el juego la cambia a wss para el WebSocket).
       - name: Sala (Cloudflare)
         if: env.CLOUDFLARE_API_TOKEN != ''
         working-directory: workers/salas
@@ -75,7 +75,7 @@ jobs:
           fi
           if [ -z "$VITE_SALAS_URL" ]; then
             url=$(grep -oE 'https://[a-z0-9.-]+\.workers\.dev' /tmp/sala.log | head -1)
-            [ -n "$url" ] && echo "VITE_SALAS_URL=wss://${url#https://}" >> "$GITHUB_ENV"
+            [ -n "$url" ] && echo "VITE_SALAS_URL=$url" >> "$GITHUB_ENV"
           fi
 
       # Con llave de despliegue, Convex publica sus funciones y compila el juego con su propia URL (en preview crea

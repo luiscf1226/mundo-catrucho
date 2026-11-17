@@ -116,13 +116,13 @@ const ok = await run('dept', file, { hash: '#test,go' }, async (t) => {
   console.log(
     `exploradores: 18 zonas con ${Math.min(...all.map((z) => z.n))}+ objetos · p. ej. ${all.find((z) => z.id === 'olancho').names.join(', ')}`,
   );
-  await t.ev(`${S}.startJuego('lapaz.pintadas')`);
+  await t.ev(`${S}.startJuego('yoro.tolupan')`);
   await t.click('mg-start');
   const X = `window.__mcTest.exploradores`;
   await t.waitFor(`${S}.mg?.phase==='playing' && !!${X}`, 8000, 'exploradores en juego');
   await t.sleep(500);
   const xs = await t.ev(`JSON.stringify(${X}.sites)`);
-  if (xs !== '["lapaz"]') throw new Error(`sitios del tema ignorados: ${xs}`);
+  if (xs !== '["yoro"]') throw new Error(`sitios del tema ignorados: ${xs}`);
   for (const f of JSON.parse(await t.ev(`JSON.stringify(${X}.finds())`))) {
     await t.ev(`${P}.teleport(${f.pos[0]}, ${f.pos[1] + 0.15}, ${f.pos[2]})`);
     await t.sleep(500);

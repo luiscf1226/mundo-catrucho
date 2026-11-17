@@ -44,6 +44,15 @@ export type MinigameId =
   | 'choluteca.cincha'
   | 'choluteca.ventanasbus'
   | 'choluteca.mareapaseo'
+  // La Paz
+  | 'lapaz.catacion'
+  | 'lapaz.cafe'
+  | 'lapaz.tostador'
+  | 'lapaz.reciprocidad'
+  | 'lapaz.vapor'
+  | 'lapaz.pesas'
+  | 'lapaz.abrasigo'
+  | 'lapaz.estiba'
   // Colón
   | 'colon.salinidad'
   | 'colon.visualbahia'
