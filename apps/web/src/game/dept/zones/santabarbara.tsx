@@ -3,6 +3,7 @@ import { P } from '../../kit';
 import { bx, cy, dist, inR, type Pc, PI, place } from '../lib';
 import { basket, bunting, casa, champa, hat, mont } from '../parts';
 import { ZB, type ZoneSpec } from '../zone';
+import { SantaBarbaraDescubrimientos } from './SantaBarbaraDescubrimientos';
 
 /** Santa Bárbara: calle de talleres de junco (sombreros, canastas, petates) y el sombrero gigante de la plaza. */
 export function artesania(d: Department): ZoneSpec {
@@ -15,6 +16,7 @@ export function artesania(d: Department): ZoneSpec {
     (x, z) => Math.max(Math.min(3.6 - Math.abs(x), z + 14, 52 - z), 9.6 - dist(x, z, 0, -21)) * 1.5,
   );
   Z.stop(0, 42);
+  Z.n(<SantaBarbaraDescubrimientos altura={Z.h} />);
   const shelf: Pc[] = [
     bx(0, 0.9, -1.5, 4.6, 0.07, 0.75, 'wood', '#8a5a34'),
     bx(0, 1.6, -1.5, 4.6, 0.07, 0.75, 'wood', '#8a5a34'),

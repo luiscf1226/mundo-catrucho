@@ -1,0 +1,20 @@
+[
+  {
+    "id": "santabarbara.locura-0",
+    "nombre": "La chimenea se puso tenis",
+    "texto": "Esta figura de papel de fantasía se puso tenis y cruza su escenario vacío saludando. No es nadie de verdad: en Trinidad las chimeneas gigantes se exhiben y después se queman como arte de una noche.",
+    "pos": [-6, 18]
+  },
+  {
+    "id": "santabarbara.locura-1",
+    "nombre": "Sombrero para la mesa",
+    "texto": "El sombrero de práctica se tejió tan bien que creció hasta darle sombra a toda la mesa. Puro orgullo del junco de Santa Bárbara.",
+    "pos": [6.5, 4]
+  },
+  {
+    "id": "santabarbara.locura-2",
+    "nombre": "Ventana con ceja",
+    "texto": "Esta maqueta del Castillo Bográn mueve sus cejas de papel según desde dónde la mirés. El castillo de verdad se admira desde afuera: no se entra a las partes deterioradas.",
+    "pos": [-6.5, -11]
+  }
+]

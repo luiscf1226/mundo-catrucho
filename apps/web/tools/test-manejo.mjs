@@ -36,7 +36,7 @@ assert.equal(vehicleKind('desconocido'), 'pickup');
 const file = process.argv[2] ?? '/tmp/claude-1000/mc-viaje/mundo-catrucho-hd.html';
 const shots = '/tmp/claude-1000/mc-viaje/capturas';
 const ok = await run('manejo', file, { hash: '#go,test' }, async (t) => {
-  for (const id of ['franciscomorazan.rapidito', 'santabarbara.sacos', null]) {
+  for (const id of ['franciscomorazan.rapidito', 'franciscomorazan.va-vacio--cabe-una-nube', null]) {
     await t.ev(
       id ? `window.__mc.store.getState().startJuego('${id}')` : `window.__mc.store.getState().startMinigame('manejo')`,
     );
