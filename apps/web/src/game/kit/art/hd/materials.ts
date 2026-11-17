@@ -102,10 +102,13 @@ const FRAG_MAP = /* glsl */ `
     vec2 uvX = tp.zy, uvY = tp.xz, uvZ = tp.xy;
   #endif
   #ifdef TRI_WATER
-    vec2 wo = uTime * vec2( 0.045, 0.03 );
-    vec4 nX = 0.5 * ( texture( tNrm, vec3( uvX + wo, tl ) ) + texture( tNrm, vec3( uvX * 1.9 - wo.yx * 1.6, tl ) ) );
-    vec4 nY = 0.5 * ( texture( tNrm, vec3( uvY + wo, tl ) ) + texture( tNrm, vec3( uvY * 1.9 - wo.yx * 1.6, tl ) ) );
-    vec4 nZ = 0.5 * ( texture( tNrm, vec3( uvZ + wo, tl ) ) + texture( tNrm, vec3( uvZ * 1.9 - wo.yx * 1.6, tl ) ) );
+    // tres capas de olas en direcciones distintas: marejada lenta, ola media y rizo fino; de lejos se aplana
+    // (sin centelleo) y el rizo pesa menos
+    vec2 wo = uTime * vec2( 0.045, 0.03 ), ws = uTime * vec2( -0.012, 0.021 );
+    float wFar = smoothstep( 18.0, 80.0, length( vViewPosition ) );
+    #define TRI_WN( uv ) ( texture( tNrm, vec3( uv * 0.29 + ws, tl ) ) * 0.42 + texture( tNrm, vec3( uv + wo, tl ) ) * 0.36 + texture( tNrm, vec3( uv * 2.1 - wo.yx * 1.6, tl ) ) * 0.22 )
+    vec4 nX = TRI_WN( uvX ), nY = TRI_WN( uvY ), nZ = TRI_WN( uvZ );
+    tk *= 1.6 - 0.9 * wFar;
     vec4 ta = vec4( 1.0 );
   #else
     vec4 nX = texture( tNrm, vec3( uvX, tl ) ), nY = texture( tNrm, vec3( uvY, tl ) ), nZ = texture( tNrm, vec3( uvZ, tl ) );
@@ -121,6 +124,9 @@ const FRAG_MAP = /* glsl */ `
   float wetK = uWet * ( 0.35 + 0.65 * smoothstep( 0.2, 0.9, tn0.y ) ) * ( 0.5 + 0.5 * smoothstep( 0.25, 0.6, macro ) );
   alb *= 1.0 - 0.3 * wetK;
   triRoughMul = mix( 1.0, 0.22, wetK ); triRough = tnb.b;
+  #ifdef TRI_WATER
+    alb *= 0.82;
+  #endif
   diffuseColor.rgb = alb;
 }
 `;
@@ -150,12 +156,30 @@ const FRAG_EMIS = /* glsl */ `
 #endif
 `;
 /** brillo de Fresnel para agua y vidrio: más opaco y con reflejo del cielo en ángulos rasantes */
+// El agua usa Fresnel de Schlick (F0 = 0.02) con el reflejo del mapa de entorno (cielo y monte lejano): mirando
+// hacia abajo se ve el fondo y el color del agua; en ángulo rasante es casi un espejo del cielo.
 const FRAG_FRESNEL = /* glsl */ `
+#ifdef TRI_WATER
+{
+  vec3 wV = normalize( vViewPosition );
+  float wF = 0.02 + 0.98 * pow( 1.0 - saturate( dot( normal, wV ) ), 5.0 );
+  diffuseColor.a = mix( diffuseColor.a * 0.88, 1.0, saturate( wF * 1.7 ) );
+  #ifdef USE_ENVMAP
+    // con scene.environment la intensidad es la del relleno del cielo: aquí se quita para ver el cielo tal cual;
+    // el agua se queda con un poco de su color en el reflejo
+    vec3 wR = getIBLRadiance( wV, normal, 0.04 ) / max( envMapIntensity, 0.3 );
+    outgoingLight = mix( outgoingLight, wR * mix( vec3( 1.0 ), triTint * 1.6, 0.3 ), wF * 0.72 );
+  #else
+    outgoingLight += uSky * wF * 0.5;
+  #endif
+}
+#else
 {
   float fres = pow( 1.0 - saturate( dot( normal, normalize( vViewPosition ) ) ), 3.0 );
   diffuseColor.a = mix( diffuseColor.a, 1.0, fres * 0.85 );
   outgoingLight += uSky * fres * 0.4;
 }
+#endif
 #include <opaque_fragment>
 `;
 
