@@ -227,11 +227,19 @@ const motor = defineMotor({
       pisos = agua(s.brotes, s.desvios, p.cols),
       sel = celda(s, p),
       listo = s.brotes.length > 0 && paso(pisos),
-      X = (c: number) => -3.6 + (c * 5.2) / Math.max(1, p.cols - 1),
-      Y = (k: number) => 3.4 - k * 0.62;
+      // maqueta vertical al frente de la mesa: una repisa por piso y columna
+      X = (c: number) => -1 + (c - (p.cols - 1) / 2) * 2,
+      Y = (k: number) => 4.4 - k * 0.78,
+      Z = 0.2;
     return (
       <Mesa titulo="Pico Pijol · cascadas en cadena">
-        <Block pos={[-1, 1.9, -2.2]} size={[7, 3.2, 0.2]} color="#5f6f52" mat="stone" solid={false} />
+        <Block
+          pos={[-1, 2.6, Z - 0.45]}
+          size={[2 * p.cols + 0.6, 4.2, 0.2]}
+          color="#5f6f52"
+          mat="stone"
+          solid={false}
+        />
         {pisos.map((fila, k) =>
           fila.map((w, c) => {
             const d = s.desvios[k],
@@ -239,36 +247,43 @@ const motor = defineMotor({
             return (
               <group key={`${k}-${c}`}>
                 <Block
-                  pos={[X(c), Y(k) - 0.18, -1.9]}
-                  size={[1.1, 0.12, 0.5]}
-                  color={aqui ? '#ffd166' : w === 0 ? '#a47148' : '#5c4033'}
+                  pos={[X(c), Y(k) - 0.25, Z]}
+                  size={[1.6, 0.14, 0.6]}
+                  color={aqui ? '#ffd166' : w === 0 ? '#c08552' : '#3d5a80'}
                   mat="wood"
                   solid={false}
                 />
                 {w > 0 && (
-                  <mesh position={[X(c), Y(k) + 0.08, -1.85]}>
-                    <boxGeometry args={[0.25 + Math.min(3, w) * 0.22, 0.45, 0.08]} />
-                    <meshBasicMaterial color={w >= 3 ? '#0077b6' : '#90e0ef'} transparent opacity={0.75} />
+                  <mesh position={[X(c), Y(k) + 0.12, Z + 0.05]}>
+                    <boxGeometry args={[0.3 + Math.min(3, w) * 0.35, 0.6, 0.12]} />
+                    <meshBasicMaterial color={w >= 3 ? '#0077b6' : '#90e0ef'} transparent opacity={0.8} />
                   </mesh>
                 )}
                 {d && d.col === c && (
                   <Block
-                    pos={[X(c) + d.dir * 0.3, Y(k) + 0.12, -1.6]}
-                    size={[0.7, 0.06, 0.3]}
+                    pos={[X(c) + d.dir * 0.45, Y(k) + 0.2, Z + 0.3]}
+                    size={[1, 0.08, 0.3]}
                     rot={0}
                     color="#e9c46a"
                     mat="wood"
                     solid={false}
                   />
                 )}
-                {s.brotes[k]?.[c] > 0 && k > 0 && <Label pos={[X(c) - 0.45, Y(k) + 0.25, -1.6]} text="💧" h={0.18} />}
+                {d && d.col === c && <Label pos={[X(c), Y(k) + 0.25, Z + 0.4]} text={d.dir < 0 ? '⬅️' : '➡️'} h={0.3} />}
+                {s.brotes[k]?.[c] > 0 && k > 0 && <Label pos={[X(c) - 0.65, Y(k) + 0.3, Z + 0.3]} text="💧" h={0.24} />}
               </group>
             );
           }),
         )}
-        <Block pos={[-1, 0.76, -0.8]} size={[6.4, 0.04, 1.2]} color="#4a90b8" mat="water" solid={false} />
+        <Block
+          pos={[-1, 0.76, Z + 0.4]}
+          size={[2 * p.cols + 0.6, 0.04, 1.2]}
+          color="#4a90b8"
+          mat="water"
+          solid={false}
+        />
         <Label
-          pos={[-1, 3.9, -1]}
+          pos={[-1, 5.2, Z]}
           text={
             s.listo > 0
               ? '¡Paso abierto!'
@@ -276,7 +291,7 @@ const motor = defineMotor({
                 ? '✅ Paso seco: E para cruzar'
                 : `🪵 Desviadores ${s.desvios.filter(Boolean).length}/${s.presupuesto}`
           }
-          h={0.38}
+          h={0.42}
         />
       </Mesa>
     );

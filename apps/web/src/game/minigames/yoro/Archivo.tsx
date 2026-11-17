@@ -226,10 +226,12 @@ const motor = defineMotor({
                 mat="cloth"
                 solid={false}
               />
+              <Label pos={[pos[0], 1.55, pos[2] - 0.35]} text={`${ICONO[x.tipo]} ${TIPOS[x.tipo]}`} h={0.3} />
+              <Label pos={[pos[0], 1.2, pos[2] - 0.35]} text={`${x.dia} de mayo`} h={0.28} />
               <Label
-                pos={[pos[0], 1.35, pos[2]]}
-                text={`${ICONO[x.tipo]} ${TIPOS[x.tipo]}\n${x.dia} may · ${TURNOS[x.turno]}${p.pagos && x.tipo === 0 ? `\n${PAGOS[x.pago]}` : ''}`}
-                h={0.26}
+                pos={[pos[0], 0.85, pos[2] - 0.35]}
+                text={p.pagos && x.tipo === 0 ? `${TURNOS[x.turno]} · ${PAGOS[x.pago]}` : TURNOS[x.turno]}
+                h={0.28}
               />
             </group>
           );

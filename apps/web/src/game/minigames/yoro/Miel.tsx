@@ -175,11 +175,18 @@ const motor = defineMotor({
       <Mesa titulo="Coyoles en miel · punto de hilo">
         <Cyl pos={[-2.4, 0.9, -0.8]} r={1} h={0.3} color="#3d3d3d" mat="stone" solid={false} />
         <Cyl pos={[-2.4, 1.45, -0.8]} r={1.05} h={0.9} color="#2b2d42" mat="metal" solid={false} />
-        <Cyl pos={[-2.4, 1.6 + s.miel * 0.25, -0.8]} r={0.95} h={0.06} color={tono} mat="plastic" solid={false} />
+        <Cyl
+          pos={[-2.4, 1.92, -0.8]}
+          r={0.95 * (0.7 + s.miel * 0.3)}
+          h={0.04}
+          color={tono}
+          mat="plastic"
+          solid={false}
+        />
         {[0, 1, 2, 3, 4].map((j) => (
           <Ball
             key={j}
-            pos={[-2.4 + Math.cos(j * 1.3) * 0.5, 1.68 + s.miel * 0.25, -0.8 + Math.sin(j * 1.3) * 0.5]}
+            pos={[-2.4 + Math.cos(j * 1.3) * 0.5, 1.98, -0.8 + Math.sin(j * 1.3) * 0.5]}
             r={0.13}
             color="#c9a227"
           />

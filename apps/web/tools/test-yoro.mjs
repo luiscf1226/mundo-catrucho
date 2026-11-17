@@ -27,6 +27,8 @@ const S = 'window.__mc.store.getState()',
 const difDe = (etapa, etapas) => (etapas > 1 ? etapa / (etapas - 1) : 0.35);
 
 const ok = await run('yoro', file, { hash: '#test', width: 1280, height: 800 }, async (t) => {
+  // con la GPU compartida el primer arranque puede tardar
+  await t.waitFor("!!document.querySelector('[data-testid=btn-jugar]')", 60000);
   await t.click('btn-jugar');
   await t.click('ed-done');
   if (!solo) await recorrido();
@@ -236,6 +238,8 @@ const ok = await run('yoro', file, { hash: '#test', width: 1280, height: 800 }, 
 });
 
 const tactil = await run('yoro-tactil', file, { hash: '#test', touch: true, width: 900, height: 700 }, async (t) => {
+  // con la GPU compartida el primer arranque puede tardar
+  await t.waitFor("!!document.querySelector('[data-testid=btn-jugar]')", 60000);
   await t.click('btn-jugar');
   await t.click('ed-done');
   for (const [motor, boton, cumple, px = 0] of [

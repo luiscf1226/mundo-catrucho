@@ -198,58 +198,77 @@ const motor = defineMotor({
   Escena: ({ motor: m }) => {
     const s = m.datos,
       pr = proyeccion(s.lecturas),
-      H = (h: number) => 0.75 + h * 0.28,
-      GX = (t: number) => 0.2 + (t / 7) * 3.4,
-      GZ = (h: number) => 2.6 - h * 0.48;
+      // regla grande a la izquierda, gráfica a la derecha (tiempo hacia la derecha, nivel hacia el fondo)
+      H = (h: number) => 0.75 + h * 0.3,
+      GX = (t: number) => -0.4 + (t / 7) * 4.6,
+      GZ = (h: number) => 2.7 - h * 0.52,
+      a = s.lecturas[0],
+      b = s.lecturas[s.lecturas.length - 1];
+    let tendencia = null as null | { x: number; z: number; largo: number; giro: number };
+    if (pr !== null && a && b && s.lecturas.length >= 2) {
+      const fin = Math.min(7, Number.isFinite(pr) ? pr : 7),
+        hFin = a.h + ((b.h - a.h) / Math.max(0.05, b.t - a.t)) * (fin - a.t),
+        x0 = GX(a.t),
+        z0 = GZ(a.h),
+        x1 = GX(fin),
+        z1 = GZ(Math.min(10, hFin));
+      tendencia = {
+        x: (x0 + x1) / 2,
+        z: (z0 + z1) / 2,
+        largo: Math.hypot(x1 - x0, z1 - z0),
+        giro: -Math.atan2(z1 - z0, x1 - x0),
+      };
+    }
     return (
       <Mesa titulo="Río Ulúa · lectura de crecida">
         {/* regla de nivel con agua, sensores y equipos */}
-        <Block pos={[-4, H(5), -1]} size={[0.25, 2.8, 0.1]} color="#f1faee" mat="plastic" solid={false} />
+        <Block pos={[-4, H(5), 0.4]} size={[0.4, 3, 0.12]} color="#f1faee" mat="plastic" solid={false} />
         {[0, 2, 4, 6, 8, 10].map((h) => (
-          <Label key={h} pos={[-4.6, H(h), -1]} text={`${h}`} h={0.18} />
+          <Label key={h} pos={[-4.65, H(h), 0.4]} text={`${h} m`} h={0.24} />
         ))}
         <Block
-          pos={[-4, (0.75 + H(Math.max(0, s.nivel))) / 2, -0.6]}
-          size={[1.6, Math.max(0.02, H(Math.max(0, s.nivel)) - 0.75), 0.6]}
+          pos={[-4, (0.75 + H(Math.max(0, s.nivel))) / 2, 0.8]}
+          size={[1.8, Math.max(0.02, H(Math.max(0, s.nivel)) - 0.75), 0.6]}
           color="#4a90b8"
           mat="water"
           solid={false}
         />
-        <Block pos={[-4, H(EQUIPO), -0.6]} size={[0.9, 0.18, 0.5]} color="#e76f51" mat="metal" solid={false} />
-        <Label pos={[-3.1, H(EQUIPO) + 0.1, -0.6]} text={s.retirado ? '🚚 a salvo' : '🧰 equipos'} h={0.2} />
+        <Block pos={[-3.3, H(EQUIPO), 0.6]} size={[1, 0.25, 0.6]} color="#e76f51" mat="metal" solid={false} />
+        <Label pos={[-3.3, H(EQUIPO) + 0.45, 0.6]} text={s.retirado ? '🚚 a salvo' : '🧰 equipos'} h={0.28} />
         {s.sensores.map((h) => (
           <Ball
             key={h}
-            pos={[-3.75, H(h), -1]}
-            r={0.1}
+            pos={[-3.7, H(h), 0.5]}
+            r={0.16}
             color={s.lecturas.some((l) => l.h === h) ? '#e63946' : '#57cc99'}
           />
         ))}
-        <Block pos={[-4.3, H(altura(s.y)), -1]} size={[0.3, 0.05, 0.3]} color="#ffd166" solid={false} />
-        {/* gráfica: lecturas, tendencia y fin del aguacero */}
-        <Block pos={[2, 0.73, 0.2]} size={[3.8, 0.02, 5]} color="#fefae0" mat="cloth" solid={false} />
-        <Block pos={[2, 0.75, GZ(EQUIPO)]} size={[3.8, 0.02, 0.05]} color="#e76f51" solid={false} />
-        <Block pos={[GX(FIN), 0.75, 0.2]} size={[0.05, 0.02, 5]} color="#457b9d" solid={false} />
-        <Label pos={[GX(FIN), 1.1, -2.4]} text="para" h={0.2} />
+        <Block pos={[-4.45, H(altura(s.y)), 0.5]} size={[0.5, 0.08, 0.3]} color="#ffd166" solid={false} />
+        {/* gráfica: lecturas, tendencia, equipos y fin del aguacero */}
+        <Block pos={[1.9, 0.73, 0.1]} size={[5, 0.02, 5.6]} color="#fefae0" mat="cloth" solid={false} />
+        <Block pos={[1.9, 0.75, GZ(EQUIPO)]} size={[5, 0.02, 0.08]} color="#e76f51" solid={false} />
+        <Label pos={[-0.2, 1.05, GZ(EQUIPO)]} text="equipos" h={0.24} />
+        <Block pos={[GX(FIN), 0.75, 0.1]} size={[0.08, 0.02, 5.6]} color="#457b9d" solid={false} />
+        <Label pos={[GX(FIN), 1.05, -2.6]} text="para el aguacero" h={0.24} />
         {s.lecturas.map((l, i) => (
-          <Ball key={i} pos={[GX(l.t), 0.8, GZ(l.h)]} r={0.08} color="#e63946" />
+          <Ball key={i} pos={[GX(l.t), 0.82, GZ(l.h)]} r={0.14} color="#e63946" />
         ))}
-        {pr !== null && Number.isFinite(pr) && s.lecturas.length >= 2 && (
-          <Cyl
-            pos={[Math.min(3.9, GX(pr)), 0.8, GZ(EQUIPO)]}
-            r={0.12}
-            h={0.06}
-            color={pr < FIN ? '#e63946' : '#57cc99'}
+        {tendencia && (
+          <Block
+            pos={[tendencia.x, 0.77, tendencia.z]}
+            size={[tendencia.largo, 0.02, 0.06]}
+            rot={tendencia.giro}
+            color={pr !== null && pr < FIN ? '#e63946' : '#2a9d8f'}
             solid={false}
           />
         )}
         <Label
-          pos={[-1, 3.2, -2.6]}
+          pos={[-1, 3.6, -2.4]}
           text={
             s.listo > 0
               ? '…'
               : pr === null
-                ? `📏 Sensores ${s.sensores.length}/3`
+                ? `📏 Sensores ${s.sensores.length}/3 · esperá dos lecturas`
                 : pr < FIN
                   ? '📈 ¡Llega antes de que pare!'
                   : '📉 No llega antes de que pare'
