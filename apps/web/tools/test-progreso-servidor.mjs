@@ -125,7 +125,7 @@ try {
       collected: ['lapaz', 'olancho'],
       achievements: LOGROS.map((l) => l.id),
       juegos: {
-        'santabarbara.patepluma': { etapa: 2, stars: [3, 9], best: 1e9, label: 'mil millones', veces: 1e6 },
+        'santabarbara.cuando-caen-las-tres': { etapa: 2, stars: [3, 9], best: 1e9, label: 'mil millones', veces: 1e6 },
         'inventado.juego': { etapa: 3, stars: [3, 3, 3], best: 5, label: '5', veces: 3 },
       },
       daily: {
@@ -149,17 +149,19 @@ try {
     assert.deepEqual(e1.visitas.sort(), ['cortes', 'lapaz']);
     assert.deepEqual(e1.recuerdos, ['lapaz']);
     // el avance local no desbloquea etapas en el servidor: solo cuenta las veces
-    assert.deepEqual(e1.juegos, [{ juegoId: 'santabarbara.patepluma', etapa: 0, estrellas: [], mejor: 0, veces: 500 }]);
+    assert.deepEqual(e1.juegos, [
+      { juegoId: 'santabarbara.cuando-caen-las-tres', etapa: 0, estrellas: [], mejor: 0, veces: 500 },
+    ]);
     assert.deepEqual(e1.logros, ['primer_paso'], 'solo el logro de entrar; nada del avance inventado');
     const p1 = await q(fn.perfil, { invitado: secretoA });
     assert.equal(p1.monedas, 100 + coins('primer_paso'), 'el saldo inventado no sube');
     assert.equal(p1.nivel, 1);
     assert.equal(await st('s.profile.coins'), p1.monedas);
     assert.deepEqual(await st('s.profile.achievements'), ['primer_paso']);
-    assert.equal(await st(`s.profile.juegos['santabarbara.patepluma'].etapa`), 0);
+    assert.equal(await st(`s.profile.juegos['santabarbara.cuando-caen-las-tres'].etapa`), 0);
     assert.equal(await st(`s.profile.juegos['inventado.juego'] ?? null`), null);
     assert.equal(
-      (await q(fn.porJuego, { juegoId: 'santabarbara.patepluma' })).filas.some((f) => f.nombre === nombreA),
+      (await q(fn.porJuego, { juegoId: 'santabarbara.cuando-caen-las-tres' })).filas.some((f) => f.nombre === nombreA),
       false,
     );
     // las misiones son las del servidor: sin progreso, no se cobran

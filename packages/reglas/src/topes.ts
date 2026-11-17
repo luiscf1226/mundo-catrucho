@@ -115,6 +115,12 @@ const graciasadios = kit(
   (d) => [120 + r(d * 120), 360, 600],
   () => 75,
 );
+// Santa Bárbara
+/** Santa Bárbara: metas y reloj de minigames/santabarbara/comun.tsx. */
+const santabarbara = kit(
+  (d) => [120 + r(d * 120), 360, 600],
+  () => 75,
+);
 const islas = (a: number, b: number, c: number, k: number, base: number, extra: number) =>
   kit(lineal(a, b, c, k), (d) => base + r(d * extra));
 /** Comayagua: `metasLineales` y `reloj` de apps/web/src/game/minigames/comayagua/comun.tsx */
@@ -468,6 +474,21 @@ export const TOPES: Record<string, TopeMotor> = {
   'graciasadios.wabul': conRitmo(graciasadios, 120),
   // 15 pts por bulto cada 0,5 s y 40 al cerrar una entrega de dos bultos
   'graciasadios.truequeflotante': conRitmo(graciasadios, 75),
+  // Santa Bárbara: el ritmo sale de cuánto paga cada acierto y la espera mínima entre aciertos
+  // 30 pts por costilla justa cada 0,6 s (+40 al remate, que pide armar toda la figura)
+  'santabarbara.chimenea': conRitmo(santabarbara, 80),
+  // 35 pts por vuelta cada 0,6 s
+  'santabarbara.junco': conRitmo(santabarbara, 70),
+  // 20 pts por carga cada 0,5 s y 40 al cruzar (un paso pide al menos cinco cargas)
+  'santabarbara.caliza': conRitmo(santabarbara, 70),
+  // 15 por la fuga y 40 por el piso, cada uno con 0,6 s de espera
+  'santabarbara.perspectiva': conRitmo(santabarbara, 60),
+  // 60 pts por coincidencia y 0,6 s de espera entre marcas
+  'santabarbara.goteo': conRitmo(santabarbara, 110),
+  // 15 pts por pieza cada 0,5 s y 40 al completar el tejido (cinco piezas o más)
+  'santabarbara.juncocorte': conRitmo(santabarbara, 50),
+  // 35 pts por parte cada 0,6 s y 30 al terminar el gigante (tres partes o más)
+  'santabarbara.papel': conRitmo(santabarbara, 90),
 };
 
 export interface Resultado {

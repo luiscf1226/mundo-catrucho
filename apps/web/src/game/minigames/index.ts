@@ -174,6 +174,16 @@ const MOTORS = {
   'graciasadios.truequeflotante': motor(() =>
     import('./graciasadios/Mostrador').then((m) => ({ ...m, default: m.Mostrador })),
   ),
+  // Santa Bárbara
+  'santabarbara.chimenea': motor(() => import('./santabarbara/Chimenea').then((m) => ({ ...m, default: m.Chimenea }))),
+  'santabarbara.junco': motor(() => import('./santabarbara/Copa').then((m) => ({ ...m, default: m.Copa }))),
+  'santabarbara.caliza': motor(() => import('./santabarbara/Caliza').then((m) => ({ ...m, default: m.Caliza }))),
+  'santabarbara.perspectiva': motor(() =>
+    import('./santabarbara/Ventanas').then((m) => ({ ...m, default: m.Ventanas })),
+  ),
+  'santabarbara.goteo': motor(() => import('./santabarbara/Goteo').then((m) => ({ ...m, default: m.Goteo }))),
+  'santabarbara.juncocorte': motor(() => import('./santabarbara/Tiras').then((m) => ({ ...m, default: m.Tiras }))),
+  'santabarbara.papel': motor(() => import('./santabarbara/Pliegos').then((m) => ({ ...m, default: m.Pliegos }))),
 } satisfies Record<MinigameId, ReturnType<typeof motor>>;
 export const MINIGAME_SCENES = MOTORS;
 export function motorGuide(id: MinigameId) {
