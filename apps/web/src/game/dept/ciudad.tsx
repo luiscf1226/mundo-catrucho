@@ -1190,7 +1190,7 @@ function calles(
         lay.st.every((s) => Math.hypot(x - s.pos[0], z - s.pos[1]) > 16) &&
         caminos.every((cm) => distSeg(x, z, cm[0], cm[1]) > ACERA - 0.05) &&
         (!muro || Math.hypot(x - muro[0], z - muro[2]) > 6) &&
-        sitios.every((s) => !dentroDe([x, z], s, 1.2)) &&
+        sitios.every((s) => !dentroDe([x, z], s, 1.2) && Math.hypot(x - s.use[0], z - s.use[2]) > 3.5) &&
         hechas.every((s) => !dentroDe([x, z], s, 0.05)),
     );
   /** un tramo de acera o bordillo solo si no se mete en un sitio ni en el muro */
@@ -1298,7 +1298,15 @@ function calles(
           // tapial: bloque repellado con alambre de púas arriba; cada tanto un portón abierto para pasar
           const [tx, tz] = W(sx * (ACERA + 0.2), z + 0.75),
             [bx_, bz] = W(sx * (ACERA + 0.2), z + 0.75 + 0.8);
-          if (libreCasa([[tx, tz]]) && libreCasa([[bx_, bz]]) && tapial++ % 5 !== 4)
+          const lejos = ([x, z]: XZ) =>
+            sitios.every((st) => !dentroDe([x, z], st, 3) && Math.hypot(x - st.use[0], z - st.use[2]) > 4.5);
+          if (
+            libreCasa([[tx, tz]]) &&
+            libreCasa([[bx_, bz]]) &&
+            lejos([tx, tz]) &&
+            lejos([bx_, bz]) &&
+            tapial++ % 5 !== 4
+          )
             loc.push(
               bx(sx * (ACERA + 0.2), 1.0, z + 0.75, 0.18, 2.0, 1.5, 'stucco', tapial % 9 < 5 ? '#d8d2c4' : '#b9c7c0'),
               bx(sx * (ACERA + 0.2), 2.04, z + 0.75, 0.26, 0.08, 1.5, 'concrete', '#bdb8ac', { solid: false }),
