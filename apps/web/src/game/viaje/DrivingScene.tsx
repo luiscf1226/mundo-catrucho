@@ -68,7 +68,11 @@ function Sencillo({ kind }: { kind: VehicleKind }) {
 }
 function Obstacle({ kind }: { kind: ObstacleKind }) {
   if (kind === 'ola')
-    return <Block pos={[0, 0.2, 0]} size={[3.5, 0.4, 0.7]} color="#d3f5ee" mat="water" solid={false} />;
+    return art.fused ? (
+      <Estorbo kind="ola" />
+    ) : (
+      <Block pos={[0, 0.2, 0]} size={[3.5, 0.4, 0.7]} color="#d3f5ee" mat="water" solid={false} />
+    );
   if (kind === 'bache' || kind === 'tumulo' || kind === 'tronco' || kind === 'vaca' || kind === 'perro')
     return art.fused ? (
       <Estorbo kind={kind} />

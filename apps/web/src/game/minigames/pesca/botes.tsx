@@ -8,7 +8,7 @@ import { Mallas } from '../kit/fundido';
 const sin = { solid: false } as const;
 const TABLAS = ['#a77b4d', '#9a6f43', '#b08453', '#94693f'];
 
-function lancha(W: number, L: number): Pc[] {
+export function lancha(W: number, L: number): Pc[] {
   const out: Pc[] = [],
     n = 14,
     zf = -L / 2 + L * 0.4, // donde el casco ya tiene todo su ancho
@@ -69,25 +69,37 @@ function lancha(W: number, L: number): Pc[] {
   }
   return out;
 }
-function cayucoPlat(W: number, L: number): Pc[] {
+export function cayucoPlat(W: number, L: number): Pc[] {
   const out: Pc[] = [],
-    n = 9;
+    n = 16,
+    m = L * 0.22, // tramo del medio con todo el ancho
+    ancho = (z: number) => W * (0.28 + 0.72 * Math.min(1, (L / 2 - Math.abs(z)) / (L / 2 - m)));
   for (let i = 0; i < n; i++) {
-    const t = i / (n - 1),
-      z = -L / 2 + (L * (i + 0.5)) / n,
-      a = Math.sin(PI * (0.12 + t * 0.76)),
-      w = W * Math.max(0.3, a),
+    const z = -L / 2 + (L * (i + 0.5)) / n,
+      w = ancho(z),
       d = L / n + 0.02;
     out.push(
-      bx(0, -0.3, z, w * 0.75, 0.3, d, 'wood', '#6d4628', sin),
-      bx(0, -0.1, z, w, 0.22, d, 'wood', '#8a5a2b', sin),
-      bx(0, -0.01, z, w - 0.16, 0.02, d, 'wood', '#5e3d22', sin),
+      bx(0, -0.3, z, w * 0.72, 0.3, d, 'wood', '#6d4628', sin),
+      bx(0, -0.1, z, w * 0.96, 0.22, d, 'wood', '#8a5a2b', sin),
+      bx(0, -0.01, z, Math.max(0.05, w - 0.2), 0.02, d, 'wood', '#5e3d22', sin),
     );
-    for (const s of [-1, 1]) out.push(bx(s * (w / 2 - 0.05), 0.1, z, 0.1, 0.24, d, 'wood', '#7a4d24', sin));
+  }
+  // costados: rectos en el medio y en diagonal hacia las dos puntas (sin escalones)
+  for (const s of [-1, 1]) {
+    out.push(bx(s * (W / 2 - 0.05), 0.08, 0, 0.1, 0.3, 2 * m, 'wood', '#7a4d24', sin));
+    for (const e of [-1, 1]) {
+      const ax = s * (W / 2 - 0.05),
+        az = e * m,
+        bx_ = s * W * 0.14,
+        bz = e * (L / 2 - 0.05),
+        len = Math.hypot(bx_ - ax, bz - az),
+        yaw = Math.atan2(bx_ - ax, bz - az);
+      out.push(bx((ax + bx_) / 2, 0.06, (az + bz) / 2, 0.1, 0.34, len, 'wood', '#7a4d24', { e: [0, yaw, 0], ...sin }));
+    }
   }
   for (const s of [-1, 1])
-    out.push(bx(0, 0.02, s * (L / 2 - 0.05), 0.3, 0.32, 0.5, 'wood', '#7a4d24', { e: [0, PI / 4, 0], ...sin }));
-  for (const z of [-L * 0.3, L * 0.3]) out.push(bx(0, 0.12, z, W * 0.7, 0.05, 0.26, 'wood', '#5e3d22', sin));
+    out.push(bx(0, 0.02, s * (L / 2 - 0.05), 0.24, 0.36, 0.2, 'wood', '#6d4628', { e: [0, PI / 4, 0], ...sin }));
+  for (const z of [-L * 0.3, L * 0.3]) out.push(bx(0, 0.12, z, ancho(z) * 0.85, 0.05, 0.26, 'wood', '#5e3d22', sin));
   if (L > 4)
     out.push(
       bx(W * 0.7, 0.1, L * 0.27, 0.07, 0.05, 2.0, 'wood', '#c9a46a', { e: [0, 0.3, 0.08], ...sin }),

@@ -4,6 +4,7 @@
 // carro. Medidas y largo de siempre (`vehicles`): la física no cambia. El frente mira a −Z.
 import { bl, bx, cy, type Merged, mergePieces, type Pc, PI, rk } from '../../dept/lib';
 import { Mallas } from '../../minigames/kit/fundido';
+import { cayucoPlat, lancha } from '../../minigames/pesca/botes';
 import { type ObstacleKind, type VehicleKind, vehicles } from '../model';
 
 const LLANTA = '#1b1d20',
@@ -256,47 +257,15 @@ function dosRuedas(c: string, L: number, moto: boolean): Pc[] {
   );
   return out;
 }
-/** Lancha de fibra (proa en punta, borda, consola) o cayuco tallado (casco redondo de una pieza). */
-function bote(c: string, L: number, cayuco: boolean): Pc[] {
-  const out: Pc[] = [],
-    W = cayuco ? 1.1 : 1.8;
-  // casco: secciones que se angostan hacia la proa (−Z) y un poco hacia la popa
-  const n = 7;
-  for (let i = 0; i < n; i++) {
-    const t = i / (n - 1),
-      z = -L / 2 + 0.3 + t * (L - 0.6),
-      a = cayuco ? Math.sin(PI * (0.08 + t * 0.84)) : Math.min(1, 0.25 + t * 1.6),
-      w = W * Math.max(0.25, a);
-    out.push(
-      bx(0, 0.32, z, w, 0.42, L / n + 0.06, cayuco ? 'wood' : 'plastic', c, sin),
-      bx(0, 0.18, z, w * 0.7, 0.2, L / n + 0.06, cayuco ? 'wood' : 'plastic', cayuco ? '#5e3d22' : '#2b6f9a', sin),
-    );
-    if (!cayuco)
-      for (const s of [-1, 1]) out.push(bx(s * (w / 2), 0.56, z, 0.07, 0.08, L / n + 0.06, 'plastic', '#2b6f9a', sin));
-  }
-  // proa en cuña
-  out.push(
-    bx(0, 0.38, -L / 2 + 0.12, W * 0.18, 0.34, 0.5, cayuco ? 'wood' : 'plastic', c, { e: [0, PI / 4, 0], ...sin }),
-  );
-  if (cayuco) {
-    out.push(
-      bx(0, 0.5, 0.3, W * 0.85, 0.05, 0.25, 'wood', '#6b4423', sin),
-      bx(0, 0.5, -0.9, W * 0.75, 0.05, 0.22, 'wood', '#6b4423', sin),
-      // canalete apoyado
-      bx(0.45, 0.62, 0.2, 0.07, 0.04, 1.9, 'wood', '#c9a46a', { e: [0, 0.4, 0.2], ...sin }),
-      bx(0.85, 0.62, -0.62, 0.22, 0.03, 0.42, 'wood', '#c9a46a', { e: [0, 0.4, 0.2], ...sin }),
-    );
-  } else {
-    out.push(
-      bx(0, 0.5, 0.2, 1.4, 0.06, 2.4, 'wood', '#9e7448', sin),
-      bx(0, 0.85, -0.2, 0.7, 0.6, 0.5, 'plastic', '#e9ecef', sin),
-      bx(0, 1.18, -0.38, 0.62, 0.3, 0.04, 'metal', VIDRIO, { e: [0.4, 0, 0], ...sin }),
-      bx(0, 0.62, 0.95, 1.4, 0.18, 0.4, 'plastic', '#e9ecef', sin),
-      // motor fuera de borda
-      bx(0, 0.75, L / 2 + 0.05, 0.36, 0.5, 0.36, 'plastic', '#22262a', sin),
-      bx(0, 0.25, L / 2 + 0.12, 0.12, 0.6, 0.14, 'metal', '#3a3f44', sin),
-    );
-  }
+/** Lancha de fibra o cayuco tallado: los mismos cascos de la pesca, subidos para que floten en el agua del viaje;
+ *  la lancha lleva además su toldo de lona sobre cuatro tubos. */
+function bote(L: number, cayuco: boolean): Pc[] {
+  const sube = (q: Pc): Pc => ({ ...q, p: [q.p[0], q.p[1] + 0.55, q.p[2]] });
+  if (cayuco) return cayucoPlat(1.1, L).map(sube);
+  const out = lancha(1.8, L).map(sube);
+  for (const sx of [-1, 1])
+    for (const z of [-0.6, 1.1]) out.push(cy(sx * 0.75, 1.5, z, 0.03, 1.5, 'metal', CROMO, { n: 6, ...sin }));
+  out.push(bx(0, 2.26, 0.25, 1.75, 0.06, 2.1, 'cloth', '#37a9b4', sin));
   return out;
 }
 
@@ -358,6 +327,16 @@ function estorbo(kind: ObstacleKind): Pc[] {
       out.push(bx(-1.25 + k * 0.5, 0.245, 0, 0.25, 0.02, 0.78, 'plastic', k % 2 ? '#1d1f22' : '#f2c230', sin));
     return out;
   }
+  if (kind === 'ola') {
+    // cresta de ola: lomo de agua con su espuma encima y salpicaduras
+    const out: Pc[] = [
+      cy(0, 0.05, 0, 0.42, 3.6, 'water', '#9fdbe4', { e: [0, 0, PI / 2], n: 12, ...sin }),
+      bx(0, 0.42, -0.08, 3.4, 0.08, 0.3, 'plastic', '#f4fbfb', sin),
+    ];
+    for (let k = 0; k < 7; k++)
+      out.push(bl(-1.6 + k * 0.53, 0.5 + (k % 2) * 0.08, -0.05, 0.12 + (k % 3) * 0.04, 'plastic', '#ffffff'));
+    return out;
+  }
   if (kind === 'tronco') {
     return [
       cy(0, 0.3, 0, 0.3, 3.5, 'wood', '#6b4326', { e: [0, 0.4, PI / 2], n: 12, ...sin }),
@@ -380,7 +359,7 @@ function grupos(clave: string, hacer: () => Pc[]): Merged[] {
 /** Piezas de un vehículo de carretera o agua (los de `Nuevos` no pasan por aquí). */
 export function piezasVehiculo(kind: VehicleKind): Pc[] {
   const v = vehicles[kind];
-  if (kind === 'lancha' || kind === 'cayuco') return bote(v.color, v.length, kind === 'cayuco');
+  if (kind === 'lancha' || kind === 'cayuco') return bote(v.length, kind === 'cayuco');
   if (kind === 'moto' || kind === 'bici') return dosRuedas(v.color, v.length, kind === 'moto');
   if (kind === 'rapidito') return micro(v.color, v.length);
   if (kind === 'bus') return busEscolar(v.color, v.length);
@@ -396,7 +375,7 @@ export function Carro({ kind }: { kind: VehicleKind }) {
 export function Estorbo({ kind }: { kind: ObstacleKind }) {
   if (kind === 'vaca' || kind === 'perro')
     return <Mallas grupos={grupos(`o|${kind}`, () => vacaPcs(kind === 'perro'))} />;
-  if (kind === 'bache' || kind === 'tumulo' || kind === 'tronco')
-    return <Mallas grupos={grupos(`o|${kind}`, () => estorbo(kind))} sombra={kind !== 'bache'} />;
+  if (kind === 'bache' || kind === 'tumulo' || kind === 'tronco' || kind === 'ola')
+    return <Mallas grupos={grupos(`o|${kind}`, () => estorbo(kind))} sombra={kind === 'tumulo' || kind === 'tronco'} />;
   return null;
 }
