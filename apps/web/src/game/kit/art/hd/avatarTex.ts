@@ -2,6 +2,7 @@
 // estampados y una rejilla de colores lisos. Todo se dibuja con Canvas 2D; nada se descarga.
 import * as THREE from 'three';
 import apodos from '../../../../../shared/data/apodos.json';
+import { SHOP } from '../../../../core/data';
 import type { AvatarConfig } from '../../../../core/types';
 import { EYE_RECT, hairline, lineAt } from './avatarAnat';
 import { cut, R, SWATCH, type SwatchName, swatchCell } from './avatarGeo';
@@ -2017,7 +2018,12 @@ export const configKey = (c: AvatarConfig) =>
 /** clases de material que el sombreador lee del canal R del mapa ORM (ver avatarMat.ts) */
 export const CLS = { algodon: 0, mezclilla: 1, tejido: 2, cuero: 3, piel: 4, pelo: 5, ojo: 6, duro: 7 } as const;
 type Cls = (typeof CLS)[keyof typeof CLS];
-const KNIT = /olimpia|motagua|realespana|marathon|vida|victoria|portero|camisa_h|catracho|estrellas/;
+/** camisas de tejido deportivo: las de los atuendos de club y de la Selección */
+let KNIT: Set<string> | null = null;
+const knit = (shirt: string) =>
+  (KNIT ??= new Set(
+    SHOP.items.filter((i) => i.grupo === 'club' || i.grupo === 'seleccion').map((i) => i.set?.shirt ?? ''),
+  )).has(shirt);
 export interface AvatarMaps {
   map: THREE.CanvasTexture;
   orm: THREE.DataTexture;
@@ -2041,7 +2047,7 @@ function ormFor(cfg: AvatarConfig, cv: HTMLCanvasElement): THREE.DataTexture {
     hex = Number.parseInt(cfg.skin.slice(1), 16),
     sk = { r: (hex >> 16) / 255, g: ((hex >> 8) & 255) / 255, b: (hex & 255) / 255 },
     d = new Uint8Array(w * h * 4);
-  const shirt: Cls = KNIT.test(cfg.shirt) ? CLS.tejido : CLS.algodon,
+  const shirt: Cls = knit(cfg.shirt) ? CLS.tejido : CLS.algodon,
     pants: Cls = cfg.pants === 'jeans' ? CLS.mezclilla : cfg.pants === 'short_futbol' ? CLS.tejido : CLS.algodon,
     hatC: Cls = cfg.hat === 'gorra' || cfg.hat.startsWith('panuelo') ? CLS.algodon : CLS.duro;
   const sw: Partial<Record<SwatchName, [Cls, number, number?]>> = {
