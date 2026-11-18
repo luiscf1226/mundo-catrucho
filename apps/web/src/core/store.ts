@@ -39,6 +39,8 @@ import { type Avance, alVencer, type EstadoServidor, type PerfilServidor, SERVID
 import type { AvatarConfig, MinigameId, MinigameResult, Modo, PanelId, Rewards, Scene, V3, Vehiculo } from './types';
 
 const SAVE_KEY = 'mundo-catrucho-v1';
+/** Cuántos pasos tiene la guía de primeros pasos (ui/screens/Guia.tsx). */
+export const GUIA_PASOS = 4;
 const FREE = SHOP.items.filter((i) => i.price === 0 && !i.soloSet).map((i) => i.id);
 
 export interface Settings {
@@ -105,6 +107,8 @@ export interface Profile {
   /** progreso por juego del catálogo (id 'depto.juego') */ juegos: Record<string, JuegoProg>;
   modo: Modo;
   daily: { date: string; missions: DailyMission[] };
+  /** pasos de la guía de primeros pasos ya hechos; `GUIA_PASOS` = terminada o saltada */
+  guia: number;
   settings: Settings;
   room: { mode: 'solo' | 'publica' | 'privada'; code: string };
 }
@@ -176,6 +180,7 @@ const freshProfile = (): Profile => ({
   juegos: {},
   modo: 'solo',
   daily: { date: today(), missions: pickDaily(today()) },
+  guia: 0,
   settings: { music: 0.6, sfx: 0.8, quality: 'alta', sens: 1, invertY: false, chat: true },
   room: { mode: 'publica', code: '' },
 });
@@ -192,6 +197,8 @@ function load(): Profile {
       stats: { ...base.stats, ...s.stats },
       settings: { ...base.settings, ...s.settings },
       room: { ...base.room, ...s.room },
+      // quien ya jugaba antes de la guía no la necesita
+      guia: s.guia ?? (s.created ? GUIA_PASOS : 0),
     };
     p.owned = [...new Set([...FREE, ...(s.owned ?? [])])];
     if (p.daily.date !== today()) p.daily = { date: today(), missions: pickDaily(today()) };
@@ -272,6 +279,8 @@ export interface Game {
   alAire(id: string): void;
   bump(type: string, amount?: number, target?: string): void;
   claimMission(id: string): boolean;
+  /** Marca hechos los pasos de la guía hasta `n` (nunca retrocede). */
+  pasoGuia(n: number): void;
   setSettings(s: Partial<Settings>): void;
   setRoom(mode: Profile['room']['mode'], code?: string): void;
   resetProgress(): void;
@@ -333,8 +342,9 @@ export const useGame = create<Game>((set, get) => {
     const p: Profile = JSON.parse(JSON.stringify(get().profile));
     fn(p);
     const fresh = checkAchievements(p);
-    set({ profile: p });
+    // se guarda antes de avisar: un suscriptor que hace su propio commit (la guía) guarda después y no se pisa
     save(p);
+    set({ profile: p });
     for (const id of fresh) {
       const a = ACHIEVEMENTS.find((x) => x.id === id)!;
       get().toast(SERVIDOR ? `Logro: ${a.name}` : `Logro: ${a.name} (+${a.coins})`, a.icon);
@@ -1045,6 +1055,9 @@ export const useGame = create<Game>((set, get) => {
       commit((p) => {
         p.room = { mode, code };
       });
+    },
+    pasoGuia: (n) => {
+      if (get().profile.guia < n) commit((p) => (p.guia = Math.min(n, GUIA_PASOS)));
     },
     resetProgress: () => {
       const p = freshProfile();

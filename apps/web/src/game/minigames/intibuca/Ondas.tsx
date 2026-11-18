@@ -1,6 +1,7 @@
 import { input } from '../../../core/input';
 import { Ball, Block, Label } from '../../kit';
 import { defineMotor, type Motor } from '../kit';
+import { Poza } from '../kit/poza';
 import { controles, cursor, duracion, Mesa, metas, mover } from './comun';
 
 type Estado = ReturnType<typeof cursor> & {
@@ -68,7 +69,7 @@ const motor = defineMotor({
   },
   Escena: ({ motor: m }) => (
     <Mesa titulo="Chiligatoro · Laboratorio de reflejos">
-      <Block pos={[-1, 0.9, 0]} size={[7, 0.12, 5]} color="#527e9a" mat="water" solid={false} />
+      <Poza pos={[-1, 0.9, 0]} size={[7, 0.12, 5]} color="#527e9a" hondo="#1d3346" seed={6} />
       {m.datos.anillos.map((i) => (
         <group
           key={i}

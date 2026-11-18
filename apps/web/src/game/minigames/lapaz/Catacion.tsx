@@ -3,6 +3,7 @@ import { useGame } from '../../../core/store';
 import { Ball, Block, Cyl, Label, Plate } from '../../kit';
 import { rng } from '../api';
 import { defineMotor, type Motor } from '../kit';
+import { Objeto } from '../kit/objetos';
 import { casilla, centro, controles, cursor, duracion, Mesa, metas, mover, Puntero } from './comun';
 
 const AROMAS = ['Chocolate', 'Caramelo', 'Cítrico', 'Floral', 'Nuez', 'Panela', 'Frutos rojos', 'Miel', 'Durazno'];
@@ -178,8 +179,8 @@ const motor = defineMotor({
           const x = -1 + centro(t.col, 3) * 4.4;
           return (
             <group key={i} position={[x, 0.7, -0.6]}>
-              <Cyl pos={[0, 0.35, 0]} r={0.55} rTop={0.7} h={0.7} color="#f4efe6" mat="plastic" solid={false} />
-              <Cyl pos={[0, 0.69, 0]} r={0.62} h={0.04} color="#4a2a17" solid={false} />
+              <Objeto k="taza" scale={[11.7, 7, 11.7]} c="#f4efe6" c2="#cfc6b4" />
+              <Cyl pos={[0, 0.66, 0]} r={0.58} h={0.04} color="#4a2a17" solid={false} />
               {t.olida && <Plate pos={[0, 1.7, 0]} text={t.aromas.map((a) => AROMAS[a]).join(' · ')} h={0.26} />}
               {s.fase === 1 && i === s.distinta && <Label pos={[0, 2.4, 0]} text="✔ La distinta" h={0.3} />}
               {s.fase === 0 && t.col === col && <Ball pos={[0, 1.15, 0]} r={0.12} color="#d8c7a5" mat="glass" />}

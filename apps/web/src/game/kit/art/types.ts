@@ -129,13 +129,32 @@ export interface ArtProps {
   Crate: Prop;
   Tire: Prop;
   SoccerBall: FC<{ r?: number }>;
-  Goal: Prop<{ w?: number; h?: number }>;
+  /** portería con red; `d` = fondo de la red (m) */
+  Goal: Prop<{ w?: number; h?: number; d?: number }>;
   /** moneda Lempirita giratoria (solo el modelo; la lógica está en kit <CoinPickup>) */
   Coin: FC<{ r?: number }>;
   /** objeto de colección brillante (jade, concha, etc.) */
   Gem: FC<{ color?: string; kind?: string }>;
   /** guacamaya roja posada o volando en círculos */
   Macaw: Prop<{ flying?: boolean }>;
+}
+/** Pintura de una pieza fusionada: tipo de material (o las capas de corteza y paja tejida), color, rugosidad,
+ *  metal, emisión, `uv` = usar las UV de la pieza (la textura viaja con el objeto) y `g` = degradado vertical
+ *  [y0, y1, k] que oscurece hasta k por debajo de y0. */
+export interface Pintura {
+  k?: MatKind | 'bark' | 'straw';
+  c: string;
+  r?: number;
+  m?: number;
+  e?: number;
+  uv?: boolean;
+  g?: [number, number, number];
+}
+/** Junta piezas en una sola geometría con color y material por vértice (se dibuja con `fused.material()`). */
+export interface Molde {
+  /** `xf`: traslado, giro (Euler XYZ) y escala, o una matriz ya armada */
+  add(geo: THREE.BufferGeometry, paint: Pintura, xf?: { p?: V3; r?: V3; s?: V3 | number } | THREE.Matrix4): Molde;
+  build(): THREE.BufferGeometry;
 }
 export interface ArtPack {
   name: 'roblox' | 'hd';
@@ -155,6 +174,8 @@ export interface ArtPack {
     info(kind: MatKind): [number, number, number];
     /** charco de luz de las lámparas (aditivo, solo de noche): quads con uv en [−1, 1] y atributo aK (fuerza) */
     pool?(): THREE.Material;
+    /** constructor de mallas fusionadas para ese material (objetos con forma: torno, tubos, anillos) */
+    molde?(): Molde;
   };
   /** envoltorio opcional alrededor de toda la escena (posprocesado, etc.) */
   Effects?: FC<{ children?: ReactNode }>;

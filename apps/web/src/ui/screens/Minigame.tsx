@@ -26,7 +26,7 @@ interface Guide {
 /** Controles y metas de cada minijuego. Las metas salen de shared/data/minigames.json. */
 export const GUIDE: Partial<Record<MinigameId, Guide>> = {
   carrera: {
-    goal: 'Llega a la meta antes de que se acabe el tiempo.',
+    goal: 'Llegá a la meta antes de que se acabe el tiempo.',
     keys: [
       ['WASD', 'moverte'],
       ['Shift', 'correr'],
@@ -39,7 +39,7 @@ export const GUIDE: Partial<Record<MinigameId, Guide>> = {
     stars: (r) => [fmtTime(r.bronze), fmtTime(r.silver), fmtTime(r.gold)],
   },
   futbol: {
-    goal: 'Mete más goles que el otro equipo.',
+    goal: 'Meté más goles que el otro equipo.',
     keys: [
       ['WASD', 'moverte'],
       ['Clic / F', 'patear'],
@@ -53,7 +53,7 @@ export const GUIDE: Partial<Record<MinigameId, Guide>> = {
     stars: (r) => ['Ganar', 'Ganar por 2', `${r.goldGoals} goles`],
   },
   feria: {
-    goal: 'Suma puntos en los tres puestos de la feria.',
+    goal: 'Sumá puntos en los tres puestos de la feria.',
     keys: [
       ['E', 'entrar al puesto'],
       ['Mouse', 'apuntar'],
@@ -61,13 +61,13 @@ export const GUIDE: Partial<Record<MinigameId, Guide>> = {
     ],
     touch: [
       ['E', 'entrar al puesto'],
-      ['Arrastra', 'apuntar'],
+      ['Arrastrá', 'apuntar'],
       ['🎯', 'tirar'],
     ],
     stars: (r) => [`${r.bronze} pts`, `${r.silver} pts`, `${r.gold} pts`],
   },
   exploradores: {
-    goal: 'Encuentra los objetos escondidos en cada lugar.',
+    goal: 'Encontrá los objetos escondidos en cada lugar.',
     keys: [
       ['WASD', 'explorar'],
       ['E', 'recoger'],
@@ -80,7 +80,7 @@ export const GUIDE: Partial<Record<MinigameId, Guide>> = {
     stars: (r) => [`${r.bronze} objetos`, `${r.silver} objetos`, `${r.gold} objetos`],
   },
   pulperia: {
-    goal: 'Lleva a cada cliente lo que pide antes de que se vaya.',
+    goal: 'Llevale a cada cliente lo que pide antes de que se vaya.',
     keys: [
       ['WASD', 'moverte'],
       ['E', 'agarrar y entregar'],
@@ -253,7 +253,7 @@ function LoadedIntro() {
                     <b className="mc-num">{best.label}</b>
                   </span>
                 ) : (
-                  <span className="text-muted">Aún no juegas</span>
+                  <span className="text-muted">Todavía no jugás</span>
                 )}
               </div>
             </div>
