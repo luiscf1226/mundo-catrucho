@@ -5,6 +5,7 @@ import { SHOP } from '../../core/data';
 import type { Anim, AvatarConfig, AvatarState } from '../../core/types';
 import type { MatKind } from '../kit';
 import { art, Block, Ground, Label, P, Spawn } from '../kit';
+import { MEDIDA, Objeto, type ObjetoKind } from '../minigames/kit/objetos';
 
 const MATS: MatKind[] = [
   'plastic',
@@ -171,6 +172,13 @@ export function Gallery() {
             }
           />
           <Label pos={[-28.5 + i * 3, 2.6, 30]} text={m} h={0.38} />
+        </group>
+      ))}
+      {/* objetos de juego de los minijuegos (minigames/kit/objetos) */}
+      {(Object.keys(MEDIDA) as ObjetoKind[]).map((k, i) => (
+        <group key={k} position={[-15 + i * 2.2, 0, 12]}>
+          <Objeto k={k} scale={k === 'cayuco' || k === 'fogon' || k === 'mesa' ? 0.6 : k === 'taza' ? 4 : 1.6} />
+          <Label pos={[0, 1.6, 0]} text={k} h={0.3} />
         </group>
       ))}
       {/* fila 2: avatares con distintas prendas */}

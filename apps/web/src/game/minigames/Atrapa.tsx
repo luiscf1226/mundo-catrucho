@@ -15,6 +15,8 @@ import { Label, Spawn, useMgTick, useTick } from '../kit';
 import { finish, type Guia, type Partida, partida, rng, setHud, starsFor } from './api';
 import { type BotS, BotView, conTema, Escenario, Fx, faceTo, fondoDe, fx, makeBots } from './atrapa/comun';
 import { Forma, Recipiente } from './atrapa/formas';
+import { hayPaisaje } from './kit/Paisaje';
+import { Poza as AguaPoza } from './kit/poza';
 
 type Cosa = [string, string, string?];
 const CAE: Cosa[] = [
@@ -626,10 +628,21 @@ export function Atrapa() {
 function Poza({ pos, texto, activa, nivel }: { pos: [number, number]; texto: string; activa: boolean; nivel: number }) {
   return (
     <group position={[pos[0], 0, pos[1]]}>
-      <mesh position={[0, 0.04, 0]} rotation-x={-Math.PI / 2}>
-        <circleGeometry args={[R_POZA, 24]} />
-        <meshBasicMaterial color={activa ? '#2e86ab' : '#7a8b99'} transparent opacity={0.75} />
-      </mesh>
+      {hayPaisaje() ? (
+        <AguaPoza
+          pos={[0, 0.03, 0]}
+          r={R_POZA}
+          h={0.06}
+          color={activa ? '#2e86ab' : '#7a8b99'}
+          hondo="#173a4a"
+          seed={3}
+        />
+      ) : (
+        <mesh position={[0, 0.04, 0]} rotation-x={-Math.PI / 2}>
+          <circleGeometry args={[R_POZA, 24]} />
+          <meshBasicMaterial color={activa ? '#2e86ab' : '#7a8b99'} transparent opacity={0.75} />
+        </mesh>
+      )}
       <mesh position={[0, 0.06, 0]} rotation-x={-Math.PI / 2}>
         <ringGeometry args={[R_POZA * (1 - Math.min(1, nivel) * 0.8), R_POZA, 24]} />
         <meshBasicMaterial color="#9be37a" transparent opacity={0.35} />

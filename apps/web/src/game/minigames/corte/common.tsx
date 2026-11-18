@@ -7,6 +7,7 @@ import { art, Block, Cyl, Ground, P, useTick } from '../../kit';
 import type { FloraItem, FloraKind } from '../../kit/art/types';
 import { COMPACT_QUALITY } from '../../quality';
 import { finish, type Partida, rng } from '../api';
+import { Cueva } from '../kit/cueva';
 import {
   alturaTerreno,
   type Cauce,
@@ -352,9 +353,10 @@ export function Escenario({
       {hd && cauce && (
         <Ground size={[cauce.w + 2.4, 60]} pos={[cauce.x, 0, -4]} y={NIVEL_CAUCE} color="#35605a" mat="water" />
       )}
-      {(paisaje?.props ?? L.props).map((it, i) => (
+      {(hd && fondo === 'cueva' ? [] : (paisaje?.props ?? L.props)).map((it, i) => (
         <PropOf key={i} it={it} />
       ))}
+      {hd && fondo === 'cueva' && <Cueva claro={claro} />}
       {paisaje && art.Flora && paisaje.flora.length > 0 && <art.Flora items={paisaje.flora} />}
       {paisaje && art.Hills && paisaje.cerros.length > 0 && <art.Hills hills={paisaje.cerros} />}
       {hd && zacate && art.GroundCover && <art.GroundCover area={[-34, 34, -26, 18]} holes={zacate} />}
@@ -382,7 +384,7 @@ export function Escenario({
             solid={false}
           />
         ))}
-      {fondo === 'cueva' && (
+      {fondo === 'cueva' && !hd && (
         <Block pos={[0, 14, -10]} size={[70, 2, 40]} color="#2a2622" mat="stone" solid={false} cast={false} />
       )}
       {extra}

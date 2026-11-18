@@ -4,11 +4,13 @@ import { phys } from '../../../../core/phys';
 import { player } from '../../../../core/player';
 import { useGame } from '../../../../core/store';
 import type { V3 } from '../../../../core/types';
+import { Build } from '../../../dept/lib';
 import { art, Block, Cyl, Ground, Label, P, Spawn, useTick } from '../../../kit';
+import type { HillDef } from '../../../kit/art/types';
 import { BORDE, CALLES, CUADRAS, ESPECIALES, LUGARES, MEDIA_CUADRA } from './calles';
+import { type Edificio, obrasCiudad } from './obras';
 
 const PALETA = ['#f1e3c8', '#e9c46a', '#a8dadc', '#f4a261', '#e5e5e5', '#cdb4db', '#b7e4c7', '#ffd6a5'];
-type Edificio = { pos: V3; size: V3; color: string; mat: 'stucco' | 'concrete' | 'brick' | 'glass' };
 function edificios(): Edificio[] {
   const lista: Edificio[] = [];
   let i = 0;
@@ -69,14 +71,21 @@ export function useCiudad(esperando: () => boolean) {
   });
 }
 
-export const Ciudad = memo(function Ciudad({ noche = false, spawn }: { noche?: boolean; spawn: [V3, number] }) {
+/** En HD: la ciudad con detalle (obras.ts) en una sola malla; las colisiones son las mismas de antes. */
+const OBRAS = art.fused ? obrasCiudad(EDIFICIOS) : null;
+const CERROS_HD: HillDef[] = [
+  [-80, -90, 34],
+  [0, -110, 42],
+  [90, -80, 30],
+  [110, 20, 26],
+  [-110, 30, 28],
+  [-60, 110, 24],
+  [60, 110, 26],
+].map(([x, z, h], i) => ({ p: [x, -1, z], r: h * 1.4, h, c: i % 2 ? '#6c8a5b' : '#7d9a64', seed: i * 13 + 5 }));
+/** la ciudad de siempre (paquete sin malla fusionada) */
+function Sencilla() {
   return (
     <>
-      <Spawn pos={spawn[0]} yaw={spawn[1]} />
-      <art.SkyRig time={noche ? 'noche' : 'dia'} weather="despejado" shadowRadius={40} />
-      {/* calles y aceras */}
-      <Ground size={260} color="#5b6b4c" mat="grass" />
-      <Ground size={BORDE * 2 + 6} y={0.02} color="#4b4f57" mat="asphalt" />
       {CUADRAS.flatMap((cx) =>
         CUADRAS.map((cz) => (
           <Block
@@ -133,32 +142,58 @@ export const Ciudad = memo(function Ciudad({ noche = false, spawn }: { noche?: b
       <Block pos={[36, 4, 34]} size={[7, 8, 7]} color="#f8f9fa" mat="stucco" />
       <Cyl pos={[33, 7, 38]} r={0.9} rTop={0.1} h={14} color="#f8f9fa" mat="stucco" />
       <Cyl pos={[39, 7, 38]} r={0.9} rTop={0.1} h={14} color="#f8f9fa" mat="stucco" />
+    </>
+  );
+}
+
+export const Ciudad = memo(function Ciudad({ noche = false, spawn }: { noche?: boolean; spawn: [V3, number] }) {
+  return (
+    <>
+      <Spawn pos={spawn[0]} yaw={spawn[1]} />
+      <art.SkyRig time={noche ? 'noche' : 'dia'} weather="despejado" shadowRadius={40} />
+      {/* calles y aceras */}
+      <Ground size={260} color="#5b6b4c" mat="grass" />
+      <Ground size={BORDE * 2 + 6} y={0.02} color="#4b4f57" mat="asphalt" />
+      {OBRAS ? (
+        <>
+          <Build pieces={OBRAS} />
+          <P.Fountain pos={[-12, 0.2, -9]} />
+          <P.Statue pos={[-7, 0.2, -8]} />
+          <P.Tree pos={[-16.5, 0.2, -7]} seed={2} />
+          <P.Stall pos={[-40, 0.2, 38]} sign="Mercado" />
+          <P.Stall pos={[-33, 0.2, 38]} />
+        </>
+      ) : (
+        <Sencilla />
+      )}
       {/* rótulos de los lugares, sobre la acera, mirando a la calle */}
       {LUGARES.map((l) => (
         <Label key={l.nombre} pos={[l.x, 7.5, l.z - 4.8]} text={l.nombre} h={0.75} fg={l.color} />
       ))}
       {/* cerros que rodean el valle, con el Cristo del Picacho */}
-      {[
-        [-80, -90, 34],
-        [0, -110, 42],
-        [90, -80, 30],
-        [110, 20, 26],
-        [-110, 30, 28],
-        [-60, 110, 24],
-        [60, 110, 26],
-      ].map(([x, z, h], i) => (
-        <Cyl
-          key={i}
-          pos={[x, h / 2 - 1, z]}
-          r={h * 1.4}
-          rTop={h * 0.15}
-          h={h}
-          color={i % 2 ? '#6c8a5b' : '#7d9a64'}
-          mat="grass"
-          solid={false}
-          cast={false}
-        />
-      ))}
+      {OBRAS && art.Hills && <art.Hills hills={CERROS_HD} />}
+      {!(OBRAS && art.Hills) &&
+        [
+          [-80, -90, 34],
+          [0, -110, 42],
+          [90, -80, 30],
+          [110, 20, 26],
+          [-110, 30, 28],
+          [-60, 110, 24],
+          [60, 110, 26],
+        ].map(([x, z, h], i) => (
+          <Cyl
+            key={i}
+            pos={[x, h / 2 - 1, z]}
+            r={h * 1.4}
+            rTop={h * 0.15}
+            h={h}
+            color={i % 2 ? '#6c8a5b' : '#7d9a64'}
+            mat="grass"
+            solid={false}
+            cast={false}
+          />
+        ))}
       <P.Statue pos={[0, 41, -110]} scale={3} solid={false} />
       {[-30, 0, 30].map((x) => (
         <P.Lamp key={x} pos={[x + 5.2, 0.2, -5.2]} />
