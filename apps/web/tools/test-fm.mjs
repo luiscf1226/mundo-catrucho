@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { lugaresTuristicos } from './explorar.mjs';
 import { run } from './harness.mjs';
 
 const file = process.argv[2] ?? 'apps/web/dist/mundo-catrucho-hd.html';
@@ -9,15 +10,18 @@ const puntos = JSON.parse(
   readFileSync(new URL('../src/game/dept/zones/franciscomorazan-puntos.json', import.meta.url)),
 );
 const S = 'window.__mc.store.getState()';
+// un puesto por juego del catálogo (Taxi y Chepa sumaron dos a los doce de MC-36)
+const juegos = JSON.parse(readFileSync(new URL('../shared/data/catalogo/centro.json', import.meta.url)))
+  .franciscomorazan.juegos;
 const ok = await run('fm', file, { hash: '#test', width: 1280, height: 800 }, async (t) => {
   await t.click('btn-jugar');
   await t.click('ed-done');
   await t.ev(`${S}.travel('franciscomorazan')`);
-  const listo = `window.__mcTest?.dept?.id==='franciscomorazan' && window.__mcTest?.lugares?.st.flatMap(s=>s.booths).length===12`;
+  const listo = `window.__mcTest?.dept?.id==='franciscomorazan' && window.__mcTest?.lugares?.st.flatMap(s=>s.booths).length===${juegos.length}`;
   await t.waitFor(listo);
   if (process.env.MC_GPU !== '0') await t.ev('window.__mc.gl.setPixelRatio(1.5)');
   const puestos = await t.ev('window.__mcTest.lugares.st.flatMap(s=>s.booths)');
-  assert.equal(new Set(puestos.map((p) => p.id)).size, 12);
+  assert.deepEqual([...new Set(puestos.map((p) => p.id))].sort(), juegos.map((j) => `franciscomorazan.${j[0]}`).sort());
   await t.shot(`${out}/departamento.png`);
   for (const p of puestos) {
     await t.ev(`window.__mc.player.teleport(...${JSON.stringify(p.use)})`);
@@ -28,28 +32,29 @@ const ok = await run('fm', file, { hash: '#test', width: 1280, height: 800 }, as
     await t.ev(`${S}.exitMinigame()`);
     await t.waitFor(listo);
   }
-  console.log('PASA 12 puestos abren su tarjeta con E');
-  for (const p of puntos) {
+  console.log(`PASA ${juegos.length} puestos abren su tarjeta con E`);
+  assert.equal(await lugaresTuristicos(t, 'franciscomorazan'), 6);
+  // las locuras se activan con E y abren su ficha
+  for (const p of puntos.filter((q) => q.tipo === 'locura')) {
     await t.ev(
       `${S}.toasts.forEach(t=>${S}.dropToast(t.id));window.__mc.player.teleport(${p.x},window.__mc.phys.ground(${p.x},${p.z}),${p.z + 1})`,
     );
-    await t.waitFor(`${S}.toasts.some(t=>t.text.includes(${JSON.stringify(p.nombre)}))`);
     await t.waitFor(
       `document.querySelector('[data-testid=prompt]')?.textContent.includes(${JSON.stringify(p.nombre)})`,
     );
     await t.press('e');
     await t.waitFor(`${S}.dialog?.title===${JSON.stringify(p.nombre)}`);
-    if (p.tipo === 'locura' || p.id.endsWith('1')) await t.shot(`${out}/${p.id.split('.').at(-1)}.png`);
+    await t.shot(`${out}/${p.id.split('.').at(-1)}.png`);
     await t.click('dialog-close');
     await t.ev(
       `window.__mc.player.fixedCam={pos:[${p.x},window.__mc.player.pos[1]+4,${p.z + 7}],target:[${p.x},window.__mc.player.pos[1]+1,${p.z}],fov:52}`,
     );
     await t.waitFor(`${S}.dialog===null`);
     await t.sleep(1200);
-    if (p.tipo === 'locura' || p.id.endsWith('1')) await t.shot(`${out}/${p.id.split('.').at(-1)}-sitio.png`);
+    await t.shot(`${out}/${p.id.split('.').at(-1)}-sitio.png`);
   }
   await t.ev('window.__mc.player.fixedCam=null');
-  console.log('PASA 6 lugares y 3 locuras descubiertos por proximidad');
+  console.log('PASA 6 lugares descubiertos al llegar y 3 locuras con E');
   for (const id of ['niebla', 'baleada', 'repartidor', 'artesania']) {
     await t.ev(`${S}.startMinigame('franciscomorazan.${id}')`);
     await t.click('mg-start');

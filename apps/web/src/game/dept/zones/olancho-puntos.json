@@ -1,0 +1,20 @@
+[
+  {
+    "id": "olancho.locura-1",
+    "nombre": "Pastel a machete de goma",
+    "texto": "¡Ideay! El anfitrión saca un machete de goma más grande que él y parte el pastel de un solo tajo.",
+    "pos": [12, 31]
+  },
+  {
+    "id": "olancho.locura-2",
+    "nombre": "Tapado con techo",
+    "texto": "Se abre la tapa de la olla como si fuera un techo y las verduras del tapado te hacen reverencia.",
+    "pos": [12, 25.5]
+  },
+  {
+    "id": "olancho.locura-3",
+    "nombre": "Talgua prende el brillo",
+    "texto": "Apuntá bien el foco y los cristales de la réplica se encienden como luces de feria. Con respeto: los restos no se tocan.",
+    "pos": [12, 20]
+  }
+]

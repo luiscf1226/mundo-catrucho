@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { validarResultado } from '../../../packages/reglas/src/topes.ts';
+import { locuraCaminando, lugaresTuristicos } from './explorar.mjs';
 import { run } from './harness.mjs';
 
 const file = process.argv[2] ?? 'apps/web/dist/mundo-catrucho-hd.html';
@@ -34,10 +35,11 @@ const ok = await run('intibuca', file, { hash: '#test', width: 1280, height: 800
   await t.waitFor("window.__mc.store.getState().scene.kind==='lobby'");
   await t.ev("window.__mc.store.getState().travel('intibuca')");
   await t.waitFor("window.__mcTest?.dept?.id==='intibuca'");
-  for (let i = 0; i < puntos.length; i++) {
+  assert.equal(await lugaresTuristicos(t, 'intibuca'), 6);
+  // las tres locuras abren su ficha al llegar caminando y E arranca su acción
+  for (let i = 7; i < puntos.length; i++) {
     const [x, y, z] = puntos[i].pos;
-    await t.ev(`window.__mc.player.teleport(${x},${y},${z + 3},0)`);
-    await t.holdUntil('w', `window.__mc.store.getState().dialog?.title===${JSON.stringify(puntos[i].nombre)}`);
+    await locuraCaminando(t, { x, y, z, nombre: puntos[i].nombre, texto: puntos[i].texto });
     await t.shot(`${shots}/descubrimiento-${i + 1}.png`);
     await t.click('dialog-close');
     if (i !== 3) {
@@ -51,7 +53,7 @@ const ok = await run('intibuca', file, { hash: '#test', width: 1280, height: 800
       await t.shot(`${shots}/accion-${i + 1}.png`);
     }
   }
-  console.log('PASA 12 puestos, 7 lugares y 3 locuras caminando');
+  console.log('PASA 12 puestos, 6 lugares y 3 locuras caminando');
   async function abrir(juego, motor, modo = 'solo') {
     await t.ev(
       `window.__mc.input.reset();window.__mc.input.px=0;window.__mc.input.py=0;navigator.getGamepads=()=>[];window.__mc.store.getState().setModo('${modo}');window.__mc.store.getState().${juego ? 'startJuego' : 'startMinigame'}('${juego ?? motor}')`,
