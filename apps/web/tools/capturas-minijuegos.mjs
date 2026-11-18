@@ -44,6 +44,15 @@ const VISTAS = [
   ['cuencas', 'lempira.la-montana-reparte-agua'],
   ['tapisca', 'elparaiso.tapisca-de-jamastran'],
   ['catacion', 'lapaz.catacion-de-marcala'],
+  // motor sin juego del catálogo (`!motor`) o con estilo forzado (`juego#ruta=estilo`)
+  ['carretera', '!manejo'],
+  ['fiado', 'franciscomorazan.sabado-de-fiado'],
+  ['bota', 'cortes.la-bota-no-es-pescado'],
+  ['vacio', 'franciscomorazan.va-vacio--cabe-una-nube'],
+  ['ruta-cueva', 'lempira.sendero-de-celaque#ruta=cueva'],
+  ['ruta-selva', 'lempira.sendero-de-celaque#ruta=selva'],
+  ['ruta-mina', 'lempira.sendero-de-celaque#ruta=mina'],
+  ['ruta-ciudad', 'lempira.sendero-de-celaque#ruta=ciudad'],
 ];
 const SOLO = process.env.MC_VISTAS?.split(',');
 
@@ -51,7 +60,10 @@ const ok = await run('capturas-minijuegos', file, { hash: '#go', width: 1280, he
   await t.waitFor(`${S}.scene.kind==='lobby' && !!window.__mc.gl`, 20000, 'el lobby');
   const tabla = [];
   for (const [nombre, juego] of VISTAS.filter(([n]) => !SOLO || SOLO.includes(n))) {
-    await t.ev(`window.__mc.input.reset();${S}.setModo('solo');${S}.startJuego('${juego}')`);
+    const [id, vista] = juego.split('#');
+    await t.ev(`location.hash='#go${vista ? `,${vista}` : ''}'`);
+    const abrir = id.startsWith('!') ? `startMinigame('${id.slice(1)}')` : `startJuego('${id}')`;
+    await t.ev(`window.__mc.input.reset();${S}.setModo('solo');${S}.${abrir}`);
     await t.click('mg-start', 30000);
     await t.waitFor(`${S}.mg?.phase==='playing'`, 30000, nombre);
     // la cuenta de «¡Preparáte!» dura 3 s; las sombras y el posproceso se asientan

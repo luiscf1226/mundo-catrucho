@@ -106,9 +106,14 @@ function Plat({ q, look, onSink }: { q: Pieza; look: (typeof LOOK)[Estilo]; onSi
   );
 }
 
+/** Capturas: `#go,ruta=cueva` muestra ese estilo aunque el juego del catálogo traiga otro (no cambia el juego). */
+const estiloVista = () =>
+  typeof location === 'undefined' ? undefined : (location.hash.match(/ruta=(\w+)/)?.[1] as Estilo | undefined);
+
 export function Ruta() {
   const P_ = useMemo(partida, []),
-    est: Estilo = ESTILOS_RUTA.includes(P_.tema.estilo) ? P_.tema.estilo : 'cerro',
+    pedido = estiloVista() ?? P_.tema.estilo,
+    est: Estilo = ESTILOS_RUTA.includes(pedido) ? pedido : 'cerro',
     L = LOOK[est];
   const G = useMemo(() => generar(P_), [P_]),
     TL = limiteDe(P_),
