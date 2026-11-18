@@ -175,8 +175,8 @@ const ok = await run('reglas', file, { hash: '#test', width: 1280, height: 800 }
   await t.ev('window.__mc.store.getState().goLobby()');
   console.log(`PASA metas y reloj de ${revisadas} etapas de motores del kit iguales a TOPES`);
 
-  // motores propios con metas en la intro: corte, ritmo y pesca dicen «N pts»; monta y ruta, segundos y estilo.
-  // Ritmo y pesca dependen del tema: se revisan todos sus juegos. Las de ritmo en TOPES son una cota inferior.
+  // motores propios con metas en la intro: corte, ritmo, pesca y atrapa dicen «N pts»; monta y ruta, segundos y estilo.
+  // Ritmo, pesca y atrapa dependen del tema: se revisan todos sus juegos. Las de ritmo en TOPES son una cota inferior.
   const metasIntro = async (j, etapa) => {
     await t.ev('window.__mc.store.getState().goLobby()');
     await t.waitFor(`!document.querySelector('[data-testid=mg-intro]')`);
@@ -194,9 +194,9 @@ const ok = await run('reglas', file, { hash: '#test', width: 1280, height: 800 }
     );
   };
   let propias = 0;
-  for (const motor of ['corte', 'ritmo', 'pesca', 'monta', 'ruta']) {
+  for (const motor of ['corte', 'ritmo', 'pesca', 'atrapa', 'monta', 'ruta']) {
     const deMotor = juegos.filter((x) => x.motor === motor);
-    for (const j of ['ritmo', 'pesca'].includes(motor) ? deMotor : deMotor.slice(0, 1))
+    for (const j of ['ritmo', 'pesca', 'atrapa'].includes(motor) ? deMotor : deMotor.slice(0, 1))
       for (const etapa of sinGpu ? [0] : [0, j.etapas - 1]) {
         const intro = await metasIntro(j, etapa),
           dif = difDe(etapa, j.etapas),
@@ -219,7 +219,7 @@ const ok = await run('reglas', file, { hash: '#test', width: 1280, height: 800 }
       }
   }
   await t.ev('window.__mc.store.getState().goLobby()');
-  console.log(`PASA metas de ${propias} etapas de corte, ritmo, pesca, monta y ruta cuadran con TOPES`);
+  console.log(`PASA metas de ${propias} etapas de corte, ritmo, pesca, atrapa, monta y ruta cuadran con TOPES`);
   assert.equal(t.errors.length, 0, 'Sin excepciones ni red no permitida');
 });
 process.exitCode = ok ? 0 : 1;
