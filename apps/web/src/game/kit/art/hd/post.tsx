@@ -370,8 +370,6 @@ function Post({ nivel }: { nivel: Nivel }) {
     const prev = gl.info.autoReset,
       mc = (window as Window & { __mc?: { post?: Nivel; postPasadas?: () => number } }).__mc;
     gl.info.autoReset = false;
-    // los materiales guardan en el alfa la luz ambiental y el reflejo mientras haya posproceso
-    G.uSplit.value = 1;
     // para las pruebas: qué posproceso está activo y cuántas llamadas suma
     if (mc) {
       mc.post = nivel;
@@ -379,7 +377,6 @@ function Post({ nivel }: { nivel: Nivel }) {
     }
     return () => {
       gl.info.autoReset = prev;
-      G.uSplit.value = 0;
       if (mc) mc.post = mc.postPasadas = undefined;
       P.dispose();
     };
@@ -400,14 +397,18 @@ function Post({ nivel }: { nivel: Nivel }) {
       P.aoA.setSize(hw, hh);
       P.aoB.setSize(hw, hh);
       P.pre.setSize(hw, hh);
-      P.rays.setSize(Math.max(1, W >> 2), Math.max(1, H >> 2));
+      if (P.alta) P.rays.setSize(Math.max(1, W >> 2), Math.max(1, H >> 2));
       P.down.forEach((r, i) => r.setSize(Math.max(1, hw >> (i + 1)), Math.max(1, hh >> (i + 1))));
       P.up.forEach((r, i) => r.setSize(Math.max(1, hw >> (3 - i)), Math.max(1, hh >> (3 - i))));
     }
     const prevRT = gl.getRenderTarget();
     // 1. la escena
     gl.setRenderTarget(P.escena);
+    // solo mientras se dibuja la escena aquí los materiales guardan en el alfa la luz ambiental y el reflejo (G es de
+    // toda la página: otro lienzo con fondo transparente, como el del personaje, no debe verlo)
+    G.uSplit.value = 1;
     gl.render(st.scene, cam);
+    G.uSplit.value = 0;
     const c0 = gl.info.render.calls;
     const draw = (m: THREE.ShaderMaterial, target: THREE.WebGLRenderTarget | null) => {
       P.quad.material = m;

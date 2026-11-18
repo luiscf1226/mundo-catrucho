@@ -17,6 +17,15 @@ const ok = await run(
   { hash: '#go,ciclo=rapido,clima=despejado,hora=12', width: 960, height: 540 },
   async (t) => {
     await t.waitFor(`${S}.scene.kind==='lobby' && !!window.__mc.gl`, 30000, 'el lobby');
+    // los materiales se arman con la calidad del arranque: se fuerza alta (media sin GPU) y se recarga, así se
+    // compilan el piso mojado, la orilla, los cáusticos y los reflejos (en GitHub la calidad automática sería baja)
+    const q = process.env.MC_GPU === '0' ? 'media' : 'alta';
+    await t.ev(`${S}.setSettings({ quality: '${q}', calidadElegida: true })`);
+    await t.sleep(800);
+    await t.ev('location.reload()');
+    await t.sleep(1500);
+    await t.waitFor(`${S}.scene.kind==='lobby' && !!window.__mc.gl`, 30000, 'el lobby de nuevo');
+    console.log(`calidad ${q}, posproceso ${await t.ev('window.__mc.post ?? null')}`);
     await t.ev(`${S}.travel('franciscomorazan')`);
     await t.waitFor(`${S}.scene.kind==='dept' && ${S}.scene.id==='franciscomorazan'`, 30000, 'Tegucigalpa');
     await t.waitFor(`${W} && ${W}.wet < 0.05 && ${W}.rain < 0.05`, 30000, 'piso seco al empezar');
@@ -54,6 +63,12 @@ const ok = await run(
     await t.waitFor(`${W}.wet < 0.15`, 180000, 'el piso se seca');
     const seco = await t.ev(W);
     assert.ok(seco.pud > seco.wet, `los charcos se secan de último (${seco.pud.toFixed(2)} > ${seco.wet.toFixed(2)})`);
+    // el mar de Roatán con hondura (orilla, fondo a la vista, cáusticos) tampoco se rompe
+    await t.ev(`${S}.travel('islas')`);
+    await t.waitFor(`${S}.scene.kind==='dept' && ${S}.scene.id==='islas'`, 30000, 'Islas de la Bahía');
+    await t.sleep(2000);
+    const mar = await t.ev(brillo);
+    assert.ok(mar > 0.15 && mar < 0.85, `el mar se ve (${mar})`);
     console.log(
       `mojado al empezar ${al.wet.toFixed(2)}, charcos con piso mojado ${mojado.pud.toFixed(2)}, al escampar ${esc.wet.toFixed(2)}`,
     );

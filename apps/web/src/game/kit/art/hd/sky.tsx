@@ -363,7 +363,8 @@ void main() {
   vA = step( seed, uRain * 1.05 ) * ( 0.22 + 0.3 * seed ) * smoothstep( 0.6, 3.0, - mv.z ) * ( 1.0 - smoothstep( 12.0, 17.0, - mv.z ) ) * ( 1.0 - aEnd * 0.7 );
   // a contraluz las gotas se encienden (la luz las atraviesa hacia la cámara)
   float fs = pow( max( dot( normalize( p - uCam ), uSunDir ), 0.0 ), 5.0 );
-  vC = uCol + uSunCol * fs * 1.4; vA *= 1.0 + fs * 1.6;
+  fs *= min( 1.0, dot( uSunCol, vec3( 0.6 ) ) );
+  vC = uCol + uSunCol * fs * 1.4; vA = min( vA * ( 1.0 + fs * 1.6 ), 1.0 );
   gl_Position = projectionMatrix * mv;
 }
 `;
