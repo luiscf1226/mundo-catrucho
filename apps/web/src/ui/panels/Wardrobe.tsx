@@ -567,12 +567,13 @@ export function ShopPanel() {
       }
     >
       <div className="flex min-h-0 flex-1 flex-col gap-3 landscape:flex-row">
-        <div className="flex flex-none flex-col gap-2 portrait:h-[27vh] portrait:min-h-[10rem] landscape:w-[32%] landscape:min-w-[12rem] landscape:max-w-sm">
+        <div className="flex flex-none flex-col gap-2 portrait:h-[31vh] portrait:min-h-[11rem] landscape:w-[32%] landscape:min-w-[12rem] landscape:max-w-sm">
           <div className="mc-stage relative min-h-0 flex-1">
             <AvatarView config={preview} anim={anim} cls="absolute inset-0" hint={false} />
             {shown?.nota && (
               <p
                 data-testid="shop-nota"
+                data-tapa
                 className="mc-trying absolute inset-x-2 bottom-2 px-2.5 py-1.5 text-[13px] font-bold leading-snug"
               >
                 {shown.nota}
@@ -581,6 +582,7 @@ export function ShopPanel() {
             {triedNew && (
               <div
                 data-testid="shop-trying"
+                data-tapa
                 className="mc-trying anim-drop absolute inset-x-2 top-2 flex items-center gap-2 px-2.5 py-1.5 text-sm"
               >
                 <Icon name="eye" size={17} />

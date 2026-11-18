@@ -190,6 +190,8 @@ const DETAIL = /* glsl */ `
         float cloth = mcCls == 4.0 ? ( a != 4.0 ? a : b != 4.0 ? b : c != 4.0 ? c : d ) : mcCls;
         bool isSkin = distance( sqrt( max( diffuseColor.rgb, 0.0 ) ), sqrt( uSkinC ) ) < 0.07;
         mcCls = isSkin ? 4.0 : cloth;
+        // la rugosidad del ORM también viene en escalones: se toma la de la clase decidida
+        roughnessFactor = mcCls == 4.0 ? 0.52 : mcCls == 2.0 ? 0.62 : mcCls == 1.0 ? 0.84 : 0.9;
       }
     }
   }
@@ -265,7 +267,7 @@ export function avatarMaterial(cfg: AvatarConfig) {
         #include <opaque_fragment>`,
       );
   };
-  m.customProgramCacheKey = () => 'hd-avatar-4';
+  m.customProgramCacheKey = () => 'hd-avatar-5';
   mats.set(key, m);
   return m;
 }

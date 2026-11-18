@@ -25,20 +25,56 @@ export class Safe3D extends Component<{ fallback?: ReactNode; children: ReactNod
 
 /** lo que tiene que caber en la vista: del borde de la base (abajo) a un poco sobre la cabeza, y su ancho */
 const FRAME = { y0: -0.13, y1: 1.98, w: 1.25 };
-/** Encuadre de cuerpo entero con algo de aire arriba, para cualquier proporción del recuadro (celular incluido). */
+/**
+ * Encuadre de cuerpo entero con algo de aire arriba, para cualquier proporción del recuadro (celular incluido). Los
+ * letreros encima de la vista (marcados con `data-tapa`, como «Probándote» y la nota de la tienda) se descuentan: el
+ * personaje queda en la franja libre entre ellos.
+ */
 function Encuadre() {
-  const { camera, size } = useThree();
-  useEffect(() => {
+  const { camera, size, gl } = useThree(),
+    band = useRef({ top: 0, bot: 0, n: 0 });
+  const fit = () => {
     const cam = camera as THREE.PerspectiveCamera,
-      aspect = size.width / Math.max(1, size.height),
+      H = Math.max(1, size.height),
+      aspect = size.width / H,
       t = Math.tan(THREE.MathUtils.degToRad(cam.fov / 2)),
-      h = FRAME.y1 - FRAME.y0,
-      d = Math.max(h / 2 / t, FRAME.w / 2 / (t * aspect)) + 0.35,
-      cy = (FRAME.y0 + FRAME.y1) / 2;
-    cam.position.set(0, cy + 0.32, d);
-    cam.lookAt(0, cy + 0.02, 0);
+      { top, bot } = band.current,
+      f = Math.max(0.45, (H - top - bot) / H),
+      // con letreros encima el espacio es poco: encuadre más justo (de los pies a un poco sobre la cabeza)
+      tapa = f < 0.97,
+      y0 = tapa ? -0.03 : FRAME.y0,
+      y1 = tapa ? 1.86 : FRAME.y1,
+      h = y1 - y0,
+      d = Math.max(h / 2 / t / f, FRAME.w / 2 / (t * aspect)) + (tapa ? 0.1 : 0.35),
+      cy = (y0 + y1) / 2,
+      // la franja libre no está centrada: se corre la mirada para que el personaje caiga en su centro
+      shift = ((top - bot) / 2 / H) * 2 * d * t;
+    cam.position.set(0, cy + 0.32 + shift, d);
+    cam.lookAt(0, cy + 0.02 + shift, 0);
     cam.updateProjectionMatrix();
-  }, [camera, size.width, size.height]);
+  };
+  useEffect(fit, [camera, size.width, size.height]);
+  useFrame(() => {
+    if (band.current.n++ % 20) return;
+    const box = gl.domElement.getBoundingClientRect(),
+      mid = box.top + box.height / 2;
+    let top = 0,
+      bot = 0;
+    for (const e of gl.domElement
+      .closest('[data-testid=avatar-view]')
+      ?.parentElement?.querySelectorAll('[data-tapa]') ?? []) {
+      const r = e.getBoundingClientRect();
+      if (!r.height) continue;
+      if (r.top + r.height / 2 < mid) top = Math.max(top, r.bottom - box.top);
+      else bot = Math.max(bot, box.bottom - r.top);
+    }
+    top = Math.round(top);
+    bot = Math.round(bot);
+    if (top === band.current.top && bot === band.current.bot) return;
+    band.current.top = top;
+    band.current.bot = bot;
+    fit();
+  });
   return null;
 }
 interface Spin {

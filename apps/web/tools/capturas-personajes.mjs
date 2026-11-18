@@ -111,15 +111,18 @@ const ok = await run('capturas-personajes', file, { hash: '#go', width: 1280, he
   await t.sleep(1300);
   await foto(t, 'emote');
   // la cara con gesto: aplaudiendo (sonrisa, boca entreabierta) y asombro (cejas arriba, boca abierta)
-  await t.ev(`${P}.emote = null`);
-  await t.sleep(500);
-  await t.ev(cam(0.95, 0.35, 1.56, 1.5, 36));
-  await t.ev(`${P}.emote = { anim: 'clap', until: performance.now() + 6000 }`);
-  await t.sleep(1200);
-  await foto(t, 'emote-cara');
-  await t.ev(`${P}.emote = { anim: 'asombro', until: performance.now() + 6000 }`);
-  await t.sleep(700);
-  await foto(t, 'emote-asombro');
+  for (const [anim, nombre, espera] of [
+    ['clap', 'emote-cara', 1200],
+    ['wave', 'emote-saludo', 1300],
+  ]) {
+    await t.ev(`${P}.emote = null`);
+    await t.ev(`${P}.teleport(-7, 1, 24.5, Math.PI)`);
+    await t.sleep(900);
+    await t.ev(cam(1.15, 0.3, 1.58, 1.46, 36));
+    await t.ev(`${P}.emote = { anim: '${anim}', until: performance.now() + 6000 }`);
+    await t.sleep(espera);
+    await foto(t, nombre);
+  }
   await t.ev(`${P}.emote = null`);
   // noche
   await t.ev(cam(2.1, 0.4, 1.5, 1.25, 40));
