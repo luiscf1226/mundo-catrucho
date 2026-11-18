@@ -186,4 +186,8 @@ export interface ArtPack {
   /** zacate, matas y florcitas cerca de la cámara sobre el piso de zacate de la escena. `area` [x0, x1, z0, z1] es el
    *  piso que se mira (si falta, el límite del jugador); en los `holes` no crece (donde se juega). */
   GroundCover?: FC<{ area?: [number, number, number, number]; holes?: [number, number, number, number][] }>;
+  /** opcional (hd): rejilla de alturas del terreno (n × n cada `cell` m, centrada) y niveles de los planos de agua,
+   *  para que el agua sepa su hondura (espuma en la orilla, fondo a la vista, olas de mar abierto). Devuelve cómo
+   *  quitarla. */
+  shore?(data: Float32Array, n: number, cell: number, levels: number[]): () => void;
 }

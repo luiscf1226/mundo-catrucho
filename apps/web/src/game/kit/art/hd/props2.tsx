@@ -9,7 +9,7 @@ import { textTexture } from '../../core';
 import { Placed } from '../base';
 import type { ArtProps } from '../types';
 import { Builder, gLathe, gTube, type Paint, tint } from './geo';
-import { G, hdMaterial } from './materials';
+import { G, hdMaterial, SUMA_SIN_ALFA } from './materials';
 import { cached, haloTexture, Merged, solidBox, solidCyl, TextPlane } from './pk';
 import { rng } from './tex';
 
@@ -292,7 +292,7 @@ function lampGlow() {
         color: '#ffc874',
         transparent: true,
         opacity: 0,
-        blending: THREE.AdditiveBlending,
+        ...SUMA_SIN_ALFA,
         depthWrite: false,
       }),
       pool: new THREE.MeshBasicMaterial({
@@ -300,7 +300,7 @@ function lampGlow() {
         color: '#ffb056',
         transparent: true,
         opacity: 0,
-        blending: THREE.AdditiveBlending,
+        ...SUMA_SIN_ALFA,
         depthWrite: false,
       }),
       geo: new THREE.PlaneGeometry(1, 1),
