@@ -156,7 +156,20 @@ export function place(pcs: Pc[], x: number, y: number, z: number, rot = 0): Pc[]
     ...q,
     p: [x + q.p[0] * c + q.p[2] * s, y + q.p[1], z - q.p[0] * s + q.p[2] * c] as V3,
     e: rot || q.e ? ([q.e?.[0] ?? 0, (q.e?.[1] ?? 0) + rot, q.e?.[2] ?? 0] as V3) : undefined,
+    flora: q.flora && {
+      ...q.flora,
+      p: [x + q.flora.p[0] * c + q.flora.p[2] * s, y + q.flora.p[1], z - q.flora.p[0] * s + q.flora.p[2] * c] as V3,
+      r: (q.flora.r ?? (q.flora.seed * 2.399) % 6.283) + rot,
+    },
   }));
+}
+/** Con vegetación del paquete de arte: las piezas quedan solo como colisión y se dibuja `item` (fusionado en <Build>). */
+export function conFlora(pcs: Pc[], item: FloraItem): Pc[] {
+  if (art.Flora && pcs.length) {
+    for (const q of pcs) q.hide = true;
+    pcs[0].flora = item;
+  }
+  return pcs;
 }
 /** Gira un punto local (igual que place). */
 export const rotXZ = (x: number, z: number, rot: number): XZ => [
@@ -321,7 +334,8 @@ function Pools({ pieces }: { pieces: Pc[] }) {
 }
 /** Dibuja muchas piezas estáticas con una malla por (material, color) y registra sus colisiones. */
 export function Build({ pieces }: { pieces: Pc[] }) {
-  const groups = useMemo(() => mergePieces(pieces, true), [pieces]);
+  const groups = useMemo(() => mergePieces(pieces, true), [pieces]),
+    flora = useMemo(() => pieces.flatMap((q): FloraItem[] => (q.flora ? [q.flora] : [])), [pieces]);
   useLayoutEffect(() => {
     const cs = pieces.filter(isSolid).map((q) => phys.add(colliderOf(q)));
     return () => {
@@ -346,6 +360,7 @@ export function Build({ pieces }: { pieces: Pc[] }) {
         />
       ))}
       <Pools pieces={pieces} />
+      {art.Flora && flora.length > 0 && <art.Flora items={flora} />}
     </>
   );
 }

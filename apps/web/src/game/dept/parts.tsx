@@ -2,8 +2,9 @@
 // y = 0) para colocarlas con place() / z.put(), salvo la vegetación (VEG), que ya va en coordenadas del mundo.
 
 import { art, type MatKind } from '../kit';
+import type { FloraKind } from '../kit/art/types';
 import { arco, campanario, casaHN, edificioHN } from './casas';
-import { bl, bx, cy, type Pc, PI, py, rk } from './lib';
+import { bl, bx, conFlora, cy, type Pc, PI, py, rk } from './lib';
 
 const WOOD = '#7a5230',
   DARKWOOD = '#5a3d26',
@@ -132,6 +133,40 @@ export const VEG: Record<VegKind, VegFn> = {
     ];
   },
 };
+
+/** especie del paquete de arte para cada vegetación (las rocas siguen siendo piezas) */
+export const FLORA_OF: Partial<Record<VegKind, FloraKind>> = {
+  tree: 'tree',
+  pine: 'pine',
+  palm: 'palm',
+  oilpalm: 'oilpalm',
+  bush: 'bush',
+  jungle: 'jungle',
+  giant: 'giant',
+  dry: 'dry',
+  reed: 'reed',
+  fern: 'fern',
+  banana: 'banana',
+  cafe: 'cafe',
+};
+/** semilla estable de una planta según su lugar */
+export const floraSeed = (x: number, z: number) => Math.floor(Math.abs(x * 7.31 + z * 3.17) * 10);
+/** Una planta: con vegetación del paquete de arte se dibuja su especie (fusionada en <Build>) y las piezas quedan solo
+ *  como colisión; sin ella (Roblox) se ven las piezas. `place()` la mueve y gira junto con las demás piezas. */
+export function planta(
+  kind: VegKind,
+  x: number,
+  y: number,
+  z: number,
+  s: number,
+  c: string,
+  r: () => number,
+  seed = floraSeed(x, z),
+): Pc[] {
+  const pc = VEG[kind](x, y, z, s, c, r),
+    k = FLORA_OF[kind];
+  return k ? conFlora(pc, { k, p: [x, y, z], s, c, seed }) : pc;
+}
 
 // --- construcciones
 /** Casa sencilla de pueblo: repello con zócalo, ventanas con reja y techo de teja de dos aguas (ver casas.ts). */

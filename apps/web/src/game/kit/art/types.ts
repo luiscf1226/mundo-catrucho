@@ -72,7 +72,14 @@ export type FloraKind =
   | 'fern'
   | 'banana'
   | 'cafe'
-  | 'flowers';
+  | 'flowers'
+  /** guineo de bananera: racimo en bolsa azul y puntal */
+  | 'bananera'
+  /** jardín: izote, veranera sobre un tapial (x a lo largo de la pared, +z hacia la calle), seto podado, tulipán */
+  | 'izote'
+  | 'veranera'
+  | 'seto'
+  | 'tulipan';
 /** Una planta en coordenadas del mundo: especie, punto de apoyo, escala, color de hoja, semilla y giro. */
 export interface FloraItem {
   k: FloraKind;

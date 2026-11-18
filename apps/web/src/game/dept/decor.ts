@@ -1,8 +1,8 @@
 // Decorado de una estación según el tipo de lugar. Piezas locales (frente hacia +Z, apoyo en y = 0), centradas en el origen.
 import type { LugarKind } from '../../core/types';
 import { arco, campanario, columna } from './casas';
-import { bl, bx, cy, type Pc, py, rng } from './lib';
-import { casa, VEG } from './parts';
+import { bl, bx, conFlora, cy, type Pc, py, rng } from './lib';
+import { casa, planta } from './parts';
 
 const W = '#7a5230',
   DW = '#5a3d26',
@@ -16,9 +16,10 @@ const W = '#7a5230',
   DARK = '#1d1d1f';
 const AW = ['#e63946', '#2a9d8f', '#f4a261', '#ffd23f'];
 
-const tree = (x: number, z: number, s = 1, c = LEAF) => VEG.tree(x, 0, z, s, c, Math.random);
-const palm = (x: number, z: number, s = 1, r = rng(Math.round(x * 13 + z * 7))) => VEG.palm(x, 0, z, s, LEAF, r);
-const pine = (x: number, z: number, s = 1) => VEG.pine(x, 0, z, s, DLEAF, Math.random);
+// árboles con la especie del paquete de arte (una malla para toda la vegetación de las estaciones)
+const tree = (x: number, z: number, s = 1, c = LEAF) => planta('tree', x, 0, z, s, c, Math.random);
+const palm = (x: number, z: number, s = 1, r = rng(Math.round(x * 13 + z * 7))) => planta('palm', x, 0, z, s, LEAF, r);
+const pine = (x: number, z: number, s = 1) => planta('pine', x, 0, z, s, DLEAF, Math.random);
 const fence = (x0: number, x1: number, z: number): Pc[] => {
   const o: Pc[] = [
     bx((x0 + x1) / 2, 0.75, z, x1 - x0, 0.1, 0.08, 'wood', W, { solid: false }),
@@ -92,8 +93,8 @@ export function decorFor(kind: LugarKind | string, seed: number): Pc[] {
       return [
         ...pond(0, -1.5, 6),
         ...muelle(0, 1, 6),
-        ...VEG.reed(-5, 0, 1, 1, LEAF, r),
-        ...VEG.reed(5.5, 0, 0, 1, LEAF, r),
+        ...planta('reed', -5, 0, 1, 1, LEAF, r),
+        ...planta('reed', 5.5, 0, 0, 1, LEAF, r),
         ...tree(-7, -4, 0.9),
       ];
     case 'rio':
@@ -102,8 +103,8 @@ export function decorFor(kind: LugarKind | string, seed: number): Pc[] {
         bx(0, 0.4, -1.5, 2, 0.14, 6, 'wood', W),
         bx(-1, 1, -1.5, 0.1, 0.1, 6, 'wood', DW, { solid: false }),
         bx(1, 1, -1.5, 0.1, 0.1, 6, 'wood', DW, { solid: false }),
-        ...VEG.rock(-5, 0, 0.6, 1, STONE, r),
-        ...VEG.rock(4.5, 0, -3.8, 1.2, STONE, r),
+        ...planta('rock', -5, 0, 0.6, 1, STONE, r),
+        ...planta('rock', 4.5, 0, -3.8, 1.2, STONE, r),
         ...tree(-7, -5, 0.9),
         ...tree(7, -5.5, 1),
       ];
@@ -180,28 +181,38 @@ export function decorFor(kind: LugarKind | string, seed: number): Pc[] {
         bl(4.5, 1.2, -0.5, 2.6, 'stone', '#868c92', { n: 8 }),
         bx(0, 1.5, 2.7, 3, 3, 0.4, 'stone', DARK, { solid: false }),
         bl(0, 3, 2.7, 1.5, 'stone', DARK, { s: [1, 0.5, 0.3] }),
-        ...VEG.fern(-2.5, 0, 3.2, 1, LEAF, r),
-        ...VEG.fern(2.8, 0, 3, 1, LEAF, r),
+        ...planta('fern', -2.5, 0, 3.2, 1, LEAF, r),
+        ...planta('fern', 2.8, 0, 3, 1, LEAF, r),
       ];
     case 'finca':
       return [
         ...casa(5, 4, 2.6, '#ffe6a7', ROOF).map((q) => ({ ...q, p: [q.p[0] - 4, q.p[1], q.p[2] - 1] as Pc['p'] })),
+        // cafetal en surcos
         ...[0, 1, 2, 3].flatMap((i) =>
-          [0, 1, 2, 3].map((j) =>
-            bl(2 + j * 1.4, 0.45, -4 + i * 1.5, 0.45, 'leaf', i % 2 ? '#3f8a4b' : '#6cb648', { s: [1, 0.9, 1], n: 6 }),
-          ),
+          [0, 1, 2, 3].flatMap((j) => {
+            const x = 2 + j * 1.4,
+              z = -4 + i * 1.5,
+              c = i % 2 ? '#3f8a4b' : '#6cb648';
+            return conFlora([bl(x, 0.45, z, 0.45, 'leaf', c, { s: [1, 0.9, 1], n: 6 })], {
+              k: 'cafe',
+              p: [x, 0, z],
+              s: 0.62,
+              c,
+              seed: i * 4 + j,
+            });
+          }),
         ),
         ...fence(1, 7.5, 1.5),
         cy(-7, 0.5, 2, 0.5, 1, 'wood', W),
       ];
     case 'selva':
       return [
-        ...VEG.jungle(-4, 0, -2, 0.9, '#1f6b34', r),
-        ...VEG.jungle(4, 0, -3, 1, '#2a7d3c', r),
-        ...VEG.banana(-6.5, 0, 2, 1, LEAF, r),
-        ...VEG.banana(6.5, 0, 1.5, 1, LEAF, r),
-        ...VEG.fern(0, 0, -1, 1.3, LEAF, r),
-        ...VEG.fern(-2, 0, 2.5, 1, '#2a7d3c', r),
+        ...planta('jungle', -4, 0, -2, 0.9, '#1f6b34', r),
+        ...planta('jungle', 4, 0, -3, 1, '#2a7d3c', r),
+        ...planta('banana', -6.5, 0, 2, 1, LEAF, r),
+        ...planta('banana', 6.5, 0, 1.5, 1, LEAF, r),
+        ...planta('fern', 0, 0, -1, 1.3, LEAF, r),
+        ...planta('fern', -2, 0, 2.5, 1, '#2a7d3c', r),
       ];
     case 'puerto':
       return [

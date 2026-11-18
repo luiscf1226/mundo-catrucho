@@ -5,7 +5,8 @@ import { type ReactNode, useEffect, useMemo } from 'react';
 import { catDe } from '../../core/data';
 import { useGame } from '../../core/store';
 import type { Department, V3 } from '../../core/types';
-import { Interactable, type MatKind, P, Plate } from '../kit';
+import { art, Interactable, type MatKind, P, Plate } from '../kit';
+import type { FloraKind } from '../kit/art/types';
 import {
   antena,
   arco,
@@ -21,7 +22,7 @@ import {
 } from './casas';
 import { CIUDADES, type SitioReal, type TipoSitio } from './ciudad-datos';
 import { type Layout, layoutOf } from './ext';
-import { Build, bl, bx, cy, type Pc, PI, place, py, rng, rotXZ, type XZ } from './lib';
+import { Build, bl, bx, conFlora, cy, type Pc, PI, place, py, rng, rotXZ, type XZ } from './lib';
 import { lugarDelMuro } from './muro';
 import type { ZoneSpec } from './zone';
 
@@ -840,6 +841,25 @@ function pulperia(c: string): Obra {
   };
 }
 
+/** Con vegetación del paquete de arte, los árboles y palmas de una obra van fusionados en <Build> (misma especie,
+ *  semilla y colisión que P.Tree / P.Palm, pero una sola malla para toda la ciudad). Sin ella siguen como utilería. */
+const ARBOL = { Tree: { k: 'tree', r: 0.35, h: 3 }, Palm: { k: 'palm', r: 0.25, h: 4 } } as const;
+const esArbol = (k: string): k is keyof typeof ARBOL => !!art.Flora && k in ARBOL;
+function arboles(o: Obra): Pc[] {
+  return (o.props ?? []).flatMap((q, i) => {
+    if (!esArbol(q.k)) return [];
+    const a = ARBOL[q.k];
+    return conFlora([cy(q.x, a.h / 2, q.z, a.r, a.h, 'wood', '#6b4a2a')], {
+      k: a.k,
+      p: [q.x, 0, q.z],
+      s: 1,
+      c: q.color,
+      seed: i + 3,
+      r: q.rot ?? 0,
+    });
+  });
+}
+
 /** La misma obra a escala k (para que quepa en un hueco más chico). */
 function aEscala(o: Obra, k: number): Obra {
   return {
@@ -923,6 +943,8 @@ export interface PlanCiudad {
   rotulos: { pos: V3; rot: number; text: string; bg: string; fg: string }[];
   /** cuántas casas del barrio salieron (para pruebas) */
   casas: number;
+  /** dónde quedaron las plantas de los jardines del barrio y un punto de la calle para verlas (capturas) */
+  jardines: { p: XZ; cam: XZ; k: string }[];
 }
 
 /** Huella de un edificio (rectángulo girado) muestreada cada ~2 m, con margen. */
@@ -1040,7 +1062,7 @@ export function planCiudad(d: Department, spec: ZoneSpec): PlanCiudad | null {
       use: [u.x + ux, 0, u.z + uz],
       obra: q.obra,
     });
-    pcs.push(...place(q.obra.pcs, u.x, 0, u.z, u.rot));
+    pcs.push(...place(q.obra.pcs, u.x, 0, u.z, u.rot), ...place(arboles(q.obra), u.x, 0, u.z, u.rot));
   }
   sitios.sort((a, b) => pedidos.findIndex((p) => p.id === a.id) - pedidos.findIndex((p) => p.id === b.id));
 
@@ -1136,6 +1158,7 @@ export function planCiudad(d: Department, spec: ZoneSpec): PlanCiudad | null {
     maranasEn,
     rotulos: barrio.rotulos,
     casas: barrio.casas,
+    jardines: barrio.jardines,
   };
 }
 
@@ -1169,8 +1192,9 @@ function calles(
   muro: V3 | null,
   r: () => number,
   ciudad: string,
-): { rotulos: PlanCiudad['rotulos']; casas: number } {
+): { rotulos: PlanCiudad['rotulos']; casas: number; jardines: PlanCiudad['jardines'] } {
   const [cx, cz] = lay.c,
+    jardines: PlanCiudad['jardines'] = [],
     fino = detalleFino(),
     grande = ciudad === 'Tegucigalpa' || ciudad === 'San Pedro Sula' || ciudad === 'La Ceiba',
     rotulos: PlanCiudad['rotulos'] = [],
@@ -1316,6 +1340,7 @@ function calles(
                   )
                 : []),
               bx(sx * (ACERA + 0.2), 2.3, z + 0.02, 0.03, 0.6, 0.03, 'metal', '#5d5a55', { solid: false }),
+              ...jardinTapial(sx, z + 0.75, si),
             );
           z += 1.5;
           continue;
@@ -1369,12 +1394,55 @@ function calles(
           );
         }
         nCasas++;
-        z += w + (r() < 0.6 ? 0 : 0.6 + r() * 1.2);
+        const hueco = r() < 0.6 ? 0 : 0.6 + r() * 1.2;
+        if (hueco > 0.9) loc.push(...jardinHueco(sx, z + w + hueco / 2, hueco, si));
+        z += w + hueco;
       }
     }
+    for (const q of loc)
+      if (q.flora && q.flora.k !== 'seto') {
+        const [fx, , fz] = q.flora.p,
+          sx = Math.sign(fx);
+        jardines.push({ p: W(fx, fz), cam: W(fx - sx * 5.2, fz - 3.5), k: q.flora.k });
+      }
     pcs.push(...place(loc, cx, 0, cz, yaw));
   });
-  return { rotulos, casas: nCasas };
+  return { rotulos, casas: nCasas, jardines };
+}
+
+// --- jardines del barrio (solo con vegetación del paquete de arte; azar propio para no mover las casas). Coordenadas
+// locales de la calle: x = de lado (sx), z = a lo largo; el frente de los lotes está en x = sx · ACERA.
+const semilla = (sx: number, z: number, si: number) => rng(Math.round(z * 13.7 + sx * 7 + si * 1009) >>> 0);
+/** Una planta del jardín: solo se dibuja (una pieza escondida y sin colisión la lleva hasta <Build>). */
+const mata = (k: FloraKind, x: number, z: number, s: number, seed: number, rot = 0): Pc[] =>
+  conFlora([bx(x, 0.3, z, 0.3, 0.6, 0.3, 'leaf', '#4a8a40', { solid: false })], {
+    k,
+    p: [x, 0, z],
+    s,
+    seed,
+    r: rot,
+  });
+/** Detrás de un tramo de tapial: veranera que se derrama por encima de la pared o un izote que asoma. */
+function jardinTapial(sx: number, z: number, si: number): Pc[] {
+  if (!art.Flora) return [];
+  const g = semilla(sx, z, si),
+    t = g();
+  if (t < 0.34)
+    return mata('veranera', sx * (ACERA + 0.2), z, 0.85 + g() * 0.2, 1 + Math.floor(g() * 9), (-sx * PI) / 2);
+  if (t < 0.52) return mata('izote', sx * (ACERA + 1.2), z + (g() - 0.5) * 0.6, 1.05 + g() * 0.3, Math.floor(g() * 9));
+  return [];
+}
+/** Entre dos casas: seto podado a la orilla de la acera y detrás un izote o un tulipán en el patio. */
+function jardinHueco(sx: number, z: number, ancho: number, si: number): Pc[] {
+  if (!art.Flora) return [];
+  const g = semilla(sx, z, si + 50),
+    out = mata('seto', sx * (ACERA + 0.45), z, Math.min(1, (ancho - 0.1) / 1.2), Math.floor(g() * 9), PI / 2);
+  out.push(
+    ...(g() < 0.55
+      ? mata('izote', sx * (ACERA + 1.7), z, 0.95 + g() * 0.3, Math.floor(g() * 9))
+      : mata('tulipan', sx * (ACERA + 1.5), z, 0.8 + g() * 0.25, Math.floor(g() * 9))),
+  );
+  return out;
 }
 
 // ---------------------------------------------------------------------------------------------------------------
@@ -1385,7 +1453,7 @@ const PROPS = { Tree: P.Tree, Palm: P.Palm, Bench: P.Bench, Lamp: P.Lamp, Boat: 
 export function Ciudad({ d, spec }: { d: Department; spec: ZoneSpec }) {
   const plan = useMemo(() => planCiudad(d, spec), [d, spec]);
   useEffect(() => {
-    if (!plan || !location.hash.includes('test')) return;
+    if (!plan || !(location.hash.includes('test') || location.hash.includes('fotos'))) return;
     const w = window as Window & { __mcTest?: Record<string, unknown> };
     (w.__mcTest ??= {}).ciudad = {
       dept: d.id,
@@ -1406,6 +1474,7 @@ export function Ciudad({ d, spec }: { d: Department; spec: ZoneSpec }) {
       zapatosEn: plan.zapatosEn,
       maranasEn: plan.maranasEn,
       casas: plan.casas,
+      jardines: plan.jardines,
       comercios: plan.rotulos.length,
     };
     return () => {
@@ -1427,6 +1496,7 @@ export function Ciudad({ d, spec }: { d: Department; spec: ZoneSpec }) {
             return [s.pos[0] + rx, y, s.pos[2] + rz];
           };
         const nodes: ReactNode[] = (o.props ?? []).map((q, i) => {
+          if (esArbol(q.k)) return null;
           const C = PROPS[q.k];
           return <C key={i} pos={L(q.x, q.z)} rot={s.rot + (q.rot ?? 0)} color={q.color} seed={i + 3} />;
         });
