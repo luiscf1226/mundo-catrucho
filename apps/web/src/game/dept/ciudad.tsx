@@ -6,6 +6,19 @@ import { catDe } from '../../core/data';
 import { useGame } from '../../core/store';
 import type { Department, V3 } from '../../core/types';
 import { Interactable, type MatKind, P, Plate } from '../kit';
+import {
+  antena,
+  arco,
+  campanario,
+  casaHN,
+  columna,
+  detalleFino,
+  PASTEL,
+  type Techo,
+  tanque as tanqueHN,
+  techoLamina,
+  ventana,
+} from './casas';
 import { CIUDADES, type SitioReal, type TipoSitio } from './ciudad-datos';
 import { type Layout, layoutOf } from './ext';
 import { Build, bl, bx, cy, type Pc, PI, place, py, rng, rotXZ, type XZ } from './lib';
@@ -139,7 +152,7 @@ interface Poste {
   b: V3;
   t: V3;
 }
-function poste(out: Pc[], x: number, z: number, yaw: number, seed: number): Poste {
+function poste(out: Pc[], x: number, z: number, yaw: number, seed: number, lado = 1): Poste {
   const r = rng(seed * 13 + 7),
     L = (lx: number, ly: number, lz = 0): V3 => {
       const [rx, rz] = rotXZ(lx, lz, yaw);
@@ -162,6 +175,20 @@ function poste(out: Pc[], x: number, z: number, yaw: number, seed: number): Post
       0,
       z,
       yaw,
+    ),
+  );
+  // luminaria: brazo sobre la calle y lámpara que se enciende de noche
+  out.push(
+    ...place(
+      [
+        bx(-0.75, 6.2, 0, 1.5, 0.07, 0.07, 'metal', K.gris, { e: [0, 0, -0.12], solid: false }),
+        bx(-1.5, 6.05, 0, 0.55, 0.12, 0.26, 'metal', K.gris, { solid: false }),
+        bx(-1.5, 5.98, 0, 0.42, 0.03, 0.18, 'plastic', '#fff1cf', { solid: false, em: 2.4 }),
+      ],
+      x,
+      0,
+      z,
+      yaw + (lado < 0 ? PI : 0),
     ),
   );
   if (r() < 0.45)
@@ -213,10 +240,7 @@ interface Obra {
 }
 const ventanas = (w: number, y: number, z: number, n: number, c = K.oscuro, h = 1.3, ww = 1): Pc[] =>
   Array.from({ length: n }, (_, i) => bx(((i + 0.5) / n - 0.5) * w, y, z, ww, h, 0.08, 'glass', c, { solid: false }));
-const tanque = (x: number, y: number, z: number): Pc[] => [
-  cy(x, y + 0.6, z, 0.55, 1.2, 'plastic', K.tanque, { n: 12, solid: false }),
-  cy(x, y + 1.25, z, 0.3, 0.1, 'plastic', K.tanque, { n: 10, solid: false }),
-];
+const tanque = (x: number, y: number, z: number): Pc[] => tanqueHN(x, y, z);
 /** Varillas de construcción saliendo del techo: «el segundo piso viene». */
 const varillas = (x: number, y: number, z: number, w: number): Pc[] =>
   [-1, -0.33, 0.33, 1].flatMap((k) => [
@@ -225,38 +249,76 @@ const varillas = (x: number, y: number, z: number, w: number): Pc[] =>
   ]);
 
 function iglesia(c: string): Obra {
-  const p: Pc[] = [
-    bx(0, 0.2, 0, 11, 0.4, 15, 'stone', K.piso),
-    bx(0, 3.6, -1, 8, 6.8, 12, 'stucco', c),
-    bx(0, 4.6, 6.1, 10.6, 8.8, 1.0, 'stucco', c),
-    py(0, 9.0, 6.1, 5.4, 2.2, 1.0, 'stucco', c),
-    bx(-4.4, 6.6, 6.0, 2.6, 12.8, 2.6, 'stucco', c),
-    bx(4.4, 6.6, 6.0, 2.6, 12.8, 2.6, 'stucco', c),
-    py(-4.4, 13.0, 6.0, 2.8, 2.4, 2.8, 'roof', K.teja),
-    py(4.4, 13.0, 6.0, 2.8, 2.4, 2.8, 'roof', K.teja),
-    bl(0, 7.2, -3.5, 2.7, 'roof', K.teja, { s: [1, 0.8, 1], n: 12 }),
-    bx(0, 7.1, -1, 8.4, 0.4, 12.4, 'roof', K.teja, { solid: false }),
-    // puerta, ventanas de campanario, campanas, cruz y reloj
-    bx(0, 1.9, 6.65, 2.4, 3.4, 0.12, 'wood', K.madera, { solid: false }),
-    bx(0, 3.6, 6.65, 2.6, 0.3, 0.16, 'stucco', K.amarillo, { solid: false }),
-    bx(-4.4, 10.2, 7.32, 1.0, 1.6, 0.06, 'plastic', K.oscuro, { solid: false }),
-    bx(4.4, 10.2, 7.32, 1.0, 1.6, 0.06, 'plastic', K.oscuro, { solid: false }),
-    // cornisas y pilastras de color, y las agujas del reloj
-    bx(0, 8.95, 6.7, 10.8, 0.35, 0.3, 'stucco', '#e0b45a', { solid: false }),
-    bx(0, 5.3, 6.68, 10.8, 0.3, 0.26, 'stucco', '#e0b45a', { solid: false }),
-    bx(-4.4, 8.6, 7.36, 2.8, 0.3, 0.2, 'stucco', '#e0b45a', { solid: false }),
-    bx(4.4, 8.6, 7.36, 2.8, 0.3, 0.2, 'stucco', '#e0b45a', { solid: false }),
-    bx(-2.2, 4.6, 6.66, 0.4, 8.6, 0.2, 'stucco', '#e0b45a', { solid: false }),
-    bx(2.2, 4.6, 6.66, 0.4, 8.6, 0.2, 'stucco', '#e0b45a', { solid: false }),
-    bx(0, 7.75, 6.7, 0.07, 0.6, 0.04, 'plastic', K.oscuro, { solid: false }),
-    bx(0.2, 7.6, 6.7, 0.45, 0.07, 0.04, 'plastic', K.oscuro, { solid: false }),
-    bl(-4.4, 10.0, 7.2, 0.35, 'gold', '#d9a531', { n: 8 }),
-    bl(4.4, 10.0, 7.2, 0.35, 'gold', '#d9a531', { n: 8 }),
-    cy(0, 7.6, 6.62, 0.8, 0.1, 'plastic', '#fffbe9', { e: [PI / 2, 0, 0], n: 16, solid: false }),
-    bx(0, 11.9, 6.1, 0.16, 1.3, 0.16, 'metal', K.oscuro, { solid: false }),
-    bx(0, 12.1, 6.1, 0.7, 0.14, 0.16, 'metal', K.oscuro, { solid: false }),
-    ...ventanas(9, 4.2, 6.62, 2, K.oscuro, 1.6, 0.8).map((q) => ({ ...q, p: [q.p[0] * 0.75, q.p[1], q.p[2]] as V3 })),
-  ];
+  const fino = detalleFino(),
+    oro = '#e0b45a',
+    p: Pc[] = [
+      bx(0, 0.2, 0, 11, 0.4, 15, 'stone', K.piso),
+      bx(0, 3.6, -1, 8, 6.8, 12, 'stucco', c),
+      bx(0, 4.6, 6.1, 10.6, 8.8, 1.0, 'stucco', c),
+      py(0, 9.0, 6.1, 5.4, 2.2, 1.0, 'stucco', c),
+      bx(-4.4, 6.6, 6.0, 2.6, 12.8, 2.6, 'stucco', c),
+      bx(4.4, 6.6, 6.0, 2.6, 12.8, 2.6, 'stucco', c),
+      // cúpula del crucero sobre su tambor, con linterna
+      cy(0, 7.35, -3.5, 2.75, 0.5, 'stucco', c, { n: 20, solid: false }),
+      bl(0, 7.6, -3.5, 2.6, 'roof', K.teja, { s: [1, 0.8, 1], n: 16 }),
+      cy(0, 7.62, -3.5, 2.85, 0.16, 'stucco', oro, { n: 20, solid: false }),
+      cy(0, 10.0, -3.5, 0.5, 0.9, 'stucco', c, { n: 10, solid: false }),
+      bl(0, 10.45, -3.5, 0.55, 'stucco', c, { s: [1, 0.8, 1], n: 10 }),
+      bx(0, 11.25, -3.5, 0.1, 0.9, 0.1, 'metal', K.oscuro, { solid: false }),
+      bx(0, 11.4, -3.5, 0.5, 0.1, 0.1, 'metal', K.oscuro, { solid: false }),
+      // techo de teja de la nave con su cumbrera
+      bx(0, 7.1, -1, 8.4, 0.4, 12.4, 'roof', K.teja, { solid: false }),
+      bx(0, 7.0, -1, 8.6, 0.25, 12.6, 'stucco', oro, { solid: false }),
+      // puerta de madera bajo arco, campanas, cruz y reloj
+      bx(0, 1.9, 6.65, 2.4, 3.4, 0.12, 'wood', K.madera, { solid: false }),
+      cy(0, 3.6, 6.65, 1.2, 0.12, 'wood', K.madera, { e: [PI / 2, 0, 0], n: 16, solid: false }),
+      cy(0, 3.6, 6.62, 1.45, 0.1, 'stucco', oro, { e: [PI / 2, 0, 0], n: 16, solid: false }),
+      bx(0, 2.4, 6.72, 0.06, 3.4, 0.06, 'wood', '#3a2716', { solid: false }),
+      // cornisas, pilastras y el frontón con su moldura
+      bx(0, 8.95, 6.7, 10.8, 0.35, 0.3, 'stucco', oro, { solid: false }),
+      bx(0, 9.15, 6.75, 11.2, 0.12, 0.4, 'stucco', oro, { solid: false }),
+      bx(0, 5.3, 6.68, 10.8, 0.3, 0.26, 'stucco', oro, { solid: false }),
+      bx(0, 5.48, 6.72, 11.0, 0.1, 0.34, 'stucco', oro, { solid: false }),
+      bx(0, 0.55, 6.68, 10.8, 0.3, 0.2, 'stone', '#a9a294', { solid: false }),
+      bx(-1.35, 10.1, 6.66, 3.5, 0.22, 0.24, 'stucco', oro, { e: [0, 0, 0.684], solid: false }),
+      bx(1.35, 10.1, 6.66, 3.5, 0.22, 0.24, 'stucco', oro, { e: [0, 0, -0.684], solid: false }),
+      bx(-2.2, 4.6, 6.66, 0.4, 8.6, 0.2, 'stucco', oro, { solid: false }),
+      bx(2.2, 4.6, 6.66, 0.4, 8.6, 0.2, 'stucco', oro, { solid: false }),
+      bx(0, 7.75, 6.7, 0.07, 0.6, 0.04, 'plastic', K.oscuro, { solid: false }),
+      bx(0.2, 7.6, 6.7, 0.45, 0.07, 0.04, 'plastic', K.oscuro, { solid: false }),
+      bl(-4.4, 10.0, 7.2, 0.35, 'gold', '#d9a531', { n: 8 }),
+      bl(4.4, 10.0, 7.2, 0.35, 'gold', '#d9a531', { n: 8 }),
+      cy(0, 7.6, 6.62, 0.8, 0.1, 'plastic', '#fffbe9', { e: [PI / 2, 0, 0], n: 16, solid: false }),
+      cy(0, 7.6, 6.6, 0.95, 0.08, 'stucco', oro, { e: [PI / 2, 0, 0], n: 16, solid: false }),
+      bx(0, 11.9, 6.1, 0.16, 1.3, 0.16, 'metal', K.oscuro, { solid: false }),
+      bx(0, 12.1, 6.1, 0.7, 0.14, 0.16, 'metal', K.oscuro, { solid: false }),
+      // columnas pareadas a los lados de la puerta, en dos cuerpos
+      ...[-1.55, 1.55].flatMap((x) => [
+        ...columna(x, 6.85, 0.7, 5.2, 0.2, c, oro),
+        ...columna(x, 6.82, 5.55, 8.8, 0.16, c, oro),
+      ]),
+      // ventanas en arco de la fachada (encendidas de noche) y nichos del segundo cuerpo
+      ...[-3.35, 3.35].flatMap((x) => arco(x, 3.6, 6.6, 0.95, 1.5, oro, '#2b2a2f', 0.9)),
+      ...[-3.35, 3.35].flatMap((x) => [
+        ...arco(x, 6.9, 6.6, 0.8, 1.0, oro, '#5b4a3a'),
+        cy(x, 6.75, 6.75, 0.14, 0.9, 'stucco', '#f1ece0', { n: 8, solid: false }),
+        bl(x, 7.3, 6.75, 0.13, 'stucco', '#f1ece0', { n: 8 }),
+      ]),
+      // remates (pináculos) en las esquinas del frontón
+      ...[-2.8, 2.8].flatMap((x) => [
+        cy(x, 9.55, 6.3, 0.12, 0.6, 'stucco', oro, { n: 6, solid: false }),
+        bl(x, 9.95, 6.3, 0.17, 'stucco', oro, { n: 8 }),
+      ]),
+      // campanarios: cornisas, arcos en las cuatro caras y cúpula
+      ...campanario(-4.4, 6.0, 2.6, 13.0, c, { cap: oro, fino, desde: 8.5 }),
+      ...campanario(4.4, 6.0, 2.6, 13.0, c, { cap: oro, fino, desde: 8.5 }),
+    ];
+  // la nave: contrafuertes y ventanas altas en arco a los dos lados
+  for (const sx of [-1, 1]) {
+    for (const z of [-6.2, -2.6, 1.0, 4.2]) p.push(bx(sx * 4.15, 2.9, z, 0.3, 5.8, 0.7, 'stucco', c, { solid: false }));
+    for (const z of [-4.4, -0.8, 2.6])
+      p.push(...place(arco(0, 4.4, 0, 0.8, 1.4, oro, '#2b2a2f', 0.9), sx * 4.0, 0, z, (sx * PI) / 2));
+  }
   return {
     pcs: p,
     w: 11,
@@ -425,16 +487,12 @@ function mercado(): Obra {
   const p: Pc[] = [bx(0, 0.1, 0, 14, 0.2, 9, 'concrete', '#9e9a91')];
   for (const x of [-6.6, -2.2, 2.2, 6.6])
     for (const z of [-4, 4]) p.push(bx(x, 2.1, z, 0.22, 4.2, 0.22, 'metal', K.oxido));
-  // techo de láminas de zinc, unas nuevas y otras oxidadas
-  for (let i = 0; i < 8; i++) {
-    const x = -6.3 + i * 1.8;
-    p.push(
-      bx(x, 4.45, 0, 1.85, 0.08, 10, 'metal', i % 3 === 1 ? K.oxido : K.zinc, {
-        e: [0, 0, (i % 2 ? 1 : -1) * 0.03],
-        solid: false,
-      }),
-    );
-  }
+  // techo de láminas de zinc onduladas, unas nuevas y otras oxidadas, con su canaleta
+  p.push(
+    ...techoLamina(13.4, 8.2, 4.1, '#9e9a91', { fino: detalleFino(), seed: 9 }).filter(
+      (q) => q.m !== 'stucco' && q.m !== 'concrete',
+    ),
+  );
   // puestos con fruta, verdura y sacos
   const FR = ['#ff9f1c', '#e63946', '#ffd23f', '#3f9b4b', '#8e5a2b'];
   for (let i = 0; i < 4; i++) {
@@ -741,10 +799,16 @@ function salinera(): Obra {
 function pulperia(c: string): Obra {
   const p: Pc[] = [
     bx(0, 1.6, 0, 5.6, 3.2, 4.6, 'stucco', c),
-    bx(0, 3.25, 0, 5.8, 0.1, 4.8, 'concrete', K.concreto, { solid: false }),
+    ...techoLamina(5.6, 4.6, 3.2, c, { fino: detalleFino(), seed: 5 }),
+    bx(0, 0.4, 0, 5.66, 0.8, 4.66, 'stucco', '#8f6a5a', { solid: false }),
     bx(0, 0.1, 2.9, 5.6, 0.2, 1.2, 'concrete', K.concreto),
+    // marco de la puerta, ventana lateral con reja y el medidor de luz
+    bx(1.6, 2.35, 2.36, 1.3, 0.12, 0.1, 'concrete', '#e9e3d6', { solid: false }),
+    ...place(ventana(0, 1.7, 0, 1.0, 1.0, { reja: K.oscuro, luz: true }), 2.8, 0, -0.6, PI / 2),
+    bx(2.75, 1.9, 1.6, 0.3, 0.4, 0.2, 'metal', '#c3c7cb', { solid: false }),
+    cy(2.75, 1.9, 1.72, 0.08, 0.05, 'glass', K.vidrio, { e: [PI / 2, 0, 0], n: 10, solid: false }),
     // ventana con reja (por ahí se despacha) y la puerta
-    bx(-1.1, 1.65, 2.33, 2.4, 1.3, 0.08, 'plastic', K.oscuro, { solid: false }),
+    bx(-1.1, 1.65, 2.33, 2.4, 1.3, 0.08, 'plastic', '#3a3027', { solid: false, em: 1.2 }),
     bx(-1.1, 0.95, 2.45, 2.6, 0.12, 0.35, 'wood', K.madera, { solid: false }),
     ...[-2.2, -1.85, -1.5, -1.15, -0.8, -0.45, -0.1].map((x) =>
       bx(x, 1.65, 2.42, 0.05, 1.4, 0.05, 'metal', K.oscuro, { solid: false }),
@@ -758,8 +822,14 @@ function pulperia(c: string): Obra {
     bx(2.2, 0.66, 3.0, 0.7, 0.3, 0.5, 'plastic', K.amarillo, { solid: false }),
     bx(-2.3, 0.45, 3.1, 0.5, 0.08, 0.5, 'plastic', K.blanco, { solid: false }),
     bx(-2.3, 0.75, 2.88, 0.5, 0.6, 0.06, 'plastic', K.blanco, { solid: false }),
-    ...tanque(1.6, 3.3, -1.2),
-    ...varillas(-1.2, 3.3, -0.6, 3.6),
+    ...tanqueHN(1.4, 3.9, -1.2),
+    ...[-1, 1].flatMap((sx) =>
+      [-1, 1].map((sz) =>
+        bx(1.4 + sx * 0.45, 3.65, -1.2 + sz * 0.45, 0.05, 0.6, 0.05, 'metal', K.oxido, { solid: false }),
+      ),
+    ),
+    bx(1.4, 3.9, -1.2, 1.2, 0.06, 1.2, 'metal', K.oxido, { solid: false }),
+    ...antena(-1.8, 3.5, -1.4, true, 0.6),
   ];
   return {
     pcs: p,
@@ -849,6 +919,10 @@ export interface PlanCiudad {
   /** dónde cuelgan los zapatos y dónde están las marañas (para pruebas y capturas) */
   zapatosEn: V3[];
   maranasEn: V3[];
+  /** rótulos pintados de los comercios del barrio */
+  rotulos: { pos: V3; rot: number; text: string; bg: string; fg: string }[];
+  /** cuántas casas del barrio salieron (para pruebas) */
+  casas: number;
 }
 
 /** Huella de un edificio (rectángulo girado) muestreada cada ~2 m, con margen. */
@@ -970,6 +1044,9 @@ export function planCiudad(d: Department, spec: ZoneSpec): PlanCiudad | null {
   }
   sitios.sort((a, b) => pedidos.findIndex((p) => p.id === a.id) - pedidos.findIndex((p) => p.id === b.id));
 
+  // calles: asfalto, cunetas, bordillo pintado, aceras, túmulos y casas del barrio a los dos lados
+  const barrio = calles(pcs, lay, sitios, muro?.pos ?? null, r, datos.ciudad);
+
   // tendido eléctrico: una fila de postes a un lado de cada camino, amarrada alrededor de la plaza
   const libreDePoste = (x: number, z: number) =>
     sitios.every((s) => !dentroDe([x, z], s, 0.8)) &&
@@ -995,7 +1072,7 @@ export function planCiudad(d: Department, spec: ZoneSpec): PlanCiudad | null {
       const x = cx + ux * t + uz * 2.4 * side,
         z = cz + uz * t - ux * 2.4 * side;
       if (!libreDePoste(x, z)) break;
-      fila.push(poste(pcs, x, z, yaw, seed++));
+      fila.push(poste(pcs, x, z, yaw, seed++, side));
     }
     for (let i = 0; i < fila.length - 1; i++) {
       tendido(pcs, fila[i], fila[i + 1], seed++, i % 2);
@@ -1057,7 +1134,225 @@ export function planCiudad(d: Department, spec: ZoneSpec): PlanCiudad | null {
     maranas: maranasEn.length,
     zapatosEn,
     maranasEn,
+    rotulos: barrio.rotulos,
+    casas: barrio.casas,
   };
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Calles del barrio
+
+/** ancho de media calzada, fin del bordillo y fin de la acera, medidos desde el centro del camino */
+const CALZ = 2.0,
+  BORD = 2.16,
+  ACERA = 3.36;
+const COMERCIOS: [string, string, string][] = [
+  ['Comedor Doña Tere', '#c62828', '#fff8e1'],
+  ['Ferretería El Martillo', '#1d4e89', '#ffffff'],
+  ['Barbería El Estilo', '#ffffff', '#1d3557'],
+  ['Llantera El Gordo', '#ffd23f', '#1b1b1b'],
+  ['Tortillería Doña Mari', '#2e7d32', '#ffffff'],
+  ['Farmacia Popular', '#ffffff', '#2e7d32'],
+  ['Repuestos El Catracho', '#263238', '#ffd23f'],
+  ['Baleadas La Bendición', '#ff8f00', '#ffffff'],
+  ['Panadería San José', '#f6e3c3', '#6d3b1f'],
+  ['Taller El Primo', '#455a64', '#ffffff'],
+  ['Mini Súper La Económica', '#d32f2f', '#ffffff'],
+  ['Cyber y Copias', '#0277bd', '#ffffff'],
+];
+const CORDON = { amarillo: '#e2b83a', blanco: '#e9e6dd', rojo: '#c0392b', gris: '#b9b4a8' };
+
+function calles(
+  pcs: Pc[],
+  lay: Layout,
+  sitios: SitioPuesto[],
+  muro: V3 | null,
+  r: () => number,
+  ciudad: string,
+): { rotulos: PlanCiudad['rotulos']; casas: number } {
+  const [cx, cz] = lay.c,
+    fino = detalleFino(),
+    grande = ciudad === 'Tegucigalpa' || ciudad === 'San Pedro Sula' || ciudad === 'La Ceiba',
+    rotulos: PlanCiudad['rotulos'] = [],
+    hechas: { pos: V3; rot: number; obra: Obra }[] = [],
+    caminos = lay.st.map((s) => [lay.c, s.pos] as [XZ, XZ]),
+    angs = lay.st.map((s) => s.ang);
+  let nCasas = 0,
+    nCom = Math.floor(r() * COMERCIOS.length);
+  const libreCasa = (pts: XZ[]) =>
+    pts.every(
+      ([x, z]) =>
+        x > lay.main.minX + 1 &&
+        x < lay.main.maxX - 1 &&
+        z > lay.main.minZ + 1 &&
+        z < lay.main.maxZ - 1 &&
+        Math.hypot(x - cx, z - cz) > 11 &&
+        lay.st.every((s) => Math.hypot(x - s.pos[0], z - s.pos[1]) > 16) &&
+        caminos.every((cm) => distSeg(x, z, cm[0], cm[1]) > ACERA - 0.05) &&
+        (!muro || Math.hypot(x - muro[0], z - muro[2]) > 6) &&
+        sitios.every((s) => !dentroDe([x, z], s, 1.2)) &&
+        hechas.every((s) => !dentroDe([x, z], s, 0.05)),
+    );
+  /** un tramo de acera o bordillo solo si no se mete en un sitio ni en el muro */
+  const tramoLibre = (x: number, z: number) =>
+    sitios.every((s) => !dentroDe([x, z], s, 0.3)) && (!muro || Math.hypot(x - muro[0], z - muro[2]) > 3);
+  lay.st.forEach((s, si) => {
+    const dx = s.pos[0] - cx,
+      dz = s.pos[1] - cz,
+      len = Math.hypot(dx, dz),
+      ux = dx / len,
+      uz = dz / len,
+      yaw = Math.atan2(ux, uz),
+      r0 = 7.4,
+      r1 = len - 13.3,
+      // dónde arranca la acera de cada lado: lejos de la calle vecina
+      gap = (k: number) => {
+        const o = angs[si + k];
+        return o === undefined ? 9 : Math.max(9, (ACERA + 0.3) / Math.sin(Math.abs(o - s.ang) / 2));
+      },
+      W = (lx: number, lz: number): XZ => {
+        const [rx, rz] = rotXZ(lx, lz, yaw);
+        return [cx + rx, cz + rz];
+      },
+      loc: Pc[] = [];
+    if (r1 < r0 + 4) return;
+    const L = r1 - r0,
+      mid = (r0 + r1) / 2;
+    loc.push(
+      bx(0, 0.035, mid, 2 * CALZ, 0.07, L, 'asphalt', '#56585c', { solid: false }),
+      // cunetas: la orilla de la calzada, más oscura y gastada
+      bx(-CALZ + 0.17, 0.073, mid, 0.34, 0.012, L, 'concrete', '#77736b', { solid: false }),
+      bx(CALZ - 0.17, 0.073, mid, 0.34, 0.012, L, 'concrete', '#77736b', { solid: false }),
+    );
+    // línea del centro, discontinua, y paso de cebra al salir de la plaza
+    for (let z = r0 + 4; z < r1 - 1; z += 4)
+      loc.push(bx(0, 0.076, z, 0.12, 0.012, 1.8, 'plastic', '#e2c044', { solid: false }));
+    for (let x = -CALZ + 0.4; x < CALZ - 0.2; x += 0.6)
+      loc.push(bx(x, 0.076, r0 + 1.8, 0.36, 0.012, 1.8, 'plastic', '#ece9e0', { solid: false }));
+    // túmulos (pintados de amarillo y negro)
+    for (const t of [0.42, 0.78]) {
+      const z = r0 + L * t;
+      if (z > r1 - 3) continue;
+      for (let k = 0; k < 6; k++)
+        loc.push(
+          cy(
+            -CALZ + (2 * CALZ * (k + 0.5)) / 6,
+            -0.33,
+            z,
+            0.5,
+            (2 * CALZ) / 6,
+            'asphalt',
+            k % 2 ? '#2a2a2c' : '#d9b23a',
+            {
+              e: [0, 0, PI / 2],
+              n: 14,
+              solid: false,
+            },
+          ),
+        );
+    }
+    // bordillo y acera por tramos de 1.5 m (se cortan donde hay un sitio o el muro)
+    for (const sx of [-1, 1]) {
+      const z0 = gap(sx < 0 ? -1 : 1),
+        pinta = (si + (sx > 0 ? 1 : 0)) % 3;
+      for (let z = z0; z < r1 - 0.5; z += 1.5) {
+        const [wx, wz] = W(sx * ((BORD + ACERA) / 2), z + 0.75);
+        if (!tramoLibre(wx, wz)) continue;
+        const k = Math.round((z - z0) / 1.5),
+          c =
+            z < z0 + 6
+              ? k % 2
+                ? CORDON.rojo
+                : CORDON.blanco
+              : pinta === 0
+                ? CORDON.amarillo
+                : pinta === 1
+                  ? CORDON.gris
+                  : k % 8 < 4
+                    ? CORDON.amarillo
+                    : CORDON.gris;
+        loc.push(
+          bx(sx * (CALZ + 0.08), 0.11, z + 0.75, 0.16, 0.22, 1.48, 'concrete', c, { solid: false }),
+          bx(sx * ((BORD + ACERA) / 2), 0.09, z + 0.75, ACERA - BORD, 0.18, 1.5, 'concrete', '#c7c1b3'),
+        );
+      }
+      // casas del barrio, pared con pared, con el frente a la acera; donde no cabe una casa, tapial de bloque
+      let z = z0 + 1.5,
+        tapial = 0;
+      while (z < r1 - 2) {
+        const w = 5.4 + r() * 2.6,
+          zc = z + w / 2,
+          rot = yaw - (sx * PI) / 2;
+        if (zc + w / 2 > r1 - 1) break;
+        let ok = 0,
+          hx = 0,
+          hz = 0;
+        for (const d of [6 + r() * 2.5, 5, 4.2]) {
+          [hx, hz] = W(sx * (ACERA + 0.12 + d / 2), zc);
+          if (libreCasa(huella(hx, hz, rot, w, d, 0.1))) {
+            ok = d;
+            break;
+          }
+        }
+        if (!ok) {
+          // tapial: bloque repellado con alambre de púas arriba; cada tanto un portón abierto para pasar
+          const [tx, tz] = W(sx * (ACERA + 0.2), z + 0.75),
+            [bx_, bz] = W(sx * (ACERA + 0.2), z + 0.75 + 0.8);
+          if (libreCasa([[tx, tz]]) && libreCasa([[bx_, bz]]) && tapial++ % 5 !== 4)
+            loc.push(
+              bx(sx * (ACERA + 0.2), 1.0, z + 0.75, 0.18, 2.0, 1.5, 'stucco', tapial % 9 < 5 ? '#d8d2c4' : '#b9c7c0'),
+              bx(sx * (ACERA + 0.2), 2.04, z + 0.75, 0.26, 0.08, 1.5, 'concrete', '#bdb8ac', { solid: false }),
+              ...(fino
+                ? [0.15, 0.3].map((k) =>
+                    bx(sx * (ACERA + 0.2), 2.08 + k, z + 0.75, 0.015, 0.015, 1.5, 'metal', '#5d5a55', { solid: false }),
+                  )
+                : []),
+              bx(sx * (ACERA + 0.2), 2.3, z + 0.02, 0.03, 0.6, 0.03, 'metal', '#5d5a55', { solid: false }),
+            );
+          z += 1.5;
+          continue;
+        }
+        const d = ok,
+          o: Obra = { pcs: [], w, d, sign: { y: 0, z: 0, h: 0, bg: '' }, luz: [0, 0, 0] },
+          t = r(),
+          techo: Techo = grande
+            ? t < 0.4
+              ? 'losa'
+              : t < 0.75
+                ? 'lamina'
+                : 'teja'
+            : t < 0.5
+              ? 'teja'
+              : t < 0.8
+                ? 'lamina'
+                : 'losa',
+          dos = techo === 'losa' && grande && r() < 0.35,
+          com = r() < 0.3 ? COMERCIOS[nCom++ % COMERCIOS.length] : null,
+          hh = dos ? 5.6 : com ? 3.4 + r() * 0.3 : 2.9 + r() * 0.5,
+          casa = casaHN({
+            w,
+            d,
+            h: hh,
+            col: PASTEL[Math.floor(r() * PASTEL.length)],
+            techo,
+            adobe: techo === 'teja' && r() < 0.5,
+            comercio: com?.[1],
+            seed: nCasas * 7 + si * 131 + 3,
+            fino,
+          });
+        pcs.push(...place(casa, hx, 0, hz, rot));
+        hechas.push({ pos: [hx, 0, hz], rot, obra: o });
+        if (com) {
+          const [lx, lz] = rotXZ(0, d / 2 + 0.07, rot);
+          rotulos.push({ pos: [hx + lx, hh - 0.36, hz + lz], rot, text: com[0], bg: com[1], fg: com[2] });
+        }
+        nCasas++;
+        z += w + (r() < 0.6 ? 0 : 0.6 + r() * 1.2);
+      }
+    }
+    pcs.push(...place(loc, cx, 0, cz, yaw));
+  });
+  return { rotulos, casas: nCasas };
 }
 
 // ---------------------------------------------------------------------------------------------------------------
@@ -1088,6 +1383,8 @@ export function Ciudad({ d, spec }: { d: Department; spec: ZoneSpec }) {
       maranas: plan.maranas,
       zapatosEn: plan.zapatosEn,
       maranasEn: plan.maranasEn,
+      casas: plan.casas,
+      comercios: plan.rotulos.length,
     };
     return () => {
       if (w.__mcTest) delete w.__mcTest.ciudad;
@@ -1098,6 +1395,9 @@ export function Ciudad({ d, spec }: { d: Department; spec: ZoneSpec }) {
   return (
     <>
       <Build pieces={plan.pcs} />
+      {plan.rotulos.map((q, i) => (
+        <Plate key={`r${i}`} pos={q.pos} rot={q.rot} h={0.34} text={q.text} bg={q.bg} fg={q.fg} />
+      ))}
       {plan.sitios.map((s) => {
         const o = s.obra,
           L = (lx: number, lz: number, y = 0): V3 => {

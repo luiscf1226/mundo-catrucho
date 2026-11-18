@@ -29,14 +29,22 @@ const VISTAS = [
     [58, 124, 0.6],
     { pos: [47, 6, 108], target: [64.6, 3, 134], fov: 55 },
   ],
-  ['tegus-calle', 'franciscomorazan', 15.5, [-48, 100, 0.6], { pos: [-38, 3.2, 92], target: [-70, 3, 128], fov: 60 }],
+  ['tegus-calle', 'franciscomorazan', 15.5, [-3, 78, 0], { pos: [-0.6, 3.6, 71], target: [-8.5, 2.2, 101], fov: 60 }],
   ['tegus-noche', 'franciscomorazan', 21, [-36, 66, 1.6], { pos: [-20, 4.5, 76], target: [-46, 5, 63], fov: 55 }],
+  [
+    'tegus-calle-noche',
+    'franciscomorazan',
+    20.5,
+    [-3, 78, 0],
+    { pos: [-0.6, 3.6, 71], target: [-8.5, 2.2, 101], fov: 60 },
+  ],
   ['sps-guamilito', 'cortes', 15.5, [55, 122, 0.7], { pos: [49, 6, 115], target: [63, 2.5, 132.5], fov: 55 }],
+  ['sps-calle', 'cortes', 15.5, [3, 78, 0], { pos: [0.6, 3.6, 71], target: [8.5, 2.2, 101], fov: 60 }],
   ['sps-museo', 'cortes', 15.5, [70, 110, 0.7], { pos: [62, 5, 100], target: [80, 3, 118], fov: 55 }],
   ['colon-fortaleza', 'colon', 15.5, [6, 20, Math.PI], { pos: [12, 7, 28], target: [0, 2.5, -8], fov: 55 }],
   ['santabarbara-iglesia', 'santabarbara', 15.5, [44, 114, 0.6], { pos: [40, 6, 106], target: [52, 5, 129], fov: 55 }],
   ['comayagua-catedral', 'comayagua', 15.5, [0, 10, Math.PI], { pos: [6, 6, 14], target: [0, 5, -11], fov: 60 }],
-  ['yoro-lluvia', 'yoro', 15.5, [-60, 100, 0.6], { pos: [-52, 4, 96], target: [-70, 3, 112], fov: 60 }],
+  ['yoro-lluvia', 'yoro', 15.5, [1, 80, 0], { pos: [1.6, 3.6, 70], target: [-0.5, 2.2, 100], fov: 60 }],
 ];
 const SOLO = process.env.MC_VISTAS?.split(',');
 const EXTRA = process.env.MC_HASH ? `,${process.env.MC_HASH}` : '';

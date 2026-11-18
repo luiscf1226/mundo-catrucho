@@ -2,6 +2,7 @@
 // y = 0) para colocarlas con place() / z.put(), salvo la vegetación (VEG), que ya va en coordenadas del mundo.
 
 import type { MatKind } from '../kit';
+import { arco, campanario, casaHN, edificioHN } from './casas';
 import { bl, bx, cy, type Pc, PI, py } from './lib';
 
 const WOOD = '#7a5230',
@@ -112,23 +113,12 @@ export const VEG: Record<VegKind, VegFn> = {
 };
 
 // --- construcciones
-/** Casa sencilla de pueblo con techo de teja a cuatro aguas. */
-export const casa = (w = 6, d = 5, h = 3, col = '#f7f1e3', roof = '#b5523b', zocalo = '#a5694f'): Pc[] => [
-  bx(0, h / 2, 0, w, h, d, 'stucco', col),
-  bx(0, 0.35, 0, w + 0.1, 0.7, d + 0.1, 'stucco', zocalo, { solid: false }),
-  py(0, h, 0, w + 1, 1.5, d + 1, 'roof', roof),
-  bx(0, 1.05, d / 2 + 0.03, 1.1, 2.1, 0.1, 'wood', '#6b3f22', { solid: false }),
-  bx(-w * 0.3, 1.75, d / 2 + 0.03, 0.9, 0.9, 0.1, 'glass', '#2b4a63', { solid: false }),
-  bx(w * 0.3, 1.75, d / 2 + 0.03, 0.9, 0.9, 0.1, 'glass', '#2b4a63', { solid: false }),
-];
-/** Edificio de ciudad con franjas de ventanas. */
-export const edificio = (w: number, h: number, d: number, col: string): Pc[] => [
-  bx(0, h / 2, 0, w, h, d, 'concrete', col),
-  ...Array.from({ length: Math.max(1, Math.floor((h - 1.5) / 3)) }, (_, i) =>
-    bx(0, 2.4 + i * 3, 0, w + 0.06, 1.1, d + 0.06, 'glass', '#2b4a63', { solid: false }),
-  ),
-  bx(0, h + 0.2, 0, w + 0.3, 0.4, d + 0.3, 'concrete', '#d9d9d9', { solid: false }),
-];
+/** Casa sencilla de pueblo: repello con zócalo, ventanas con reja y techo de teja de dos aguas (ver casas.ts). */
+export const casa = (w = 6, d = 5, h = 3, col = '#f7f1e3', roof = '#b5523b', zocalo = '#a5694f'): Pc[] =>
+  casaHN({ w, d, h, col, roof, zocalo, techo: 'teja', seed: Math.round(w * 7 + d * 13 + h * 3 + col.charCodeAt(2)) });
+/** Edificio de ciudad con pisos, ventanas, aires acondicionados y tanques en el techo. */
+export const edificio = (w: number, h: number, d: number, col: string): Pc[] =>
+  edificioHN(w, h, d, col, Math.round(w * 3 + h * 5 + d));
 /** Champa abierta con techo de paja (comedores, talleres). */
 export const champa = (w = 5, d = 4, roof = STRAW, h = 2.5): Pc[] => [
   ...[-1, 1].flatMap((sx) =>
@@ -183,11 +173,18 @@ export const pier = (len: number, w = 3.4, y = 0.6, deep = 3): Pc[] => [
     ),
   ).flat(),
 ];
-/** Garita redonda de fortaleza con cupulita. */
+/** Garita redonda de fortaleza con cupulita: ménsula abajo, cordón, aspilleras en cuatro lados y remate. */
 export const garita = (c = '#b9b1a0', roof = '#b5523b'): Pc[] => [
   cy(0, 1.2, 0, 1.15, 2.4, 'stone', c, { n: 8 }),
   bx(0, 1.45, 1.1, 0.5, 0.7, 0.2, 'stone', '#3a3a3a', { solid: false }),
   cy(0, 2.9, 0, 1.3, 1, 'roof', roof, { rt: 0.05, n: 8, solid: false }),
+  cy(0, 2.43, 0, 1.3, 0.16, 'stone', '#d2cbbb', { n: 8, solid: false }),
+  cy(0, 0.12, 0, 1.25, 0.24, 'stone', '#d2cbbb', { n: 8, solid: false }),
+  ...[PI / 2, PI, -PI / 2].map((a) =>
+    bx(Math.sin(a) * 1.1, 1.45, Math.cos(a) * 1.1, 0.16, 0.6, 0.16, 'stone', '#2b2925', { r: a, solid: false }),
+  ),
+  bl(0, 3.48, 0, 0.16, 'stone', '#d2cbbb', { n: 8 }),
+  cy(0, 3.68, 0, 0.04, 0.4, 'metal', '#2b2b2b', { n: 5, solid: false }),
 ];
 /** Almenas a lo largo de X sobre un muro de largo `len`. */
 export const merlons = (len: number, c: string, m: MatKind = 'stone', h = 0.7, t = 0.5): Pc[] =>
@@ -276,17 +273,19 @@ export const vaca = (c = '#f2efe6', spot = '#5a3d26'): Pc[] => [
   bx(-0.22, 1.48, 0.95, 0.07, 0.16, 0.07, 'plastic', '#e9e4d8', { solid: false }),
   bx(0.22, 1.48, 0.95, 0.07, 0.16, 0.07, 'plastic', '#e9e4d8', { solid: false }),
 ];
-/** Iglesia blanca de pueblo con dos torrecitas; fachada hacia +Z. */
+/** Iglesia blanca de pueblo con dos torrecitas; fachada hacia +Z. Cornisas, arcos del campanario, puerta en arco. */
 export const iglesia = (w = 7, h = 5, len = 11, c = '#ffffff', roof = '#b5523b'): Pc[] => [
   bx(0, h / 2, 0, w, h, len, 'stucco', c),
   py(0, h, 0, w + 0.6, 1.8, len + 0.6, 'roof', roof),
   bx(0, h / 2 + 0.9, len / 2 + 0.25, w * 0.5, h + 1.8, 0.5, 'stucco', c),
   ...[-1, 1].flatMap((s) => [
     bx(s * (w / 2 - 0.9), (h + 2.6) / 2, len / 2 - 0.2, 2, h + 2.6, 2, 'stucco', c),
-    py(s * (w / 2 - 0.9), h + 2.6, len / 2 - 0.2, 2.3, 1.5, 2.3, 'roof', roof),
-    bx(s * (w / 2 - 0.9), h + 1.5, len / 2 + 0.82, 0.7, 1.1, 0.08, 'stone', '#3a3a3a', { solid: false }),
+    py(s * (w / 2 - 0.9), h + 2.72, len / 2 - 0.2, 2.3, 1.5, 2.3, 'roof', roof),
+    ...campanario(s * (w / 2 - 0.9), len / 2 - 0.2, 2, h + 2.6, c, { desde: h + 0.4, sinCupula: true }),
   ]),
   bx(0, 1.3, len / 2 + 0.52, 1.5, 2.6, 0.1, 'wood', '#6b3f22', { solid: false }),
+  ...arco(0, 1.3, len / 2 + 0.5, 1.5, 2.6, '#e9d9a8', '#6b3f22'),
+  bx(0, h + 1.85, len / 2 + 0.55, w * 0.5 + 0.3, 0.2, 0.2, 'stucco', '#e9d9a8', { solid: false }),
   bx(0, h + 3.2, len / 2 + 0.25, 0.16, 1.2, 0.16, 'stone', '#e9e4d8', { solid: false }),
   bx(0, h + 3.4, len / 2 + 0.25, 0.7, 0.16, 0.16, 'stone', '#e9e4d8', { solid: false }),
 ];

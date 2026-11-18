@@ -40,6 +40,36 @@ export function fortaleza(d: Department): ZoneSpec {
     bx(-17, 1.6, -10, 3, 3.2, 23, 'stone', C),
     bx(17, 1.6, -10, 3, 3.2, 23, 'stone', C),
   );
+  // cordón de piedra bajo las almenas, talud en la base y troneras hacia el mar (sin tocar los colisionadores)
+  for (const [x, z, w, d] of [
+    [0, -23, 37, 3],
+    [-10.25, 3, 16.5, 3],
+    [10.25, 3, 16.5, 3],
+    [-17, -10, 3, 23],
+    [17, -10, 3, 23],
+  ])
+    Z.add(
+      bx(x, 2.95, z, w + 0.36, 0.26, d + 0.36, 'stone', C2, { solid: false }),
+      bx(x, 3.12, z, w + 0.2, 0.1, d + 0.2, 'stone', '#cfc8b8', { solid: false }),
+      bx(x, 0.35, z, w + 0.5, 0.7, d + 0.5, 'stone', '#958c7a', { solid: false }),
+      bx(x, 0.78, z, w + 0.3, 0.16, d + 0.3, 'stone', C2, { solid: false }),
+    );
+  for (const x of [-12, -6, 0, 6, 12])
+    Z.add(
+      bx(x, 2.2, -24.53, 0.9, 0.7, 0.08, 'stone', '#2b2925', { solid: false }),
+      bx(x, 2.62, -24.55, 1.2, 0.16, 0.12, 'stone', C2, { solid: false }),
+    );
+  // portada de la entrada: pilastras y arco de dovelas
+  for (const sx of [-1, 1]) Z.add(bx(sx * 2.35, 1.5, 4.6, 0.5, 3.0, 0.3, 'stone', C2, { solid: false }));
+  for (let i = 0; i <= 8; i++) {
+    const a = (i / 8) * PI;
+    Z.add(
+      bx(Math.cos(a) * 2.2, 2.2 + Math.sin(a) * 0.9, 4.62, 0.55, 0.32, 0.3, 'stone', i === 4 ? '#d8d0bd' : C2, {
+        e: [0, 0, a - PI / 2],
+        solid: false,
+      }),
+    );
+  }
   Z.add(
     place(merlons(37, C2), 0, 3.2, -24.25),
     place(merlons(15, C2), -10.6, 3.2, 4.25),
