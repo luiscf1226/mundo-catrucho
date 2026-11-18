@@ -28,6 +28,7 @@ import {
   alongPath,
   Build,
   bx,
+  conFlora,
   Field,
   type Layer,
   type Pc,
@@ -39,23 +40,7 @@ import {
   Terrain,
   type XZ,
 } from './lib';
-import { VEG, type VegKind } from './parts';
-
-/** especie del paquete de arte para cada vegetación de zona (las rocas siguen siendo piezas) */
-const FLORA_OF: Partial<Record<VegKind, FloraKind>> = {
-  tree: 'tree',
-  pine: 'pine',
-  palm: 'palm',
-  oilpalm: 'oilpalm',
-  bush: 'bush',
-  jungle: 'jungle',
-  giant: 'giant',
-  dry: 'dry',
-  reed: 'reed',
-  fern: 'fern',
-  banana: 'banana',
-  cafe: 'cafe',
-};
+import { FLORA_OF, floraSeed, VEG, type VegKind } from './parts';
 
 export interface Bio {
   grass: string;
@@ -300,7 +285,7 @@ export class ZB {
       // con vegetación del paquete de arte: las piezas quedan solo como colisión (mismos troncos sólidos)
       if (art.Flora && fk && pc.length) {
         for (const q of pc) q.hide = true;
-        pc[0].flora = { k: fk, p: [x, y, z], s, c, seed: Math.floor(Math.abs(x * 7.31 + z * 3.17) * 10) };
+        pc[0].flora = { k: fk, p: [x, y, z], s, c, seed: floraSeed(x, z) };
       }
       this.pcs.push(...pc);
     }
@@ -308,11 +293,7 @@ export class ZB {
   }
   /** piezas de una planta: con vegetación del paquete de arte se dibuja `item` y las piezas quedan solo como colisión */
   plant(pcs: Pc[], item: FloraItem) {
-    if (art.Flora && pcs.length) {
-      for (const q of pcs) q.hide = true;
-      pcs[0].flora = item;
-    }
-    this.pcs.push(...pcs);
+    this.pcs.push(...conFlora(pcs, item));
     return this;
   }
   /** parada de bus: aquí aparece el jugador. Deja el bus a su derecha y el rótulo de bienvenida al frente a la izquierda. */
@@ -516,10 +497,9 @@ function lomas(spec: ZoneSpec): HillDef[] {
   return out;
 }
 
-/** Vegetación y cerros del paquete de arte (una malla cada uno) y el zacate cerca de la cámara. */
+/** Cerros del paquete de arte (una malla) y el zacate cerca de la cámara. La vegetación la dibuja <Build>. */
 function Greenery({ spec }: { spec: ZoneSpec }) {
   const pcs = spec.pcs,
-    flora = useMemo(() => pcs.flatMap((q): FloraItem[] => (q.flora ? [q.flora] : [])), [pcs]),
     hills = useMemo(
       () =>
         art.Hills
@@ -534,7 +514,6 @@ function Greenery({ spec }: { spec: ZoneSpec }) {
     );
   return (
     <>
-      {art.Flora && flora.length > 0 && <art.Flora items={flora} />}
       {art.Hills && hills.length > 0 && <art.Hills hills={hills} />}
       {art.GroundCover && <art.GroundCover />}
     </>

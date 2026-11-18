@@ -5,7 +5,7 @@
 // los puestos ni el camino. Todo se fusiona en <Build>: el detalle cuesta vértices, no llamadas de dibujo.
 import { arco, campanario, columna, detalleFino } from './casas';
 import { bl, bx, cy, type Pc, PI, place, py, rng } from './lib';
-import { cannon, garita, stairs, VEG } from './parts';
+import { cannon, garita, planta, stairs } from './parts';
 
 const nf = (o: Pc): Pc => ({ ...o, solid: false });
 const NEGRO = '#1d1f22';
@@ -355,14 +355,14 @@ function ciudadBlanca(seed: number): Pc[] {
         cy(x, 1.6, -1.2 - r() * 1.2, 0.07 + r() * 0.05, 3.4, 'wood', '#5a4532', { e: [0.7, a, 0], n: 5, solid: false }),
       );
     }
-  out.push(...VEG.giant(-4.6, 0, -6.4, 0.42, '#3f7d3b', r));
+  out.push(...planta('giant', -4.6, 0, -6.4, 0.42, '#3f7d3b', r));
   // selva alrededor: helechos, platanillos y matas sobre las piedras
   for (const [x, z, s] of [
     [-7.4, -2.5, 1],
     [7.6, -1.5, 1.1],
     [-3.8, -6.2, 0.9],
   ] as [number, number, number][])
-    out.push(...VEG.jungle(x, 0, z, s, '#2a7d3c', r));
+    out.push(...planta('jungle', x, 0, z, s, '#2a7d3c', r));
   for (const [x, z] of [
     [-6.8, 2.4],
     [6.9, 0.6],
@@ -370,8 +370,8 @@ function ciudadBlanca(seed: number): Pc[] {
     [2.9, 2.4],
     [-4.4, -0.2],
   ])
-    out.push(...VEG.fern(x, 0, z, 1.1, '#3a8a45', r));
-  out.push(...VEG.banana(-7.8, 0, 0.6, 0.9, '#3f9b4b', r), ...VEG.banana(8, 0, -3.8, 1, '#3f9b4b', r));
+    out.push(...planta('fern', x, 0, z, 1.1, '#3a8a45', r));
+  out.push(...planta('banana', -7.8, 0, 0.6, 0.9, '#3f9b4b', r), ...planta('banana', 8, 0, -3.8, 1, '#3f9b4b', r));
   return out;
 }
 
@@ -612,8 +612,8 @@ function copanRuinas(): Pc[] {
   // musgo y selva
   out.push(
     bx(2, 1.82, -0.6, 9, 0.06, 0.5, 'leaf', CPM, { solid: false }),
-    ...VEG.jungle(-7.6, 0, -3.6, 0.9, '#2a7d3c', rng(5)),
-    ...VEG.fern(7.4, 0, 1.6, 1, '#3a8a45', rng(6)),
+    ...planta('jungle', -7.6, 0, -3.6, 0.9, '#2a7d3c', rng(5)),
+    ...planta('fern', 7.4, 0, 1.6, 1, '#3a8a45', rng(6)),
   );
   return out;
 }

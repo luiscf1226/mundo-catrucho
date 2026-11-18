@@ -5,7 +5,7 @@ import { type ReactNode, useEffect, useMemo } from 'react';
 import { catDe } from '../../core/data';
 import { useGame } from '../../core/store';
 import type { Department, V3 } from '../../core/types';
-import { Interactable, type MatKind, P, Plate } from '../kit';
+import { art, Interactable, type MatKind, P, Plate } from '../kit';
 import {
   antena,
   arco,
@@ -21,7 +21,7 @@ import {
 } from './casas';
 import { CIUDADES, type SitioReal, type TipoSitio } from './ciudad-datos';
 import { type Layout, layoutOf } from './ext';
-import { Build, bl, bx, cy, type Pc, PI, place, py, rng, rotXZ, type XZ } from './lib';
+import { Build, bl, bx, conFlora, cy, type Pc, PI, place, py, rng, rotXZ, type XZ } from './lib';
 import { lugarDelMuro } from './muro';
 import type { ZoneSpec } from './zone';
 
@@ -840,6 +840,25 @@ function pulperia(c: string): Obra {
   };
 }
 
+/** Con vegetación del paquete de arte, los árboles y palmas de una obra van fusionados en <Build> (misma especie,
+ *  semilla y colisión que P.Tree / P.Palm, pero una sola malla para toda la ciudad). Sin ella siguen como utilería. */
+const ARBOL = { Tree: { k: 'tree', r: 0.35, h: 3 }, Palm: { k: 'palm', r: 0.25, h: 4 } } as const;
+const esArbol = (k: string): k is keyof typeof ARBOL => !!art.Flora && k in ARBOL;
+function arboles(o: Obra): Pc[] {
+  return (o.props ?? []).flatMap((q, i) => {
+    if (!esArbol(q.k)) return [];
+    const a = ARBOL[q.k];
+    return conFlora([cy(q.x, a.h / 2, q.z, a.r, a.h, 'wood', '#6b4a2a')], {
+      k: a.k,
+      p: [q.x, 0, q.z],
+      s: 1,
+      c: q.color,
+      seed: i + 3,
+      r: q.rot ?? 0,
+    });
+  });
+}
+
 /** La misma obra a escala k (para que quepa en un hueco más chico). */
 function aEscala(o: Obra, k: number): Obra {
   return {
@@ -1040,7 +1059,7 @@ export function planCiudad(d: Department, spec: ZoneSpec): PlanCiudad | null {
       use: [u.x + ux, 0, u.z + uz],
       obra: q.obra,
     });
-    pcs.push(...place(q.obra.pcs, u.x, 0, u.z, u.rot));
+    pcs.push(...place(q.obra.pcs, u.x, 0, u.z, u.rot), ...place(arboles(q.obra), u.x, 0, u.z, u.rot));
   }
   sitios.sort((a, b) => pedidos.findIndex((p) => p.id === a.id) - pedidos.findIndex((p) => p.id === b.id));
 
@@ -1427,6 +1446,7 @@ export function Ciudad({ d, spec }: { d: Department; spec: ZoneSpec }) {
             return [s.pos[0] + rx, y, s.pos[2] + rz];
           };
         const nodes: ReactNode[] = (o.props ?? []).map((q, i) => {
+          if (esArbol(q.k)) return null;
           const C = PROPS[q.k];
           return <C key={i} pos={L(q.x, q.z)} rot={s.rot + (q.rot ?? 0)} color={q.color} seed={i + 3} />;
         });
