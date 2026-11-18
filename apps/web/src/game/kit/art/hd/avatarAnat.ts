@@ -4,7 +4,7 @@
 import * as THREE from 'three';
 import type { V3 } from '../../../../core/types';
 import { B } from './avatarGeo';
-import { inverted, loft, type Rect, type WFn } from './skin';
+import { inverted, loft, loftNormals, type Rect, type WFn } from './skin';
 
 export type AddN = (g: THREE.BufferGeometry, rect: Rect, w: WFn | number, m?: THREE.Matrix4) => void;
 
@@ -17,6 +17,15 @@ const DY = HC[1] - 1.6;
 export const EYE = { x: 0.4, y: 0.06, r: 0.0118 };
 /** rincón del atlas (dentro de la región de la cara, fuera del disco que usa la cara) con el iris pintado */
 export const EYE_RECT: Rect = [3, 3, 30, 30];
+/** rincones del atlas (también fuera del disco de la cara) con la piel de las orejas, más roja, y la del cuello */
+export const EAR_RECT: Rect = [223, 3, 30, 30],
+  NECK_RECT: Rect = [3, 223, 30, 30];
+/** línea de la boca en la esfera de la cara (sy): la quijada abre justo ahí */
+export const MOUTH_SY = -0.545;
+/** pivotes de los huesos de la cara: quijada (bajo la oreja), cejas y boca */
+export const JAW: V3 = [0, HC[1] - 0.018, HC[2] - 0.03],
+  BROW: V3 = [0, HC[1] + 0.03, HC[2] + 0.085],
+  MOUTH: V3 = [0, HC[1] + MOUTH_SY * HA[1], HC[2] + 0.09];
 
 const sm = (a: number, b: number, x: number) => {
   const t = Math.max(0, Math.min(1, (x - a) / (b - a)));
@@ -171,9 +180,37 @@ function weld(a: THREE.BufferGeometry, ca: number, na: number, b: THREE.BufferGe
 }
 
 /** cabeza esculpida: mitad delantera con la cara del atlas, mitad trasera con la piel lisa */
+/**
+ * pesos de la cara: debajo de la línea de la boca va con la quijada (así al abrirla se estira la línea oscura de los
+ * labios y la boca se ve entreabierta), cejas y frente con el hueso de las cejas, comisuras y pómulos con la boca
+ */
+const faceW = (x: number, y: number, z: number) => {
+  const sz = (z - HC[2]) / HA[2],
+    sx = (x - HC[0]) / HA[0],
+    sy0 = (y - HC[1]) / HA[1],
+    // headPoint estira un 3 % la mitad de abajo de la cara: se deshace para comparar con la línea de la boca
+    sy = sy0 < 0 ? sy0 / (1 + 0.03 * sm(0.1, 0.7, sz)) : sy0,
+    ax = Math.abs(sx),
+    front = sm(0.05, 0.4, sz),
+    jaw =
+      front * sm(MOUTH_SY + 0.004, MOUTH_SY - 0.004, sy) * (1 - sm(0.55, 0.85, ax)) * (1 - 0.65 * sm(-0.75, -1, sy)),
+    brow = front * g2(ax, sy, 0.36, 0.3, 0.3, 0.12) * 0.95,
+    mouth = front * (1 - jaw) * (g2(ax, sy, 0.27, MOUTH_SY, 0.11, 0.09) + 0.4 * g2(ax, sy, 0.45, -0.25, 0.18, 0.14));
+  const m = Math.min(1, mouth),
+    h = Math.max(0, 1 - jaw - brow - m);
+  return [B.head, h, B.jaw, jaw, B.brow, brow, B.mouth, m];
+};
 export function head(add: AddN, fem: boolean, face: Rect, skin: Rect) {
-  const lats = spread(seg(46), 0.015, Math.PI - 0.015, (p) => 1 + 2.4 * sm(0.95, 1.2, p) * (1 - sm(2.45, 2.75, p))),
-    front = spread(seg(32), -Math.PI / 2, Math.PI / 2, (t) => 1 + 2.6 * Math.exp(-((t / 0.55) ** 2))),
+  const lats = spread(seg(46), 0.015, Math.PI - 0.015, (p) => 1 + 2.4 * sm(0.95, 1.2, p) * (1 - sm(2.45, 2.75, p)));
+  // dos filas justo arriba y abajo de la línea de la boca: lo que estira la quijada es solo la línea oscura
+  for (const d of [0.007, -0.007]) {
+    const ph = Math.acos(MOUTH_SY + d),
+      i = lats.findIndex((v) => v > ph);
+    if (Math.abs(lats[i] - ph) < 0.003) lats[i] = ph;
+    else if (Math.abs(lats[i - 1] - ph) < 0.003) lats[i - 1] = ph;
+    else lats.splice(i, 0, ph);
+  }
+  const front = spread(seg(32), -Math.PI / 2, Math.PI / 2, (t) => 1 + 2.6 * Math.exp(-((t / 0.55) ** 2))),
     back = spread(seg(12), Math.PI / 2, Math.PI * 1.5, () => 1);
   const at = (sx: number, sy: number, sz: number, _t: number, o: THREE.Vector3) => {
     headPoint(sx, sy, sz, fem, 1, o);
@@ -183,7 +220,7 @@ export function head(add: AddN, fem: boolean, face: Rect, skin: Rect) {
     gb = grid(lats, back, at, () => [0.5, 0.5]);
   weld(gf, front.length - 1, front.length, gb, 0, back.length);
   weld(gf, 0, front.length, gb, back.length - 1, back.length);
-  add(gf, face, B.head);
+  add(gf, face, faceW);
   add(gb, skin, B.head);
 }
 
@@ -216,7 +253,7 @@ export function eyes(add: AddN, fem: boolean, closed: [boolean, boolean], lid: R
   for (const s of [-1, 1]) {
     const c = eyeCenter(s, fem),
       shut = closed[s > 0 ? 1 : 0];
-    if (!shut) add(eyeball(), EYE_RECT, B.head, M(c));
+    if (!shut) add(eyeball(), EYE_RECT, s > 0 ? B.eyeL : B.eyeR, M(c));
     if (!shut) add(lidCap(EYE.r * 1.1, 0, 1.24), lid, B.head, M(c, 1, [0.12, 0, 0]));
     add(lidCap(EYE.r * 1.08, Math.PI - 1.02, Math.PI, 1.7), lid, B.head, M(c));
     if (shut) add(lidCap(EYE.r * 1.09, 0, 2.3), lid, B.head, M(c, 1, [0.05, 0, 0]));
@@ -230,7 +267,7 @@ export const lidPivot = (fem: boolean): V3 => {
 };
 
 let EAR: Record<number, THREE.BufferGeometry> = {};
-export function ears(add: AddN, skin: Rect) {
+export function ears(add: AddN, skin: Rect = EAR_RECT) {
   EAR[LOD] ??= new THREE.LatheGeometry(
     (
       [
@@ -261,25 +298,50 @@ export function ears(add: AddN, skin: Rect) {
     );
 }
 
-export function neck(add: AddN, fem: boolean, skin: Rect) {
-  const k = fem ? 0.86 : 1;
-  add(
-    loft(
-      [
-        { y: 1.36, rx: 0.062 * k, rz: 0.064 * k, cz: -0.004 },
-        { y: 1.42, rx: 0.056 * k, rz: 0.058 * k, cz: -0.002 },
-        { y: 1.46, rx: 0.049 * k, rz: 0.053 * k, cz: -0.004 },
-        { y: 1.52, rx: 0.047 * k, rz: 0.052 * k, cz: -0.012 },
-        { y: 1.58, rx: 0.042 * k, rz: 0.046 * k, cz: -0.02 },
-      ],
-      14,
-    ),
-    skin,
-    (_x, y) => {
-      const t = sm(1.44, 1.54, y);
-      return [B.chest, 1 - t, B.head, t];
-    },
-  );
+/**
+ * cuello: más ancho que antes (casi tres cuartos del ancho de la cabeza), metido dentro del torso para que el cuello
+ * de la camisa lo tape limpio, con nuez en los hombres y el relieve suave de los músculos que bajan al esternón
+ */
+export function neck(add: AddN, fem: boolean, skin: Rect = NECK_RECT) {
+  const k = fem ? 0.885 : 1,
+    NS = seg(22, 12),
+    rings = [
+      { y: 1.39, rx: 0.068, rz: 0.068, cz: -0.004 },
+      { y: 1.42, rx: 0.065, rz: 0.066, cz: -0.005 },
+      { y: 1.45, rx: 0.061, rz: 0.063, cz: -0.007 },
+      { y: 1.475, rx: 0.058, rz: 0.06, cz: -0.009 },
+      { y: 1.5, rx: 0.056, rz: 0.058, cz: -0.012 },
+      { y: 1.525, rx: 0.054, rz: 0.056, cz: -0.016 },
+      { y: 1.55, rx: 0.051, rz: 0.053, cz: -0.02 },
+      { y: 1.58, rx: 0.046, rz: 0.049, cz: -0.024 },
+    ].map((r) => ({ ...r, rx: r.rx * k, rz: r.rz * k })),
+    g = loft(rings, NS),
+    P = g.attributes.position;
+  for (let i = 0; i < P.count; i++) {
+    const j = i % (NS + 1),
+      th = (j / NS - 0.5) * Math.PI * 2,
+      y = P.getY(i);
+    // esternocleidomastoideo: dos cordones que bajan de detrás de la oreja hacia el centro del pecho
+    const t = sm(1.43, 1.55, y),
+      a = 0.35 + t * 0.95;
+    let d =
+      0.0022 * (Math.exp(-(((th - a) / 0.22) ** 2)) + Math.exp(-(((th + a) / 0.22) ** 2))) * (1 - sm(1.53, 1.56, y));
+    if (!fem) d += 0.0065 * Math.exp(-((th / 0.28) ** 2)) * Math.exp(-(((y - 1.478) / 0.011) ** 2)); // nuez
+    // la nuca es más plana y la garganta baja hacia adelante
+    d -= 0.004 * Math.exp(-(((Math.abs(th) - Math.PI) / 0.5) ** 2));
+    if (!d) continue;
+    const n = (i - j) / (NS + 1),
+      r = rings[n],
+      ux = Math.sin(th),
+      uz = Math.cos(th);
+    P.setX(i, P.getX(i) + ux * d);
+    P.setZ(i, P.getZ(i) + uz * d * (r.rz / r.rx));
+  }
+  loftNormals(g, NS);
+  add(g, skin, (_x, y) => {
+    const t = sm(1.46, 1.55, y);
+    return [B.chest, 1 - t, B.head, t];
+  });
 }
 
 /** mano relajada con palma, cuatro dedos un poco doblados y pulgar (s = 1 mano izquierda, en +x) */
