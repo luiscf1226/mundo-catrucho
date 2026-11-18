@@ -70,6 +70,8 @@ export interface Pc {
   rt?: number;
   n?: number;
   solid?: boolean;
+  /** emisión: >0 luz cálida que se enciende de noche (ventanas), <0 brillo propio siempre */
+  em?: number;
 }
 export interface PcOpt {
   /** giro en Y */ r?: number /** Euler [x, y, z] (orden YXZ: primero inclina, luego gira) */;
@@ -77,7 +79,8 @@ export interface PcOpt {
   solid?: boolean /** radio de arriba relativo (cilindro) */;
   rt?: number /** lados */;
   n?: number /** escala [x, y, z] de una bola */;
-  s?: V3;
+  s?: V3 /** emisión (ver Pc.em) */;
+  em?: number;
 }
 const eul = (o: PcOpt): V3 | undefined => o.e ?? (o.r ? [0, o.r, 0] : undefined);
 /** Caja; (x, y, z) es el centro. Sólida salvo que esté inclinada. */
@@ -91,7 +94,7 @@ export const bx = (
   m: MatKind,
   c: string,
   o: PcOpt = {},
-): Pc => ({ g: 'box', p: [x, y, z], s: [w, h, d], m, c, e: eul(o), solid: o.solid });
+): Pc => ({ g: 'box', p: [x, y, z], s: [w, h, d], m, c, e: eul(o), solid: o.solid, em: o.em });
 /** Cilindro vertical; (x, y, z) es el centro. */
 export const cy = (
   x: number,
@@ -102,7 +105,7 @@ export const cy = (
   m: MatKind,
   c: string,
   o: PcOpt = {},
-): Pc => ({ g: 'cyl', p: [x, y, z], s: [r, h, r], m, c, e: eul(o), rt: o.rt, n: o.n, solid: o.solid });
+): Pc => ({ g: 'cyl', p: [x, y, z], s: [r, h, r], m, c, e: eul(o), rt: o.rt, n: o.n, solid: o.solid, em: o.em });
 /** Bola decorativa (sin colisión). */
 export const bl = (x: number, y: number, z: number, r: number, m: MatKind, c: string, o: PcOpt = {}): Pc => ({
   g: 'ball',
@@ -113,6 +116,7 @@ export const bl = (x: number, y: number, z: number, r: number, m: MatKind, c: st
   e: eul(o),
   n: o.n,
   solid: false,
+  em: o.em,
 });
 /** Pirámide de base rectangular (techos); (x, y, z) es el centro de la BASE. */
 export const py = (
@@ -125,7 +129,7 @@ export const py = (
   m: MatKind,
   c: string,
   o: PcOpt = {},
-): Pc => ({ g: 'pyr', p: [x, y + h / 2, z], s: [w, h, d], m, c, e: eul(o), solid: o.solid ?? false });
+): Pc => ({ g: 'pyr', p: [x, y + h / 2, z], s: [w, h, d], m, c, e: eul(o), solid: o.solid ?? false, em: o.em });
 /** Coloca un grupo de piezas definidas en coordenadas locales: gira en Y y traslada. */
 export function place(pcs: Pc[], x: number, y: number, z: number, rot = 0): Pc[] {
   const c = Math.cos(rot),
@@ -187,45 +191,74 @@ export interface Merged {
   m: MatKind;
   c: string;
   geo: THREE.BufferGeometry;
+  /** material propio (la malla fusionada con color y material por vértice) */
+  mat?: THREE.Material;
 }
-/** Fusiona las piezas en una geometría por (material, color). */
-export function mergePieces(pieces: Pc[]): Merged[] {
+/** transparentes y sin luz: siguen aparte, una malla por (material, color) */
+const APARTE = new Set<MatKind>(['glass', 'water', 'neon']);
+const _col = new THREE.Color();
+/** Fusiona las piezas en una geometría por (material, color). Con `fuse` (y un arte que lo permita) todo lo opaco
+ *  va en una sola malla con color, capa, rugosidad, metal y emisión por vértice: una llamada de dibujo. */
+export function mergePieces(pieces: Pc[], fuse = false): Merged[] {
+  const F = fuse ? art.fused : undefined;
   const groups = new Map<string, Pc[]>();
   for (const q of pieces) {
-    const k = `${q.m}|${q.c}`;
+    const k = F && !APARTE.has(q.m) ? '~fused' : `${q.m}|${q.c}`;
     let l = groups.get(k);
     if (!l) groups.set(k, (l = []));
     l.push(q);
   }
   const out: Merged[] = [];
   for (const [key, list] of groups) {
-    const geos = list.map(geoOf);
+    const geos = list.map(geoOf),
+      attr = key === '~fused' && F;
     let n = 0;
     for (const g of geos) n += g.attributes.position.count;
     const pos = new Float32Array(n * 3),
       nor = new Float32Array(n * 3),
-      uv = new Float32Array(n * 2);
+      uv = new Float32Array(n * 2),
+      col = attr ? new Float32Array(n * 3) : null,
+      mat = attr ? new Float32Array(n * 4) : null;
     let o = 0;
-    for (const g of geos) {
+    geos.forEach((g, gi) => {
       const c = g.attributes.position.count;
       pos.set(g.attributes.position.array as Float32Array, o * 3);
       nor.set(g.attributes.normal.array as Float32Array, o * 3);
       if (g.attributes.uv) uv.set(g.attributes.uv.array as Float32Array, o * 2);
+      if (attr && col && mat) {
+        const q = list[gi],
+          [l, r, m] = attr.info(q.m),
+          e = q.em ?? 0;
+        _col.set(q.c);
+        for (let i = o; i < o + c; i++) {
+          col[i * 3] = _col.r;
+          col[i * 3 + 1] = _col.g;
+          col[i * 3 + 2] = _col.b;
+          mat[i * 4] = l;
+          mat[i * 4 + 1] = r;
+          mat[i * 4 + 2] = m;
+          mat[i * 4 + 3] = e;
+        }
+      }
       o += c;
       g.dispose();
-    }
+    });
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     geo.setAttribute('normal', new THREE.BufferAttribute(nor, 3));
     geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+    if (col && mat) {
+      geo.setAttribute('aCol', new THREE.BufferAttribute(col, 3));
+      geo.setAttribute('aMat', new THREE.BufferAttribute(mat, 4));
+    }
     geo.computeBoundingSphere();
-    out.push({ key, m: list[0].m, c: list[0].c, geo });
+    out.push({ key, m: list[0].m, c: list[0].c, geo, mat: attr ? attr.material() : undefined });
   }
   return out;
 }
 /** Dibuja muchas piezas estáticas con una malla por (material, color) y registra sus colisiones. */
 export function Build({ pieces }: { pieces: Pc[] }) {
-  const groups = useMemo(() => mergePieces(pieces), [pieces]);
+  const groups = useMemo(() => mergePieces(pieces, true), [pieces]);
   useLayoutEffect(() => {
     const cs = pieces.filter(isSolid).map((q) => phys.add(colliderOf(q)));
     return () => {
@@ -244,7 +277,7 @@ export function Build({ pieces }: { pieces: Pc[] }) {
         <mesh
           key={g.key}
           geometry={g.geo}
-          material={art.material(g.m, g.c)}
+          material={g.mat ?? art.material(g.m, g.c)}
           castShadow={g.m !== 'neon' && g.m !== 'water' && g.m !== 'glass'}
           receiveShadow
         />
