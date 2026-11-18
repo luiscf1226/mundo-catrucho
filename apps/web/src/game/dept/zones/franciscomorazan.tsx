@@ -10,7 +10,7 @@ const barrio = (seed: number, c = '#7aa060'): Pc[] => {
   const r = rng(seed),
     cols = ['#ffd6a5', '#fdffb6', '#caffbf', '#9bf6ff', '#ffc6ff', '#ffadad', '#f1f1f1', '#bde0fe'];
   return [
-    ...mont(48, 36, c),
+    ...mont(48, 36, c, undefined, false),
     ...Array.from({ length: 44 }, () => {
       const a = r() * 6.28,
         rad = 6 + r() * 34,

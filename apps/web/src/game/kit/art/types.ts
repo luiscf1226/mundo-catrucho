@@ -58,6 +58,39 @@ export interface PropBase {
 }
 export type Prop<P = {}> = FC<PropBase & P>;
 
+/** Especies de vegetación (paquete HD: plantillas fusionadas por escena). */
+export type FloraKind =
+  | 'tree'
+  | 'pine'
+  | 'palm'
+  | 'oilpalm'
+  | 'bush'
+  | 'jungle'
+  | 'giant'
+  | 'dry'
+  | 'reed'
+  | 'fern'
+  | 'banana'
+  | 'cafe'
+  | 'flowers';
+/** Una planta en coordenadas del mundo: especie, punto de apoyo, escala, color de hoja, semilla y giro. */
+export interface FloraItem {
+  k: FloraKind;
+  p: V3;
+  s: number;
+  c?: string;
+  seed: number;
+  r?: number;
+}
+/** Cerro de fondo con relieve: centro en la base, radio, altura y color. */
+export interface HillDef {
+  p: V3;
+  r: number;
+  h: number;
+  c: string;
+  seed: number;
+}
+
 export interface ArtProps {
   Tree: Prop;
   Palm: Prop;
@@ -106,6 +139,8 @@ export interface ArtPack {
   props: ArtProps;
   /** geometría de caja opcional (p. ej. con bordes biselados en hd); la usa <Block>. Debe venir cacheada. */
   boxGeometry?(w: number, h: number, d: number): THREE.BufferGeometry;
+  /** geometría de roca con forma (radio 1, base plana en y = −0.3), cacheada por semilla; la usan las zonas */
+  rockGeometry?(seed: number): THREE.BufferGeometry;
   /** opcional (hd): un solo material que lee capa, rugosidad, metal y emisión (`aMat`) y color (`aCol`) por
    *  vértice; `info` da [capa, rugosidad, metal] de cada tipo. Con esto <Build> dibuja todo lo opaco en una llamada. */
   fused?: {
@@ -116,4 +151,10 @@ export interface ArtPack {
   };
   /** envoltorio opcional alrededor de toda la escena (posprocesado, etc.) */
   Effects?: FC<{ children?: ReactNode }>;
+  /** vegetación fusionada (una malla para muchas plantas). Si falta, las escenas usan sus piezas de siempre. */
+  Flora?: FC<{ items: FloraItem[] }>;
+  /** cerros de fondo con relieve, fusionados en una malla */
+  Hills?: FC<{ hills: HillDef[] }>;
+  /** zacate, matas y florcitas cerca de la cámara sobre el piso de zacate de la escena */
+  GroundCover?: FC;
 }

@@ -6,16 +6,20 @@
 //   props1-3.tsx  utilería fusionada (naturaleza, pueblo, vehículos); pk.tsx = utilidades comunes
 //   sky.tsx       cielo, sol y luna, ciclo de día y noche, clima
 //   post.tsx      posproceso en media y alta: oclusión ambiental, resplandor y viñeta
+//   flora.tsx     vegetación: atlas de hojas, especies y fusión por escena;  relief.tsx  cerros de fondo
 
 import { basePack } from '../base';
 import type { ArtPack } from '../types';
 import { Avatar } from './avatar';
-import { roundedBox } from './geo';
+import { Flora } from './flora';
+import { gRock, roundedBox } from './geo';
+import { GroundCover } from './grass';
 import { hdMaterial, kindInfo, poolMaterial, propMaterial } from './materials';
 import { Effects } from './post';
 import { props1 } from './props1';
 import { props2 } from './props2';
 import { props3 } from './props3';
+import { Hills } from './relief';
 import { SkyRig } from './sky';
 import { layerIndex } from './tex';
 
@@ -24,6 +28,7 @@ export const pack: ArtPack = {
   name: 'hd',
   material: hdMaterial,
   boxGeometry: (w, h, d) => roundedBox(w, h, d),
+  rockGeometry: gRock,
   fused: {
     material: () => propMaterial(),
     info: (k) => {
@@ -35,5 +40,8 @@ export const pack: ArtPack = {
   SkyRig,
   Avatar,
   Effects,
+  Flora,
+  Hills,
+  GroundCover,
   props: { ...props1, ...props2, ...props3 },
 };
