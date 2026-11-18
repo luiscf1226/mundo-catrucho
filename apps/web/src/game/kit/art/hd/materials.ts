@@ -238,7 +238,7 @@ const FRAG_NORMAL = /* glsl */ `
 `;
 const FRAG_EMIS = /* glsl */ `
 #ifdef TRI_ATTR
-  totalEmissiveRadiance += vMat.w > 0.0 ? vec3( 1.0, 0.72, 0.36 ) * vMat.w * uNight : triTint * ( - vMat.w );
+  totalEmissiveRadiance += vMat.w > 0.0 ? vec3( 1.0, 0.64, 0.3 ) * vMat.w * uNight : triTint * ( - vMat.w );
 #endif
 `;
 /** brillo de Fresnel para agua y vidrio: más opaco y con reflejo del cielo en ángulos rasantes */
@@ -261,9 +261,10 @@ const FRAG_FRESNEL = /* glsl */ `
 }
 #else
 {
+  // de noche el vidrio deja ver más el cuarto encendido de adentro (y refleja menos un cielo que ya está oscuro)
   float fres = pow( 1.0 - saturate( dot( normal, normalize( vViewPosition ) ) ), 3.0 );
-  diffuseColor.a = mix( diffuseColor.a, 1.0, fres * 0.85 );
-  outgoingLight += uSky * fres * 0.4;
+  diffuseColor.a = mix( diffuseColor.a, 1.0, fres * 0.85 ) * ( 1.0 - 0.8 * uNight );
+  outgoingLight += uSky * fres * 0.4 * ( 1.0 - 0.7 * uNight );
 }
 #endif
 #include <opaque_fragment>
@@ -372,4 +373,34 @@ export function propMaterial(doubleSided = false) {
       { attr: true },
     ));
   return (_prop ??= triplanar(new THREE.MeshStandardMaterial(), { attr: true }));
+}
+
+let _pool: THREE.ShaderMaterial | null = null;
+/** Charco de luz cálida en el piso bajo las lámparas: disco aditivo que se apaga de día (sin luces ni sombras
+ *  extra). La geometría trae uv en [−1, 1] y `aK` con la fuerza de cada lámpara. */
+export function poolMaterial() {
+  return (_pool ??= new THREE.ShaderMaterial({
+    uniforms: { uNight: G.uNight },
+    vertexShader: /* glsl */ `
+      attribute float aK; varying vec2 vUv; varying float vK;
+      void main() { vUv = uv; vK = aK; gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 ); }`,
+    fragmentShader: /* glsl */ `
+      uniform float uNight; varying vec2 vUv; varying float vK;
+      void main() {
+        float d = length( vUv );
+        if ( d > 1.0 ) discard;
+        // caída suave tipo cuadrado inverso, núcleo más blanco y borde anaranjado
+        float a = pow( 1.0 - d * d, 2.6 ) * vK * uNight;
+        vec3 c = mix( vec3( 1.0, 0.55, 0.22 ), vec3( 1.0, 0.82, 0.55 ), pow( 1.0 - d, 2.0 ) );
+        gl_FragColor = vec4( c * a * 0.26, 1.0 );
+        #include <tonemapping_fragment>
+        #include <colorspace_fragment>
+      }`,
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+    polygonOffset: true,
+    polygonOffsetFactor: -2,
+    polygonOffsetUnits: -2,
+  }));
 }

@@ -108,7 +108,12 @@ export interface ArtPack {
   boxGeometry?(w: number, h: number, d: number): THREE.BufferGeometry;
   /** opcional (hd): un solo material que lee capa, rugosidad, metal y emisión (`aMat`) y color (`aCol`) por
    *  vértice; `info` da [capa, rugosidad, metal] de cada tipo. Con esto <Build> dibuja todo lo opaco en una llamada. */
-  fused?: { material(): THREE.Material; info(kind: MatKind): [number, number, number] };
+  fused?: {
+    material(): THREE.Material;
+    info(kind: MatKind): [number, number, number];
+    /** charco de luz de las lámparas (aditivo, solo de noche): quads con uv en [−1, 1] y atributo aK (fuerza) */
+    pool?(): THREE.Material;
+  };
   /** envoltorio opcional alrededor de toda la escena (posprocesado, etc.) */
   Effects?: FC<{ children?: ReactNode }>;
 }
