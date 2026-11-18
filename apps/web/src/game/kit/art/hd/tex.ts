@@ -871,7 +871,7 @@ const GEN: Record<LayerName, Gen> = {
     // manchas de agua, de tierra y parches lavados más claros
     stains(a, r, 9, 30, 100, (r) => (r() < 0.65 ? [0.6, 0.57, 0.52, 0.26] : [0.5, 0.44, 0.36, 0.22]), h, 0.4);
     stains(a, r, 6, 40, 110, () => [1, 1, 0.98, 0.24]);
-    stains(a, r, 3, 10, 26, () => [0.2, 0.2, 0.22, 0.4]);
+    stains(a, r, 3, 8, 18, () => [0.42, 0.41, 0.4, 0.2]);
     // poros y granitos del cemento
     specks(a, h, r, 1600, 0.4, 1.5, 0.25, 0.45);
     // grietas que nacen de las juntas

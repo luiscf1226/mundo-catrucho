@@ -1353,6 +1353,20 @@ function calles(
         if (com) {
           const [lx, lz] = rotXZ(0, d / 2 + 0.07, rot);
           rotulos.push({ pos: [hx + lx, hh - 0.36, hz + lz], rot, text: com[0], bg: com[1], fg: com[2] });
+          // lámpara de brazo sobre el rótulo: de noche el bombillo brilla y deja su charco en la acera
+          pcs.push(
+            ...place(
+              [
+                bx(0, hh + 0.04, d / 2 + 0.28, 0.04, 0.04, 0.56, 'metal', '#2b2d30', { solid: false }),
+                bx(0, hh - 0.02, d / 2 + 0.56, 0.34, 0.1, 0.18, 'metal', '#2b2d30', { solid: false }),
+                bx(0, hh - 0.08, d / 2 + 0.56, 0.28, 0.02, 0.12, 'plastic', '#fff1cf', { solid: false, em: 2 }),
+              ],
+              hx,
+              0,
+              hz,
+              rot,
+            ),
+          );
         }
         nCasas++;
         z += w + (r() < 0.6 ? 0 : 0.6 + r() * 1.2);

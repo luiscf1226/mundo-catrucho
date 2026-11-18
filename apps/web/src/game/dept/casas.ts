@@ -67,6 +67,11 @@ export function reja(x: number, y: number, z: number, w: number, h: number, c: s
   return out;
 }
 
+/** Fuerza de la luz de un cuarto encendido (0.6–1.3), fija para cada ventana: unas con foco, otras con la tele. */
+const luzDe = (x: number, y: number, z: number) => {
+  const h = Math.sin(x * 12.9898 + y * 78.233 + z * 37.719) * 43758.5453;
+  return 0.6 + 0.7 * (h - Math.floor(h));
+};
 /** Ventana de celosía: marco de repello, alféizar, vidrio que refleja el cielo, interior que se enciende de noche
  *  y reja. (x, y) es el centro; z la cara de la pared. */
 export function ventana(
@@ -82,7 +87,7 @@ export function ventana(
     t = 0.09;
   const out: Pc[] = [
     // interior oscuro (de noche, luz cálida) y el vidrio encima
-    bx(x, y, z + 0.012, w, h, 0.02, 'plastic', INTERIOR, { solid: false, em: o.luz ? 1.5 : 0 }),
+    bx(x, y, z + 0.012, w, h, 0.02, 'plastic', INTERIOR, { solid: false, em: o.luz ? luzDe(x, y, z) : 0 }),
     bx(x, y, z + 0.035, w, h, 0.02, 'glass', VIDRIO, { solid: false }),
     // marco y alféizar
     bx(x, y + h / 2 + t / 2, z + 0.05, w + 2 * t, t, 0.1, 'concrete', m, { solid: false }),

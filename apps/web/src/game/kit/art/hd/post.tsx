@@ -20,7 +20,7 @@ const IGN = 'float ign( vec2 p ) { return fract( 52.9829189 * fract( dot( p, vec
 // --- oclusión: salida r = visibilidad (1 = sin oclusión), g = distancia a la cámara (para los bordes)
 const AO_FRAG = /* glsl */ `
 #include <packing>
-uniform sampler2D tDepth; uniform vec2 uProjK, uTexel; uniform float uNear, uFar, uRadius, uIntensity, uProjScale, uFade;
+uniform sampler2D tDepth; uniform vec2 uProjK, uTexel; uniform float uNear, uFar, uRadius, uIntensity, uProjScale, uFade, uThick;
 varying vec2 vUv;
 ${IGN}
 float vz( vec2 uv ) { return perspectiveDepthToViewZ( texture2D( tDepth, uv ).x, uNear, uFar ); }
@@ -49,10 +49,14 @@ void main() {
     vec2 suv = vUv + vec2( cos( th ), sin( th ) ) * max( a * ssR, 1.5 ) * uTexel;
     vec3 v = vpos( suv, vz( suv ) ) - p;
     float vv = dot( v, v ), vn = dot( v, n ), f = max( r2 - vv, 0.0 );
-    occ += f * f * f * max( ( vn - bias ) / ( vv + 0.01 ), 0.0 );
+    // grosor: lo que queda mucho más cerca de la cámara (un poste, el canto de un tapial delante de una pared) no es
+    // un bloque macizo; sin esto la profundidad se lee como un muro y deja halos negros grandes detrás
+    float th_k = 1.0 - smoothstep( uThick * 0.4, uThick, v.z );
+    occ += f * f * f * max( ( vn - bias ) / ( vv + 0.01 ), 0.0 ) * th_k;
   }
-  // nunca negro del todo: la luz del cielo rebota aunque el rincón esté cerrado
-  float ao = max( 0.4, 1.0 - occ * uIntensity / ( r2 * r2 * r2 ) * 5.0 / float( AO_N ) );
+  // curva exponencial con piso: en esquinas cóncavas (pared con tapial, alero) la luz del cielo no se apaga del todo;
+  // antes la resta lineal llegaba a 0 y dejaba franjas negras de un metro
+  float ao = max( exp( -occ * uIntensity / ( r2 * r2 * r2 ) * 5.0 / float( AO_N ) ), 0.38 );
   ao = mix( ao, 1.0, smoothstep( uFade * 0.6, uFade, -z ) );
   gl_FragColor = vec4( ao, -z, 0.0, 1.0 );
 }
@@ -186,8 +190,9 @@ function crear(nivel: Nivel) {
       uTexel: { value: new THREE.Vector2() },
       uNear: { value: 0.1 },
       uFar: { value: 700 },
-      uRadius: { value: 1.5 },
+      uRadius: { value: 1.1 },
       uIntensity: { value: alta ? 2.1 : 1.8 },
+      uThick: { value: 0.8 },
       uProjScale: { value: 500 },
       uFade: { value: 55 },
     },

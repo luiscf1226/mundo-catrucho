@@ -77,7 +77,8 @@ export interface Pc {
   flora?: FloraItem;
   /** cerro que dibuja art.Hills en lugar de estas piezas (centro relativo a p) */
   hill?: HillDef;
-  /** emisión: >0 luz cálida que se enciende de noche (ventanas), <0 brillo propio siempre */
+  /** emisión: >0 luz cálida que se enciende de noche (ventanas), <0 brillo propio siempre; ≥2 es una lámpara y
+   *  además deja un charco de luz en el piso debajo */
   em?: number;
 }
 export interface PcOpt {
@@ -279,6 +280,45 @@ export function mergePieces(pieces: Pc[], fuse = false): Merged[] {
   }
   return out;
 }
+/** Charcos de luz bajo las lámparas (piezas con em ≥ 2): un quad horizontal por lámpara, todos en una malla. */
+export function poolGeometry(pieces: Pc[]): THREE.BufferGeometry | null {
+  const ls = pieces.filter((q) => (q.em ?? 0) >= 2);
+  if (!ls.length) return null;
+  const pos = new Float32Array(ls.length * 18),
+    uv = new Float32Array(ls.length * 12),
+    k = new Float32Array(ls.length * 6),
+    C = [-1, -1, 1, -1, 1, 1, -1, -1, 1, 1, -1, 1];
+  ls.forEach((q, i) => {
+    const r = clamp(q.p[1] * 0.6, 1.6, 3.8),
+      y = 0.2;
+    for (let v = 0; v < 6; v++) {
+      const u = C[v * 2],
+        w = C[v * 2 + 1];
+      pos.set([q.p[0] + u * r, y, q.p[2] - w * r], (i * 6 + v) * 3);
+      uv.set([u, w], (i * 6 + v) * 2);
+      k[i * 6 + v] = clamp((q.em ?? 2) / 2.4, 0.5, 1.4);
+    }
+  });
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  g.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+  g.setAttribute('aK', new THREE.BufferAttribute(k, 1));
+  g.computeBoundingSphere();
+  return g;
+}
+function Pools({ pieces }: { pieces: Pc[] }) {
+  const geo = useMemo(() => (art.fused?.pool ? poolGeometry(pieces) : null), [pieces]),
+    mat = useMemo(() => art.fused?.pool?.(), []),
+    ref = useRef<THREE.Mesh>(null);
+  useEffect(() => () => geo?.dispose(), [geo]);
+  // de día no cuesta nada: la malla se oculta (el material trae la fuerza de la noche en uNight)
+  useTick(() => {
+    const n = (mat as THREE.ShaderMaterial | undefined)?.uniforms?.uNight?.value ?? 1;
+    if (ref.current) ref.current.visible = n > 0.02;
+  });
+  if (!geo || !mat) return null;
+  return <mesh ref={ref} geometry={geo} material={mat} renderOrder={2} visible={false} />;
+}
 /** Dibuja muchas piezas estáticas con una malla por (material, color) y registra sus colisiones. */
 export function Build({ pieces }: { pieces: Pc[] }) {
   const groups = useMemo(() => mergePieces(pieces, true), [pieces]);
@@ -305,6 +345,7 @@ export function Build({ pieces }: { pieces: Pc[] }) {
           receiveShadow
         />
       ))}
+      <Pools pieces={pieces} />
     </>
   );
 }
