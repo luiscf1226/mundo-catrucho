@@ -1277,7 +1277,7 @@ function banana(v: number, bolsa = false): Template {
     ],
     [0.17, 0.14, 0.11],
     // pseudotallo: vainas verdosas con fibras secas a lo largo (la textura del zacate seco, no la corteza)
-    col('#a8c088'),
+    col('#8aae7a'),
     8,
     0,
     CELL.dry,
