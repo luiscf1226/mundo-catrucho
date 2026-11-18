@@ -812,7 +812,7 @@ function piezasMesa(
 }
 
 /** Plantas al pie de la mesa: matas y helechos bajitos que no tapan lo que se juega ni el título. */
-function floraMesa(f: Fondo, cx: number, cz: number, w: number, d: number, seed: number): FloraItem[] {
+function floraMesa(f: Fondo, cx: number, cz: number, w: number, d: number, seed: number, talud = 0): FloraItem[] {
   const s = sueloDe(f);
   if (!s.flora.length || f === 'ciudad' || f === 'cueva' || f === 'pueblo' || f === 'mercado') return [];
   const r = azar(seed),
@@ -834,6 +834,27 @@ function floraMesa(f: Fondo, cx: number, cz: number, w: number, d: number, seed:
       k: kinds[i % kinds.length],
       p: [x, 0, z],
       s: 0.38 + r() * 0.3,
+      seed: Math.floor(r() * 999),
+      r: r() * 6.28,
+    });
+  }
+  // en el talud del bancal: helechos y florcitas que rompen el canto recto (en las esquinas y los lados)
+  for (let i = 0; talud > 0 && i < 12; i++) {
+    let t = r() * per,
+      x: number,
+      z: number;
+    const o = 0.3 + r() * 0.35,
+      y = talud * (1 - o / 0.9) ** 2;
+    if (t < w) [x, z] = [cx - w / 2 + t, cz + d / 2 + o];
+    else if ((t -= w) < d) [x, z] = [cx + w / 2 + o, cz + d / 2 - t];
+    else if ((t -= d) < w) [x, z] = [cx + w / 2 - t, cz - d / 2 - o];
+    else [x, z] = [cx - w / 2 - o, cz - d / 2 + (t - w)];
+    if (z > cz + d / 2 && Math.abs(x - cx) < 3.5) continue;
+    if (x > 3.6 && x < 10.4 && z > -2.6 && z < 0.8) continue;
+    out.push({
+      k: i % 3 ? 'fern' : 'flowers',
+      p: [x, y - 0.05, z],
+      s: 0.3 + r() * 0.2,
       seed: Math.floor(r() * 999),
       r: r() * 6.28,
     });
@@ -867,7 +888,17 @@ export function MesaBase({
       return {
         grupos: mergePieces(pcs, true),
         banco: banco ? bancoGeo(...banco) : null,
-        flora: matas ? floraMesa(fondo, pos[0], pos[2], size[0], size[2], Math.round(pos[0] * 7 + size[0] * 13)) : [],
+        flora: matas
+          ? floraMesa(
+              fondo,
+              pos[0],
+              pos[2],
+              size[0],
+              size[2],
+              Math.round(pos[0] * 7 + size[0] * 13),
+              est === 'bancal' || est === 'laja' ? top * 0.85 : 0,
+            )
+          : [],
       };
     }, [`${pos}|${size}|${mat}|${color}|${fondo}|${matas}`]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(
