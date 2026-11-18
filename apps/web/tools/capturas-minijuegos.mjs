@@ -29,6 +29,21 @@ const VISTAS = [
   ['ritmo', 'atlantida.punta-en-sambo-creek'],
   ['monta', 'olancho.jaripeo'],
   ['lluvia', 'yoro.lluvia-de-peces'],
+  ['gol', 'franciscomorazan.el-gol-del-lunes'],
+  ['talgua', 'olancho.talgua-sin-tocar-los-restos'],
+  ['chepa', 'franciscomorazan.corre-que-viene-la-chepa'],
+  ['taxi', 'franciscomorazan.taxi-a-toda-mecha'],
+  ['pulperia', 'franciscomorazan.pulperia'],
+  ['ruta', 'lempira.sendero-de-celaque'],
+  ['yojoa', 'cortes.pesca-en-yojoa'],
+  ['estanque', 'choluteca.estanques-de-marcovia'],
+  ['rapidito', 'franciscomorazan.rapidito'],
+  ['ciudadblanca', 'graciasadios.ciudad-blanca-sin-extraer'],
+  ['termal', 'lempira.la-pausa-tambien-cuenta'],
+  ['ondas', 'intibuca.chiligatoro-en-el-reflejo'],
+  ['cuencas', 'lempira.la-montana-reparte-agua'],
+  ['tapisca', 'elparaiso.tapisca-de-jamastran'],
+  ['catacion', 'lapaz.catacion-de-marcala'],
 ];
 const SOLO = process.env.MC_VISTAS?.split(',');
 

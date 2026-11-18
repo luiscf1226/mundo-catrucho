@@ -12,7 +12,7 @@ import { basePack } from '../base';
 import type { ArtPack } from '../types';
 import { Avatar } from './avatar';
 import { Flora } from './flora';
-import { gRock, roundedBox } from './geo';
+import { Builder, gRock, roundedBox } from './geo';
 import { GroundCover } from './grass';
 import { hdMaterial, kindInfo, poolMaterial, propMaterial } from './materials';
 import { Effects } from './post';
@@ -36,6 +36,7 @@ export const pack: ArtPack = {
       return [layerIndex(i.l), i.r, i.m];
     },
     pool: poolMaterial,
+    molde: () => new Builder(),
   },
   SkyRig,
   Avatar,
