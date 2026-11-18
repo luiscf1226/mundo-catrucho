@@ -444,9 +444,8 @@ export function casaHN(o: CasaHN): Pc[] {
 
 /** Edificio de ciudad (Tegucigalpa, San Pedro): pisos de 3 m con cornisa, ventanas con marco en las cuatro caras
  *  (algunas encendidas de noche), aires acondicionados colgando, local comercial abajo y techo con tanques. */
-export function edificioHN(w: number, h: number, d: number, col: string, seed = 1): Pc[] {
+export function edificioHN(w: number, h: number, d: number, col: string, seed = 1, fino = detalleFino()): Pc[] {
   const r = rng(seed * 17 + 3),
-    fino = detalleFino(),
     pisos = Math.max(1, Math.floor((h - 0.5) / 3)),
     out: Pc[] = [bx(0, h / 2, 0, w, h, d, 'concrete', col)];
   // cada cara: (largo, giro); las ventanas se arman en local con la cara en z = largo de la otra mitad

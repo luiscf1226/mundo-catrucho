@@ -55,8 +55,9 @@ export function alturaLago(x: number, z: number) {
   }
   const e = (v - 1) * 40;
   let h = NIVEL + 0.55 * ss(0, 5, e);
-  h += ss(3, 45, e) * (1.5 + 9 * fbm(x * 0.018 + 4, z * 0.018 - 2));
-  h += ss(-90, -200, z) * ss(10, 60, e) * 30 * (0.5 + 0.7 * fbm(x * 0.011, z * 0.011));
+  // lomas bajas en la orilla (dejan ver las montañas de atrás) y la subida a la sierra lejos
+  h += ss(3, 45, e) * (0.8 + 4.5 * fbm(x * 0.018 + 4, z * 0.018 - 2)) * (z < -90 ? 1 : 0.55 + 0.45 * ss(-20, -90, z));
+  h += ss(-140, -230, z) * ss(10, 60, e) * 26 * (0.5 + 0.7 * fbm(x * 0.011, z * 0.011));
   return h;
 }
 

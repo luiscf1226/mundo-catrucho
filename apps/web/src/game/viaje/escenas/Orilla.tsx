@@ -7,7 +7,7 @@
 // otra y los rótulos otra. Decorado sin colisión: el manejo no usa la física de la escena.
 import { useMemo } from 'react';
 import type { V3 } from '../../../core/types';
-import { casaHN, edificioHN, PASTEL } from '../../dept/casas';
+import { casaHN, detalleFino, edificioHN, PASTEL } from '../../dept/casas';
 import { bx, cy, type Pc, PI, place, rk, rng } from '../../dept/lib';
 import { art } from '../../kit';
 import type { FloraItem, FloraKind } from '../../kit/art/types';
@@ -187,7 +187,7 @@ const elegir = (l: [FloraKind, number][], t: number): FloraKind => {
 };
 
 /** Un tramo de carretera (z de 0 a −TRAMO). */
-function tramoCarretera(biome: string, coastal: boolean, monte: boolean, seed: number): Lote {
+function tramoCarretera(biome: string, coastal: boolean, monte: boolean, seed: number, fino: boolean): Lote {
   const r = rng(seed),
     L: Lote = { pcs: [], flora: [], rot: [] },
     tierra = monte ? '#8a6a4c' : '#8f8576',
@@ -268,6 +268,7 @@ function tramoCarretera(biome: string, coastal: boolean, monte: boolean, seed: n
           techo,
           adobe: !com && r() < 0.4,
           seed: Math.floor(r() * 999),
+          fino,
           comercio: com ? ROTULOS[Math.floor(r() * ROTULOS.length)] : undefined,
         },
         com ? nombres[n++ % nombres.length] : undefined,
@@ -334,7 +335,7 @@ function tramoCarretera(biome: string, coastal: boolean, monte: boolean, seed: n
 }
 
 /** Un tramo de calle de ciudad (Tegucigalpa, San Pedro o la entrada de un pueblo). */
-function tramoCiudad(seed: number): Lote {
+function tramoCiudad(seed: number, fino: boolean): Lote {
   const r = rng(seed),
     L: Lote = { pcs: [], flora: [], rot: [] },
     nombres = [...NOMBRES_CIUDAD].sort(() => r() - 0.5);
@@ -362,7 +363,7 @@ function tramoCiudad(seed: number): Lote {
         const h = 9 + Math.floor(r() * 3) * 3;
         L.pcs.push(
           ...place(
-            edificioHN(w, h, d, PASTEL[Math.floor(r() * PASTEL.length)], Math.floor(r() * 999)),
+            edificioHN(w, h, d, PASTEL[Math.floor(r() * PASTEL.length)], Math.floor(r() * 999), fino),
             s * (10.65 + d / 2),
             0,
             cz,
@@ -384,6 +385,7 @@ function tramoCiudad(seed: number): Lote {
             techo: r() < 0.6 ? 'losa' : 'lamina',
             rejas: true,
             seed: Math.floor(r() * 999),
+            fino,
             comercio: com ? ROTULOS[Math.floor(r() * ROTULOS.length)] : undefined,
           },
           com ? nombres[n++ % nombres.length] : undefined,
@@ -437,13 +439,23 @@ export function Orilla({
   letreros: [string, string];
 }) {
   const hecho = useMemo(() => {
-    const L = city ? tramoCiudad(504) : tramoCarretera(biome, coastal, monte, 1991 + biome.length * 7);
-    const pcs: Pc[] = [],
+    const hacer = (fino: boolean) =>
+      city ? tramoCiudad(504, fino) : tramoCarretera(biome, coastal, monte, 1991 + biome.length * 7, fino);
+    // el último tramo siempre queda lejos (a más de 80 m): va sin rejas tupidas ni tejas una por una. Los tramos se
+    // corren a la vez, así que el cambio de detalle pasa allá lejos, en la bruma.
+    const fino = detalleFino(),
+      L = hacer(fino),
+      lejos = fino ? hacer(false) : L;
+    // una malla por tramo: la cámara y la sombra se saltan los tramos que no ven
+    const pcs: Pc[][] = [],
       flora: FloraItem[] = [],
       rot: Rotulo[] = [];
     for (let k = 0; k < COPIAS; k++) {
       const dz = Z0 - k * TRAMO;
-      for (const q of L.pcs) pcs.push({ ...q, p: [q.p[0], q.p[1], q.p[2] + dz] });
+      // cajas lisas: el bisel de 7 cm no se ve desde la cámara (a 10 m o más) y costaba ~300 triángulos por caja
+      pcs.push(
+        (k === COPIAS - 1 ? lejos : L).pcs.map((q) => ({ ...q, liso: true, p: [q.p[0], q.p[1], q.p[2] + dz] as V3 })),
+      );
       for (const f of L.flora) flora.push({ ...f, p: [f.p[0], f.p[1], f.p[2] + dz] });
       for (const t of L.rot) rot.push({ ...t, p: [t.p[0], t.p[1], t.p[2] + dz] });
     }
@@ -514,7 +526,9 @@ export function Orilla({
   const todos = useMemo(() => [...hecho.rot, ...verdes.rot], [hecho, verdes]);
   return (
     <>
-      <Fundido pcs={hecho.pcs} />
+      {hecho.pcs.map((p, k) => (
+        <Fundido key={k} pcs={p} sombra={k < COPIAS - 1} />
+      ))}
       <Fundido pcs={verdes.pcs} />
       <Rotulos items={todos} />
       {art.Flora && hecho.flora.length > 0 && <art.Flora items={hecho.flora} />}
