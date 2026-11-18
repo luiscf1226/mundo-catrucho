@@ -2,7 +2,9 @@
 // estampados y una rejilla de colores lisos. Todo se dibuja con Canvas 2D; nada se descarga.
 import * as THREE from 'three';
 import apodos from '../../../../../shared/data/apodos.json';
+import { SHOP } from '../../../../core/data';
 import type { AvatarConfig } from '../../../../core/types';
+import { EYE_RECT, hairline, lineAt } from './avatarAnat';
 import { cut, R, SWATCH, type SwatchName, swatchCell } from './avatarGeo';
 import { AH, AW, type Rect } from './skin';
 import { rng } from './tex';
@@ -87,213 +89,276 @@ function ribbons(c: Ctx, x: number, y: number, w: number, h: number, n = 6, off 
   }
 }
 
+/** semilla estable por texto (para que cada configuración tenga sus manchitas y su color de ojos) */
+const hash = (t: string) => {
+  let h = 2166136261;
+  for (let i = 0; i < t.length; i++) h = Math.imul(h ^ t.charCodeAt(i), 16777619);
+  return h >>> 0;
+};
+/** piel con vida: manchas suaves rojizas y cafés, y grano fino de poros (amp = cuánto se nota) */
+export function skinFill(c: Ctx, w: number, h: number, skin: string, seed: number, amp = 1) {
+  c.fillStyle = skin;
+  c.fillRect(0, 0, w, h);
+  const r = rng(seed),
+    L = lum(skin),
+    red = mix(skin, '#b0302a', 0.5),
+    brown = mix(skin, '#3a1c0c', 0.6),
+    pale = mix(skin, '#fff1e2', 0.5);
+  const n = Math.round((w * h) / 900) + 6;
+  for (let i = 0; i < n; i++) {
+    const x = r() * w,
+      y = r() * h,
+      rad = 6 + r() * 26,
+      col = r() < 0.45 ? red : r() < 0.6 ? brown : pale,
+      g = c.createRadialGradient(x, y, 0, x, y, rad);
+    g.addColorStop(0, col);
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    c.globalAlpha = (0.05 + r() * 0.07) * amp * (L < 0.35 ? 0.8 : 1);
+    c.fillStyle = g;
+    c.fillRect(x - rad, y - rad, rad * 2, rad * 2);
+  }
+  c.globalAlpha = 1;
+  // poros: un grano de ±3 por pixel
+  const t = c.getTransform(),
+    img = c.getImageData(t.e, t.f, w, h),
+    d = img.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const k = (r() - 0.5) * 7 * amp;
+    d[i] += k;
+    d[i + 1] += k * 0.9;
+    d[i + 2] += k * 0.8;
+  }
+  c.putImageData(img, t.e, t.f);
+}
+const IRIS = ['#3a2010', '#2b170b', '#4a2a14', '#56341a', '#6b4a24', '#4d5634', '#3d4f5e'];
+/** color de ojos estable por configuración: casi siempre café; claros solo de vez en cuando en piel clara */
+export function irisColor(cfg: AvatarConfig) {
+  const h = hash(`${cfg.skin}|${cfg.hairColor}|${cfg.face}|${cfg.shirtColor}`) % 100,
+    light = lum(cfg.skin) > 0.7;
+  if (light && h < 9) return IRIS[5 + (h % 2)];
+  if (h < 16) return IRIS[4];
+  return IRIS[h % 4];
+}
+/** globo del ojo (esclerótica, iris con fibras, anillo, pupila y brillo) en un cuadrito del atlas */
+function eyeTex(c: Ctx, cfg: AvatarConfig, w: number) {
+  const m = w / 2,
+    iris = irisColor(cfg);
+  let g = c.createRadialGradient(m, m, w * 0.2, m, m, w * 0.55);
+  g.addColorStop(0, '#f2ede6');
+  g.addColorStop(0.7, '#e3d6cc');
+  g.addColorStop(1, '#c9a59a');
+  c.fillStyle = g;
+  c.fillRect(0, 0, w, w);
+  const ri = w * 0.255;
+  g = c.createRadialGradient(m, m, ri * 0.2, m, m, ri);
+  g.addColorStop(0, light(iris, 0.2));
+  g.addColorStop(0.65, iris);
+  g.addColorStop(0.88, dark(iris, 0.35));
+  g.addColorStop(1, '#120a06');
+  c.fillStyle = g;
+  ell(c, m, m, ri, ri);
+  c.fill();
+  c.strokeStyle = `${light(iris, 0.35)}`;
+  c.globalAlpha = 0.35;
+  c.lineWidth = 0.6;
+  for (let i = 0; i < 24; i++) {
+    const a = (i / 24) * Math.PI * 2;
+    c.beginPath();
+    c.moveTo(m + Math.cos(a) * ri * 0.35, m + Math.sin(a) * ri * 0.35);
+    c.lineTo(m + Math.cos(a + 0.1) * ri * 0.9, m + Math.sin(a + 0.1) * ri * 0.9);
+    c.stroke();
+  }
+  c.globalAlpha = 1;
+  c.fillStyle = '#070505';
+  ell(c, m, m, ri * 0.38, ri * 0.38);
+  c.fill();
+  c.fillStyle = 'rgba(255,255,255,0.85)';
+  ell(c, m - ri * 0.35, m - ri * 0.4, ri * 0.17, ri * 0.17);
+  c.fill();
+}
+
+/**
+ * Cara en la proyección frontal de la cabeza: el pixel (128 + sx·128, 128 − sy·128) cae en la dirección (sx, sy) de la
+ * esfera unitaria (ver avatarAnat.ts). Ojos de verdad van en la geometría; aquí van la piel, cejas, labios, nariz,
+ * ojeras, rubor, barba de pocos días y pecas.
+ */
 function face(c: Ctx, cfg: AvatarConfig) {
   const skin = cfg.skin,
-    line = mix(skin, '#3a120c', 0.78),
-    brow = mix(cfg.hairColor, '#1c110b', 0.5),
-    f = cfg.face;
-  c.fillStyle = skin;
-  c.fillRect(0, 0, 256, 256);
-  let g = c.createRadialGradient(128, 110, 10, 128, 128, 126);
-  g.addColorStop(0, 'rgba(255,255,255,0.09)');
-  g.addColorStop(1, 'rgba(255,255,255,0)');
-  c.fillStyle = g;
-  c.fillRect(0, 0, 256, 256);
-  for (const s of [-1, 1]) {
-    g = c.createRadialGradient(128 + s * 70, 174, 2, 128 + s * 70, 174, f === 'cara_feliz' ? 32 : 26);
-    g.addColorStop(0, `rgba(255,80,90,${f === 'cara_feliz' ? 0.42 : 0.26})`);
-    g.addColorStop(1, 'rgba(255,80,90,0)');
+    L = lum(skin),
+    fem = cfg.body === 'm',
+    f = cfg.face,
+    X = (sx: number) => 128 + sx * 128,
+    Y = (sy: number) => 128 - sy * 128;
+  skinFill(c, 256, 256, skin, hash(skin) % 1000, 1);
+  const blob = (x: number, y: number, rx: number, ry: number, col: string, a: number) => {
+    c.save();
+    c.translate(x, y);
+    c.scale(1, ry / rx);
+    const g = c.createRadialGradient(0, 0, 0, 0, 0, rx);
+    g.addColorStop(0, col);
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    c.globalAlpha = a;
     c.fillStyle = g;
-    c.fillRect(0, 120, 256, 110);
-  }
-  const cy = 140;
-  const eye = (s: number) => {
-    const cx = 128 + s * 47,
-      ix = cx - s * 1.5;
-    c.fillStyle = '#ffffff';
-    ell(c, cx, cy, 17.5, 21.5);
-    c.fill();
-    c.fillStyle = '#4a2a14';
-    ell(c, ix, cy + 1.5, 13, 17.5);
-    c.fill();
-    c.fillStyle = '#140b08';
-    ell(c, ix, cy + 2, 8.5, 12);
-    c.fill();
-    c.fillStyle = '#ffffff';
-    ell(c, ix - 5, cy - 7, 5, 6.2);
-    c.fill();
-    ell(c, ix + 5.5, cy + 8.5, 2.4, 2.9);
-    c.fill();
-    c.strokeStyle = '#22140e';
-    c.lineWidth = 4.6;
-    c.lineCap = 'round';
-    c.beginPath();
-    c.ellipse(cx, cy, 18, 22, 0, Math.PI * 1.06, Math.PI * 1.94);
-    c.stroke();
-    c.lineWidth = 3.2;
-    c.beginPath();
-    c.moveTo(cx + s * 16.5, cy - 9);
-    c.lineTo(cx + s * 23, cy - 14);
-    c.stroke();
-    if (cfg.body === 'm') {
-      c.lineWidth = 3;
-      c.beginPath();
-      for (const [a, b] of [
-        [8, -21],
-        [14, -18],
-      ]) {
-        c.moveTo(cx + s * a, cy + b);
-        c.lineTo(cx + s * (a + 7), cy + b - 8);
-      }
-      c.stroke();
-    }
+    c.fillRect(-rx, -rx, rx * 2, rx * 2);
+    c.restore();
+    c.globalAlpha = 1;
   };
-  const closed = (s: number) => {
-    const cx = 128 + s * 47;
-    c.strokeStyle = '#22140e';
-    c.lineWidth = 5.5;
-    c.lineCap = 'round';
-    c.beginPath();
-    c.moveTo(cx - 17, cy + 5);
-    c.quadraticCurveTo(cx, cy - 13, cx + 17, cy + 5);
-    c.stroke();
-  };
-  if (f === 'cara_lentes') {
-    c.strokeStyle = '#101114';
-    c.lineWidth = 7;
-    c.beginPath();
-    c.moveTo(0, cy - 8);
-    c.lineTo(256, cy - 8);
-    c.stroke();
-    for (const s of [-1, 1]) {
-      const cx = 128 + s * 47;
-      g = c.createLinearGradient(0, cy - 24, 0, cy + 24);
-      g.addColorStop(0, '#0d0e12');
-      g.addColorStop(1, '#343b48');
-      c.fillStyle = g;
-      c.beginPath();
-      c.roundRect(cx - 30, cy - 22, 60, 44, [12, 12, 20, 20]);
-      c.fill();
-      c.strokeStyle = '#08080a';
-      c.lineWidth = 4;
-      c.stroke();
-      c.save();
-      c.clip();
-      c.strokeStyle = 'rgba(255,255,255,0.4)';
-      c.lineWidth = 7;
-      c.beginPath();
-      c.moveTo(cx - 20, cy + 26);
-      c.lineTo(cx + 2, cy - 26);
-      c.stroke();
-      c.lineWidth = 3;
-      c.beginPath();
-      c.moveTo(cx - 6, cy + 26);
-      c.lineTo(cx + 16, cy - 26);
-      c.stroke();
-      c.restore();
-    }
-  } else if (f === 'cara_guino') {
-    eye(-1);
-    closed(1);
-  } else if (f === 'cara_feliz') {
-    closed(-1);
-    closed(1);
-  } else {
-    eye(-1);
-    eye(1);
-  }
-  // cejas
-  c.strokeStyle = brow;
-  c.lineCap = 'round';
-  c.lineWidth = f === 'cara_bigote' ? 8.5 : 6;
+  const shadow = mix(skin, '#2a0f08', 0.55),
+    warm = mix(skin, '#c2403a', 0.6);
+  // ojeras y cuencas, rubor en mejillas, nariz y orejas, sombra bajo el labio y en la quijada
   for (const s of [-1, 1]) {
-    const cx = 128 + s * 47,
-      up = f === 'cara_guino' && s > 0 ? 5 : f === 'cara_lentes' ? -4 : 0;
-    c.beginPath();
-    c.moveTo(cx - s * 16, 103 + up);
-    c.quadraticCurveTo(cx, 93 + up, cx + s * 18, 101 + up);
-    c.stroke();
+    blob(X(s * 0.42), Y(0.05), 30, 22, shadow, 0.13);
+    blob(X(s * 0.4), Y(-0.06), 22, 9, shadow, 0.1);
+    blob(X(s * 0.47), Y(-0.24), 34, 24, warm, f === 'cara_feliz' ? 0.3 : 0.17);
+    blob(X(s * 0.16), Y(-0.24), 9, 14, shadow, 0.12);
   }
-  // boca
-  c.strokeStyle = line;
-  c.lineWidth = 5;
-  c.lineCap = 'round';
-  c.lineJoin = 'round';
+  blob(X(0), Y(-0.24), 14, 18, warm, 0.2);
+  blob(X(0), Y(-0.69), 26, 8, shadow, 0.22);
+  blob(X(0), Y(-0.9), 70, 26, shadow, 0.16);
+  // barba de pocos días (hombres): una sombra fría y granulada
+  if (!fem && f !== 'cara_feliz') {
+    const r = rng(hash(skin + f)),
+      beard = mix(cfg.hairColor, skin, 0.35);
+    c.fillStyle = beard;
+    for (let i = 0; i < 1600; i++) {
+      const a = r() * Math.PI,
+        rad = 0.55 + r() * 0.45,
+        sx = Math.cos(a) * rad * 0.8,
+        sy = -0.38 - Math.sin(a) * rad * 0.6;
+      if (sy > -0.5 && Math.abs(sx) < 0.34) continue;
+      if (Math.abs(sx) < 0.3 && sy < -0.47 && sy > -0.66) continue;
+      c.globalAlpha = 0.035 + r() * 0.05 * (L > 0.6 ? 1 : 0.6);
+      c.fillRect(X(sx), Y(sy), 1.4, 1.4);
+    }
+    c.globalAlpha = 1;
+  }
+  // nacimiento del pelo: la piel toma el color del pelo justo donde empieza (pelitos finos), así el borde no se ve cortado
+  const line = hairline(cfg.hair);
+  if (line) {
+    const t = c.getTransform(),
+      img = c.getImageData(t.e, t.f, 256, 256),
+      d = img.data,
+      hc = Number.parseInt(cfg.hairColor.slice(1), 16),
+      hr = hc >> 16,
+      hg = (hc >> 8) & 255,
+      hb = hc & 255,
+      q = rng(5);
+    for (let y = 0; y < 256; y++)
+      for (let x = 0; x < 256; x++) {
+        const sx = (x - 128) / 128,
+          sy = (128 - y) / 128,
+          r2 = sx * sx + sy * sy;
+        if (r2 >= 1) continue;
+        const m = sy - lineAt(line, Math.atan2(sx, Math.sqrt(1 - r2)));
+        if (m < -0.01) continue;
+        const k = Math.min(1, Math.max(0, (m + 0.01) / 0.07)) ** 1.5 * (0.55 + 0.45 * q()) * 0.9,
+          i = (y * 256 + x) * 4;
+        d[i] += (hr - d[i]) * k;
+        d[i + 1] += (hg - d[i + 1]) * k;
+        d[i + 2] += (hb - d[i + 2]) * k;
+      }
+    c.putImageData(img, t.e, t.f);
+  }
+  // nariz: luz en el tabique, sombra en las aletas y las fosas
+  blob(X(0), Y(-0.1), 6, 22, light(skin, 0.5), 0.18);
+  blob(X(0), Y(-0.25), 7, 6, light(skin, 0.5), 0.22);
+  for (const s of [-1, 1]) {
+    blob(X(s * 0.15), Y(-0.31), 7, 7, shadow, 0.3);
+    c.fillStyle = mix(skin, '#1a0a06', 0.6);
+    c.globalAlpha = 0.7;
+    ell(c, X(s * 0.085), Y(-0.345), 4.2, 2.2, s * 0.35);
+    c.fill();
+    c.globalAlpha = 1;
+  }
+  // labios
+  const lip = mix(skin, L < 0.35 ? '#5c2426' : '#a8434a', fem ? 0.5 : 0.36),
+    lipD = dark(lip, 0.35),
+    cy = Y(-0.545),
+    smile = f === 'cara_feliz' ? 0 : f === 'cara_bigote' || f === 'cara_lentes' ? 2 : 5,
+    wink = f === 'cara_guino' ? 4 : 0;
+  c.fillStyle = lip;
+  c.beginPath();
+  c.moveTo(X(-0.25), cy - smile + wink);
+  c.bezierCurveTo(X(-0.15), Y(-0.48), X(-0.06), Y(-0.455), X(0), Y(-0.48));
+  c.bezierCurveTo(X(0.06), Y(-0.455), X(0.15), Y(-0.48), X(0.25), cy - smile - wink);
+  c.bezierCurveTo(X(0.14), Y(-0.65), X(-0.14), Y(-0.65), X(-0.25), cy - smile + wink);
+  c.fill();
+  blob(X(0), Y(-0.6), 16, 5, light(lip, 0.4), 0.3);
   if (f === 'cara_feliz') {
+    // sonrisa abierta con dientes
+    c.fillStyle = '#3a0e10';
     c.beginPath();
-    c.moveTo(98, 182);
-    c.quadraticCurveTo(128, 190, 158, 182);
-    c.quadraticCurveTo(152, 226, 128, 226);
-    c.quadraticCurveTo(104, 226, 98, 182);
-    c.closePath();
-    c.fillStyle = '#6a1a22';
+    c.moveTo(X(-0.22), cy - 3);
+    c.quadraticCurveTo(X(0), cy - 1, X(0.22), cy - 3);
+    c.quadraticCurveTo(X(0), cy + 15, X(-0.22), cy - 3);
     c.fill();
     c.save();
     c.clip();
-    c.fillStyle = '#ffffff';
-    c.fillRect(96, 178, 64, 13);
-    c.fillStyle = '#f2788a';
-    ell(c, 128, 222, 20, 12);
-    c.fill();
+    c.fillStyle = '#efe8dc';
+    c.fillRect(X(-0.22), cy - 4, 60, 6);
     c.restore();
-    c.stroke();
-  } else if (f === 'cara_guino') {
-    c.beginPath();
-    c.moveTo(104, 184);
-    c.quadraticCurveTo(132, 206, 156, 178);
-    c.stroke();
-    c.fillStyle = '#f2788a';
-    ell(c, 140, 198, 9, 7, -0.3);
-    c.fill();
-    c.lineWidth = 3;
-    c.stroke();
-  } else if (f === 'cara_bigote') {
-    c.fillStyle = brow;
-    c.beginPath();
-    c.moveTo(128, 172);
-    c.bezierCurveTo(146, 160, 168, 172, 176, 190);
-    c.bezierCurveTo(160, 184, 144, 186, 128, 182);
-    c.bezierCurveTo(112, 186, 96, 184, 80, 190);
-    c.bezierCurveTo(88, 172, 110, 160, 128, 172);
-    c.fill();
-    c.beginPath();
-    c.moveTo(112, 198);
-    c.quadraticCurveTo(128, 208, 144, 198);
-    c.stroke();
-  } else if (f === 'cara_lentes') {
-    c.beginPath();
-    c.moveTo(106, 190);
-    c.quadraticCurveTo(132, 206, 154, 186);
-    c.stroke();
   } else {
+    c.strokeStyle = lipD;
+    c.lineWidth = 1.6;
+    c.lineCap = 'round';
     c.beginPath();
-    c.moveTo(103, 185);
-    c.quadraticCurveTo(128, 207, 153, 185);
+    c.moveTo(X(-0.24), cy - smile + wink);
+    c.bezierCurveTo(X(-0.1), cy + 1.5, X(0.1), cy + 1.5, X(0.24), cy - smile - wink);
     c.stroke();
+    for (const s of [-1, 1]) blob(X(s * 0.25), cy - smile - s * wink, 5, 5, shadow, 0.45);
   }
-  if (cfg.body === 'm' && f !== 'cara_feliz' && f !== 'cara_bigote') {
-    c.strokeStyle = 'rgba(200,60,80,0.45)';
-    c.lineWidth = 4;
-    c.beginPath();
-    c.moveTo(114, 194);
-    c.quadraticCurveTo(128, 203, 142, 194);
-    c.stroke();
-  }
-  if (f === 'cara_pecas') {
-    c.fillStyle = mix(skin, '#6b2f14', 0.6);
-    const r = rng(77);
-    for (const s of [-1, 1])
-      for (let i = 0; i < 9; i++) {
-        c.beginPath();
-        c.arc(128 + s * (36 + r() * 50), 160 + r() * 26, 2 + r() * 1.3, 0, 7);
-        c.fill();
-      }
-    for (let i = 0; i < 5; i++) {
+  // cejas: pelitos en el color del pelo, más gruesas por dentro
+  const brow = mix(cfg.hairColor, '#120a06', 0.4),
+    r = rng(31 + (fem ? 7 : 0));
+  c.strokeStyle = brow;
+  c.lineCap = 'round';
+  for (const s of [-1, 1]) {
+    const up = f === 'cara_guino' && s > 0 ? -4 : 0;
+    for (let i = 0; i < 70; i++) {
+      const t = r(),
+        sx = s * (0.16 + t * 0.46),
+        sy = 0.255 + Math.sin(t * Math.PI * 0.85) * 0.05 - t * 0.01,
+        th = (fem ? 0.024 : 0.036) * (1 - t * 0.55),
+        y0 = Y(sy) + up + (r() - 0.5) * th * 128;
+      c.globalAlpha = 0.35 + r() * 0.4;
+      c.lineWidth = 0.9 + r() * 0.6;
       c.beginPath();
-      c.arc(112 + r() * 32, 164 + r() * 10, 1.8, 0, 7);
-      c.fill();
+      c.moveTo(X(sx), y0 + 1.5);
+      c.lineTo(X(sx) + s * (3 + r() * 2), y0 - 1.5);
+      c.stroke();
     }
   }
+  c.globalAlpha = 1;
+  if (f === 'cara_bigote') {
+    // bigote: pelitos que salen del centro hacia las comisuras
+    const q = rng(13);
+    c.strokeStyle = mix(cfg.hairColor, '#000000', 0.2);
+    c.lineCap = 'round';
+    for (let i = 0; i < 260; i++) {
+      const sx = (q() - 0.5) * 0.66,
+        sy = -0.4 - 0.22 * (sx / 0.33) ** 2 - q() * 0.06;
+      c.globalAlpha = 0.45 + q() * 0.4;
+      c.lineWidth = 0.8 + q() * 0.7;
+      c.beginPath();
+      c.moveTo(X(sx), Y(sy));
+      c.lineTo(X(sx) + Math.sign(sx) * (2 + q() * 2), Y(sy) + 3 + q() * 2);
+      c.stroke();
+    }
+    c.globalAlpha = 1;
+  }
+  if (f === 'cara_pecas') {
+    const q = rng(77);
+    c.fillStyle = mix(skin, '#6b2f14', 0.55);
+    for (let i = 0; i < 90; i++) {
+      const sx = (q() - 0.5) * 1.15,
+        sy = -0.05 - q() * 0.3 - Math.abs(sx) * 0.1;
+      c.globalAlpha = 0.3 + q() * 0.4;
+      ell(c, X(sx), Y(sy), 0.8 + q() * 1.1, 0.7 + q(), q() * 3);
+      c.fill();
+    }
+    c.globalAlpha = 1;
+  }
+  region(c, EYE_RECT, (w) => eyeTex(c, cfg, w));
 }
 
 interface Sleeve {
@@ -1472,8 +1537,7 @@ function leg(c: Ctx, cfg: AvatarConfig) {
     p = cfg.pants,
     W = 128,
     H = 256;
-  c.fillStyle = cfg.skin;
-  c.fillRect(0, 0, W, H);
+  skinFill(c, W, H, cfg.skin, 11, 0.8);
   const seams = (col: string, to: number) => {
     c.strokeStyle = col;
     c.lineWidth = 1.5;
@@ -1770,7 +1834,7 @@ function swatches(c: Ctx, cfg: AvatarConfig) {
     folk = maya || p === 'pantalon_manta' || p === 'falda_tipica' || p.startsWith('falda_');
   const cols: Record<SwatchName, string> = {
     skin: cfg.skin,
-    lid: mix(cfg.skin, '#5a2a1a', 0.12),
+    lid: mix(cfg.skin, '#4a2216', 0.1),
     hair: cfg.hairColor,
     hat: hat === 'casco_explorador' ? '#d9c89a' : cfg.hatColor,
     hat2: hat === 'casco_explorador' ? '#8a6a3a' : dark(cfg.hatColor, 0.3),
@@ -1798,8 +1862,14 @@ function swatches(c: Ctx, cfg: AvatarConfig) {
     region(c, swatchCell(n), (w, h) => {
       c.fillStyle = cols[n];
       c.fillRect(0, 0, w, h);
-      if (n === 'lid') {
-        c.fillStyle = '#22140e';
+      if (n === 'skin') skinFill(c, w, h, cfg.skin, 3, 0.6);
+      else if (n === 'lid') {
+        // borde del párpado con pestañas (abajo del cuadro = orilla del párpado)
+        const g = c.createLinearGradient(0, 44, 0, 52);
+        g.addColorStop(0, 'rgba(40,20,12,0)');
+        g.addColorStop(0.5, cfg.body === 'm' ? '#120a08' : '#2a1810');
+        g.addColorStop(1, '#0c0706');
+        c.fillStyle = g;
         c.fillRect(0, 44, w, 20);
       } else if (n === 'hair') {
         const r = rng(5);
@@ -1929,7 +1999,6 @@ function overlays(c: Ctx, cfg: AvatarConfig) {
   }
 }
 
-const cache = new Map<string, THREE.CanvasTexture>();
 export const configKey = (c: AvatarConfig) =>
   [
     c.body ?? 'h',
@@ -1946,15 +2015,125 @@ export const configKey = (c: AvatarConfig) =>
     c.acc,
     c.accColor,
   ].join('|');
-/** textura del avatar para una configuración (cacheada; las más viejas se liberan y se vuelven a subir si hacen falta) */
-export function avatarAtlas(cfg: AvatarConfig): THREE.CanvasTexture {
+/** clases de material que el sombreador lee del canal R del mapa ORM (ver avatarMat.ts) */
+export const CLS = { algodon: 0, mezclilla: 1, tejido: 2, cuero: 3, piel: 4, pelo: 5, ojo: 6, duro: 7 } as const;
+type Cls = (typeof CLS)[keyof typeof CLS];
+/** camisas de tejido deportivo: las de los atuendos de club y de la Selección */
+let KNIT: Set<string> | null = null;
+const knit = (shirt: string) =>
+  (KNIT ??= new Set(
+    SHOP.items.filter((i) => i.grupo === 'club' || i.grupo === 'seleccion').map((i) => i.set?.shirt ?? ''),
+  )).has(shirt);
+export interface AvatarMaps {
+  map: THREE.CanvasTexture;
+  orm: THREE.DataTexture;
+}
+const inR = (r: Rect, x: number, y: number) => x >= r[0] && x < r[0] + r[2] && y >= r[1] && y < r[1] + r[3];
+/**
+ * Mapa ORM de la configuración (a 1/4 del atlas): R = clase de material, G = rugosidad, B = metal. Lo que quedó
+ * pintado del color de la piel es piel (brazos sin manga, cuello abierto, pecho maya); lo demás es la tela de su
+ * región: camisa de algodón o de tejido deportivo, mezclilla, cuero de zapatos y sombrero vaquero, pelo, ojos.
+ */
+function ormFor(cfg: AvatarConfig, cv: HTMLCanvasElement): THREE.DataTexture {
+  const k = 4,
+    w = AW / k,
+    h = AH / k,
+    sc = document.createElement('canvas');
+  sc.width = w;
+  sc.height = h;
+  const c = sc.getContext('2d', { willReadFrequently: true })!;
+  c.drawImage(cv, 0, 0, w, h);
+  const px = c.getImageData(0, 0, w, h).data,
+    hex = Number.parseInt(cfg.skin.slice(1), 16),
+    sk = { r: (hex >> 16) / 255, g: ((hex >> 8) & 255) / 255, b: (hex & 255) / 255 },
+    d = new Uint8Array(w * h * 4);
+  const shirt: Cls = knit(cfg.shirt) ? CLS.tejido : CLS.algodon,
+    pants: Cls = cfg.pants === 'jeans' ? CLS.mezclilla : cfg.pants === 'short_futbol' ? CLS.tejido : CLS.algodon,
+    hatC: Cls = cfg.hat === 'gorra' || cfg.hat.startsWith('panuelo') ? CLS.algodon : CLS.duro;
+  const sw: Partial<Record<SwatchName, [Cls, number, number?]>> = {
+    skin: [CLS.piel, 0.52],
+    lid: [CLS.piel, 0.45],
+    hair: [CLS.pelo, 0.58],
+    hat: [hatC, hatC === CLS.duro ? 0.6 : 0.88],
+    hat2: [hatC, hatC === CLS.duro ? 0.6 : 0.88],
+    acc: [CLS.tejido, 0.62],
+    acc2: [CLS.tejido, 0.62],
+    shoe: [CLS.cuero, 0.46],
+    sole: [CLS.duro, 0.8],
+    white: [CLS.duro, 0.5],
+    black: [CLS.duro, 0.45],
+    gold: [CLS.duro, 0.3, 1],
+    jade: [CLS.duro, 0.16],
+    lens: [CLS.duro, 0.06],
+    straw: [CLS.duro, 0.92],
+    wood: [CLS.duro, 0.45],
+    leather: [CLS.cuero, 0.55],
+    drum: [CLS.duro, 0.7],
+  };
+  const ROUGH = [0.9, 0.84, 0.62, 0.5, 0.52, 0.42, 0.1, 0.55];
+  for (let y = 0; y < h; y++)
+    for (let x = 0; x < w; x++) {
+      const i = (y * w + x) * 4,
+        X = x * k + 2,
+        Y = y * k + 2;
+      let cls: Cls = CLS.duro,
+        rough = -1,
+        metal = 0;
+      if (inR(EYE_RECT, X, Y)) cls = CLS.ojo;
+      else if (inR(R.face, X, Y)) {
+        // zona T (frente, nariz) y labios brillan un poco más
+        const sx = (X - 128) / 128,
+          sy = (128 - Y) / 128,
+          tz = Math.abs(sx) < 0.16 && sy > -0.35 && sy < 0.65 ? 1 : sy > 0.3 && sy < 0.65 ? 0.6 : 0,
+          lips = Math.abs(sx) < 0.25 && sy < -0.46 && sy > -0.64 ? 1 : 0;
+        cls = CLS.piel;
+        rough = 0.52 - 0.1 * tz - 0.14 * lips;
+      } else {
+        const dr = px[i] / 255 - sk.r,
+          dg = px[i + 1] / 255 - sk.g,
+          db = px[i + 2] / 255 - sk.b,
+          isSkin = Math.hypot(dr, dg, db) < 0.075;
+        if (inR(R.torso, X, Y)) cls = isSkin ? CLS.piel : Y - R.torso[1] < HEM ? shirt : pants;
+        else if (inR(R.arm, X, Y)) cls = isSkin ? CLS.piel : shirt;
+        else if (inR(R.leg, X, Y)) cls = isSkin ? CLS.piel : pants;
+        else if (inR(R.skirt, X, Y) || inR(R.cape, X, Y) || inR(R.patA, X, Y)) cls = CLS.algodon;
+        else if (inR(R.patB1, X, Y) || inR(R.patB2, X, Y)) cls = CLS.algodon;
+        else
+          for (const n of SWATCH)
+            if (inR(swatchCell(n), X, Y)) {
+              const v = sw[n];
+              if (v) {
+                cls = v[0];
+                rough = v[1];
+                metal = v[2] ?? 0;
+              }
+              break;
+            }
+      }
+      d[i] = cls * 32 + 16;
+      d[i + 1] = (rough < 0 ? ROUGH[cls] : rough) * 255;
+      d[i + 2] = metal * 255;
+      d[i + 3] = 255;
+    }
+  // el lienzo va con y hacia abajo; la textura con y hacia arriba
+  const out = new Uint8Array(d.length);
+  for (let y = 0; y < h; y++) out.set(d.subarray(y * w * 4, (y + 1) * w * 4), (h - 1 - y) * w * 4);
+  const t = new THREE.DataTexture(out, w, h, THREE.RGBAFormat);
+  t.magFilter = t.minFilter = THREE.NearestFilter;
+  t.needsUpdate = true;
+  return t;
+}
+
+const cache = new Map<string, AvatarMaps>();
+/** textura y ORM del avatar para una configuración (cacheadas; las más viejas se liberan y se vuelven a subir) */
+export function avatarMaps(cfg: AvatarConfig): AvatarMaps {
   const key = configKey(cfg);
   let t = cache.get(key);
   if (t) return t;
   const cv = document.createElement('canvas');
   cv.width = AW;
   cv.height = AH;
-  const c = cv.getContext('2d')!;
+  const c = cv.getContext('2d', { willReadFrequently: true })!;
   c.fillStyle = cfg.skin;
   c.fillRect(0, 0, AW, AH);
   region(c, R.face, () => face(c, cfg));
@@ -1965,8 +2144,7 @@ export function avatarAtlas(cfg: AvatarConfig): THREE.CanvasTexture {
     pantsTop(c, cfg);
   });
   region(c, R.arm, () => {
-    c.fillStyle = cfg.skin;
-    c.fillRect(0, 0, 128, 256);
+    skinFill(c, 128, 256, cfg.skin, 7, 0.8);
     c.save();
     c.beginPath();
     c.rect(0, 0, 128, sl!.len);
@@ -1984,68 +2162,16 @@ export function avatarAtlas(cfg: AvatarConfig): THREE.CanvasTexture {
   region(c, R.cape, () => cape(c));
   patterns(c, cfg);
   swatches(c, cfg);
-  t = new THREE.CanvasTexture(cv);
-  t.colorSpace = THREE.SRGBColorSpace;
-  t.anisotropy = 4;
+  const map = new THREE.CanvasTexture(cv);
+  map.colorSpace = THREE.SRGBColorSpace;
+  map.anisotropy = 4;
+  t = { map, orm: ormFor(cfg, cv) };
   cache.set(key, t);
   if (cache.size > 64) {
     const old = cache.keys().next().value!;
-    cache.get(old)!.dispose();
+    cache.get(old)!.map.dispose();
+    cache.get(old)!.orm.dispose();
     cache.delete(old);
   }
   return t;
-}
-
-let orm: THREE.DataTexture | null = null;
-/** rugosidad (G) y metal (B) por región del atlas; igual para todos los avatares */
-export function avatarORM(): THREE.DataTexture {
-  if (orm) return orm;
-  const k = 4,
-    w = AW / k,
-    h = AH / k,
-    d = new Uint8Array(w * h * 4);
-  const fill = (r: Rect, rough: number, metal = 0) => {
-    for (let y = r[1] / k; y < (r[1] + r[3]) / k; y++)
-      for (let x = r[0] / k; x < (r[0] + r[2]) / k; x++) {
-        const o = ((h - 1 - y) * w + x) * 4;
-        d[o] = 255;
-        d[o + 1] = rough * 255;
-        d[o + 2] = metal * 255;
-        d[o + 3] = 255;
-      }
-  };
-  fill([0, 0, AW, AH], 0.8);
-  fill(R.face, 0.6);
-  fill(R.torso, 0.86);
-  fill(R.skirt, 0.62);
-  fill(R.arm, 0.74);
-  fill(R.leg, 0.8);
-  fill(R.cape, 0.66);
-  const sw: Partial<Record<SwatchName, [number, number?]>> = {
-    skin: [0.6],
-    lid: [0.6],
-    hair: [0.48],
-    shoe: [0.42],
-    gold: [0.3, 1],
-    jade: [0.16],
-    lens: [0.1],
-    straw: [0.92],
-    wood: [0.42],
-    black: [0.5],
-    leather: [0.6],
-    red: [0.55],
-    blue: [0.55],
-    green: [0.55],
-    yellow: [0.55],
-    pink: [0.55],
-    purple: [0.55],
-  };
-  for (const n of SWATCH) {
-    const v = sw[n];
-    if (v) fill(swatchCell(n), v[0], v[1] ?? 0);
-  }
-  orm = new THREE.DataTexture(d, w, h, THREE.RGBAFormat);
-  orm.magFilter = orm.minFilter = THREE.NearestFilter;
-  orm.needsUpdate = true;
-  return orm;
 }

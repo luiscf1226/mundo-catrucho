@@ -19,16 +19,15 @@ const JUEGO = {
   corte: 'olancho.pastel',
   monta: 'olancho.jaripeo',
   ritmo: 'atlantida.punta-en-sambo-creek',
-  atrapa: 'yoro.lluvia',
+  atrapa: 'yoro.lluvia-de-peces',
   pesca: 'cortes.pesca-en-yojoa',
-  trivia: 'yoro.huelga',
-  cocina: 'yoro.coyoles',
+  cocina: 'colon.casabe-de-santa-fe',
   ruta: 'lempira.sendero-de-celaque',
   manejo: 'franciscomorazan.rapidito',
-  feria: 'yoro.santiago',
+  feria: 'santabarbara.argollas-pateplumas',
   pulperia: 'franciscomorazan.pulperia',
-  futbol: 'yoro.riberenos',
-  exploradores: 'yoro.tolupan',
+  futbol: 'franciscomorazan.potra-de-dos-colores',
+  exploradores: 'graciasadios.la-ficha-que-faltaba',
 };
 
 // ------------------------------------------------------------------ bots (corren dentro de la página)
@@ -159,6 +158,12 @@ function botAtrapa({ normal }) {
     if (tgt) {
       dx = tgt.x + off[0] - px;
       dz = tgt.z + off[1] - pz;
+    }
+    // con cubeta (Lluvia de Peces): llena, o sin nada que alcanzar y con algo adentro, se va a vaciarla
+    if (s.poza && (s.carga >= s.cupo || (!tgt && s.carga >= 3))) {
+      const [qx, qz] = s.pozas[s.pozas.length > 1 ? s.turno : 0];
+      dx = qx - px;
+      dz = qz - pz;
     }
     // esquivar lo malo que cae encima
     if (Math.random() < esquiva)

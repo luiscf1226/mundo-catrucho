@@ -150,7 +150,15 @@ export type MinigameId =
   | 'santabarbara.perspectiva'
   | 'santabarbara.goteo'
   | 'santabarbara.juncocorte'
-  | 'santabarbara.papel';
+  | 'santabarbara.papel'
+  // Yoro
+  | 'yoro.cable'
+  | 'yoro.acuerdos'
+  | 'yoro.jamo'
+  | 'yoro.ulua'
+  | 'yoro.pijol'
+  | 'yoro.almohadilla'
+  | 'yoro.coyol';
 /** solo = vos contra bots · duo = vos y un compa contra parejas · abierto = sala abierta (se llena con bots si no hay gente) */
 export type Modo = 'solo' | 'duo' | 'abierto';
 export type Vehiculo =
