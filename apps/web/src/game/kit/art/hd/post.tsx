@@ -38,8 +38,11 @@ void main() {
   vec3 ddy = abs( pu.z - p.z ) < abs( p.z - pd.z ) ? pu - p : p - pd;
   vec3 n = normalize( cross( ddx, ddy ) );
   if ( dot( n, p ) > 0.0 ) n = -n;
-  float ssR = min( uProjScale * uRadius / -z, 90.0 );
-  float r2 = uRadius * uRadius, j = ign( gl_FragCoord.xy ), ang = j * 6.2832, occ = 0.0, bias = 0.004 - 0.002 * z;
+  // radio que se achica de cerca: con 1,5 m fijo, en primer plano el cuello, las axilas y los
+  // tapiales se veían negros; de lejos sigue asentando casas y postes
+  float rad = uRadius * clamp( -z / 8.0, 0.15, 1.0 );
+  float ssR = min( uProjScale * rad / -z, 90.0 );
+  float r2 = rad * rad, j = ign( gl_FragCoord.xy ), ang = j * 6.2832, occ = 0.0, bias = 0.004 - 0.002 * z;
   for ( int i = 0; i < AO_N; i++ ) {
     // espiral con ángulo áureo; el giro y el radio cambian por píxel y el desenfoque junta el resultado
     float a = ( float( i ) + fract( j * 7.31 + float( i ) * 0.618 ) ) / float( AO_N ), th = float( i ) * 2.39996 + ang;
@@ -48,7 +51,8 @@ void main() {
     float vv = dot( v, v ), vn = dot( v, n ), f = max( r2 - vv, 0.0 );
     occ += f * f * f * max( ( vn - bias ) / ( vv + 0.01 ), 0.0 );
   }
-  float ao = max( 0.0, 1.0 - occ * uIntensity / ( r2 * r2 * r2 ) * 5.0 / float( AO_N ) );
+  // nunca negro del todo: la luz del cielo rebota aunque el rincón esté cerrado
+  float ao = max( 0.4, 1.0 - occ * uIntensity / ( r2 * r2 * r2 ) * 5.0 / float( AO_N ) );
   ao = mix( ao, 1.0, smoothstep( uFade * 0.6, uFade, -z ) );
   gl_FragColor = vec4( ao, -z, 0.0, 1.0 );
 }
