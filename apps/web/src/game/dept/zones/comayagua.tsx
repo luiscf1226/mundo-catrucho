@@ -1,5 +1,6 @@
 import type { Department } from '../../../core/types';
 import { P } from '../../kit';
+import { arco } from '../casas';
 import { bl, bx, cy, inR, PI, place, py } from '../lib';
 import { casa, mont, stairs } from '../parts';
 import { ZB, type ZoneSpec } from '../zone';
@@ -28,6 +29,19 @@ export function catedral(d: Department): ZoneSpec {
     bx(0, 6, -12.5, 17, 12, 1.2, 'stucco', W),
     bx(0, 13, -12.5, 11.5, 2.2, 1.2, 'stucco', W),
     bx(0, 15, -12.5, 6, 2, 1.2, 'stucco', W),
+    // remates de la fachada escalonada: cornisas, pináculos y volutas
+    bx(0, 14.15, -12.5, 11.9, 0.2, 1.5, 'stucco', T, { solid: false }),
+    bx(0, 16.05, -12.5, 6.4, 0.2, 1.5, 'stucco', T, { solid: false }),
+    ...[-5.6, 5.6, -2.8, 2.8].flatMap((x) => {
+      const y = Math.abs(x) > 4 ? 14.25 : 16.15;
+      return [
+        cy(x, y + 0.35, -12.0, 0.13, 0.7, 'stucco', T, { n: 6, solid: false }),
+        bl(x, y + 0.8, -12.0, 0.2, 'stucco', T, { n: 8 }),
+      ];
+    }),
+    ...[-1, 1].map((sx) =>
+      cy(sx * 4.4, 14.6, -11.95, 0.55, 0.3, 'stucco', T, { e: [PI / 2, 0, 0], n: 12, solid: false }),
+    ),
     bx(0, 16.9, -12.5, 0.25, 1.8, 0.25, 'stone', K, { solid: false }),
     bx(0, 17.2, -12.5, 1, 0.25, 0.25, 'stone', K, { solid: false }),
     ...[4.6, 8.6, 12].map((y) => bx(0, y, -11.85, y > 10 ? 11.9 : 17.4, 0.3, 0.3, 'stucco', T, { solid: false })),
@@ -48,10 +62,15 @@ export function catedral(d: Department): ZoneSpec {
     bx(-13, 18.15, -13, 7.5, 0.3, 7.5, 'stucco', T, { solid: false }),
     bx(-13, 20.8, -13, 6, 5, 6, 'stucco', '#f2e6cf'),
     bx(-13, 23.4, -13, 6.5, 0.3, 6.5, 'stucco', T, { solid: false }),
-    bx(-13, 20.8, -9.96, 1.6, 3, 0.12, 'stone', K, { solid: false }),
-    bx(-13, 20.8, -16.04, 1.6, 3, 0.12, 'stone', K, { solid: false }),
-    bx(-9.96, 20.8, -13, 0.12, 3, 1.6, 'stone', K, { solid: false }),
-    bx(-16.04, 20.8, -13, 0.12, 3, 1.6, 'stone', K, { solid: false }),
+    // arcos del campanario en las cuatro caras, pilastras en las esquinas y pináculos arriba
+    ...[0, PI / 2, PI, -PI / 2].flatMap((r) => place(arco(0, 20.3, 3, 1.6, 2.4, T, '#2e2b27'), -13, 0, -13, r)),
+    ...[-1, 1].flatMap((sx) =>
+      [-1, 1].flatMap((sz) => [
+        bx(-13 + sx * 2.85, 20.8, -13 + sz * 2.85, 0.4, 4.8, 0.4, 'stucco', T, { solid: false }),
+        cy(-13 + sx * 3.05, 23.9, -13 + sz * 3.05, 0.14, 0.7, 'stucco', T, { n: 6, solid: false }),
+        bl(-13 + sx * 3.05, 24.35, -13 + sz * 3.05, 0.2, 'stucco', T, { n: 8 }),
+      ]),
+    ),
     bl(-13, 23.5, -13, 3, 'tile', '#f4a261', { s: [1, 0.85, 1] }),
     cy(-13, 26.4, -13, 0.5, 1.2, 'stucco', W, { n: 8, solid: false }),
     bx(-13, 27.8, -13, 0.2, 1.6, 0.2, 'stone', K, { solid: false }),

@@ -141,6 +141,9 @@ export interface ArtPack {
   boxGeometry?(w: number, h: number, d: number): THREE.BufferGeometry;
   /** geometría de roca con forma (radio 1, base plana en y = −0.3), cacheada por semilla; la usan las zonas */
   rockGeometry?(seed: number): THREE.BufferGeometry;
+  /** opcional (hd): un solo material que lee capa, rugosidad, metal y emisión (`aMat`) y color (`aCol`) por
+   *  vértice; `info` da [capa, rugosidad, metal] de cada tipo. Con esto <Build> dibuja todo lo opaco en una llamada. */
+  fused?: { material(): THREE.Material; info(kind: MatKind): [number, number, number] };
   /** envoltorio opcional alrededor de toda la escena (posprocesado, etc.) */
   Effects?: FC<{ children?: ReactNode }>;
   /** vegetación fusionada (una malla para muchas plantas). Si falta, las escenas usan sus piezas de siempre. */

@@ -14,13 +14,14 @@ import { Avatar } from './avatar';
 import { Flora } from './flora';
 import { gRock, roundedBox } from './geo';
 import { GroundCover } from './grass';
-import { hdMaterial } from './materials';
+import { hdMaterial, kindInfo, propMaterial } from './materials';
 import { Effects } from './post';
 import { props1 } from './props1';
 import { props2 } from './props2';
 import { props3 } from './props3';
 import { Hills } from './relief';
 import { SkyRig } from './sky';
+import { layerIndex } from './tex';
 
 export const pack: ArtPack = {
   ...basePack,
@@ -28,6 +29,13 @@ export const pack: ArtPack = {
   material: hdMaterial,
   boxGeometry: (w, h, d) => roundedBox(w, h, d),
   rockGeometry: gRock,
+  fused: {
+    material: () => propMaterial(),
+    info: (k) => {
+      const i = kindInfo(k) ?? { l: 'plastic' as const, r: 0.42, m: 0 };
+      return [layerIndex(i.l), i.r, i.m];
+    },
+  },
   SkyRig,
   Avatar,
   Effects,

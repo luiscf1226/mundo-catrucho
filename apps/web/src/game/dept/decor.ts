@@ -1,5 +1,6 @@
 // Decorado de una estación según el tipo de lugar. Piezas locales (frente hacia +Z, apoyo en y = 0), centradas en el origen.
 import type { LugarKind } from '../../core/types';
+import { arco, campanario, columna } from './casas';
 import { bl, bx, cy, type Pc, py, rng } from './lib';
 import { casa, VEG } from './parts';
 
@@ -144,17 +145,21 @@ export function decorFor(kind: LugarKind | string, seed: number): Pc[] {
         ...[-3, -1, 1, 3].map((x, i) => bl(x, 1.25, -4.5, 0.3, 'plastic', AW[i % 4])),
       ];
     case 'iglesia':
+      // basílica o iglesia grande: nave, frontón, dos campanarios con cúpula y puerta en arco
       return [
         bx(0, 3.5, -2, 7, 7, 6, 'stucco', WHITE),
         py(0, 7, -2, 7.4, 2.4, 6.4, 'roof', ROOF),
         bx(-3.2, 5, 1.3, 1.8, 10, 1.8, 'stucco', WHITE),
         bx(3.2, 5, 1.3, 1.8, 10, 1.8, 'stucco', WHITE),
-        py(-3.2, 10, 1.3, 2, 1.8, 2, 'roof', ROOF),
-        py(3.2, 10, 1.3, 2, 1.8, 2, 'roof', ROOF),
+        ...campanario(-3.2, 1.3, 1.8, 10, WHITE, { cap: '#ffe6a7', cupula: '#d9e3ea', desde: 6.8 }),
+        ...campanario(3.2, 1.3, 1.8, 10, WHITE, { cap: '#ffe6a7', cupula: '#d9e3ea', desde: 6.8 }),
         bx(0, 7.4, 1.05, 4.6, 1.4, 0.3, 'stucco', '#ffe6a7', { solid: false }),
+        py(0, 8.1, 1.05, 4.6, 1.2, 0.3, 'stucco', WHITE),
         bx(0, 1.6, 1.05, 1.8, 3.2, 0.12, 'wood', DW, { solid: false }),
-        bx(0, 8.5, 1.1, 0.2, 1.4, 0.15, 'gold', '#e8c547', { solid: false }),
-        bx(0, 8.7, 1.1, 0.8, 0.2, 0.15, 'gold', '#e8c547', { solid: false }),
+        ...arco(0, 1.6, 1.0, 1.8, 3.2, '#ffe6a7', DW),
+        ...[-1.6, 1.6].flatMap((x) => columna(x, 1.2, 0, 6.6, 0.16, WHITE, '#ffe6a7')),
+        bx(0, 8.5 + 0.9, 1.1, 0.2, 1.4, 0.15, 'gold', '#e8c547', { solid: false }),
+        bx(0, 8.7 + 0.9, 1.1, 0.8, 0.2, 0.15, 'gold', '#e8c547', { solid: false }),
       ];
     case 'estadio':
       return [
