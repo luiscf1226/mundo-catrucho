@@ -3,12 +3,13 @@ import type { Group } from 'three';
 import { player } from '../../../core/player';
 import { useGame } from '../../../core/store';
 import { Ball, Block, Cyl, Interactable, Label, useTick } from '../../kit';
-import { reaccionLocura } from '../../reacciones';
+import { reaccionLocura, useLocuraCerca } from '../../reacciones';
 import puntos from './intibuca-puntos.json';
 
 function Punto({ indice }: { indice: number }) {
   const p = puntos[indice];
   const [x, y, z] = p.pos;
+  useLocuraCerca(x, z, undefined, { title: p.nombre, text: p.texto });
   const [hecho, hacer] = useState(false);
   const g = useRef<Group>(null);
   const calma = useRef(0);
