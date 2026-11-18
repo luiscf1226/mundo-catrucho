@@ -10,7 +10,42 @@ export const G = {
   /** 0..1 superficies mojadas por la lluvia */ uWet: { value: 0 },
   /** 0..1 faroles y ventanas encendidos */ uNight: { value: 0 },
   /** color del cielo (lineal) para el brillo del agua y el vidrio */ uSky: { value: new THREE.Color('#9fd0ff') },
+  /** 0..1 cuánto llueve ahora (gotas en los charcos) */ uRain: { value: 0 },
+  /** 0..1 cuánta agua junta el piso: se llena después de mojarse y se seca de último */ uPuddle: { value: 0 },
+  /** dirección hacia el sol (mundo) y su color: cáusticos, rayos y lluvia a contraluz */
+  uSunDir: { value: new THREE.Vector3(0, 1, 0) },
+  uSunCol: { value: new THREE.Color('#fff0d8') },
+  /** 1 mientras el posproceso dibuja la escena en su objetivo: el alfa lleva luz ambiental y reflejo (ver FRAG_SPLIT) */
+  uSplit: { value: 0 },
+  /** alturas del terreno de la zona para saber la hondura del agua: textura, caja (x0, z0, lado, activa) y nivel
+   *  de los dos planos de agua de la zona */
+  tShore: { value: null as THREE.Texture | null },
+  uShoreBox: { value: new THREE.Vector4(0, 0, 1, 0) },
+  uShoreY: { value: new THREE.Vector2(-999, -999) },
 };
+
+/** Le dice al agua dónde está el fondo: la rejilla de alturas de la zona (n × n puntos cada `cell` m, centrada en
+ *  el origen) y los niveles de sus planos de agua. Sin esto (lobby, pilas, fuentes) el agua sigue como siempre. */
+export function setShore(data: Float32Array | null, n = 0, cell = 1, levels: number[] = []) {
+  const old = G.tShore.value;
+  G.tShore.value = null;
+  G.uShoreBox.value.w = 0;
+  old?.dispose();
+  if (!data || n < 2) return;
+  const half = ((n - 1) * cell) / 2,
+    h16 = new Uint16Array(n * n);
+  for (let i = 0; i < h16.length; i++) h16[i] = THREE.DataUtils.toHalfFloat(data[i]);
+  const t = new THREE.DataTexture(h16, n, n, THREE.RedFormat, THREE.HalfFloatType);
+  t.magFilter = t.minFilter = THREE.LinearFilter;
+  t.needsUpdate = true;
+  G.tShore.value = t;
+  // el centro del texel i cae en x = −half + i·cell
+  G.uShoreBox.value.set(-half - cell / 2, -half - cell / 2, n * cell, 1);
+  G.uShoreY.value.set(levels[0] ?? -999, levels[1] ?? -999);
+}
+// textura vacía para que el sampler siempre tenga algo
+const SHORE0 = new THREE.DataTexture(new Uint16Array([0]), 1, 1, THREE.RedFormat, THREE.HalfFloatType);
+SHORE0.needsUpdate = true;
 
 const KIND: Record<MatKind, { l: LayerName; r: number; m: number }> = {
   plastic: { l: 'plastic', r: 0.42, m: 0 },
@@ -69,8 +104,25 @@ const GRIME: Partial<Record<LayerName, number>> = {
 };
 const arr = (n: string, f: (l: LayerName) => number) =>
   `const float ${n}[${NL}] = float[${NL}](${LAYERS.map((l) => f(l).toFixed(2)).join(', ')});`;
+/** cuánto junta agua y brilla mojado cada capa (el zacate y la tela casi no; el asfalto y el concreto mucho) */
+const PUD: Partial<Record<LayerName, number>> = {
+  asphalt: 1,
+  concrete: 0.9,
+  cobble: 0.9,
+  tile: 0.8,
+  stone: 0.75,
+  dirt: 0.7,
+  roof: 0.35,
+  metal: 0.5,
+  wood: 0.3,
+  plastic: 0.4,
+  sand: 0.25,
+  brick: 0.4,
+  stucco: 0.3,
+};
 const tileArr = [
   arr('TRI_TILE', (l) => TILE[l]),
+  arr('TRI_PUD', (l) => PUD[l] ?? 0),
   arr('TRI_MAC', (l) => MAC[l] ?? 0.14),
   arr('TRI_GRIME', (l) => GRIME[l] ?? 0),
 ].join('\n');
@@ -79,6 +131,9 @@ const VERT_PARS = /* glsl */ `
 varying vec3 vTriPos; varying vec3 vTriN; varying mat3 vTriM;
 #ifdef TRI_ATTR
 attribute vec4 aMat; attribute vec3 aCol; varying vec4 vMat; varying vec3 vCol; varying vec2 vTriUv;
+#endif
+#ifdef TRI_WATER
+varying vec3 vTriW;
 #endif
 `;
 const VERT_MAIN = /* glsl */ `
@@ -91,6 +146,9 @@ const VERT_MAIN = /* glsl */ `
   vec3 tc0 = normalize( triR[0] ), tc1 = normalize( triR[1] ), tc2 = normalize( triR[2] );
   vTriPos = vec3( dot( tc0, triW.xyz ), dot( tc1, triW.xyz ), dot( tc2, triW.xyz ) );
   vTriN = objectNormal; vTriM = triNM;
+  #ifdef TRI_WATER
+    vTriW = triW.xyz;
+  #endif
   #ifdef TRI_ATTR
     vMat = aMat; vCol = aCol; vTriUv = uv;
   #endif
@@ -99,7 +157,32 @@ const VERT_MAIN = /* glsl */ `
 const FRAG_PARS = /* glsl */ `
 uniform sampler2DArray tAlb; uniform sampler2DArray tNrm;
 uniform float uWet; uniform float uTime; uniform float uNight; uniform vec3 uSky;
+uniform float uRain, uPuddle, uSplit; uniform vec3 uSunDir, uSunCol;
 varying vec3 vTriPos; varying vec3 vTriN; varying mat3 vTriM;
+#ifdef TRI_WATER
+  varying vec3 vTriW; uniform sampler2D tShore; uniform vec4 uShoreBox; uniform vec2 uShoreY;
+  float triFoam; float triShallow; float triKnown;
+  // cáusticos baratos: dos ondas cruzadas y deformadas; donde se anulan quedan las líneas de luz del fondo
+  float triCaus( vec2 p, float t ) {
+    vec2 q = p + vec2( sin( p.y * 1.3 + t ), cos( p.x * 1.1 - t * 0.8 ) ) * 0.55;
+    vec2 r = p * 1.6 + vec2( cos( p.y * 0.9 - t * 0.5 ), sin( p.x * 1.2 + t * 0.6 ) ) * 0.7;
+    float a = abs( sin( q.x * 2.1 + t * 0.7 ) + sin( q.y * 2.3 - t * 0.6 ) );
+    float b = abs( sin( r.x * 1.9 - t * 0.4 ) + sin( r.y * 2.0 + t * 0.5 ) );
+    return smoothstep( 0.3, 0.0, a ) * 0.6 + smoothstep( 0.24, 0.0, b ) * 0.5;
+  }
+#endif
+// gotas de lluvia en los charcos: anillos que se abren en celdas al azar (dos capas desfasadas)
+vec2 triRipple( vec2 p, float t ) {
+  vec2 acc = vec2( 0.0 );
+  for ( int k = 0; k < 2; k++ ) {
+    vec2 q = p * 2.6 + float( k ) * vec2( 0.37, 0.61 ), c = floor( q ), f = fract( q ) - 0.5;
+    float h = fract( sin( dot( c, vec2( 12.9898, 78.233 ) ) + float( k ) * 7.0 ) * 43758.5453 );
+    vec2 d = f - ( vec2( fract( h * 13.1 ), fract( h * 7.7 ) ) - 0.5 ) * 0.5;
+    float r = length( d ), ph = fract( t * 1.3 + h ), rr = ph * 0.42;
+    acc += d / max( r, 1e-3 ) * ( 1.0 - ph ) * smoothstep( 0.07, 0.0, abs( r - rr ) ) * sin( ( r - rr ) * 70.0 );
+  }
+  return acc;
+}
 ${tileArr}
 const mat2 TRI_ROT = mat2( 0.8, 0.6, -0.6, 0.8 );
 #ifdef TRI_ATTR
@@ -107,7 +190,7 @@ const mat2 TRI_ROT = mat2( 0.8, 0.6, -0.6, 0.8 );
 #else
   uniform vec4 uMat;
 #endif
-vec3 triNp; vec3 triTan; float triRough; float triRoughMul; bool triUvMode; vec3 triTint;
+vec3 triNp; vec3 triTan; float triRough; float triRoughMul; bool triUvMode; vec3 triTint; float triPud; float triRefl;
 mat3 triTBN( vec3 eye_pos, vec3 surf_norm, vec2 uv ) {
   vec3 q0 = dFdx( eye_pos.xyz ), q1 = dFdy( eye_pos.xyz ); vec2 st0 = dFdx( uv.st ), st1 = dFdy( uv.st );
   vec3 N = surf_norm, q1perp = cross( q1, N ), q0perp = cross( N, q0 );
@@ -136,13 +219,31 @@ const FRAG_MAP = /* glsl */ `
     vec2 uvX = tp.zy, uvY = tp.xz, uvZ = tp.xy;
   #endif
   #ifdef TRI_WATER
+    // hondura: nivel del agua menos la altura del terreno debajo (solo en los planos grandes de la zona)
+    float wD = 0.0; triKnown = 0.0; triFoam = 0.0; triShallow = 0.0;
+    #ifndef TRI_LOW
+      if ( uShoreBox.w > 0.5 && min( abs( vTriW.y - uShoreY.x ), abs( vTriW.y - uShoreY.y ) ) < 0.03 ) {
+        vec2 suv = ( vTriW.xz - uShoreBox.xy ) / uShoreBox.z;
+        if ( suv.x > 0.0 && suv.y > 0.0 && suv.x < 1.0 && suv.y < 1.0 ) {
+          wD = vTriW.y - texture( tShore, suv ).r; triKnown = 1.0;
+        }
+      }
+    #endif
     // tres capas de olas en direcciones distintas: marejada lenta, ola media y rizo fino; de lejos se aplana
     // (sin centelleo) y el rizo pesa menos
     vec2 wo = uTime * vec2( 0.045, 0.03 ), ws = uTime * vec2( -0.012, 0.021 );
     float wFar = smoothstep( 18.0, 80.0, length( vViewPosition ) );
     #define TRI_WN( uv ) ( texture( tNrm, vec3( uv * 0.29 + ws, tl ) ) * 0.42 + texture( tNrm, vec3( uv + wo, tl ) ) * 0.36 + texture( tNrm, vec3( uv * 2.1 - wo.yx * 1.6, tl ) ) * 0.22 )
     vec4 nX = TRI_WN( uvX ), nY = TRI_WN( uvY ), nZ = TRI_WN( uvZ );
-    tk *= 1.6 - 0.9 * wFar;
+    // mar abierto (hondo): olas más grandes, con una marejada ancha más; cerca de la orilla el agua se calma
+    float wDeep = triKnown * smoothstep( 1.5, 7.0, wD );
+    #ifdef TRI_HIGH
+      if ( wDeep > 0.01 ) {
+        vec4 sw = texture( tNrm, vec3( uvY * 0.085 + ws * 0.7, tl ) );
+        nY = mix( nY, nY * 0.45 + sw * 0.55, wDeep );
+      }
+    #endif
+    tk *= ( 1.6 - 0.9 * wFar ) * ( 1.0 + 0.75 * wDeep ) * ( 1.0 - 0.45 * triKnown * ( 1.0 - smoothstep( 0.0, 1.2, wD ) ) );
     vec4 ta = vec4( 1.0 );
   #else
     vec4 aY = texture( tAlb, vec3( uvY, tl ) );
@@ -207,11 +308,41 @@ const FRAG_MAP = /* glsl */ `
     float gr = wall * gk * ( foot * foot * 0.7 + smoothstep( 0.6, 0.9, streak ) * 0.12 );
     alb *= mix( vec3( 1.0 ), vec3( 0.66, 0.6, 0.52 ), clamp( gr, 0.0, 1.0 ) );
   }
-  float wetK = uWet * ( 0.35 + 0.65 * smoothstep( 0.2, 0.9, tn0.y ) ) * ( 0.5 + 0.5 * smoothstep( 0.25, 0.6, macro ) );
-  alb *= 1.0 - 0.3 * wetK;
-  triRoughMul = mix( 1.0, 0.22, wetK ); triRough = tnb.b;
+  // mojado: cuánto mira hacia arriba en el mundo (los planos del piso vienen girados) y cuánto agua aguanta la capa;
+  // al secarse, las partes altas del ruido grande se secan primero (manchas, no un fundido parejo)
+  float triUp = dot( normalize( vTriM * tn0 ), viewMatrix[ 1 ].xyz );
+  float wetP = smoothstep( 0.0, 0.35, uWet * 1.35 - mv * 0.7 );
+  float wetK = wetP * ( 0.35 + 0.65 * smoothstep( 0.2, 0.9, triUp ) ) * ( 0.55 + 0.45 * TRI_PUD[ li ] );
+  alb *= 1.0 - ( 0.22 + 0.2 * TRI_PUD[ li ] ) * wetK;
+  triRoughMul = mix( 1.0, mix( 0.5, 0.16, TRI_PUD[ li ] ), wetK ); triRough = tnb.b;
+  triPud = 0.0; triRefl = 0.0;
+  #if !defined( TRI_LOW ) && !defined( TRI_WATER )
+    // charcos en los bajos del piso: crecen mientras llueve y se encogen al secarse
+    if ( uPuddle > 0.002 && triUp > 0.86 && TRI_PUD[ li ] > 0.0 ) {
+      float pn = texture( tAlb, vec3( vTriPos.xz * 0.06 + vec2( 0.71, 0.29 ), ${MACRO}.0 ) ).r * 0.7
+        + texture( tAlb, vec3( vTriPos.xz * 0.21 + vec2( 0.33, 0.81 ), ${MACRO}.0 ) ).r * 0.3;
+      float th = mix( 0.82, 0.5, uPuddle * TRI_PUD[ li ] );
+      triPud = smoothstep( th, th + 0.05, pn ) * smoothstep( 0.86, 0.95, triUp );
+      alb *= 1.0 - 0.6 * triPud;
+      triRoughMul = mix( triRoughMul, 0.05, triPud );
+    }
+    triRefl = max( triPud, wetK * TRI_PUD[ li ] * 0.6 * smoothstep( 0.6, 0.95, triUp ) );
+  #endif
   #ifdef TRI_WATER
     alb *= 0.82;
+    if ( triKnown > 0.5 ) {
+      // agua poco honda: más clara y con el fondo a la vista; honda: más oscura
+      triShallow = 1.0 - smoothstep( 0.05, 1.8, wD );
+      alb = mix( alb * mix( 1.0, 0.72, smoothstep( 2.0, 10.0, wD ) ), alb * 1.25 + vec3( 0.05, 0.07, 0.04 ), triShallow * 0.6 );
+      // espuma en la orilla: una franja que respira y líneas que llegan con cada ola, rotas por ruido
+      float fn = texture( tAlb, vec3( vTriW.xz * 0.3 + uTime * vec2( 0.012, 0.008 ), ${MACRO}.0 ) ).r;
+      float fn2 = texture( tAlb, vec3( vTriW.xz * 1.1 - uTime * vec2( 0.02, 0.015 ), ${MACRO}.0 ) ).r;
+      float band = 1.0 - smoothstep( 0.0, 0.12 + 0.07 * sin( uTime * 0.9 + fn * 6.0 ), wD );
+      float lines = smoothstep( 0.86, 1.0, sin( wD * 30.0 - uTime * 1.7 + fn * 5.0 ) ) * ( 1.0 - smoothstep( 0.06, 0.26, wD ) );
+      triFoam = clamp( band * 0.9 + lines * 0.6, 0.0, 1.0 ) * smoothstep( 0.22, 0.5, fn2 * 0.75 + fn * 0.25 + band * 0.25 );
+      alb = mix( alb, vec3( 0.9, 0.94, 0.95 ), triFoam * 0.9 );
+      triRoughMul = mix( 1.0, 9.0, triFoam );
+    }
   #endif
   diffuseColor.rgb = alb;
 }
@@ -235,6 +366,22 @@ const FRAG_NORMAL = /* glsl */ `
   if ( triUvMode ) { mat3 tb = triTBN( - vViewPosition, normal, vTriUv ); normal = normalize( tb * triTan ); } else
 #endif
   { normal = normalize( vTriM * triNp ) * faceDirection; }
+#if !defined( TRI_LOW ) && !defined( TRI_WATER )
+  if ( triPud > 0.0 ) {
+    // el charco es un espejo plano; en alta, con lluvia, se rompe con los anillos de las gotas
+    vec3 gN = normalize( vTriM * normalize( vTriN ) ) * faceDirection;
+    normal = normalize( mix( normal, gN, triPud ) );
+    #ifdef TRI_HIGH
+      if ( uRain > 0.02 ) {
+        vec2 rp = triRipple( vTriPos.xz, uTime ) * uRain * triPud * 0.35;
+        normal = normalize( normal + viewMatrix[ 0 ].xyz * rp.x + viewMatrix[ 2 ].xyz * rp.y );
+      }
+    #endif
+  }
+#endif
+#ifdef TRI_WATER
+  if ( triFoam > 0.0 ) normal = normalize( mix( normal, normalize( vTriM * normalize( vTriN ) ) * faceDirection, triFoam * 0.7 ) );
+#endif
 `;
 const FRAG_EMIS = /* glsl */ `
 #ifdef TRI_ATTR
@@ -249,7 +396,10 @@ const FRAG_FRESNEL = /* glsl */ `
 {
   vec3 wV = normalize( vViewPosition );
   float wF = 0.02 + 0.98 * pow( 1.0 - saturate( dot( normal, wV ) ), 5.0 );
-  diffuseColor.a = mix( diffuseColor.a * 0.88, 1.0, saturate( wF * 1.7 ) );
+  // poco hondo deja ver el fondo; la espuma tapa
+  diffuseColor.a = mix( diffuseColor.a * mix( 0.88, 0.6, triShallow ), 1.0, saturate( wF * 1.7 ) );
+  diffuseColor.a = mix( diffuseColor.a, 0.92, triFoam );
+  wF *= 1.0 - triFoam;
   #ifdef USE_ENVMAP
     // con scene.environment la intensidad es la del relleno del cielo: aquí se quita para ver el cielo tal cual;
     // el agua se queda con un poco de su color en el reflejo
@@ -257,6 +407,13 @@ const FRAG_FRESNEL = /* glsl */ `
     outgoingLight = mix( outgoingLight, wR * mix( vec3( 1.0 ), triTint * 1.6, 0.3 ), wF * 0.72 );
   #else
     outgoingLight += uSky * wF * 0.5;
+  #endif
+  #ifdef TRI_HIGH
+    // cáusticos: la red de luz que el sol deja en el fondo poco hondo (se ve a través del agua)
+    if ( triShallow > 0.02 ) {
+      float sunUp = saturate( uSunDir.y * 2.0 ) * ( 1.0 - uNight ) * ( 1.0 - smoothstep( 14.0, 40.0, length( vViewPosition ) ) );
+      outgoingLight += uSunCol * triCaus( vTriW.xz * 1.3, uTime * 0.8 ) * triShallow * ( 1.0 - triFoam ) * sunUp * 0.35;
+    }
   #endif
 }
 #else
@@ -269,6 +426,20 @@ const FRAG_FRESNEL = /* glsl */ `
 #endif
 #include <opaque_fragment>
 `;
+/** Con el posproceso activo (uSplit = 1), lo opaco guarda en el alfa qué parte de su luz es ambiental (la oclusión
+ *  oscurece solo esa parte, no lo que da al sol) o, si es piso mojado que refleja, 1.5 + cuánto refleja (los reflejos
+ *  en pantalla de alta lo leen). Sin posproceso el alfa queda en 1 como siempre. */
+const FRAG_SPLIT = /* glsl */ `
+#include <opaque_fragment>
+#ifdef OPAQUE
+if ( uSplit > 0.5 ) {
+  const vec3 LW = vec3( 0.2126, 0.7152, 0.0722 );
+  float tAmb = dot( reflectedLight.indirectDiffuse + reflectedLight.indirectSpecular, LW );
+  float tAll = max( dot( outgoingLight, LW ), 1e-4 );
+  gl_FragColor.a = triRefl > 0.02 ? 1.5 + triRefl : clamp( tAmb / tAll, 0.0, 1.0 );
+}
+#endif
+`;
 
 function shared(sh: { uniforms: Record<string, any> }) {
   const t = layerTextures();
@@ -278,6 +449,18 @@ function shared(sh: { uniforms: Record<string, any> }) {
   sh.uniforms.uTime = G.uTime;
   sh.uniforms.uNight = G.uNight;
   sh.uniforms.uSky = G.uSky;
+  sh.uniforms.uRain = G.uRain;
+  sh.uniforms.uPuddle = G.uPuddle;
+  sh.uniforms.uSplit = G.uSplit;
+  sh.uniforms.uSunDir = G.uSunDir;
+  sh.uniforms.uSunCol = G.uSunCol;
+  sh.uniforms.tShore = {
+    get value() {
+      return G.tShore.value ?? SHORE0;
+    },
+  };
+  sh.uniforms.uShoreBox = G.uShoreBox;
+  sh.uniforms.uShoreY = G.uShoreY;
 }
 /** Convierte un MeshStandardMaterial en triplanar. `attr` = capa/color por vértice (utilería fusionada). */
 export function triplanar<T extends THREE.MeshStandardMaterial>(
@@ -287,12 +470,14 @@ export function triplanar<T extends THREE.MeshStandardMaterial>(
   const uMat = {
     value: new THREE.Vector4(layerIndex(o.layer ?? 'plastic'), 1 / TILE[o.layer ?? 'plastic'], o.nk ?? 1, 0),
   };
-  const low = texCalidad() === 'baja';
+  const low = texCalidad() === 'baja',
+    high = texCalidad() === 'alta';
   mat.defines = {
     ...(mat.defines ?? {}),
     ...(o.attr ? { TRI_ATTR: '' } : {}),
     ...(o.water ? { TRI_WATER: '' } : {}),
     ...(low ? { TRI_LOW: '' } : {}),
+    ...(high ? { TRI_HIGH: '' } : {}),
   };
   mat.onBeforeCompile = (sh) => {
     shared(sh);
@@ -308,9 +493,12 @@ export function triplanar<T extends THREE.MeshStandardMaterial>(
       .replace('#include <normal_fragment_maps>', FRAG_NORMAL)
       .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>\n${FRAG_EMIS}`);
     if (o.fresnel) f = f.replace('#include <opaque_fragment>', FRAG_FRESNEL);
+    // en baja no hay posproceso: el shader queda como antes
+    else if (!low) f = f.replace('#include <opaque_fragment>', FRAG_SPLIT);
     sh.fragmentShader = f;
   };
-  mat.customProgramCacheKey = () => `tri|${o.attr ? 1 : 0}|${o.water ? 1 : 0}|${o.fresnel ? 1 : 0}|${low ? 1 : 0}`;
+  mat.customProgramCacheKey = () =>
+    `tri|${o.attr ? 1 : 0}|${o.water ? 1 : 0}|${o.fresnel ? 1 : 0}|${low ? 1 : 0}|${high ? 1 : 0}`;
   return mat;
 }
 
@@ -380,25 +568,40 @@ let _pool: THREE.ShaderMaterial | null = null;
  *  extra). La geometría trae uv en [−1, 1] y `aK` con la fuerza de cada lámpara. */
 export function poolMaterial() {
   return (_pool ??= new THREE.ShaderMaterial({
-    uniforms: { uNight: G.uNight },
+    uniforms: { uNight: G.uNight, uWet: G.uWet },
     vertexShader: /* glsl */ `
-      attribute float aK; varying vec2 vUv; varying float vK;
-      void main() { vUv = uv; vK = aK; gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 ); }`,
+      attribute float aK; varying vec2 vUv; varying float vK; varying vec2 vCam;
+      void main() {
+        vUv = uv; vK = aK;
+        vec4 w = modelMatrix * vec4( position, 1.0 );
+        // hacia la cámara en el plano del charco (uv: x = +x del mundo, y = −z)
+        vec2 d = normalize( cameraPosition.xz - w.xz + 1e-4 ); vCam = vec2( d.x, -d.y );
+        gl_Position = projectionMatrix * viewMatrix * w;
+      }`,
     fragmentShader: /* glsl */ `
-      uniform float uNight; varying vec2 vUv; varying float vK;
+      uniform float uNight, uWet; varying vec2 vUv; varying float vK; varying vec2 vCam;
       void main() {
         float d = length( vUv );
-        if ( d > 1.0 ) discard;
         // caída suave tipo cuadrado inverso, núcleo más blanco y borde anaranjado
-        float a = pow( 1.0 - d * d, 2.6 ) * vK * uNight;
-        vec3 c = mix( vec3( 1.0, 0.55, 0.22 ), vec3( 1.0, 0.82, 0.55 ), pow( 1.0 - d, 2.0 ) );
+        float a = d > 1.0 ? 0.0 : pow( 1.0 - d * d, 2.6 ) * vK * uNight * ( 1.0 + 0.3 * uWet );
+        // con el piso mojado la lámpara se refleja: una estela angosta del pie de la luz hacia la cámara
+        float al = dot( vUv, vCam ), ac = dot( vUv, vec2( -vCam.y, vCam.x ) );
+        float st = exp( -ac * ac * 60.0 ) * smoothstep( -0.25, 0.15, al ) * ( 1.0 - smoothstep( 0.3, 1.0, al ) );
+        a += st * vK * uNight * uWet * 0.9;
+        if ( a < 0.002 ) discard;
+        vec3 c = mix( vec3( 1.0, 0.55, 0.22 ), vec3( 1.0, 0.82, 0.55 ), pow( max( 1.0 - d, 0.0 ), 2.0 ) + st * uWet * 0.5 );
         gl_FragColor = vec4( c * a * 0.26, 1.0 );
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
       }`,
     transparent: true,
     depthWrite: false,
-    blending: THREE.AdditiveBlending,
+    // suma color sin tocar el alfa (el posproceso lee del alfa la luz ambiental y el reflejo del piso)
+    blending: THREE.CustomBlending,
+    blendSrc: THREE.OneFactor,
+    blendDst: THREE.OneFactor,
+    blendSrcAlpha: THREE.ZeroFactor,
+    blendDstAlpha: THREE.OneFactor,
     polygonOffset: true,
     polygonOffsetFactor: -2,
     polygonOffsetUnits: -2,

@@ -443,6 +443,13 @@ export function ZoneScenery({ spec }: { spec: ZoneSpec }) {
       phys.limit = null;
     };
   }, [spec]);
+  // el agua de la zona sabe qué tan honda es (orilla con espuma, fondo a la vista, olas en mar abierto)
+  useLayoutEffect(() => {
+    const levels = spec.water.filter((w) => (w.mat ?? 'water') === 'water').map((w) => w.y);
+    if (!levels.length) return;
+    art.shore?.(spec.f.data, spec.f.n, spec.f.cell, levels);
+    return () => art.shore?.(null);
+  }, [spec]);
   return (
     <>
       <art.SkyRig time="auto" weather="auto" {...spec.sky} />

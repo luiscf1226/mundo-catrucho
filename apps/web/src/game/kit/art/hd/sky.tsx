@@ -5,7 +5,8 @@
 //  - niebla con el color del horizonte (perspectiva aérea)
 //  - time="auto": ciclo completo de día y noche;  weather="auto": despejado → nublado → lluvia → escampa
 // Escribe env.hour y env.weather en cada cuadro. Para pruebas: #hora=18 fija la hora del ciclo (también si se
-// cambia el hash sin recargar) y #ciclo=rapido acelera el día (48 s) y el clima.
+// cambia el hash sin recargar), #clima=lluvia|despejado|neblina|nublado fija el clima y #ciclo=rapido acelera el
+// día (48 s) y el clima.
 
 import { useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useMemo, useRef } from 'react';
@@ -197,12 +198,19 @@ const hashNum = (k: string) => {
   return m ? parseFloat(m[1]) : null;
 };
 const FAST = typeof location !== 'undefined' && location.hash.includes('ciclo=rapido');
-export const world = { hour: hashNum('hora') ?? 9, wt: 0, cover: 0.3, rain: 0, fog: 0, wet: 0 };
-// en pruebas, cambiar #hora=N sin recargar mueve el reloj
+export const world = { hour: hashNum('hora') ?? 9, wt: 0, cover: 0.3, rain: 0, fog: 0, wet: 0, pud: 0 };
+type Clima = 'despejado' | 'lluvia' | 'neblina' | 'nublado';
+const hashClima = (): Clima | null => {
+  const m = typeof location !== 'undefined' ? /clima=(despejado|lluvia|neblina|nublado)/.exec(location.hash) : null;
+  return m ? (m[1] as Clima) : null;
+};
+let climaFijo = hashClima();
+// en pruebas, cambiar #hora=N o #clima=… sin recargar mueve el reloj o el clima
 if (typeof window !== 'undefined')
   window.addEventListener('hashchange', () => {
     const h = hashNum('hora');
     if (h !== null) world.hour = h % 24;
+    climaFijo = hashClima();
   });
 /** segundos reales por hora del juego: el día dura unos 6 min, la tarde y el atardecer 2.5 min (se disfrutan),
  * la noche 2.5 min y el amanecer 1 min. Un día completo dura unos 12 min; con #ciclo=rapido, 48 s. */
@@ -276,8 +284,13 @@ void main() {
   float s = max( dot( d, uSunDir ), 0.0 ), m = max( dot( d, uMoonDir ), 0.0 );
   // halo del sol: más ancho y cálido cerca del horizonte
   vec3 glow = uSunCol * ( pow( s, 420.0 ) * 0.9 + pow( s, 28.0 ) * 0.28 + pow( s, 5.0 ) * 0.22 * pow( 1.0 - h, 5.0 ) );
+  #ifdef SKY_HQ
+    // halo ancho de la bruma (dispersión hacia adelante) y aureola alrededor del disco
+    glow += uSunCol * ( pow( s, 2.5 ) * 0.07 + pow( s, 90.0 ) * 0.22 ) * ( 0.6 + 0.4 * ( 1.0 - h ) );
+  #endif
   col += glow * uSunVis;
-  col = mix( col, vec3( 1.0, 0.98, 0.9 ), smoothstep( 0.99935, 0.99965, s ) * uSunVis );
+  // el disco siempre más claro que su halo (sin tono, lo que pasa de 1 queda blanco)
+  col = mix( col, max( col, vec3( 1.0, 0.98, 0.9 ) ) * 1.15, smoothstep( 0.99935, 0.99965, s ) * uSunVis );
   // estrellas
   vec3 sp = d * 95.0, ic = floor( sp ), fc = fract( sp ) - 0.5; float hs = hash3( ic );
   float star = step( 0.986, hs ) * smoothstep( 0.2, 0.02, length( fc ) ) * ( 0.65 + 0.35 * sin( uTime * 2.5 + hs * 97.0 ) );
@@ -292,10 +305,30 @@ void main() {
   float n = fbm( cuv ), th = mix( 0.74, 0.22, uCover );
   float cl = smoothstep( th, th + 0.3, n ) * smoothstep( 0.0, 0.16, d.y );
   vec3 ld = uSunVis > 0.01 ? uSunDir : uMoonDir;
-  float n2 = fbm( cuv + ld.xz * 0.14 );
-  float lit = clamp( 0.6 + ( n - n2 ) * 2.4 - cl * 0.25 * uCover, 0.0, 1.0 );
-  vec3 cc = mix( uCloudD, uCloudC, lit ) + uSunCol * pow( s, 7.0 ) * 0.3 * uSunVis;
-  col = mix( col, cc, cl * 0.94 );
+  #ifdef SKY_HQ
+    // cirros altos: vetas finas y estiradas detrás de los cúmulos, teñidas por el sol al atardecer
+    vec2 hu = d.xz / ( h + 0.25 ) * vec2( 0.35, 1.6 ) + uTime * vec2( 0.004, 0.0015 );
+    float ci = smoothstep( 0.52, 0.85, fbm( hu + vec2( 3.1, 7.7 ) ) ) * smoothstep( 0.04, 0.3, d.y ) * ( 1.0 - 0.6 * uCover );
+    col = mix( col, mix( uCloudC, uSunCol * 1.1, 0.35 * ( 1.0 - h ) ) * 0.98, ci * 0.42 );
+    // cúmulos con volumen: densidad hacia el sol (dos muestras) con caída de Beer y «polvo» en los bordes; base
+    // más oscura, cima encendida, borde plateado a contraluz y color del sol bajo en las caras que lo ven
+    float n2 = fbm( cuv + ld.xz * 0.09 ), n3 = fbm( cuv + ld.xz * 0.22 );
+    float dens = max( n2 - th, 0.0 ) * 2.2 + max( n3 - th, 0.0 ) * 1.6;
+    float beer = exp( -dens * 1.7 ), powder = 1.0 - exp( -max( n - th, 0.0 ) * 9.0 );
+    float lit = clamp( 0.32 + beer * mix( 1.0, powder * 2.0, 0.45 ) * 0.85 - cl * 0.2 * uCover, 0.0, 1.0 );
+    // centro grueso un poco más azulado y oscuro que los bordes (la luz del cielo lo rellena)
+    float core = smoothstep( th + 0.05, th + 0.4, n );
+    vec3 cc = mix( uCloudD, uCloudC, lit );
+    cc = mix( cc, cc * vec3( 0.9, 0.93, 1.0 ), core * 0.35 );
+    float lowSun = 1.0 - smoothstep( 0.05, 0.45, uSunDir.y );
+    cc += uSunCol * ( pow( s, 6.0 ) * 0.5 * ( 1.0 - cl * 0.7 ) + lit * lowSun * 0.25 ) * uSunVis;
+    col = mix( col, cc, cl * 0.95 );
+  #else
+    float n2 = fbm( cuv + ld.xz * 0.14 );
+    float lit = clamp( 0.6 + ( n - n2 ) * 2.4 - cl * 0.25 * uCover, 0.0, 1.0 );
+    vec3 cc = mix( uCloudD, uCloudC, lit ) + uSunCol * pow( s, 7.0 ) * 0.3 * uSunVis;
+    col = mix( col, cc, cl * 0.94 );
+  #endif
   col += ( hash( gl_FragCoord.xy ) - 0.5 ) / 200.0;
   gl_FragColor = vec4( col, 1.0 );
 }
@@ -317,7 +350,7 @@ void main() {
 }
 `;
 const RAIN_VERT = /* glsl */ `
-attribute float aEnd; uniform vec3 uCam; uniform float uTime, uRain; varying float vA;
+attribute float aEnd; uniform vec3 uCam, uCol, uSunDir, uSunCol; uniform float uTime, uRain; varying float vA; varying vec3 vC;
 void main() {
   const float W = 34.0, H = 20.0;
   float seed = fract( position.x * 91.7 + position.z * 37.3 );
@@ -328,11 +361,14 @@ void main() {
   p += aEnd * vec3( 0.07, 0.5 + seed * 0.35, 0.03 );
   vec4 mv = viewMatrix * vec4( p, 1.0 );
   vA = step( seed, uRain * 1.05 ) * ( 0.22 + 0.3 * seed ) * smoothstep( 0.6, 3.0, - mv.z ) * ( 1.0 - smoothstep( 12.0, 17.0, - mv.z ) ) * ( 1.0 - aEnd * 0.7 );
+  // a contraluz las gotas se encienden (la luz las atraviesa hacia la cámara)
+  float fs = pow( max( dot( normalize( p - uCam ), uSunDir ), 0.0 ), 5.0 );
+  vC = uCol + uSunCol * fs * 1.4; vA *= 1.0 + fs * 1.6;
   gl_Position = projectionMatrix * mv;
 }
 `;
 const RAIN_FRAG = /* glsl */ `
-uniform vec3 uCol; varying float vA; void main() { gl_FragColor = vec4( uCol, vA ); }
+varying float vA; varying vec3 vC; void main() { gl_FragColor = vec4( vC, vA ); }
 `;
 const SPLASH_VERT = /* glsl */ `
 uniform vec3 uCam; uniform float uTime, uRain, uGround, uScale; varying float vA; varying float vPh;
@@ -345,14 +381,23 @@ void main() {
   p.z = mod( ( position.z + jit.y ) * W - uCam.z, W ) - W * 0.5 + uCam.z;
   p.y = uGround + 0.04;
   vec4 mv = viewMatrix * vec4( p, 1.0 );
-  vA = step( seed, uRain ) * ( 1.0 - vPh ) * 0.55 * ( 1.0 - smoothstep( 9.0, 13.0, - mv.z ) );
+  vA = step( seed, uRain ) * ( 1.0 - vPh ) * 0.6 * ( 1.0 - smoothstep( 9.0, 13.0, - mv.z ) );
   gl_PointSize = uScale * ( 0.1 + 0.3 * vPh ) / max( 0.5, - mv.z );
   gl_Position = projectionMatrix * mv;
 }
 `;
 const SPLASH_FRAG = /* glsl */ `
 uniform vec3 uCol; varying float vA; varying float vPh;
-void main() { vec2 q = ( gl_PointCoord - 0.5 ) * vec2( 2.0, 4.4 ); float r = length( q ); float ring = smoothstep( 0.55, 0.8, r ) * ( 1.0 - smoothstep( 0.85, 1.0, r ) ); if ( ring * vA < 0.01 ) discard; gl_FragColor = vec4( uCol, ring * vA ); }
+void main() {
+  vec2 q = ( gl_PointCoord - 0.5 ) * vec2( 2.0, 4.4 ); float r = length( q );
+  float ring = smoothstep( 0.55, 0.8, r ) * ( 1.0 - smoothstep( 0.85, 1.0, r ) );
+  // el golpe de la gota: una coronita que salta al principio, arriba del anillo
+  vec2 qc = ( gl_PointCoord - vec2( 0.5, 0.38 ) ) * vec2( 2.6, 1.6 );
+  float crown = ( 1.0 - smoothstep( 0.0, 0.3, vPh ) ) * smoothstep( 0.5, 0.15, length( qc ) ) * ( 0.6 + 0.4 * step( 0.5, fract( qc.x * 3.0 + 0.5 ) ) );
+  float a = max( ring, crown * 0.8 ) * vA;
+  if ( a < 0.01 ) discard;
+  gl_FragColor = vec4( uCol * ( 1.0 + crown * 0.3 ), a );
+}
 `;
 
 const v3 = (c: RGB) => new THREE.Vector3(c[0], c[1], c[2]);
@@ -383,13 +428,16 @@ export function SkyRig({
   const scene = useThree((s) => s.scene),
     gl = useThree((s) => s.gl);
   // en alta, mapa de sombras de 4096: sombras nítidas cerca del jugador (misma luz, mismas llamadas de dibujo)
-  const sombra = useGame((s) => calidadEfectiva(s.profile.settings)) === 'alta' ? 4096 : 2048;
+  const calidad = useGame((s) => calidadEfectiva(s.profile.settings)),
+    sombra = calidad === 'alta' ? 4096 : 2048;
   const fogC = useMemo(() => (fogColor ? hex(`#${new THREE.Color(fogColor).getHexString()}`) : null), [fogColor]);
 
   const R = useMemo(() => {
     const skyMat = new THREE.ShaderMaterial({
       vertexShader: SKY_VERT,
       fragmentShader: SKY_FRAG,
+      // nubes con volumen y halo ancho fuera de baja (dos lecturas de ruido más por píxel del cielo)
+      defines: calidad === 'baja' ? {} : { SKY_HQ: '' },
       side: THREE.BackSide,
       depthWrite: false,
       depthTest: false,
@@ -437,7 +485,8 @@ export function SkyRig({
       cubeCam = new THREE.CubeCamera(0.1, 50, cubeRT);
     const pmrem = new THREE.PMREMGenerator(gl);
     // lluvia
-    const N = COMPACT_QUALITY ? 400 : 1500,
+    // en alta, más gotas (aguacero de verdad) y más salpicadas
+    const N = COMPACT_QUALITY ? 400 : calidad === 'alta' ? 2800 : 1500,
       rp = new Float32Array(N * 6),
       re = new Float32Array(N * 2);
     for (let i = 0; i < N; i++) {
@@ -462,9 +511,11 @@ export function SkyRig({
         uTime: G.uTime,
         uRain: { value: 0 },
         uCol: { value: new THREE.Vector3(0.8, 0.86, 0.95) },
+        uSunDir: { value: new THREE.Vector3(0, 1, 0) },
+        uSunCol: { value: new THREE.Vector3() },
       },
     });
-    const M = 260,
+    const M = calidad === 'alta' ? 700 : 260,
       sp = new Float32Array(M * 3);
     for (let i = 0; i < M * 3; i++) sp[i] = Math.random();
     const splashGeo = new THREE.BufferGeometry();
@@ -503,7 +554,7 @@ export function SkyRig({
       fog: new THREE.Fog('#b4dcfb', 60, fogFar),
       first: true,
     };
-  }, [gl]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [gl, calidad]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const prevFog = scene.fog,
@@ -543,13 +594,15 @@ export function SkyRig({
     let tc = 0.28,
       tr = 0,
       tf = 0;
-    if (weather === 'lluvia') {
+    const wx = climaFijo ?? weather;
+    if (wx === 'nublado') tc = 0.75;
+    else if (wx === 'lluvia') {
       tc = 1;
       tr = 1;
-    } else if (weather === 'neblina') {
+    } else if (wx === 'neblina') {
       tc = 0.55;
       tf = 1;
-    } else if (weather === 'auto') {
+    } else if (wx === 'auto') {
       [tc, tr] = autoWeather();
       tf = time === 'auto' ? sstep(5, 6.2, hour) * (1 - sstep(7.2, 8.6, hour)) * 0.85 : 0;
     }
@@ -565,6 +618,10 @@ export function SkyRig({
     world.wet +=
       ((world.rain > 0.25 ? 1 : 0) - world.wet) *
       (R.first ? 1 : 1 - Math.exp(-dt * (world.rain > 0.25 ? (FAST ? 2 : 0.25) : FAST ? 0.6 : 0.05)));
+    // los charcos se llenan después de que el piso se moja (≈ 10 s) y son lo último en secarse (≈ 40 s)
+    world.pud +=
+      ((world.rain > 0.4 ? world.wet : 0) - world.pud) *
+      (R.first ? 1 : 1 - Math.exp(-dt * (world.rain > 0.4 ? (FAST ? 1 : 0.1) : FAST ? 0.3 : 0.025)));
     R.first = false;
     const over = sstep(0.55, 1, world.cover),
       rainK = world.rain;
@@ -572,6 +629,8 @@ export function SkyRig({
     env.weather = rainK > 0.3 ? 'lluvia' : world.fog > 0.5 ? 'neblina' : 'despejado';
     G.uTime.value = T;
     G.uWet.value = indoor ? 0 : world.wet;
+    G.uPuddle.value = indoor ? 0 : world.pud;
+    G.uRain.value = indoor ? 0 : world.rain;
     G.uNight.value = indoor ? 0.7 : Math.max(sstep(18.1, 18.9, hour), 1 - sstep(5.2, 5.9, hour), over * rainK * 0.5);
 
     // --- astros
@@ -617,6 +676,8 @@ export function SkyRig({
     u.uStars.value = c.stars * (1 - over);
     u.uCover.value = world.cover;
     u.uSunVis.value = sunVis;
+    G.uSunDir.value.copy(sunDir);
+    G.uSunCol.value.setRGB(c.sun[0], c.sun[1], c.sun[2], THREE.SRGBColorSpace).multiplyScalar(sunVis * (1 - ov * 0.85));
     u.uMoonVis.value = moonVis;
     const cd = 1 - ov * 0.45;
     u.uCloudC.value.set(
@@ -631,7 +692,8 @@ export function SkyRig({
     }
 
     // --- niebla y fondo
-    const far = fogFar * (1 - 0.45 * rainK) * (1 - 0.78 * world.fog),
+    // con lluvia la cortina de agua cierra la vista: niebla más cerca y más densa
+    const far = fogFar * (1 - 0.58 * rainK) * (1 - 0.78 * world.fog),
       fog = R.fog;
     if (indoor) {
       fog.color.set(fogColor ?? '#1c1612');
@@ -640,7 +702,7 @@ export function SkyRig({
     } else {
       fog.color.setRGB(hor[0], hor[1], hor[2], THREE.SRGBColorSpace);
       fog.far = far;
-      fog.near = far * lerp(0.28, 0.04, Math.max(world.fog, rainK * 0.5));
+      fog.near = far * lerp(0.28, 0.03, Math.max(world.fog, rainK * 0.7));
     }
     // Con escenas que cargan perezosamente, el cielo anterior puede desmontarse después de que monta este y
     // restaurar su niebla y su fondo viejos (o null): el cielo activo los reafirma en cada cuadro.
@@ -751,6 +813,8 @@ export function SkyRig({
     ru.uRain.value = rainK;
     const b = 0.5 + lum * 0.5;
     ru.uCol.value.set(0.78 * b, 0.84 * b, 0.95 * b);
+    ru.uSunDir.value.copy(sunDir);
+    ru.uSunCol.value.set(c.sun[0], c.sun[1], c.sun[2]).multiplyScalar(sunVis * (1 - ov * 0.55) * 0.6);
     R.splashMat.uniforms.uGround.value = player.pos[1];
     R.splashMat.uniforms.uScale.value = st.size.height * st.viewport.dpr * 1.1;
     if (rain.current) rain.current.visible = rainK > 0.02;
