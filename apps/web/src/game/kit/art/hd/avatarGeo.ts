@@ -6,7 +6,7 @@ import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeom
 import type { AvatarConfig, V3 } from '../../../../core/types';
 import type { AddN } from './avatarAnat';
 import * as anat from './avatarAnat';
-import { inverted, loft, type Rect, SkinBuilder, type Warp, type WFn } from './skin';
+import { inverted, loft, loftNormals, type Rect, SkinBuilder, type Warp, type WFn } from './skin';
 
 // --- huesos
 export const B = {
@@ -30,9 +30,16 @@ export const B = {
   cape2: 17,
   cape3: 18,
   skirt: 19,
+  /** cara: quijada (abre la boca), cejas (suben y bajan) y comisuras (sonrisa) */
+  jaw: 20,
+  brow: 21,
+  mouth: 22,
+  /** globos de los ojos (la mirada) */
+  eyeL: 23,
+  eyeR: 24,
 } as const;
-export const NB = 20;
-export const PARENT = [-1, 0, 1, 2, 2, 4, 2, 6, 1, 8, 9, 1, 11, 12, 3, 3, 2, 16, 17, 1];
+export const NB = 25;
+export const PARENT = [-1, 0, 1, 2, 2, 4, 2, 6, 1, 8, 9, 1, 11, 12, 3, 3, 2, 16, 17, 1, 3, 3, 3, 3, 3];
 /** posición de reposo de cada hueso en las medidas VIEJAS (muñeco cabezón): la ropa, los sombreros y los accesorios
  * siguen escritos en estas medidas y `warp` los lleva a las proporciones nuevas */
 const OLD: V3[] = [
@@ -56,6 +63,11 @@ const OLD: V3[] = [
   [0, 0.92, -0.15],
   [0, 0.7, -0.16],
   [0, 0.82, 0],
+  [0, 0, 0],
+  [0, 0, 0],
+  [0, 0, 0],
+  [0, 0, 0],
+  [0, 0, 0],
 ];
 /** escala de cada hueso de las medidas viejas a las nuevas (ancho, largo, fondo); null = familia de la cabeza */
 const SC: (V3 | null)[] = [
@@ -79,6 +91,11 @@ const SC: (V3 | null)[] = [
   [0.79, 1.3, 0.78],
   [0.79, 1.3, 0.78],
   [0.83, 1.18, 0.78],
+  null,
+  null,
+  null,
+  null,
+  null,
 ];
 /** posición de reposo de cada hueso (medidas reales, ~1,72 m a la coronilla, 7,5 cabezas de alto) */
 export const REST: V3[] = OLD.map((): V3 => [0, 0, 0]);
@@ -205,70 +222,98 @@ const wCape: WFn = (_x, y) => {
   return [B.chest, 1 - a, B.cape1, a * (1 - b), B.cape2, b * (1 - c), B.cape3, c];
 };
 
-const torsoV = (y: number, fem: boolean) => {
-  const top: [number, number][] = fem
+/** escote de la camisa: redondo o en V con cuello de tela, o abierto (blusas de hombros afuera y pecho descubierto) */
+export type Neckline = 'round' | 'v' | 'open';
+let VNECK: Set<string> | null = null;
+/** camisas de club y de la Selección (cuello en V). Las pasa avatarTex.ts: importar el catálogo aquí arma un ciclo */
+let clubShirts: () => string[] = () => [];
+export const setClubShirts = (f: () => string[]) => {
+  clubShirts = f;
+  VNECK = null;
+};
+export function neckline(c: AvatarConfig): Neckline {
+  const s = c.shirt;
+  if (s === 'pecho_maya' || s === 'pecho_pelota' || s === 'blusa_tipica') return 'open';
+  if (s === 'vestido_lenca' || s === 'blusa_garifuna' || s === 'blusa_punta') return c.body === 'm' ? 'open' : 'round';
+  VNECK ??= new Set(['camisa_guacamaya', 'camisa_cuadros', 'camisa_h', 'camisa_h_azul', 'guayabera', ...clubShirts()]);
+  return VNECK.has(s) ? 'v' : 'round';
+}
+/** anillo del torso en medidas viejas: y, rx, rz, cz y la v del atlas (la banda de arriba es el cuello de la tela) */
+type TR = [number, number, number, number, number?];
+/**
+ * Perfil del torso. Arriba sube el trapecio hasta el cuello y termina en el cuello de la camisa: un borde con grosor
+ * (la tela da la vuelta hacia adentro y se esconde dentro del cuello), así la piel termina limpia en la geometría y no
+ * en la textura. En los escotes abiertos el torso cierra pegado al cuello, sin borde.
+ */
+function torsoRings(fem: boolean, nk: Neckline): TR[] {
+  const low: TR[] = fem
     ? [
-        [1.09, 0.8],
-        [1.14, 0.86],
-        [1.17, 0.93],
-        [1.188, 0.97],
-        [1.2, 1],
+        [0.692, 0.004, 0.004, 0],
+        [0.7, 0.12, 0.095, 0],
+        [0.735, 0.2, 0.152, 0],
+        [0.8, 0.216, 0.166, 0],
+        [0.88, 0.168, 0.13, 0],
+        [0.95, 0.172, 0.138, 0.004],
+        [1.0, 0.19, 0.16, 0.024],
+        [1.04, 0.192, 0.16, 0.026],
+        [1.09, 0.2, 0.14, 0.01, 0.8],
+        [1.14, 0.222, 0.122, 0, 0.86],
+        [1.162, 0.196, 0.11, -0.002, 0.9],
+        [1.18, 0.142, 0.094, -0.005, 0.93],
+        [1.192, 0.1, 0.082, -0.007, 0.955],
       ]
     : [
-        [1.11, 0.8],
-        [1.15, 0.86],
-        [1.175, 0.93],
-        [1.19, 0.97],
-        [1.2, 1],
+        [0.692, 0.004, 0.004, 0],
+        [0.7, 0.11, 0.09, 0],
+        [0.735, 0.185, 0.145, 0],
+        [0.8, 0.205, 0.158, 0],
+        [0.88, 0.186, 0.142, 0],
+        [0.97, 0.2, 0.152, 0.002],
+        [1.05, 0.218, 0.16, 0.008],
+        [1.11, 0.236, 0.152, 0.004, 0.8],
+        [1.15, 0.248, 0.134, 0, 0.86],
+        [1.167, 0.215, 0.12, -0.002, 0.9],
+        [1.1825, 0.158, 0.102, -0.005, 0.93],
+        [1.194, 0.112, 0.09, -0.007, 0.955],
       ];
-  for (const [ty, tv] of top) if (Math.abs(y - ty) < 1e-4) return tv;
-  return y < 0.7 ? 0 : Math.min(1, (y - 0.7) / 0.475);
-};
+  // borde del cuello: afuera (v 0,985), la vuelta hacia adentro (v 1) y el cierre escondido dentro del cuello
+  const y = fem ? 1.2 : 1.203,
+    k = fem ? 0.9 : 1;
+  if (nk === 'open')
+    low.push([y - 0.0005, 0.079 * k, 0.08 * k, -0.008, 0.985], [y - 0.006, 0.062 * k, 0.064 * k, -0.008, 1]);
+  else low.push([y, 0.089 * k, 0.088 * k, -0.008, 0.985], [y - 0.004, 0.07 * k, 0.072 * k, -0.008, 1]);
+  low.push([y - 0.014, 0.004, 0.004, -0.008, 1]);
+  return low;
+}
+/** el cuello de la camisa baja adelante (escote) y sube un poco atrás; se aplica a los anillos de arriba del loft */
+function collarDip(g: THREE.BufferGeometry, rings: TR[], seg: number) {
+  const P = g.attributes.position;
+  for (let i = 0; i < rings.length; i++) {
+    const k = sm(1.178, 1.198, rings[i][0]);
+    if (!k) continue;
+    for (let j = 0; j <= seg; j++) {
+      const c = Math.cos((j / seg - 0.5) * Math.PI * 2),
+        n = i * (seg + 1) + j;
+      P.setY(n, P.getY(n) + k * (c > 0 ? -0.0125 * c * c : 0.003 * c * c));
+    }
+  }
+  loftNormals(g, seg);
+}
 function body(add: Add, c: AvatarConfig, nat: AddN, lite: boolean) {
   // torso (camisa arriba, pantalón o falda abajo: lo pinta el atlas). Perfiles en medidas viejas: `warp` los estira.
-  const fem = c.body === 'm';
-  const TH: [number, number, number, number?][] = [
-    [0.692, 0.004, 0.004],
-    [0.7, 0.11, 0.09],
-    [0.735, 0.185, 0.145],
-    [0.8, 0.205, 0.158],
-    [0.88, 0.186, 0.142],
-    [0.97, 0.2, 0.152, 0.002],
-    [1.05, 0.218, 0.16, 0.008],
-    [1.11, 0.232, 0.152, 0.004],
-    [1.15, 0.226, 0.13],
-    [1.175, 0.16, 0.1],
-    [1.19, 0.086, 0.076],
-    [1.2, 0.04, 0.04],
-  ];
-  const TM: [number, number, number, number?][] = [
-    [0.692, 0.004, 0.004],
-    [0.7, 0.12, 0.095],
-    [0.735, 0.2, 0.152],
-    [0.8, 0.216, 0.166],
-    [0.88, 0.168, 0.13],
-    [0.95, 0.172, 0.138, 0.004],
-    [1.0, 0.19, 0.16, 0.024],
-    [1.04, 0.192, 0.16, 0.026],
-    [1.09, 0.2, 0.14, 0.01],
-    [1.14, 0.205, 0.118],
-    [1.17, 0.15, 0.094],
-    [1.188, 0.08, 0.07],
-    [1.2, 0.04, 0.04],
-  ];
-  add(
-    loft(
-      // arriba, la banda del cuello del atlas (v > 0,95) queda solo alrededor del cuello
-      (fem ? TM : TH).map(([y, rx, rz, cz]) => ({ y, rx, rz, cz, v: torsoV(y, fem) })),
-      lite ? 16 : 24,
-    ),
-    R.torso,
-    wTorso,
-  );
+  const fem = c.body === 'm',
+    rings = torsoRings(fem, neckline(c)),
+    tseg = lite ? 16 : 28,
+    tg = loft(
+      rings.map(([y, rx, rz, cz, v]) => ({ y, rx, rz, cz, v: v ?? (y < 0.7 ? 0 : Math.min(1, (y - 0.7) / 0.475)) })),
+      tseg,
+    );
+  collarDip(tg, rings, tseg);
+  add(tg, R.torso, wTorso);
   const skin = S('skin');
-  anat.neck(nat, fem, skin);
+  anat.neck(nat, fem);
   anat.head(nat, fem, R.face, skin);
-  anat.ears(nat, skin);
+  anat.ears(nat);
   anat.eyes(nat, fem, [c.face === 'cara_feliz', c.face === 'cara_feliz' || c.face === 'cara_guino'], S('lid'));
   if (c.face === 'cara_bigote') anat.mustache(nat, fem, S('hair'));
   if (c.face === 'cara_lentes') anat.sunglasses(nat, fem, S('lens'), S('black'));
@@ -283,20 +328,22 @@ function body(add: Add, c: AvatarConfig, nat: AddN, lite: boolean) {
           { y: 0.84, rx: 0.062, rz: 0.058 },
           { y: 0.885, rx: 0.055 },
           { y: 0.93, rx: 0.058 },
-          { y: 1.0, rx: 0.067, rz: 0.07, cz: 0.004 },
-          { y: 1.07, rx: 0.072 },
-          { y: 1.11, rx: 0.071 },
-          { y: 1.135, rx: 0.062 },
-          { y: 1.155, rx: 0.04 },
-          { y: 1.162, rx: 0.003 },
-        ].map((r) => ({
+          { y: 1.0, rx: 0.066, rz: 0.068, cz: 0.004 },
+          // deltoides: más ancho a un tercio del brazo y con la punta metida hacia el hombro, bajo el trapecio
+          { y: 1.05, rx: 0.073, rz: 0.074, cz: 0.003 },
+          { y: 1.09, rx: 0.075, rz: 0.072 },
+          { y: 1.12, rx: 0.068, rz: 0.064, dx: -0.008 },
+          { y: 1.14, rx: 0.054, rz: 0.055, dx: -0.018 },
+          { y: 1.152, rx: 0.033, rz: 0.037, dx: -0.026 },
+          { y: 1.157, rx: 0.003, dx: -0.03 },
+        ].map(({ dx = 0, ...r }) => ({
           ...r,
           rx: r.rx * (fem ? 0.88 : 1),
           rz: (r.rz ?? r.rx) * (fem ? 0.88 : 1),
-          cx: s * (fem ? 0.255 : 0.262),
+          cx: s * ((fem ? 0.255 : 0.262) + dx * (fem ? 0.88 : 1)),
           v: Math.min(1, (r.y - 0.69) / 0.488),
         })),
-        lite ? 10 : 14,
+        lite ? 10 : 16,
       ),
       R.arm,
       wArm(s),
@@ -970,17 +1017,17 @@ function accessory(add: Add, c: AvatarConfig) {
       add(
         lathe(
           [
-            [0.085, 1.15],
-            [0.108, 1.165],
-            [0.1, 1.19],
-            [0.075, 1.2],
+            [0.1, 1.16],
+            [0.13, 1.18],
+            [0.11, 1.2],
+            [0.092, 1.208],
           ],
           14,
         ),
         S('blue'),
         C,
       );
-      add(SPH_LO, S('gold'), C, M([0, 1.165, 0.105], 0.022));
+      add(SPH_LO, S('gold'), C, M([0, 1.18, 0.13], 0.022));
       break;
     }
   }
@@ -997,6 +1044,7 @@ export const styleKey = (c: AvatarConfig) =>
       ? c.pants
       : '',
     c.shirt === 'blusa_tipica' ? 'b' : '',
+    neckline(c),
     c.face === 'cara_lentes' || c.face === 'cara_bigote' || c.face === 'cara_feliz' || c.face === 'cara_guino'
       ? c.face
       : '',
@@ -1058,6 +1106,11 @@ const warp: Warp = (p, n, ws) => {
 };
 REST[B.lid] = anat.lidPivot(false);
 REST[B.tail] = anat.TAIL;
+REST[B.jaw] = anat.JAW;
+REST[B.brow] = anat.BROW;
+REST[B.mouth] = anat.MOUTH;
+REST[B.eyeL] = anat.eyeCenter(1, false);
+REST[B.eyeR] = anat.eyeCenter(-1, false);
 
 const cache = new Map<string, THREE.BufferGeometry>();
 /**
@@ -1102,7 +1155,7 @@ function bakeAO(g: THREE.BufferGeometry, fem: boolean) {
     w = fem ? 0.94 : 1,
     S: [number, number, number, number][] = [
       [0, h[1], h[2], 0.1],
-      [0, 1.47, -0.005, 0.05],
+      [0, 1.47, -0.008, 0.058 * w],
       [0, 1.28, 0, 0.14 * w],
       [0, 1.1, 0, 0.13 * w],
       [0, 0.93, 0, 0.14],

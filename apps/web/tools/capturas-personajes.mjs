@@ -59,6 +59,18 @@ const ok = await run('capturas-personajes', file, { hash: '#go', width: 1280, he
   await t.ev(cam(0.95, 0.7, 1.56, 1.52, 36));
   await t.sleep(600);
   await foto(t, 'cara-34');
+  // cuello, hombros y escote de 3/4, un poco desde arriba
+  await t.ev(cam(1.25, 0.6, 1.62, 1.36, 36));
+  await t.sleep(600);
+  await foto(t, 'hombros-34');
+  // otro tono de piel (claro) en el mismo hombre
+  await t.ev(
+    `window.__mc.store.setState((s) => ({ profile: { ...s.profile, avatar: { ...s.profile.avatar, skin: '#e8b98a' } } }))`,
+  );
+  await t.sleep(1200);
+  await t.ev(cam(0.95, -0.7, 1.56, 1.52, 36));
+  await t.sleep(600);
+  await foto(t, 'cara-clara-34');
   await t.ev(
     `window.__mc.store.setState((s) => ({ profile: { ...s.profile, avatar: { ...s.profile.avatar, ...${JSON.stringify(LOOK)} } } }))`,
   );
@@ -66,6 +78,24 @@ const ok = await run('capturas-personajes', file, { hash: '#go', width: 1280, he
   await t.ev(cam(2.3, -0.6, 1.4, 1.1, 40));
   await t.sleep(600);
   await foto(t, 'cerca-ella');
+  await t.ev(cam(0.85, 0.05, 1.52, 1.49, 36));
+  await t.sleep(600);
+  await foto(t, 'cara-ella-frente');
+  await t.ev(cam(0.9, 0.7, 1.52, 1.48, 36));
+  await t.sleep(600);
+  await foto(t, 'cara-ella-34');
+  // piel oscura en ella
+  await t.ev(
+    `window.__mc.store.setState((s) => ({ profile: { ...s.profile, avatar: { ...s.profile.avatar, skin: '#4f2f1c' } } }))`,
+  );
+  await t.sleep(1200);
+  await t.ev(cam(0.9, -0.6, 1.52, 1.48, 36));
+  await t.sleep(600);
+  await foto(t, 'cara-oscura-34');
+  await t.ev(
+    `window.__mc.store.setState((s) => ({ profile: { ...s.profile, avatar: { ...s.profile.avatar, skin: '${LOOK.skin}' } } }))`,
+  );
+  await t.sleep(1000);
   // plaza: el jugador junto a Don Chepe, cámara de juego más abierta
   await t.ev(`${P}.teleport(-5.8, 1, 21.6, 2.6)`);
   await t.sleep(800);
@@ -80,6 +110,16 @@ const ok = await run('capturas-personajes', file, { hash: '#go', width: 1280, he
   await t.click('emote-emote_punta');
   await t.sleep(1300);
   await foto(t, 'emote');
+  // la cara con gesto: aplaudiendo (sonrisa, boca entreabierta) y asombro (cejas arriba, boca abierta)
+  await t.ev(`${P}.emote = null`);
+  await t.sleep(500);
+  await t.ev(cam(0.95, 0.35, 1.56, 1.5, 36));
+  await t.ev(`${P}.emote = { anim: 'clap', until: performance.now() + 6000 }`);
+  await t.sleep(1200);
+  await foto(t, 'emote-cara');
+  await t.ev(`${P}.emote = { anim: 'asombro', until: performance.now() + 6000 }`);
+  await t.sleep(700);
+  await foto(t, 'emote-asombro');
   await t.ev(`${P}.emote = null`);
   // noche
   await t.ev(cam(2.1, 0.4, 1.5, 1.25, 40));
@@ -129,4 +169,22 @@ const ok2 = await run(
     await foto(t, 'anims');
   },
 );
-process.exit(ok && ok2 ? 0 : 1);
+// la tienda en celular (vertical y acostado)
+let ok3 = true;
+for (const [w, h, n] of [
+  [390, 844, 'tienda-cel'],
+  [844, 390, 'tienda-cel-acostado'],
+]) {
+  ok3 =
+    (await run('capturas-tienda-celular', file, { hash: '#go', width: w, height: h, touch: true }, async (t) => {
+      await t.waitFor(`${S}.scene.kind==='lobby' && !!window.__mc.gl`, 20000, 'el lobby');
+      await t.ev(`${S}.addCoins(5000)`);
+      await t.ev(`${S}.openPanel('tienda')`);
+      await t.click('shop-tab-atuendo');
+      await t.click('shop-try-at_motagua');
+      await t.sleep(2500);
+      await t.shot(`${prefijo}-${n}.png`);
+      console.log('captura', `${prefijo}-${n}.png`);
+    })) && ok3;
+}
+process.exit(ok && ok2 && ok3 ? 0 : 1);

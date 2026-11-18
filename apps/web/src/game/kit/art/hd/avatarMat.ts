@@ -6,7 +6,7 @@ import * as THREE from 'three';
 import type { AvatarConfig } from '../../../../core/types';
 import { HC } from './avatarAnat';
 import { R } from './avatarGeo';
-import { avatarMaps, configKey } from './avatarTex';
+import { avatarMaps, configKey, tonoPiel } from './avatarTex';
 import { G } from './materials';
 import { AH, AW, type Rect } from './skin';
 import { rng } from './tex';
@@ -130,6 +130,7 @@ const FRAG_PARS = /* glsl */ `
 uniform vec3 uSky;
 uniform float uCurl;
 uniform vec3 uHair;
+uniform vec3 uSkinC;
 varying vec3 vObjP;
 varying float vAO;
 float mcCls;
@@ -151,7 +152,7 @@ void RE_Direct_Avatar( const in IncidentLight directLight, const in vec3 geometr
   float ndl = dot( geometryNormal, directLight.direction );
   if ( mcSkin > 0.0 ) {
     float wrap = max( 0.0, ( ndl + 0.5 ) / 1.5 ) - saturate( ndl );
-    reflectedLight.directDiffuse += directLight.color * material.diffuseColor * vec3( 1.0, 0.36, 0.22 ) * wrap * 0.5 * mcSkin;
+    reflectedLight.directDiffuse += directLight.color * material.diffuseColor * vec3( 1.0, 0.45, 0.34 ) * wrap * 0.38 * mcSkin;
   }
   if ( mcHairK > 0.0 ) {
     vec3 up = normalize( ( viewMatrix * vec4( 0.0, 1.0, 0.0, 0.0 ) ).xyz );
@@ -175,6 +176,23 @@ void RE_Direct_Avatar( const in IncidentLight directLight, const in vec3 geometr
 const DETAIL = /* glsl */ `
 {
   mcCls = floor( texture2D( roughnessMap, vRoughnessMapUv ).r * 7.99 );
+  {
+    // el ORM va a 1/4 de resolución y sin filtrar: en el borde piel/tela (escote en V, mangas, shorts) la clase se
+    // decide con el color del atlas, a resolución completa, para que el borde no quede en escalones
+    vec2 u = vRoughnessMapUv;
+    bool body = ( u.x > 0.25 && u.x < 0.75 && u.y > 0.5 ) || ( u.x < 0.25 && u.y < 0.5 );
+    if ( body && ( mcCls < 2.5 || mcCls == 4.0 ) ) {
+      vec2 o = vec2( 1.0 / ${AW / 4}.0, 1.0 / ${AH / 4}.0 );
+      float a = floor( texture2D( roughnessMap, u + o ).r * 7.99 ), b = floor( texture2D( roughnessMap, u - o ).r * 7.99 );
+      float c = floor( texture2D( roughnessMap, u + vec2( o.x, -o.y ) ).r * 7.99 ), d = floor( texture2D( roughnessMap, u - vec2( o.x, -o.y ) ).r * 7.99 );
+      float nSkin = ( a == 4.0 ? 1.0 : 0.0 ) + ( b == 4.0 ? 1.0 : 0.0 ) + ( c == 4.0 ? 1.0 : 0.0 ) + ( d == 4.0 ? 1.0 : 0.0 ) + ( mcCls == 4.0 ? 1.0 : 0.0 );
+      if ( nSkin > 0.5 && nSkin < 4.5 ) {
+        float cloth = mcCls == 4.0 ? ( a != 4.0 ? a : b != 4.0 ? b : c != 4.0 ? c : d ) : mcCls;
+        bool isSkin = distance( sqrt( max( diffuseColor.rgb, 0.0 ) ), sqrt( uSkinC ) ) < 0.07;
+        mcCls = isSkin ? 4.0 : cloth;
+      }
+    }
+  }
   mcSkin = mcCls == 4.0 ? 1.0 : 0.0;
   mcHairK = mcCls == 5.0 ? 1.0 : 0.0;
   float cloth = mcCls < 3.5 ? 1.0 : 0.0;
@@ -218,12 +236,14 @@ export function avatarMaterial(cfg: AvatarConfig) {
     roughness: 1,
     metalness: 1,
   });
-  const uCurl = { value: CURLY.has(cfg.hair) ? 1 : 0 },
+  const uSkinC = { value: new THREE.Color(tonoPiel(cfg.skin)) },
+    uCurl = { value: CURLY.has(cfg.hair) ? 1 : 0 },
     uHair = { value: new THREE.Color(cfg.hairColor).lerp(new THREE.Color('#ffffff'), 0.25) };
   m.onBeforeCompile = (sh) => {
     sh.uniforms.uSky = G.uSky;
     sh.uniforms.uCurl = uCurl;
     sh.uniforms.uHair = uHair;
+    sh.uniforms.uSkinC = uSkinC;
     sh.vertexShader = sh.vertexShader
       .replace('#include <common>', `#include <common>\nvarying vec3 vObjP;\nattribute float mcAO;\nvarying float vAO;`)
       .replace('#include <begin_vertex>', '#include <begin_vertex>\nvObjP = position;\nvAO = mcAO;');
@@ -245,7 +265,7 @@ export function avatarMaterial(cfg: AvatarConfig) {
         #include <opaque_fragment>`,
       );
   };
-  m.customProgramCacheKey = () => 'hd-avatar-3';
+  m.customProgramCacheKey = () => 'hd-avatar-4';
   mats.set(key, m);
   return m;
 }

@@ -2,9 +2,9 @@
 // Arrastrar gira al personaje; al soltar vuelve a girar despacito solo. Las pruebas pueden fijar el giro y la
 // animación con `window.__mcAvView = { yaw, anim }` para sacar hojas de capturas.
 
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Component, type ReactNode, Suspense, useEffect, useRef } from 'react';
-import type * as THREE from 'three';
+import * as THREE from 'three';
 import type { Anim, AvatarConfig, AvatarState } from '../../core/types';
 import { art } from '../../game/kit/art';
 import { cx, TEST } from '../lib';
@@ -23,6 +23,24 @@ export class Safe3D extends Component<{ fallback?: ReactNode; children: ReactNod
   }
 }
 
+/** lo que tiene que caber en la vista: del borde de la base (abajo) a un poco sobre la cabeza, y su ancho */
+const FRAME = { y0: -0.13, y1: 1.98, w: 1.25 };
+/** Encuadre de cuerpo entero con algo de aire arriba, para cualquier proporción del recuadro (celular incluido). */
+function Encuadre() {
+  const { camera, size } = useThree();
+  useEffect(() => {
+    const cam = camera as THREE.PerspectiveCamera,
+      aspect = size.width / Math.max(1, size.height),
+      t = Math.tan(THREE.MathUtils.degToRad(cam.fov / 2)),
+      h = FRAME.y1 - FRAME.y0,
+      d = Math.max(h / 2 / t, FRAME.w / 2 / (t * aspect)) + 0.35,
+      cy = (FRAME.y0 + FRAME.y1) / 2;
+    cam.position.set(0, cy + 0.32, d);
+    cam.lookAt(0, cy + 0.02, 0);
+    cam.updateProjectionMatrix();
+  }, [camera, size.width, size.height]);
+  return null;
+}
 interface Spin {
   yaw: number;
   vel: number;
@@ -57,11 +75,11 @@ function Stage({ config, anim, spin, auto }: { config: AvatarConfig; anim: Anim;
       <directionalLight position={[-4, 3, -3]} intensity={0.7} color="#9fdcff" />
       <group ref={turn}>
         <art.Avatar config={config} state={state} />
-        <mesh position={[0, -0.1, 0]} material={art.material('plastic', art.name === 'hd' ? '#16384a' : '#ffd028')}>
-          <cylinderGeometry args={[1.05, 1.15, 0.2, 40]} />
+        <mesh position={[0, -0.07, 0]} material={art.material('plastic', art.name === 'hd' ? '#16384a' : '#ffd028')}>
+          <cylinderGeometry args={[0.56, 0.6, 0.14, 40]} />
         </mesh>
         <mesh position={[0, 0.006, 0]} rotation-x={-Math.PI / 2}>
-          <circleGeometry args={[0.55, 28]} />
+          <circleGeometry args={[0.36, 28]} />
           <meshBasicMaterial color="#000000" transparent opacity={0.22} />
         </mesh>
       </group>
@@ -127,10 +145,10 @@ export function AvatarView({
       >
         <Canvas
           dpr={TEST ? 1 : [1, 2]}
-          camera={{ fov: 30, near: 0.1, far: 50, position: [0, 1.5, 6.4] }}
+          camera={{ fov: 30, near: 0.1, far: 50, position: [0, 1.25, 4.4] }}
           gl={{ antialias: true, alpha: true, powerPreference: 'low-power' }}
-          onCreated={({ camera }) => camera.lookAt(0, 1.02, 0)}
         >
+          <Encuadre />
           <Suspense fallback={null}>
             <Stage config={config} anim={anim} spin={spin} auto={auto} />
           </Suspense>
