@@ -51,6 +51,19 @@ export function Rio({ x0 = -8.6, x1 = 3.4, color = '#4fb3c6' }: { x0?: number; x
   return (
     <>
       <Block pos={[cx, 0.03, -2]} size={[ancho, 0.04, 22]} color={color} mat="water" solid={false} cast={false} />
+      {/* lecho del río: hondo y oscuro al centro, más claro en la orilla */}
+      <Block pos={[cx, 0.005, -2]} size={[ancho, 0.01, 22]} color="#2c5552" mat="sand" solid={false} cast={false} />
+      {[x0 + 0.5, x1 - 0.5].map((x) => (
+        <Block
+          key={x}
+          pos={[x, 0.008, -2]}
+          size={[1, 0.012, 22]}
+          color="#7c8c6c"
+          mat="sand"
+          solid={false}
+          cast={false}
+        />
+      ))}
       {[x0 - 0.6, x1 + 0.6].map((x) => (
         <Block key={x} pos={[x, 0.08, -2]} size={[1.2, 0.16, 22]} color="#c9b48a" mat="sand" solid={false} />
       ))}
