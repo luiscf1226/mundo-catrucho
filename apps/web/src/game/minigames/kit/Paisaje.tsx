@@ -56,6 +56,8 @@ const mezcla = (a: string, b: string, t: number) => `#${new THREE.Color(a).lerp(
 
 // ------------------------------------------------------------------ terreno
 interface Suelo {
+  /** piso del escenario (el mismo que pone Escenario): el pie de los bancos termina en él */
+  piso: [MatKind, string];
   /** cuánto sube y baja el terreno fuera del llano (m) */
   relieve: number;
   /** del agua de atrás (mar, lago o río ancho) */
@@ -69,6 +71,7 @@ interface Suelo {
 }
 const SUELOS: Record<Fondo, Suelo> = {
   costa: {
+    piso: ['sand', '#e8d29c'],
     relieve: 2.5,
     agua: true,
     tierra: '#c9b07a',
@@ -82,6 +85,7 @@ const SUELOS: Record<Fondo, Suelo> = {
     ],
   },
   montana: {
+    piso: ['grass', '#6c9f4c'],
     relieve: 8,
     agua: false,
     tierra: '#6e5236',
@@ -95,6 +99,7 @@ const SUELOS: Record<Fondo, Suelo> = {
     ],
   },
   valle: {
+    piso: ['grass', '#69ab4a'],
     relieve: 4,
     agua: false,
     tierra: '#7d5f3c',
@@ -107,9 +112,26 @@ const SUELOS: Record<Fondo, Suelo> = {
       ['flowers', 1],
     ],
   },
-  pueblo: { relieve: 0, agua: false, tierra: '#8a6d4c', cerro: '#6b8a63', alto: 0.6, flora: [['tree', 2]] },
-  ciudad: { relieve: 0, agua: false, tierra: '#6d6458', cerro: '#7b9178', alto: 0.7, flora: [['tree', 2]] },
+  pueblo: {
+    piso: ['cobble', '#b3a58d'],
+    relieve: 0,
+    agua: false,
+    tierra: '#8a6d4c',
+    cerro: '#6b8a63',
+    alto: 0.6,
+    flora: [['tree', 2]],
+  },
+  ciudad: {
+    piso: ['asphalt', '#555a62'],
+    relieve: 0,
+    agua: false,
+    tierra: '#6d6458',
+    cerro: '#7b9178',
+    alto: 0.7,
+    flora: [['tree', 2]],
+  },
   lago: {
+    piso: ['sand', '#bfae82'],
     relieve: 3,
     agua: true,
     tierra: '#8a7550',
@@ -123,6 +145,7 @@ const SUELOS: Record<Fondo, Suelo> = {
     ],
   },
   selva: {
+    piso: ['grass', '#3f7a3a'],
     relieve: 5,
     agua: false,
     tierra: '#5a4128',
@@ -136,9 +159,26 @@ const SUELOS: Record<Fondo, Suelo> = {
       ['palm', 1],
     ],
   },
-  cueva: { relieve: 0, agua: false, tierra: '#4a4038', cerro: '#3a3530', alto: 0, flora: [] },
-  estadio: { relieve: 1, agua: false, tierra: '#7a5f40', cerro: '#6f8f6a', alto: 0.6, flora: [['tree', 2]] },
+  cueva: {
+    piso: ['stone', '#4a453f'],
+    relieve: 0,
+    agua: false,
+    tierra: '#4a4038',
+    cerro: '#3a3530',
+    alto: 0,
+    flora: [],
+  },
+  estadio: {
+    piso: ['grass', '#4ea63f'],
+    relieve: 1,
+    agua: false,
+    tierra: '#7a5f40',
+    cerro: '#6f8f6a',
+    alto: 0.6,
+    flora: [['tree', 2]],
+  },
   mar: {
+    piso: ['sand', '#e3cf9d'],
     relieve: 1.5,
     agua: true,
     tierra: '#d1b98a',
@@ -151,6 +191,7 @@ const SUELOS: Record<Fondo, Suelo> = {
     ],
   },
   rio: {
+    piso: ['grass', '#6aa04c'],
     relieve: 4,
     agua: true,
     tierra: '#6b5236',
@@ -165,6 +206,7 @@ const SUELOS: Record<Fondo, Suelo> = {
     ],
   },
   finca: {
+    piso: ['grass', '#6aa34b'],
     relieve: 4,
     agua: false,
     tierra: '#7a5a38',
@@ -177,8 +219,17 @@ const SUELOS: Record<Fondo, Suelo> = {
       ['bush', 2],
     ],
   },
-  mercado: { relieve: 0, agua: false, tierra: '#8a6d4c', cerro: '#6b8a63', alto: 0.6, flora: [['tree', 2]] },
+  mercado: {
+    piso: ['cobble', '#b79e7a'],
+    relieve: 0,
+    agua: false,
+    tierra: '#8a6d4c',
+    cerro: '#6b8a63',
+    alto: 0.6,
+    flora: [['tree', 2]],
+  },
   ruinas: {
+    piso: ['stone', '#b7a980'],
     relieve: 5,
     agua: false,
     tierra: '#6a5034',
@@ -193,6 +244,7 @@ const SUELOS: Record<Fondo, Suelo> = {
     ],
   },
   feria: {
+    piso: ['grass', '#98a758'],
     relieve: 3,
     agua: false,
     tierra: '#7d5f3c',
@@ -406,10 +458,13 @@ function bancoGeo(
   medio: string,
   pie: string,
   seed: number,
+  piso?: [MatKind, string],
 ) {
   const F = art.fused;
   if (!F) return null;
   const [l, ro, me] = F.info(m),
+    [pl, pr, pm] = piso ? F.info(piso[0]) : [l, ro, me],
+    cpiso = new THREE.Color(piso?.[1] ?? pie),
     a = w / 2,
     b = d / 2,
     lados = [
@@ -457,20 +512,25 @@ function bancoGeo(
         n1 = ruido(wx * 1.3 + seed, wz * 1.3) - 0.5,
         n2 = ruido(wx * 3.1, wz * 3.1 + seed) - 0.5,
         bulto = Math.sin(Math.PI * t),
-        off = (k === 0 ? 0.015 : 0.04 + run * t) + n1 * 0.45 * run * bulto,
+        off = (k === 0 ? 0.015 : 0.04 + run * t) + n1 * 0.45 * run * (k === 0 ? 0 : 0.3 + 0.7 * t),
         y = k === R ? -0.06 : top * (1 - t) ** 2 - (k === 0 ? 0.01 : 0) + n2 * 0.1 * top * bulto;
       pos[q * 3] = wx + nx * off;
       pos[q * 3 + 1] = Math.max(-0.06, y);
       pos[q * 3 + 2] = wz + nz * off;
-      if (t < 0.3) cc.copy(ca).lerp(cm, ss(0.05, 0.3, t));
-      else cc.copy(cm).lerp(cp, ss(0.45, 0.95, t));
-      cc.multiplyScalar(0.86 + (n1 + 0.5) * 0.28);
+      // las dos últimas filas (ya casi a ras) son del mismo piso del escenario: el banco se funde con el suelo
+      const alPiso = piso && k >= R - 1;
+      if (alPiso) cc.copy(cpiso);
+      else {
+        if (t < 0.3) cc.copy(ca).lerp(cm, ss(0.05, 0.3, t));
+        else cc.copy(cm).lerp(cp, ss(0.45, 0.95, t));
+        cc.multiplyScalar(0.86 + (n1 + 0.5) * 0.28);
+      }
       col[q * 3] = cc.r;
       col[q * 3 + 1] = cc.g;
       col[q * 3 + 2] = cc.b;
-      mat[q * 4] = l;
-      mat[q * 4 + 1] = ro;
-      mat[q * 4 + 2] = me;
+      mat[q * 4] = alPiso ? pl : l;
+      mat[q * 4 + 1] = alPiso ? pr : ro;
+      mat[q * 4 + 2] = alPiso ? pm : me;
     }
   }
   for (let i = 0; i < M; i++) {
@@ -808,6 +868,7 @@ function piezasMesa(
       : [cx, cz, w + 0.08, d + 0.08, 0.05, 0.5, 'concrete', '#8a8f93', '#7d8286', '#6a6e72', 11];
     if (costa) piedras(8, 0.9, 0.12, 0.26, '#9a9184');
   }
+  if (banco) banco[11] = s.piso;
   return { pcs, banco };
 }
 

@@ -29,8 +29,6 @@ const VISTAS = [
   ['ritmo', 'atlantida.punta-en-sambo-creek'],
   ['monta', 'olancho.jaripeo'],
   ['lluvia', 'yoro.lluvia-de-peces'],
-  ['cueva', 'olancho.talgua-sin-tocar-los-restos'],
-  ['asalto', 'franciscomorazan.corre-que-viene-la-chepa'],
 ];
 const SOLO = process.env.MC_VISTAS?.split(',');
 
