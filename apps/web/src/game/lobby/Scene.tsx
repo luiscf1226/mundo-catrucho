@@ -35,6 +35,7 @@ export function LobbyScene() {
       <MapBoard />
       <MapaHonduras />
       <Forest />
+      {art.GroundCover && <art.GroundCover />}
       <Paseo />
       <Baked>
         <P.Bus pos={[-72, 0.18, 111]} color="#eebc36" solid={false} />

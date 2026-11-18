@@ -22,6 +22,7 @@ import {
   useCollider,
   useTick,
 } from '../kit';
+import type { FloraItem, FloraKind, HillDef } from '../kit/art/types';
 import {
   alongPath,
   Build,
@@ -38,6 +39,22 @@ import {
   type XZ,
 } from './lib';
 import { VEG, type VegKind } from './parts';
+
+/** especie del paquete de arte para cada vegetación de zona (las rocas siguen siendo piezas) */
+const FLORA_OF: Partial<Record<VegKind, FloraKind>> = {
+  tree: 'tree',
+  pine: 'pine',
+  palm: 'palm',
+  oilpalm: 'oilpalm',
+  bush: 'bush',
+  jungle: 'jungle',
+  giant: 'giant',
+  dry: 'dry',
+  reed: 'reed',
+  fern: 'fern',
+  banana: 'banana',
+  cafe: 'cafe',
+};
 
 export interface Bio {
   grass: string;
@@ -274,10 +291,28 @@ export class ZB {
         z = (o.cz ?? 0) + (this.rand() * 2 - 1) * A;
       if (!ok(x, z) || pts.some((p) => Math.hypot(p[0] - x, p[1] - z) < sep)) continue;
       pts.push([x, z]);
-      const s = (o.smin ?? 0.85) + this.rand() * ((o.smax ?? 1.3) - (o.smin ?? 0.85));
-      this.pcs.push(...VEG[kind](x, this.h(x, z), z, s, cols[Math.floor(this.rand() * cols.length)], this.rand));
+      const s = (o.smin ?? 0.85) + this.rand() * ((o.smax ?? 1.3) - (o.smin ?? 0.85)),
+        c = cols[Math.floor(this.rand() * cols.length)],
+        y = this.h(x, z),
+        pc = VEG[kind](x, y, z, s, c, this.rand),
+        fk = FLORA_OF[kind];
+      // con vegetación del paquete de arte: las piezas quedan solo como colisión (mismos troncos sólidos)
+      if (art.Flora && fk && pc.length) {
+        for (const q of pc) q.hide = true;
+        pc[0].flora = { k: fk, p: [x, y, z], s, c, seed: Math.floor(Math.abs(x * 7.31 + z * 3.17) * 10) };
+      }
+      this.pcs.push(...pc);
     }
     return pts;
+  }
+  /** piezas de una planta: con vegetación del paquete de arte se dibuja `item` y las piezas quedan solo como colisión */
+  plant(pcs: Pc[], item: FloraItem) {
+    if (art.Flora && pcs.length) {
+      for (const q of pcs) q.hide = true;
+      pcs[0].flora = item;
+    }
+    this.pcs.push(...pcs);
+    return this;
   }
   /** parada de bus: aquí aparece el jugador. Deja el bus a su derecha y el rótulo de bienvenida al frente a la izquierda. */
   stop(x: number, z: number, yaw = 0, y = this.h(x, z)) {
@@ -419,6 +454,7 @@ export function ZoneScenery({ spec }: { spec: ZoneSpec }) {
       {spec.layers.map((l, i) => (
         <Terrain key={i} f={spec.f} {...l} />
       ))}
+      <Greenery pcs={spec.pcs} />
       {spec.water.map((w, i) => (
         <Ground key={i} mat={w.mat ?? 'water'} color={w.color} y={w.y} size={w.size ?? 900} pos={w.pos} />
       ))}
@@ -440,6 +476,25 @@ export function ZoneScenery({ spec }: { spec: ZoneSpec }) {
         ),
       )}
       {spec.bad && <SoftBound bad={spec.bad} msg={spec.badMsg} icon={spec.badIcon} />}
+    </>
+  );
+}
+
+/** Vegetación y cerros del paquete de arte (una malla cada uno) y el zacate cerca de la cámara. */
+function Greenery({ pcs }: { pcs: Pc[] }) {
+  const flora = useMemo(() => pcs.flatMap((q): FloraItem[] => (q.flora ? [q.flora] : [])), [pcs]),
+    hills = useMemo(
+      () =>
+        pcs.flatMap((q): HillDef[] =>
+          q.hill ? [{ ...q.hill, p: [q.p[0] + q.hill.p[0], q.p[1] + q.hill.p[1], q.p[2] + q.hill.p[2]] }] : [],
+        ),
+      [pcs],
+    );
+  return (
+    <>
+      {art.Flora && flora.length > 0 && <art.Flora items={flora} />}
+      {art.Hills && hills.length > 0 && <art.Hills hills={hills} />}
+      {art.GroundCover && <art.GroundCover />}
     </>
   );
 }

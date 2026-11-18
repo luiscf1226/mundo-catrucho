@@ -8,6 +8,7 @@ import { player } from '../../core/player';
 import { useGame } from '../../core/store';
 import type { V3 } from '../../core/types';
 import { art, boxCol, cylCol, type MatKind, useTick } from '../kit';
+import type { FloraItem, HillDef } from '../kit/art/types';
 
 export type XZ = [number, number];
 export const PI = Math.PI;
@@ -70,6 +71,12 @@ export interface Pc {
   rt?: number;
   n?: number;
   solid?: boolean;
+  /** no se dibuja con <Build> (la dibuja otro: vegetación o cerro del paquete de arte); sigue contando como colisión */
+  hide?: boolean;
+  /** planta que dibuja art.Flora en lugar de estas piezas */
+  flora?: FloraItem;
+  /** cerro que dibuja art.Hills en lugar de estas piezas (centro relativo a p) */
+  hill?: HillDef;
 }
 export interface PcOpt {
   /** giro en Y */ r?: number /** Euler [x, y, z] (orden YXZ: primero inclina, luego gira) */;
@@ -192,6 +199,7 @@ export interface Merged {
 export function mergePieces(pieces: Pc[]): Merged[] {
   const groups = new Map<string, Pc[]>();
   for (const q of pieces) {
+    if (q.hide) continue;
     const k = `${q.m}|${q.c}`;
     let l = groups.get(k);
     if (!l) groups.set(k, (l = []));

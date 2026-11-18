@@ -7,249 +7,12 @@ import * as THREE from 'three';
 import type { V3 } from '../../../../core/types';
 import { Placed } from '../base';
 import type { ArtProps } from '../types';
-import { Builder, gBlob, gLathe, gSph, gTube, tint, twoSided } from './geo';
+import { FloraMesh } from './flora';
+import { Builder, gBlob, gLathe, gSph, tint } from './geo';
 import { propMaterial } from './materials';
 import { cached, haloTexture, Merged, solidBox, solidCyl } from './pk';
 import { rng } from './tex';
 
-const BARK = '#7a5230';
-function treeGeo(color: string, seed: number) {
-  const v = ((seed % 4) + 4) % 4;
-  return cached(`tree|${color}|${v}`, () => {
-    const r = rng(v * 131 + 7),
-      b = new Builder(),
-      lx = (r() - 0.5) * 0.7,
-      lz = (r() - 0.5) * 0.5;
-    b.add(
-      gTube(
-        [
-          [0, -0.05, 0],
-          [lx * 0.1, 0.5, lz * 0.1],
-          [lx * 0.35, 1.5, lz * 0.3],
-          [lx * 0.7, 2.5, lz * 0.6],
-          [lx * 0.85, 3.3, lz * 0.8],
-          [lx * 0.9, 3.9, lz * 0.85],
-        ],
-        [0.46, 0.3, 0.25, 0.22, 0.18, 0.1],
-        10,
-      ),
-      { k: 'bark', c: BARK, g: [0, 0.8, 0.7] },
-    );
-    for (let i = 0; i < 4; i++) {
-      const a = i * 1.57 + r();
-      b.add(
-        gTube(
-          [
-            [Math.cos(a) * 0.2, 0.25, Math.sin(a) * 0.2],
-            [Math.cos(a) * 0.45, 0.06, Math.sin(a) * 0.45],
-            [Math.cos(a) * 0.62, -0.06, Math.sin(a) * 0.62],
-          ],
-          [0.16, 0.11, 0.05],
-          6,
-        ),
-        { k: 'bark', c: BARK, g: [0, 0.8, 0.7] },
-      );
-    }
-    for (let i = 0; i < 3; i++) {
-      const a = r() * 6.28,
-        x0 = lx * 0.55,
-        z0 = lz * 0.45,
-        d = 0.9 + r() * 0.5;
-      b.add(
-        gTube(
-          [
-            [x0, 2.1 + i * 0.3, z0],
-            [x0 + Math.cos(a) * d * 0.5, 2.7 + i * 0.3, z0 + Math.sin(a) * d * 0.5],
-            [x0 + Math.cos(a) * d, 3.3 + i * 0.25, z0 + Math.sin(a) * d],
-          ],
-          [0.13, 0.09, 0.05],
-          6,
-        ),
-        { k: 'bark', c: BARK },
-      );
-    }
-    const cx = lx * 0.9,
-      cz = lz * 0.85,
-      base = new THREE.Color(color);
-    const blobs: [number, number, number, number][] = [
-      [cx, 4.15, cz, 1.72],
-      [cx + 1.05, 3.55, cz + 0.4, 1.2],
-      [cx - 1.1, 3.65, cz - 0.25, 1.25],
-      [cx + 0.15, 3.5, cz - 1.05, 1.15],
-      [cx - 0.25, 3.45, cz + 1.05, 1.12],
-      [cx + 0.25, 5.0, cz + 0.1, 1.0],
-      [cx - 0.6, 4.7, cz + 0.5, 0.85],
-    ];
-    blobs.forEach(([x, y, z, R], i) => {
-      const jx = (r() - 0.5) * 0.3,
-        jz = (r() - 0.5) * 0.3,
-        k = 0.86 + r() * 0.26 + (y - 3.4) * 0.07;
-      b.add(
-        gBlob(1, v * 10 + i, 0.17, 3),
-        { k: 'leaf', c: base.clone().multiplyScalar(k), g: [y - R, y + R * 0.3, 0.5] },
-        { p: [x + jx, y, z + jz], s: [R, R * 0.84, R], r: [0, r() * 6, 0] },
-      );
-    });
-    return b.build();
-  });
-}
-let frond: THREE.BufferGeometry | null = null;
-function frondGeo() {
-  if (frond) return frond;
-  const n = 8,
-    L = 2.55,
-    W = 0.8,
-    pos: number[] = [],
-    uv: number[] = [],
-    idx: number[] = [];
-  for (let i = 0; i <= n; i++) {
-    const t = i / n,
-      x = L * t * (1 - 0.12 * t),
-      y = L * (0.4 * t - 0.62 * t * t),
-      w = W * Math.sin(Math.PI * (0.07 + 0.93 * t)) ** 0.6 * (i === n ? 0.02 : 1),
-      sag = 0.34 * w;
-    for (const k of [-1, 0, 1]) {
-      pos.push(x, y - Math.abs(k) * sag, (k * w) / 2);
-      uv.push(t, k * 0.5 + 0.5);
-    }
-  }
-  for (let i = 0; i < n; i++)
-    for (let k = 0; k < 2; k++) {
-      const a = i * 3 + k,
-        b = a + 1,
-        c = a + 3,
-        d = c + 1;
-      idx.push(a, b, d, a, d, c);
-    }
-  const g = new THREE.BufferGeometry();
-  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-  g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
-  g.setIndex(idx);
-  g.computeVertexNormals();
-  frond = twoSided(g);
-  return frond;
-}
-function palmGeo(color: string, seed: number) {
-  const v = ((seed % 4) + 4) % 4;
-  return cached(`palm|${color}|${v}`, () => {
-    const r = rng(v * 71 + 3),
-      b = new Builder(),
-      lean = 0.5 + r() * 0.7,
-      dir = r() * 6.28,
-      cx = Math.cos(dir),
-      cz = Math.sin(dir),
-      top = 4.75;
-    const pts: V3[] = [],
-      rad: number[] = [];
-    for (let i = 0; i <= 9; i++) {
-      const t = i / 9,
-        o = lean * t * t;
-      pts.push([cx * o, top * t - 0.05, cz * o]);
-      rad.push(0.3 - 0.13 * t + (i % 2 ? 0.012 : 0) + (i === 0 ? 0.08 : 0));
-    }
-    b.add(gTube(pts, rad, 9), { k: 'bark', c: '#9c7a4d', g: [0, 1.2, 0.72] });
-    const tx = cx * lean,
-      tz = cz * lean,
-      base = new THREE.Color(color);
-    b.sph(0.26, { k: 'bark', c: '#6f5a35' }, [tx, top - 0.02, tz], [1, 0.8, 1]);
-    for (let i = 0; i < 10; i++) {
-      const a = (i / 10) * 6.283 + r() * 0.3,
-        up = i % 2 ? 0.42 : 0.02,
-        s = 0.85 + r() * 0.25;
-      b.add(
-        frondGeo(),
-        { k: 'leaf', c: base.clone().multiplyScalar(i % 2 ? 1.12 : 0.88), r: 0.6 },
-        { p: [tx, top, tz], r: [(r() - 0.5) * 0.3, a, up + r() * 0.15], s },
-      );
-    }
-    for (let i = 0; i < 3; i++) {
-      const a = i * 2.1 + r();
-      b.sph(0.15, { c: '#5b3f1f', r: 0.7 }, [tx + Math.cos(a) * 0.2, top - 0.28, tz + Math.sin(a) * 0.2]);
-    }
-    return b.build();
-  });
-}
-function pineGeo(color: string, seed: number) {
-  const v = ((seed % 3) + 3) % 3;
-  return cached(`pine|${color}|${v}`, () => {
-    const r = rng(v * 37 + 11),
-      b = new Builder(),
-      base = new THREE.Color(color);
-    b.add(
-      gTube(
-        [
-          [0, -0.05, 0],
-          [0, 0.6, 0],
-          [0, 2.2, 0],
-          [0, 4.6, 0],
-        ],
-        [0.34, 0.24, 0.18, 0.06],
-        8,
-      ),
-      { k: 'bark', c: '#6b4a2a', g: [0, 0.7, 0.7] },
-    );
-    for (let i = 0; i < 5; i++) {
-      const R = 1.6 - i * 0.28,
-        h = 1.55 - i * 0.12,
-        y0 = 1.15 + i * 0.84,
-        g = new THREE.ConeGeometry(R, h, 24, 3),
-        P = g.attributes.position;
-      for (let j = 0; j < P.count; j++) {
-        const x = P.getX(j),
-          z = P.getZ(j),
-          y = P.getY(j),
-          rad = Math.hypot(x, z);
-        if (rad > R * 0.4 && y < 0) {
-          const a = Math.atan2(z, x),
-            q = rad / R,
-            k = 1 + (0.13 * Math.sin(a * 5 + i * 2 + v) + 0.05 * Math.sin(a * 9 + i)) * q;
-          P.setXYZ(j, x * k, y - 0.2 * q * q, z * k);
-        }
-      }
-      g.computeVertexNormals();
-      b.add(
-        g,
-        { k: 'leaf', c: base.clone().multiplyScalar(0.8 + i * 0.09), g: [y0 - 0.2, y0 + h * 0.7, 0.55] },
-        { p: [0, y0 + h / 2, 0], r: [0, i * 0.5, 0] },
-      );
-    }
-    return b.build();
-  });
-}
-function bushGeo(color: string, seed: number) {
-  const v = ((seed % 3) + 3) % 3;
-  return cached(`bush|${color}|${v}`, () => {
-    const r = rng(v * 17 + 5),
-      b = new Builder(),
-      base = new THREE.Color(color);
-    for (const [x, y, z, R] of [
-      [0, 0.5, 0, 0.62],
-      [0.42, 0.36, 0.12, 0.42],
-      [-0.4, 0.38, -0.1, 0.45],
-      [0.05, 0.34, 0.42, 0.38],
-      [-0.05, 0.36, -0.4, 0.36],
-    ])
-      b.add(
-        gBlob(1, v * 5 + Math.round(R * 100), 0.18, 2),
-        { k: 'leaf', c: base.clone().multiplyScalar(0.9 + r() * 0.25), g: [0, y + R * 0.4, 0.5] },
-        { p: [x, y, z], s: [R * 1.1, R * 0.9, R], r: [0, r() * 6, 0] },
-      );
-    if (v === 1)
-      for (let i = 0; i < 7; i++) {
-        const a = r() * 6.28,
-          e = 0.3 + r() * 0.9;
-        b.sph(
-          0.05,
-          { c: i % 2 ? '#ff7aa8' : '#ffffff' },
-          [Math.cos(a) * Math.cos(e) * 0.62, 0.42 + Math.sin(e) * 0.52, Math.sin(a) * Math.cos(e) * 0.6],
-          [1, 1, 1],
-          6,
-          4,
-        );
-      }
-    return b.build();
-  });
-}
 function flowersGeo(color: string | undefined, seed: number) {
   const v = ((seed % 3) + 3) % 3;
   return cached(`flowers|${color}|${v}`, () => {
@@ -799,7 +562,7 @@ export const props1: Pick<
     solidCyl(a, 0.35, 3);
     return (
       <Placed {...a}>
-        <Merged g={treeGeo(a.color ?? '#4a9e48', a.seed ?? Math.round(a.pos[0] * 3 + a.pos[2] * 7))} />
+        <FloraMesh k="tree" seed={a.seed ?? Math.round(a.pos[0] * 3 + a.pos[2] * 7)} color={a.color} />
       </Placed>
     );
   },
@@ -807,7 +570,7 @@ export const props1: Pick<
     solidCyl(a, 0.25, 4);
     return (
       <Placed {...a}>
-        <Merged g={palmGeo(a.color ?? '#3a9a45', a.seed ?? Math.round(a.pos[0] * 5 + a.pos[2] * 3))} />
+        <FloraMesh k="palm" seed={a.seed ?? Math.round(a.pos[0] * 5 + a.pos[2] * 3)} color={a.color} />
       </Placed>
     );
   },
@@ -815,13 +578,13 @@ export const props1: Pick<
     solidCyl(a, 0.3, 3);
     return (
       <Placed {...a}>
-        <Merged g={pineGeo(a.color ?? '#2f7040', a.seed ?? Math.round(a.pos[0] + a.pos[2]))} />
+        <FloraMesh k="pine" seed={a.seed ?? Math.round(a.pos[0] + a.pos[2])} color={a.color} />
       </Placed>
     );
   },
   Bush: (a) => (
     <Placed {...a}>
-      <Merged g={bushGeo(a.color ?? '#3f9b4b', a.seed ?? Math.round(a.pos[0] * 2 + a.pos[2]))} />
+      <FloraMesh k="bush" seed={a.seed ?? Math.round(a.pos[0] * 2 + a.pos[2])} color={a.color} />
     </Placed>
   ),
   Flowers: (a) => (

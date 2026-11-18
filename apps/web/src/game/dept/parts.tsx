@@ -1,7 +1,7 @@
 // Piezas compartidas por las zonas. Cada función devuelve piezas en coordenadas LOCALES (frente hacia +Z, apoyo en
 // y = 0) para colocarlas con place() / z.put(), salvo la vegetación (VEG), que ya va en coordenadas del mundo.
 
-import type { MatKind } from '../kit';
+import { art, type MatKind } from '../kit';
 import { bl, bx, cy, type Pc, PI, py } from './lib';
 
 const WOOD = '#7a5230',
@@ -20,7 +20,9 @@ export type VegKind =
   | 'reed'
   | 'rock'
   | 'fern'
-  | 'banana';
+  | 'banana'
+  | 'cafe'
+  | 'oilpalm';
 type VegFn = (x: number, y: number, z: number, s: number, c: string, r: () => number) => Pc[];
 export const VEG: Record<VegKind, VegFn> = {
   tree: (x, y, z, s, c) => [
@@ -89,6 +91,23 @@ export const VEG: Record<VegKind, VegFn> = {
       ),
     ),
   rock: (x, y, z, s, c) => [bl(x, y + 0.3 * s, z, 0.9 * s, 'stone', c, { s: [1.25, 0.7, 1], n: 7 })],
+  cafe: (x, y, z, s, c) => [
+    cy(x, y + 0.5 * s, z, 0.05 * s, 1 * s, 'wood', WOOD, { n: 5, solid: false }),
+    bl(x, y + 1 * s, z, 0.7 * s, 'leaf', c, { s: [1, 1.3, 1], n: 7 }),
+  ],
+  oilpalm: (x, y, z, s, c, r) => {
+    const a0 = r() * 6;
+    return [
+      cy(x, y + 1.8 * s, z, 0.42 * s, 3.6 * s, 'wood', '#7a6a4d', { n: 7 }),
+      ...[0, 1, 2, 3, 4, 5, 6, 7].map((i) => {
+        const a = a0 + i * 0.785;
+        return bx(x + Math.cos(a) * 1.4 * s, y + 3.7 * s, z + Math.sin(a) * 1.4 * s, 3 * s, 0.07, 0.7 * s, 'leaf', c, {
+          e: [0, -a, -0.25],
+          solid: false,
+        });
+      }),
+    ];
+  },
   banana: (x, y, z, s, c, r) => {
     const a0 = r() * 6;
     return [
@@ -192,8 +211,17 @@ export const garita = (c = '#b9b1a0', roof = '#b5523b'): Pc[] => [
 /** Almenas a lo largo de X sobre un muro de largo `len`. */
 export const merlons = (len: number, c: string, m: MatKind = 'stone', h = 0.7, t = 0.5): Pc[] =>
   Array.from({ length: Math.floor(len / 1.6) }, (_, i) => bx(-len / 2 + 0.8 + i * 1.6, h / 2, 0, 0.8, h, t, m, c));
-/** Montaña de fondo (sin colisión). */
-export const mont = (r: number, h: number, c: string, cap?: string): Pc[] => [
+/** Montaña de fondo (sin colisión). Con `relief` (y si el paquete de arte sabe), se dibuja como cerro con relieve:
+ *  lomos, quebradas, monte y roca; si no, como conos. Sin relieve cuando algo va encima de su ladera. */
+export const mont = (r: number, h: number, c: string, cap?: string, relief = true): Pc[] => {
+  const pcs = monte(r, h, c, cap);
+  if (relief && art.Hills) {
+    for (const q of pcs) q.hide = true;
+    pcs[0].hill = { p: [0, -(h / 2 - 3), 0], r, h, c, seed: Math.round(r * 7 + h * 13) };
+  }
+  return pcs;
+};
+const monte = (r: number, h: number, c: string, cap?: string): Pc[] => [
   cy(0, h / 2 - 3, 0, r, h, 'grass', c, { rt: 0.1, n: 9, solid: false }),
   cy(r * 0.55, h * 0.3 - 3, r * 0.2, r * 0.7, h * 0.6, 'grass', c, { rt: 0.15, n: 8, solid: false }),
   cy(-r * 0.5, h * 0.25 - 3, -r * 0.15, r * 0.65, h * 0.5, 'grass', c, { rt: 0.2, n: 8, solid: false }),
