@@ -366,3 +366,42 @@ export function tint(c: string | THREE.Color, k: number, to?: string): THREE.Col
   if (to) return a.lerp(new THREE.Color(to), k);
   return a.multiplyScalar(k);
 }
+
+/** roca con forma: bola deformada, cortada por planos (caras de fractura) y con la base aplanada. Facetada. */
+export function gRock(seed: number): THREE.BufferGeometry {
+  const v = ((Math.round(seed) % 12) + 12) % 12;
+  return memo(`rock${v}`, () => {
+    const g = new THREE.IcosahedronGeometry(1, 2),
+      p = g.attributes.position,
+      r = rng(v * 4931 + 17),
+      W: number[][] = [],
+      cuts: [THREE.Vector3, number][] = [];
+    for (let i = 0; i < 4; i++) {
+      const a = r() * 6.283,
+        y = r() * 2 - 1,
+        q = Math.sqrt(1 - y * y),
+        f = 1.4 + i * 0.9;
+      W.push([Math.cos(a) * q * f, y * f, Math.sin(a) * q * f, r() * 6.283, 1 / (1 + i * 0.7)]);
+    }
+    for (let i = 0; i < 5; i++) {
+      const a = r() * 6.283,
+        y = r() * 1.4 - 0.4;
+      cuts.push([new THREE.Vector3(Math.cos(a), y, Math.sin(a)).normalize(), 0.55 + r() * 0.3]);
+    }
+    for (let i = 0; i < p.count; i++) {
+      _v.fromBufferAttribute(p, i).normalize();
+      let n = 0;
+      for (const w of W) n += Math.sin(_v.x * w[0] + _v.y * w[1] + _v.z * w[2] + w[3]) * w[4];
+      _v.multiplyScalar(1 + n * 0.16);
+      for (const [c, d] of cuts) {
+        const k = _v.dot(c);
+        if (k > d) _v.addScaledVector(c, -(k - d) * 0.85);
+      }
+      if (_v.y < -0.3) _v.y = -0.3 + (_v.y + 0.3) * 0.15;
+      p.setXYZ(i, _v.x, _v.y, _v.z);
+    }
+    const ni = g.index ? g.toNonIndexed() : g;
+    ni.computeVertexNormals();
+    return ni;
+  });
+}

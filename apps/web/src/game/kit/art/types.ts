@@ -139,6 +139,8 @@ export interface ArtPack {
   props: ArtProps;
   /** geometría de caja opcional (p. ej. con bordes biselados en hd); la usa <Block>. Debe venir cacheada. */
   boxGeometry?(w: number, h: number, d: number): THREE.BufferGeometry;
+  /** geometría de roca con forma (radio 1, base plana en y = −0.3), cacheada por semilla; la usan las zonas */
+  rockGeometry?(seed: number): THREE.BufferGeometry;
   /** envoltorio opcional alrededor de toda la escena (posprocesado, etc.) */
   Effects?: FC<{ children?: ReactNode }>;
   /** vegetación fusionada (una malla para muchas plantas). Si falta, las escenas usan sus piezas de siempre. */

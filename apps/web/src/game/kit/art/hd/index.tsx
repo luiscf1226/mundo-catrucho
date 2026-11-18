@@ -12,7 +12,7 @@ import { basePack } from '../base';
 import type { ArtPack } from '../types';
 import { Avatar } from './avatar';
 import { Flora } from './flora';
-import { roundedBox } from './geo';
+import { gRock, roundedBox } from './geo';
 import { GroundCover } from './grass';
 import { hdMaterial } from './materials';
 import { Effects } from './post';
@@ -27,6 +27,7 @@ export const pack: ArtPack = {
   name: 'hd',
   material: hdMaterial,
   boxGeometry: (w, h, d) => roundedBox(w, h, d),
+  rockGeometry: gRock,
   SkyRig,
   Avatar,
   Effects,

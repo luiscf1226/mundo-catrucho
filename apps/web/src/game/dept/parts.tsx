@@ -2,7 +2,7 @@
 // y = 0) para colocarlas con place() / z.put(), salvo la vegetación (VEG), que ya va en coordenadas del mundo.
 
 import { art, type MatKind } from '../kit';
-import { bl, bx, cy, type Pc, PI, py } from './lib';
+import { bl, bx, cy, type Pc, PI, py, rk } from './lib';
 
 const WOOD = '#7a5230',
   DARKWOOD = '#5a3d26',
@@ -90,7 +90,9 @@ export const VEG: Record<VegKind, VegFn> = {
         { n: 4, solid: false },
       ),
     ),
-  rock: (x, y, z, s, c) => [bl(x, y + 0.3 * s, z, 0.9 * s, 'stone', c, { s: [1.25, 0.7, 1], n: 7 })],
+  rock: (x, y, z, s, c) => [
+    rk(x, y + 0.2 * s, z, 0.9 * s, 'stone', c, { s: [1.25, 0.75, 1], r: (x * 3.1 + z * 1.7) % 6.283 }),
+  ],
   cafe: (x, y, z, s, c) => [
     cy(x, y + 0.5 * s, z, 0.05 * s, 1 * s, 'wood', WOOD, { n: 5, solid: false }),
     bl(x, y + 1 * s, z, 0.7 * s, 'leaf', c, { s: [1, 1.3, 1], n: 7 }),

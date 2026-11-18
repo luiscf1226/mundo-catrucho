@@ -8,7 +8,7 @@ import type { V3 } from '../../../../core/types';
 import { Placed } from '../base';
 import type { ArtProps } from '../types';
 import { FloraMesh } from './flora';
-import { Builder, gBlob, gLathe, gSph, tint } from './geo';
+import { Builder, gBlob, gLathe, gRock, gSph, tint } from './geo';
 import { propMaterial } from './materials';
 import { cached, haloTexture, Merged, solidBox, solidCyl } from './pk';
 import { rng } from './tex';
@@ -55,25 +55,22 @@ function flowersGeo(color: string | undefined, seed: number) {
   });
 }
 function rockGeo(color: string, seed: number) {
-  const v = ((seed % 4) + 4) % 4;
+  const v = ((seed % 6) + 6) % 6;
   return cached(`rock|${color}|${v}`, () => {
-    const b = new Builder(),
-      flat = (g: THREE.BufferGeometry) => {
-        const n = g.toNonIndexed();
-        n.computeVertexNormals();
-        return n;
-      };
+    const b = new Builder();
     b.add(
-      flat(gBlob(1, v + 40, 0.3, 1, 1.2)),
-      { k: 'stone', c: color, g: [0, 0.5, 0.6] },
-      { p: [0, 0.36, 0], s: [0.95, 0.62, 0.82], r: [0, v * 1.3, 0] },
+      gRock(v * 2),
+      { k: 'stone', c: color, g: [-0.1, 0.6, 0.62] },
+      { p: [0, 0.32, 0], s: [0.95, 0.66, 0.82], r: [0, v * 1.3, 0] },
     );
     b.add(
-      flat(gBlob(1, v + 50, 0.3, 1, 1.3)),
-      { k: 'stone', c: tint(color, 0.9), g: [0, 0.3, 0.6] },
-      { p: [0.62, 0.16, 0.38], s: [0.36, 0.26, 0.32], r: [0, v, 0] },
+      gRock(v * 2 + 1),
+      { k: 'stone', c: tint(color, 0.88), g: [-0.1, 0.3, 0.62] },
+      { p: [0.66, 0.12, 0.36], s: [0.38, 0.28, 0.34], r: [0, v, 0] },
     );
-    b.add(gBlob(1, v + 60, 0.2, 2), { k: 'leaf', c: '#4f9a45' }, { p: [-0.45, 0.02, 0.5], s: [0.3, 0.1, 0.25] });
+    b.add(gRock(v + 7), { k: 'stone', c: tint(color, 1.08) }, { p: [-0.55, 0.05, -0.42], s: [0.2, 0.14, 0.18] });
+    // musgo y monte al pie
+    b.add(gBlob(1, v + 60, 0.2, 2), { k: 'leaf', c: '#4f8a3f' }, { p: [-0.45, 0.02, 0.5], s: [0.34, 0.1, 0.26] });
     return b.build();
   });
 }

@@ -62,7 +62,7 @@ export function alongPath(pts: XZ[], n: number): XZ[] {
 // ---------------------------------------------------------------------------------------------------------------
 // Piezas: descripción ligera de una forma con material y color. <Build> las fusiona por (material, color).
 export interface Pc {
-  g: 'box' | 'cyl' | 'ball' | 'pyr';
+  g: 'box' | 'cyl' | 'ball' | 'pyr' | 'rock';
   p: V3;
   s: V3;
   m: MatKind;
@@ -121,6 +121,16 @@ export const bl = (x: number, y: number, z: number, r: number, m: MatKind, c: st
   n: o.n,
   solid: false,
 });
+/** Roca con forma (sin colisión); (x, y, z) es el centro, r el radio y `s` la escala por eje. */
+export const rk = (x: number, y: number, z: number, r: number, m: MatKind, c: string, o: PcOpt = {}): Pc => ({
+  g: 'rock',
+  p: [x, y, z],
+  s: o.s ? [r * o.s[0], r * o.s[1], r * o.s[2]] : [r, r, r],
+  m,
+  c,
+  e: eul(o),
+  solid: false,
+});
 /** Pirámide de base rectangular (techos); (x, y, z) es el centro de la BASE. */
 export const py = (
   x: number,
@@ -170,7 +180,12 @@ function geoOf(q: Pc): THREE.BufferGeometry {
     const tiny = Math.max(q.s[0], q.s[1], q.s[2]) < 0.7 || Math.min(q.s[0], q.s[1], q.s[2]) < 0.13;
     g = ((!tiny && art.boxGeometry?.(q.s[0], q.s[1], q.s[2])) || new THREE.BoxGeometry(q.s[0], q.s[1], q.s[2])).clone();
   } else if (q.g === 'cyl') g = new THREE.CylinderGeometry(q.s[0] * (q.rt ?? 1), q.s[0], q.s[1], q.n ?? 10);
-  else if (q.g === 'ball') {
+  else if (q.g === 'rock') {
+    // roca con forma del paquete de arte (si no tiene, una bola facetada); s = radios
+    const rg = art.rockGeometry?.(Math.round(q.p[0] * 13 + q.p[2] * 7));
+    g = rg ? rg.clone() : new THREE.IcosahedronGeometry(1, 1);
+    S.set(q.s[0], q.s[1], q.s[2]);
+  } else if (q.g === 'ball') {
     g = new THREE.SphereGeometry(1, q.n ?? 10, Math.max(5, Math.round((q.n ?? 10) * 0.7)));
     S.set(q.s[0], q.s[1], q.s[2]);
   } else {
