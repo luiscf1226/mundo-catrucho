@@ -4,43 +4,22 @@
 import { useFrame } from '@react-three/fiber';
 import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
+import { useGame } from '../../../../core/store';
 import type { AvatarConfig, AvatarState } from '../../../../core/types';
+import { calidadEfectiva } from '../../../quality';
 import { textTexture } from '../../core';
 import { Exagera, Globito } from '../exagera';
 import type { AvatarProps } from '../types';
 import { ANIMS, type Ctx, PN, POSES } from './anim';
 import { avatarGeometry, B, NB, PARENT, REST } from './avatarGeo';
-import { avatarAtlas, avatarORM, configKey } from './avatarTex';
-import { G } from './materials';
+import { avatarMaterial } from './avatarMat';
+import { configKey } from './avatarTex';
 
-const mats = new Map<string, THREE.MeshStandardMaterial>();
-function avatarMaterial(cfg: AvatarConfig) {
-  const key = configKey(cfg);
-  let m = mats.get(key);
-  if (m) return m;
-  const orm = avatarORM();
-  m = new THREE.MeshStandardMaterial({
-    map: avatarAtlas(cfg),
-    roughnessMap: orm,
-    metalnessMap: orm,
-    roughness: 1,
-    metalness: 1,
-  });
-  // luz de contorno suave con el color del cielo: separa al personaje del fondo
-  m.onBeforeCompile = (sh) => {
-    sh.uniforms.uSky = G.uSky;
-    sh.fragmentShader = sh.fragmentShader
-      .replace('#include <common>', '#include <common>\nuniform vec3 uSky;')
-      .replace(
-        '#include <opaque_fragment>',
-        '{ float rimK = pow( 1.0 - saturate( dot( normal, normalize( vViewPosition ) ) ), 3.0 ); outgoingLight += diffuseColor.rgb * uSky * rimK * 0.8; }\n#include <opaque_fragment>',
-      );
-  };
-  m.customProgramCacheKey = () => 'hd-avatar';
-  mats.set(key, m);
-  return m;
-}
-
+/** el párpado gira hacia arriba sobre el ojo: abierto queda escondido bajo el párpado fijo */
+const LID_OPEN = -1.05;
+/** distancia a la cámara desde la que se usa la malla liviana, por calidad */
+const LOD_M = { baja: 3.5, media: 7, alta: 11 } as const;
+const _wp = new THREE.Vector3();
 const tmp = new Float32Array(PN),
   acc = new Float32Array(PN);
 class Rig {
@@ -58,8 +37,10 @@ class Rig {
   lastT = -1;
   /** aplastar y estirar, golpe al caer y mareo (MC-58) */
   ex = new Exagera();
-  globito = new Globito(0.82);
-  constructor(cfg: AvatarConfig) {
+  globito = new Globito(0.6);
+  full: THREE.BufferGeometry;
+  lite: THREE.BufferGeometry | null = null;
+  constructor(private cfg: AvatarConfig) {
     for (let i = 0; i < NB; i++) {
       const b = new THREE.Bone(),
         p = PARENT[i],
@@ -73,15 +54,25 @@ class Rig {
     }
     this.bones[0].updateMatrixWorld(true);
     this.skeleton = new THREE.Skeleton(this.bones);
-    this.mesh = new THREE.SkinnedMesh(avatarGeometry(cfg), avatarMaterial(cfg));
+    this.full = avatarGeometry(cfg);
+    this.mesh = new THREE.SkinnedMesh(this.full, avatarMaterial(cfg));
     this.mesh.add(this.bones[0]);
     this.mesh.bind(this.skeleton, new THREE.Matrix4());
     this.mesh.castShadow = true;
     this.mesh.receiveShadow = true;
     // la malla se deforma con los huesos: se usa una esfera fija y holgada para el descarte por cámara
     this.mesh.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, 1, 0), 1.9);
-    this.bones[B.lid].scale.y = 0.03;
+    this.bones[B.lid].rotation.x = LID_OPEN;
     this.bones[B.head].add(this.globito.sprite);
+  }
+  /** malla completa de cerca, liviana de lejos (mismos huesos y material; cambia solo la geometría) */
+  lod(cam: THREE.Vector3) {
+    const q = calidadEfectiva(useGame.getState().profile.settings),
+      m = LOD_M[q],
+      d = _wp.setFromMatrixPosition(this.mesh.matrixWorld).distanceTo(cam),
+      lite = this.mesh.geometry === this.full ? d > m * 1.1 : d > m;
+    const g = lite ? (this.lite ??= avatarGeometry(this.cfg, true)) : this.full;
+    if (this.mesh.geometry !== g) this.mesh.geometry = g;
   }
   update(state: AvatarState, t: number, dt: number) {
     const anim = this.ex.update(state.anim, t, dt);
@@ -118,7 +109,7 @@ class Rig {
     // --- movimiento secundario: parpadeo, capa, falda, coleta
     if (t > this.blinkAt) {
       const u = (t - this.blinkAt) / 0.2;
-      bn[B.lid].scale.y = u >= 1 ? 0.03 : 0.03 + 0.97 * Math.sin(u * Math.PI) ** 0.6;
+      bn[B.lid].rotation.x = u >= 1 ? LID_OPEN : LID_OPEN * (1 - Math.sin(u * Math.PI) ** 0.6);
       if (u >= 1) this.blinkAt = t + 1.6 + Math.random() * 3.6;
     }
     const moving = anim === 'walk' || anim === 'run' || anim === 'carry' ? Math.min(1, sp / 8) : 0,
@@ -178,23 +169,25 @@ export function Avatar({ config, state, name, scale = 1 }: AvatarProps) {
   const tag = useMemo(() => (name ? textTexture(name, { fg: '#ffffff', bg: 'rgba(12,22,34,0.8)' }) : null), [name]);
   useFrame((st, dt) => {
     rig.update(state, st.clock.elapsedTime, Math.min(dt, 0.1));
+    rig.lod(st.camera.position);
     cuerpo.current?.scale.set(rig.ex.sx, rig.ex.sy, rig.ex.sz);
     // el nombre sube con el muñeco cuando brinca (victoria, gol, susto)
     if (sube.current) sube.current.position.y = Math.max(0, rig.bones[0].position.y) * rig.ex.sy;
   });
+  // lo que el sombrero o el pelo suben sobre la coronilla, para que el nombre no lo tape
   const tall =
     config.hat === 'tocado_plumas'
-      ? 0.4
+      ? 0.2
       : config.hat === 'corona_carnaval'
-        ? 0.3
+        ? 0.13
         : config.hat === 'panuelo_garifuna' || config.hat === 'panuelo_punta'
-          ? 0.16
+          ? 0.08
           : config.hat === 'flores_pelo'
-            ? 0.02
+            ? 0
             : config.hat === 'sombrero_vaquero' || config.hat === 'sombrero_junco'
-              ? 0.14
+              ? 0.05
               : config.hat !== 'sin_sombrero' || config.hair === 'pelo_afro'
-                ? 0.08
+                ? 0.04
                 : 0;
   return (
     <group scale={scale}>
