@@ -151,6 +151,16 @@ export function fortaleza(d: Department): ZoneSpec {
       Math.abs(x) > 20 && Math.abs(x) < 46 && z > -24 && z < 44 && !inR(x, z, -24, 24, 20, 46) && !cercaDeLocura(x, z),
     { sep: 3 },
   );
+  // palma africana del Bajo Aguán: plantaciones en hileras a los dos lados, fuera de lo jugable
+  for (const [minX, maxX] of [
+    [52, 79],
+    [-79, -52],
+  ])
+    Z.plantacion(
+      'oilpalm',
+      { minX, maxX, minZ: -22, maxZ: 46 },
+      { dx: 7.2, dz: 6.3, smin: 1.2, smax: 1.55, colors: ['#4a8a40', '#3f7d3b', '#55963f'], calle: 5 },
+    );
   Z.add(place(mont(60, 55, '#3a8a55'), -120, 0, 60), place(mont(70, 70, '#2f7d4a'), 60, 0, 150));
   Z.trail(
     [

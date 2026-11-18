@@ -11,9 +11,9 @@ import { G } from './materials';
 import { rng, texCalidad } from './tex';
 
 // ---------------------------------------------------------------------------------------------------------------
-// Atlas: 4 × 3 celdas. Hojas en su color real (el color de la escena solo las matiza).
+// Atlas: 4 × 4 celdas. Hojas en su color real (el color de la escena solo las matiza).
 const AC = 4,
-  AR = 3;
+  AR = 4;
 export const CELL = {
   broad: 0,
   small: 1,
@@ -27,6 +27,10 @@ export const CELL = {
   dry: 9,
   cafe: 10,
   twig: 11,
+  veranera: 12,
+  izote: 13,
+  izoteFlor: 14,
+  tulipan: 15,
 } as const;
 /** rectángulo UV de una celda [u0, v0, du, dv]; du < 0 = muestreo opaco (relleno de copa, troncos) */
 export function cellRect(i: number, opaque = false): [number, number, number, number] {
@@ -370,6 +374,139 @@ const DRAW: ((c: Ctx, S: number, r: () => number) => void)[] = [
     };
     for (let i = 0; i < 3; i++) br(S / 2, S * 0.98, -Math.PI / 2 + (i - 1) * 0.5, S * 0.26, S * 0.014, 4);
   },
+  // 12 · veranera (buganvilia): hojitas y racimos de brácteas fucsia de tres en tres
+  (c, S, r) => {
+    for (let i = 0; i < 90; i++) {
+      const a = r() * 6.283,
+        d = S * 0.44 * Math.sqrt(r());
+      c.fillStyle = hsl(95 + r() * 25, 38 + r() * 18, 16 + r() * 16);
+      leaf(c, S / 2 + Math.cos(a) * d, S / 2 + Math.sin(a) * d, r() * 6.283, S * 0.07, S * 0.03);
+    }
+    for (let k = 0; k < 34; k++) {
+      const a = r() * 6.283,
+        d = S * 0.4 * Math.sqrt(r()),
+        x = S / 2 + Math.cos(a) * d,
+        y = S / 2 + Math.sin(a) * d,
+        hue = 318 + r() * 18,
+        R = S * (0.024 + r() * 0.014);
+      for (let b = 0; b < 3; b++) {
+        const t = (b / 3) * 6.283 + r() * 0.6;
+        c.fillStyle = hsl(hue, 70 + r() * 15, 44 + r() * 14);
+        c.beginPath();
+        c.ellipse(x + Math.cos(t) * R * 0.7, y + Math.sin(t) * R * 0.7, R, R * 0.72, t, 0, 6.283);
+        c.fill();
+      }
+      c.fillStyle = hsl(50, 30, 88);
+      c.beginPath();
+      c.arc(x, y, R * 0.18, 0, 6.283);
+      c.fill();
+    }
+  },
+  // 13 · hoja de izote: espada larga y tiesa a lo largo (u), con orilla clara y punta seca
+  (c, S, r) => {
+    const y = S / 2,
+      w = (t: number) => S * 0.42 * Math.min(1, t * 6) * (1 - t) ** 0.7;
+    c.fillStyle = hsl(96, 34, 30);
+    c.beginPath();
+    c.moveTo(S * 0.01, y);
+    for (let t = 0; t <= 1.001; t += 0.02) c.lineTo(S * (0.01 + t * 0.98), y - w(t));
+    for (let t = 1; t >= -0.001; t -= 0.02) c.lineTo(S * (0.01 + t * 0.98), y + w(t));
+    c.fill();
+    c.strokeStyle = hsl(70, 40, 62, 0.8);
+    c.lineWidth = S * 0.012;
+    for (const s of [-1, 1]) {
+      c.beginPath();
+      for (let t = 0; t <= 1; t += 0.02) c.lineTo(S * (0.01 + t * 0.98), y + s * (w(t) - S * 0.008));
+      c.stroke();
+    }
+    c.strokeStyle = hsl(90, 30, 22, 0.5);
+    c.lineWidth = S * 0.004;
+    for (let k = -2; k <= 2; k++) {
+      c.beginPath();
+      c.moveTo(S * 0.03, y + k * S * 0.05);
+      c.lineTo(S * 0.95, y + k * S * 0.004);
+      c.stroke();
+    }
+    c.fillStyle = hsl(38, 40, 40);
+    c.beginPath();
+    c.moveTo(S * 0.9, y - w(0.9));
+    c.lineTo(S, y);
+    c.lineTo(S * 0.9, y + w(0.9));
+    c.fill();
+    for (let i = 0; i < 40; i++) {
+      c.fillStyle = hsl(80, 25, 50, 0.12);
+      c.fillRect(S * (0.05 + r() * 0.8), y + (r() - 0.5) * S * 0.4, S * 0.03, S * 0.004);
+    }
+  },
+  // 14 · flor de izote: panoja de campanitas color crema en un tallo (abajo el tallo, arriba la punta)
+  (c, S, r) => {
+    c.strokeStyle = hsl(80, 30, 34);
+    c.lineWidth = S * 0.02;
+    c.beginPath();
+    c.moveTo(S / 2, S);
+    c.lineTo(S / 2, S * 0.05);
+    c.stroke();
+    for (let i = 0; i < 16; i++) {
+      const t = i / 16,
+        yy = S * (0.92 - t * 0.85),
+        L = S * 0.3 * Math.sin(Math.PI * (0.15 + t * 0.8)) ** 0.7;
+      for (const s of [-1, 1]) {
+        const ex = S / 2 + s * L * (0.7 + r() * 0.3),
+          ey = yy - S * 0.04;
+        c.strokeStyle = hsl(70, 25, 40);
+        c.lineWidth = S * 0.006;
+        c.beginPath();
+        c.moveTo(S / 2, yy);
+        c.lineTo(ex, ey);
+        c.stroke();
+        for (let k = 0; k < 4; k++) {
+          const q = 0.3 + k * 0.22,
+            bx = S / 2 + (ex - S / 2) * q + (r() - 0.5) * S * 0.03,
+            by = yy + (ey - yy) * q + S * 0.03;
+          c.fillStyle = hsl(48 + r() * 10, 45 + r() * 20, 82 + r() * 10);
+          c.beginPath();
+          c.ellipse(bx, by, S * 0.024, S * 0.032, 0, 0, 6.283);
+          c.fill();
+          c.fillStyle = hsl(60, 30, 70, 0.6);
+          c.beginPath();
+          c.ellipse(bx, by + S * 0.02, S * 0.012, S * 0.008, 0, 0, 6.283);
+          c.fill();
+        }
+      }
+    }
+  },
+  // 15 · tulipán (clavel, hibisco): hojas lustrosas dentadas y flores rojas o naranjas de cinco pétalos
+  (c, S, r) => {
+    for (let pass = 0; pass < 2; pass++)
+      for (let i = 0; i < (pass ? 90 : 55); i++) {
+        const a = r() * 6.283,
+          d = S * 0.43 * Math.sqrt(r()),
+          L = S * (0.09 + r() * 0.05);
+        c.fillStyle = hsl(105 + r() * 25, 45 + r() * 15, pass ? 20 + r() * 18 : 12 + r() * 8);
+        leaf(c, S / 2 + Math.cos(a) * d, S / 2 + Math.sin(a) * d, a + (r() - 0.5) * 1.5, L, L * 0.5);
+      }
+    for (let k = 0; k < 9; k++) {
+      const a = r() * 6.283,
+        d = S * 0.34 * Math.sqrt(r()),
+        x = S / 2 + Math.cos(a) * d,
+        y = S / 2 + Math.sin(a) * d,
+        R = S * (0.05 + r() * 0.02),
+        hue = r() < 0.75 ? 355 + r() * 8 : 18 + r() * 12;
+      for (let p = 0; p < 5; p++) {
+        const t = (p / 5) * 6.283 + r() * 0.3;
+        c.fillStyle = hsl(hue % 360, 78, 42 + r() * 12);
+        c.beginPath();
+        c.ellipse(x + Math.cos(t) * R * 0.55, y + Math.sin(t) * R * 0.55, R * 0.62, R * 0.45, t, 0, 6.283);
+        c.fill();
+      }
+      c.strokeStyle = hsl(50, 80, 60);
+      c.lineWidth = S * 0.006;
+      c.beginPath();
+      c.moveTo(x, y);
+      c.lineTo(x + Math.cos(a) * R * 1.1, y + Math.sin(a) * R * 1.1);
+      c.stroke();
+    }
+  },
 ];
 
 let _atlas: THREE.DataTexture | null = null;
@@ -603,16 +740,11 @@ class FB {
     else for (let i = 0; i < P.count; i++) this.I.push(o + i);
   }
   /** rama o tronco por una curva, con corteza */
-  limb(pts: V3[], radii: number[], c: THREE.Color, seg = 7, sway = 0) {
+  limb(pts: V3[], radii: number[], c: THREE.Color, seg = 7, sway = 0, cell: number = CELL.bark) {
     const g = gTube(pts, radii, seg),
       circ = 2 * Math.PI * radii[0];
-    this.geo(
-      g,
-      new THREE.Matrix4(),
-      cellRect(CELL.bark, true),
-      c,
-      [Math.max(1, Math.round(circ / 0.45)), 1 / 0.9],
-      (p) => (sway ? sway * Math.min(1, Math.max(0, p.y - pts[0][1]) / 3) : 0),
+    this.geo(g, new THREE.Matrix4(), cellRect(cell, true), c, [Math.max(1, Math.round(circ / 0.45)), 1 / 0.9], (p) =>
+      sway ? sway * Math.min(1, Math.max(0, p.y - pts[0][1]) / 3) : 0,
     );
     g.dispose();
   }
@@ -673,10 +805,10 @@ class FB {
       }
   }
   /** relleno opaco de copa (para que de lejos no se vea a través) */
-  blob(p: Vec, r: V3, seed: number, c: THREE.Color, sway: number) {
+  blob(p: Vec, r: V3, seed: number, c: THREE.Color, sway: number, cell: number = CELL.broad, leaf = 1) {
     const g = gBlob(1, seed, 0.3, 1),
       m = new THREE.Matrix4().compose(p, new THREE.Quaternion(), vec(r[0], r[1], r[2]));
-    this.geo(g, m, cellRect(CELL.broad, true), c, [1.5, 1.5], () => sway, 1);
+    this.geo(g, m, cellRect(cell, true), c, [1.5, 1.5], () => sway, leaf);
   }
   build(): Template {
     return {
@@ -909,18 +1041,36 @@ function palm(v: number): Template {
   b.limb(
     pts,
     oil ? [0.5, 0.45, 0.42, 0.42, 0.42, 0.43, 0.44, 0.4] : [0.3, 0.24, 0.2, 0.18, 0.17, 0.16, 0.15, 0.14],
-    oil ? col('#9a8a6a') : BARK_PALE,
+    oil ? col('#e8dcc0', 1.3) : BARK_PALE,
     9,
   );
+  if (oil)
+    // palma africana: las bases de las hojas viejas quedan pegadas al tronco en espiral
+    for (let i = 0; i < 22; i++) {
+      const t = 0.12 + (i / 22) * 0.82,
+        a = i * 2.4,
+        y = top * t,
+        o = lean * t * t,
+        R = 0.42;
+      b.limb(
+        [
+          [cx * o + Math.cos(a) * R * 0.7, y, cz * o + Math.sin(a) * R * 0.7],
+          [cx * o + Math.cos(a) * (R + 0.22), y + 0.28, cz * o + Math.sin(a) * (R + 0.22)],
+        ],
+        [0.09, 0.05],
+        col('#d8c8a0', 1.3),
+        4,
+      );
+    }
   const T = vec(cx * lean, top, cz * lean),
     nf = Math.round((oil ? 26 : 16) * (0.6 + 0.4 * cardK()));
   for (let i = 0; i < nf; i++) {
     const a = (i / nf) * 6.283 * (oil ? 2.6 : 1) + r() * 0.4,
       layer = i / nf,
       dead = !oil && i % 7 === 3,
-      L = (oil ? 3.6 : 3.3) * (0.85 + r() * 0.3) * (dead ? 0.9 : 1),
-      el0 = dead ? -1.1 : oil ? 0.7 - layer * 0.9 : 0.55 - (i % 3) * 0.35 - r() * 0.2,
-      droop = dead ? 0.4 : oil ? 1.2 : 1.6 + r() * 0.5,
+      L = (oil ? 4.3 : 3.3) * (0.85 + r() * 0.3) * (dead ? 0.9 : 1),
+      el0 = dead ? -1.1 : oil ? 0.95 - layer * 0.8 : 0.55 - (i % 3) * 0.35 - r() * 0.2,
+      droop = dead ? 0.4 : oil ? 0.8 : 1.6 + r() * 0.5,
       d = vec(Math.cos(a), 0, Math.sin(a)),
       ac = vec(-Math.sin(a), 0, Math.cos(a)),
       P: Vec[] = [],
@@ -954,7 +1104,22 @@ function palm(v: number): Template {
         0,
       );
     }
-  else b.blob(T.clone().add(vec(0, -0.2, 0)), [0.55, 0.45, 0.55], 77, col('#6a5a30'), 0);
+  else {
+    b.blob(T.clone().add(vec(0, -0.2, 0)), [0.55, 0.45, 0.55], 77, col('#6a5a30'), 0);
+    // racimos de fruta rojinegra entre las hojas
+    for (let i = 0; i < 3; i++) {
+      const a = i * 2.1 + r();
+      b.blob(
+        T.clone().add(vec(Math.cos(a) * 0.5, -0.45, Math.sin(a) * 0.5)),
+        [0.24, 0.2, 0.24],
+        80 + i,
+        col('#ff8a50'),
+        0,
+        CELL.bark,
+        0,
+      );
+    }
+  }
   return b.build();
 }
 function bush(v: number, cell: number = CELL.broad): Template {
@@ -1100,7 +1265,7 @@ function rosette(
     b.strip(P, Wd, A, fold, cell, leafTone(r, 0.5), S);
   }
 }
-function banana(v: number): Template {
+function banana(v: number, bolsa = false): Template {
   const r = rng(v * 23 + 41),
     b = new FB(r),
     H = 2.1 + r() * 0.5;
@@ -1111,11 +1276,30 @@ function banana(v: number): Template {
       [0, H, 0],
     ],
     [0.17, 0.14, 0.11],
-    col('#a8b878'),
+    // pseudotallo: vainas verdosas con fibras secas a lo largo (la textura del zacate seco, no la corteza)
+    col('#a8c088'),
     8,
+    0,
+    CELL.dry,
   );
   rosette(b, Math.round(10 * (0.6 + 0.4 * cardK())), CELL.banana, 2.3, 1.05, 1.05, 1.0, vec(0, H - 0.1, 0), 0.1);
-  if (v % 2 === 0) {
+  if (bolsa) {
+    // bananera: el racimo va dentro de su bolsa azul de plástico y un puntal de madera sostiene la mata
+    b.blob(vec(0.36, H - 0.78, 0.1), [0.18, 0.42, 0.18], 95 + v, col('#7fb0ff'), 0, CELL.izoteFlor, 0);
+    b.blob(vec(0.36, H - 0.3, 0.1), [0.08, 0.12, 0.08], 97, col('#7a8a4a'), 0, CELL.bark, 0);
+    b.limb(
+      [
+        [1.0, -0.05, 0.55],
+        [0.66, H * 0.45, 0.32],
+        [0.3, H - 0.25, 0.08],
+      ],
+      [0.035, 0.03, 0.025],
+      col('#e0c8a0'),
+      5,
+      0,
+      CELL.dry,
+    );
+  } else if (v % 2 === 0) {
     // racimo verde y la bellota morada colgando
     for (let i = 0; i < 6; i++)
       b.blob(vec(0.35, H - 0.5 - i * 0.12, 0.1), [0.16, 0.1, 0.16], 90 + i, col('#9ab048', 0.9), 0);
@@ -1170,6 +1354,144 @@ function tuft(v: number, cell: number, h: number, w: number, n: number): Templat
   return b.build();
 }
 
+// --- jardín hondureño: izote, veranera sobre el tapial, seto podado y tulipán
+function izote(v: number): Template {
+  // izote (yuca): troncos pálidos que se ramifican, cada uno con su penacho de hojas tiesas; a veces la flor
+  const r = rng(v * 37 + 11),
+    b = new FB(r),
+    tops: Vec[] = [];
+  const trunks: [number, number, number][] =
+    v === 0
+      ? [[0, 0, 1.7]]
+      : v === 1
+        ? [
+            [-0.1, 0, 2.2],
+            [0.35, 0.15, 1.3],
+          ]
+        : [
+            [0, 0, 1.1],
+            [0.3, -0.2, 0.6],
+            [-0.25, 0.25, 1.5],
+          ];
+  for (const [x, z, h] of trunks) {
+    const lx = x * 1.6,
+      lz = z * 1.6;
+    b.limb(
+      [
+        [0, -0.05, 0],
+        [lx * 0.35, h * 0.5, lz * 0.35],
+        [lx, h, lz],
+      ],
+      [0.13, 0.1, 0.085],
+      col('#b9ab92'),
+      7,
+    );
+    tops.push(vec(lx, h, lz));
+  }
+  for (const T of tops) {
+    // hojas secas colgando debajo del penacho y el penacho tieso arriba
+    rosette(b, 6, CELL.izote, 0.7, 0.1, -0.15, 0.35, T.clone().add(vec(0, -0.12, 0)), 0.04, 0.5);
+    rosette(b, Math.round(20 * (0.6 + 0.4 * cardK())), CELL.izote, 0.85, 0.11, 0.95, 0.3, T, 0.05, 0.35);
+  }
+  if (v !== 1) {
+    const T = tops.reduce((a, q) => (q.y > a.y ? q : a)),
+      p = T.clone().add(vec(0, 0.95, 0));
+    for (let k = 0; k < 2; k++) {
+      const a = k * 1.57 + 0.4;
+      b.card(p, 0.8, 1.45, vec(Math.cos(a), 0, Math.sin(a)), 0, p, CELL.izoteFlor, col('#ffffff'), 0.4);
+    }
+  }
+  return b.build();
+}
+function veranera(v: number): Template {
+  // veranera trepada a un tapial: x = a lo largo de la pared, +z = hacia la calle. Tallos leñosos detrás de la pared y
+  // una masa de brácteas fucsia que se derrama por encima y cuelga del lado de la calle.
+  const r = rng(v * 43 + 19),
+    b = new FB(r),
+    len = v === 0 ? 2.6 : 1.8;
+  for (const x of [-len * 0.25, len * 0.2])
+    b.limb(
+      [
+        [x, -0.05, -0.45],
+        [x + 0.1, 1.2, -0.35],
+        [x - 0.1, 2.1, -0.1],
+      ],
+      [0.06, 0.05, 0.035],
+      BARK,
+      5,
+    );
+  const clumps: [Vec, number][] = [];
+  const n = v === 0 ? 9 : 6;
+  for (let i = 0; i < n; i++) {
+    const t = n > 1 ? i / (n - 1) : 0.5,
+      x = (t - 0.5) * len + (r() - 0.5) * 0.3,
+      edge = 1 - Math.abs(t - 0.5) * 1.4;
+    clumps.push([vec(x, 2.15 + r() * 0.45 * edge, -0.25 + r() * 0.3), 0.5 + r() * 0.2]);
+    // lo que se derrama hacia la calle y cuelga sobre la pared
+    if (r() < 0.75) clumps.push([vec(x + (r() - 0.5) * 0.3, 1.55 + r() * 0.35, 0.28 + r() * 0.12), 0.32 + r() * 0.12]);
+  }
+  crown(b, clumps, vec(0, 1.9, -0.2), CELL.veranera, 5, 1.6, 1.4, 2.8, 0.42);
+  return b.build();
+}
+function seto(v: number): Template {
+  // seto podado de 1.2 m: relleno y tarjetas sobre las caras de una caja (v = 2: con flores de tulipán)
+  const r = rng(v * 29 + 3),
+    b = new FB(r),
+    W = 1.2,
+    H = 0.85 + v * 0.08,
+    D = 0.6,
+    cell = v === 2 ? CELL.tulipan : CELL.small,
+    c0 = vec(0, H * 0.5, 0);
+  b.blob(c0, [W * 0.52, H * 0.5, D * 0.5], 31 + v, col('#ffffff', 0.62), 0.2);
+  const face = (p: Vec, n: Vec, w: number, h: number) =>
+    b.card(
+      p,
+      w,
+      h,
+      n.clone().add(vec((r() - 0.5) * 0.4, (r() - 0.5) * 0.3, (r() - 0.5) * 0.4)),
+      r() * 6.283,
+      c0,
+      cell,
+      leafTone(r, p.y / H),
+      0.3,
+    );
+  for (let i = 0; i < 3; i++) {
+    const x = (i - 1) * 0.4 + (r() - 0.5) * 0.08;
+    face(vec(x, H + 0.02, 0), vec(0, 1, 0), 0.62, 0.62);
+    for (const s of [-1, 1]) face(vec(x, H * 0.5, s * (D / 2 + 0.03)), vec(0, 0, s), 0.6, H * 1.05);
+  }
+  for (const s of [-1, 1]) face(vec(s * (W / 2 + 0.03), H * 0.5, 0), vec(s, 0, 0), D * 1.1, H * 1.05);
+  return b.build();
+}
+function tulipan(v: number): Template {
+  // tulipán (hibisco) de patio: varias varas desde el suelo y la copa con flores rojas
+  const r = rng(v * 53 + 23),
+    b = new FB(r),
+    H = 1.2 + v * 0.3,
+    clumps: [Vec, number][] = [];
+  for (let i = 0; i < 3; i++) {
+    const a = i * 2.1 + r();
+    b.limb(
+      [
+        [0, -0.05, 0],
+        [Math.cos(a) * 0.15, H * 0.5, Math.sin(a) * 0.15],
+        [Math.cos(a) * 0.3, H * 0.8, Math.sin(a) * 0.3],
+      ],
+      [0.035, 0.028, 0.02],
+      BARK,
+      5,
+    );
+  }
+  for (let i = 0; i < 6; i++) {
+    const a = i * 1.1 + r(),
+      d = 0.25 + r() * 0.2;
+    clumps.push([vec(Math.cos(a) * d, H * (0.55 + r() * 0.35), Math.sin(a) * d), 0.4 + r() * 0.12]);
+  }
+  clumps.push([vec(0, H * 0.95, 0), 0.42]);
+  crown(b, clumps, vec(0, H * 0.6, 0), CELL.tulipan, 4, 1.7, H * 0.4, H, 0.5);
+  return b.build();
+}
+
 /** cuántas variantes tiene cada especie */
 const VARIANTS: Record<FloraKind, number> = {
   tree: 4,
@@ -1185,6 +1507,11 @@ const VARIANTS: Record<FloraKind, number> = {
   banana: 2,
   cafe: 2,
   flowers: 3,
+  bananera: 2,
+  izote: 3,
+  veranera: 2,
+  seto: 3,
+  tulipan: 2,
 };
 const templates = new Map<string, Template>();
 export function template(k: FloraKind, seed: number): Template {
@@ -1209,15 +1536,23 @@ export function template(k: FloraKind, seed: number): Template {
                   ? rainforest(v, true)
                   : k === 'dry'
                     ? dry(v)
-                    : k === 'banana'
-                      ? banana(v)
-                      : k === 'cafe'
-                        ? cafe(v)
-                        : k === 'fern'
-                          ? fern(v)
-                          : k === 'reed'
-                            ? tuft(v, v ? CELL.dry : CELL.grass, 1.7, 1.2, 4)
-                            : tuft(v, CELL.flowers, 0.55, 0.75, 3);
+                    : k === 'banana' || k === 'bananera'
+                      ? banana(v, k === 'bananera')
+                      : k === 'izote'
+                        ? izote(v)
+                        : k === 'veranera'
+                          ? veranera(v)
+                          : k === 'seto'
+                            ? seto(v)
+                            : k === 'tulipan'
+                              ? tulipan(v)
+                              : k === 'cafe'
+                                ? cafe(v)
+                                : k === 'fern'
+                                  ? fern(v)
+                                  : k === 'reed'
+                                    ? tuft(v, v ? CELL.dry : CELL.grass, 1.7, 1.2, 4)
+                                    : tuft(v, CELL.flowers, 0.55, 0.75, 3);
   templates.set(key, t);
   return t;
 }

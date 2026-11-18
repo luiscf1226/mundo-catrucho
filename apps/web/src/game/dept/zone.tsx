@@ -291,6 +291,42 @@ export class ZB {
     }
     return pts;
   }
+  /** Plantación en hileras dentro de un rectángulo (fondo, fuera de lo jugable): quita la vegetación suelta que había
+   *  ahí, siembra a tresbolillo con un poco de desorden y deja calles cada `calle` hileras. Sin colisión. */
+  plantacion(
+    k: 'bananera' | 'oilpalm',
+    r: { minX: number; maxX: number; minZ: number; maxZ: number },
+    o: {
+      dx: number;
+      dz: number;
+      smin: number;
+      smax: number;
+      colors: string[];
+      calle?: number;
+      ok?: (x: number, z: number) => boolean;
+    },
+  ) {
+    const dentro = (x: number, z: number, m = 0) =>
+      x > r.minX - m && x < r.maxX + m && z > r.minZ - m && z < r.maxZ + m;
+    if (art.Flora) this.pcs = this.pcs.filter((q) => !(q.hide && !q.hill && dentro(q.p[0], q.p[2], 1.5)));
+    const veg: VegKind = k === 'bananera' ? 'banana' : 'oilpalm',
+      rr = rng(Math.round(r.minX * 31 + r.minZ * 17) >>> 0);
+    let fila = 0;
+    for (let z = r.minZ; z <= r.maxZ; z += o.dz, fila++) {
+      if (o.calle && fila % o.calle === o.calle - 1) continue;
+      for (let x = r.minX + (fila % 2 ? o.dx / 2 : 0); x <= r.maxX; x += o.dx) {
+        const px = x + (rr() - 0.5) * o.dx * 0.18,
+          pz = z + (rr() - 0.5) * o.dz * 0.18;
+        if (o.ok && !o.ok(px, pz)) continue;
+        const y = this.h(px, pz),
+          s = o.smin + rr() * (o.smax - o.smin),
+          c = o.colors[Math.floor(rr() * o.colors.length)],
+          pc = VEG[veg](px, y, pz, s, c, rr).map((q) => ({ ...q, solid: false }));
+        this.pcs.push(...conFlora(pc, { k, p: [px, y, pz], s, c, seed: Math.floor(rr() * 1000) }));
+      }
+    }
+    return this;
+  }
   /** piezas de una planta: con vegetación del paquete de arte se dibuja `item` y las piezas quedan solo como colisión */
   plant(pcs: Pc[], item: FloraItem) {
     this.pcs.push(...conFlora(pcs, item));
