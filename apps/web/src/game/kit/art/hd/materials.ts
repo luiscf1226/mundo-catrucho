@@ -201,10 +201,11 @@ const FRAG_MAP = /* glsl */ `
   if ( gk > 0.0 ) {
     // paredes: tierra salpicada abajo (desde el suelo, y ≈ 0) y chorreados de lluvia hacia abajo
     float wall = 1.0 - smoothstep( 0.3, 0.7, abs( tn0.y ) );
-    float foot = 1.0 - smoothstep( 0.0, 0.9 + 0.7 * macro, vTriPos.y );
+    // salpicado de tierra solo en el primer palmo (≈ 0.3–0.6 m) y chorreados apenas marcados: sutil, sin manchones
+    float foot = 1.0 - smoothstep( 0.0, 0.3 + 0.3 * macro, vTriPos.y );
     float streak = texture( tAlb, vec3( ( vTriPos.x + vTriPos.z ) * 0.09, vTriPos.y * 0.012, ${MACRO}.0 ) ).r;
-    float gr = wall * gk * ( foot * 0.8 + smoothstep( 0.5, 0.85, streak ) * 0.3 );
-    alb *= mix( vec3( 1.0 ), vec3( 0.58, 0.52, 0.44 ), clamp( gr, 0.0, 1.0 ) );
+    float gr = wall * gk * ( foot * foot * 0.7 + smoothstep( 0.6, 0.9, streak ) * 0.12 );
+    alb *= mix( vec3( 1.0 ), vec3( 0.66, 0.6, 0.52 ), clamp( gr, 0.0, 1.0 ) );
   }
   float wetK = uWet * ( 0.35 + 0.65 * smoothstep( 0.2, 0.9, tn0.y ) ) * ( 0.5 + 0.5 * smoothstep( 0.25, 0.6, macro ) );
   alb *= 1.0 - 0.3 * wetK;
