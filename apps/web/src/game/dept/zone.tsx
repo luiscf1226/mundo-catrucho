@@ -2,8 +2,9 @@
 // Cada zona se describe como datos (ZoneSpec): terreno, piezas fusionadas, utilería del arte y puntos de interés.
 import { Fragment, type ReactNode, useLayoutEffect, useMemo, useRef } from 'react';
 import type * as THREE from 'three';
+import { Color } from 'three';
 import { audio } from '../../core/audio';
-import { SHOP } from '../../core/data';
+import { DEPARTMENTS, SHOP } from '../../core/data';
 import { phys } from '../../core/phys';
 import { player } from '../../core/player';
 import { useGame } from '../../core/store';
@@ -22,6 +23,7 @@ import {
   useCollider,
   useTick,
 } from '../kit';
+import type { FloraItem, FloraKind, HillDef } from '../kit/art/types';
 import {
   alongPath,
   Build,
@@ -38,6 +40,22 @@ import {
   type XZ,
 } from './lib';
 import { VEG, type VegKind } from './parts';
+
+/** especie del paquete de arte para cada vegetación de zona (las rocas siguen siendo piezas) */
+const FLORA_OF: Partial<Record<VegKind, FloraKind>> = {
+  tree: 'tree',
+  pine: 'pine',
+  palm: 'palm',
+  oilpalm: 'oilpalm',
+  bush: 'bush',
+  jungle: 'jungle',
+  giant: 'giant',
+  dry: 'dry',
+  reed: 'reed',
+  fern: 'fern',
+  banana: 'banana',
+  cafe: 'cafe',
+};
 
 export interface Bio {
   grass: string;
@@ -274,10 +292,28 @@ export class ZB {
         z = (o.cz ?? 0) + (this.rand() * 2 - 1) * A;
       if (!ok(x, z) || pts.some((p) => Math.hypot(p[0] - x, p[1] - z) < sep)) continue;
       pts.push([x, z]);
-      const s = (o.smin ?? 0.85) + this.rand() * ((o.smax ?? 1.3) - (o.smin ?? 0.85));
-      this.pcs.push(...VEG[kind](x, this.h(x, z), z, s, cols[Math.floor(this.rand() * cols.length)], this.rand));
+      const s = (o.smin ?? 0.85) + this.rand() * ((o.smax ?? 1.3) - (o.smin ?? 0.85)),
+        c = cols[Math.floor(this.rand() * cols.length)],
+        y = this.h(x, z),
+        pc = VEG[kind](x, y, z, s, c, this.rand),
+        fk = FLORA_OF[kind];
+      // con vegetación del paquete de arte: las piezas quedan solo como colisión (mismos troncos sólidos)
+      if (art.Flora && fk && pc.length) {
+        for (const q of pc) q.hide = true;
+        pc[0].flora = { k: fk, p: [x, y, z], s, c, seed: Math.floor(Math.abs(x * 7.31 + z * 3.17) * 10) };
+      }
+      this.pcs.push(...pc);
     }
     return pts;
+  }
+  /** piezas de una planta: con vegetación del paquete de arte se dibuja `item` y las piezas quedan solo como colisión */
+  plant(pcs: Pc[], item: FloraItem) {
+    if (art.Flora && pcs.length) {
+      for (const q of pcs) q.hide = true;
+      pcs[0].flora = item;
+    }
+    this.pcs.push(...pcs);
+    return this;
   }
   /** parada de bus: aquí aparece el jugador. Deja el bus a su derecha y el rótulo de bienvenida al frente a la izquierda. */
   stop(x: number, z: number, yaw = 0, y = this.h(x, z)) {
@@ -419,6 +455,7 @@ export function ZoneScenery({ spec }: { spec: ZoneSpec }) {
       {spec.layers.map((l, i) => (
         <Terrain key={i} f={spec.f} {...l} />
       ))}
+      <Greenery spec={spec} />
       {spec.water.map((w, i) => (
         <Ground key={i} mat={w.mat ?? 'water'} color={w.color} y={w.y} size={w.size ?? 900} pos={w.pos} />
       ))}
@@ -440,6 +477,66 @@ export function ZoneScenery({ spec }: { spec: ZoneSpec }) {
         ),
       )}
       {spec.bad && <SoftBound bad={spec.bad} msg={spec.badMsg} icon={spec.badIcon} />}
+    </>
+  );
+}
+
+/** ¿(x, z) fuera de la rejilla cae en tierra? (el plano más alto que lo cubre no es agua) */
+function landAt(spec: ZoneSpec, x: number, z: number) {
+  let top = spec.far.y,
+    water = false;
+  for (const w of spec.water) {
+    const [sx, sz] = typeof w.size === 'number' ? [w.size, w.size] : (w.size ?? [900, 900]),
+      [px, , pz] = w.pos ?? [0, 0, 0];
+    if (Math.abs(x - px) > sx / 2 || Math.abs(z - pz) > sz / 2 || w.y <= top) continue;
+    top = w.y;
+    water = (w.mat ?? 'water') === 'water';
+  }
+  return water ? null : top;
+}
+/** Lomas de fondo entre la zona y los cerros: en tierra, lejos de lo jugable y de la ampliación del sur (estaciones). */
+function lomas(spec: ZoneSpec): HillDef[] {
+  const r = rng(hash(spec.id) + 77),
+    bio = BIO[DEPARTMENTS.find((d) => d.id === spec.id)?.biome ?? 'valle'],
+    out: HillDef[] = [];
+  for (let t = 0; t < 80 && out.length < 12; t++) {
+    const a = r() * Math.PI * 2,
+      d = 125 + r() * 85,
+      x = Math.cos(a) * d,
+      z = Math.sin(a) * d,
+      R = Math.min(d - 100, 24 + r() * 26),
+      y = landAt(spec, x, z);
+    if (R < 14 || y === null || (z > -60 && Math.abs(x) < 150)) continue;
+    // y que toda la base quede en tierra
+    if ([0, 1, 2, 3].some((k) => landAt(spec, x + Math.cos(k * 1.57) * R, z + Math.sin(k * 1.57) * R) === null))
+      continue;
+    const c = new Color(bio.grass).lerp(new Color(bio.leaf[t % bio.leaf.length]), 0.55).getStyle();
+    out.push({ p: [x, y, z], r: R, h: R * (0.32 + r() * 0.4), c, seed: t + 11 });
+  }
+  return out;
+}
+
+/** Vegetación y cerros del paquete de arte (una malla cada uno) y el zacate cerca de la cámara. */
+function Greenery({ spec }: { spec: ZoneSpec }) {
+  const pcs = spec.pcs,
+    flora = useMemo(() => pcs.flatMap((q): FloraItem[] => (q.flora ? [q.flora] : [])), [pcs]),
+    hills = useMemo(
+      () =>
+        art.Hills
+          ? [
+              ...pcs.flatMap((q): HillDef[] =>
+                q.hill ? [{ ...q.hill, p: [q.p[0] + q.hill.p[0], q.p[1] + q.hill.p[1], q.p[2] + q.hill.p[2]] }] : [],
+              ),
+              ...lomas(spec),
+            ]
+          : [],
+      [pcs, spec],
+    );
+  return (
+    <>
+      {art.Flora && flora.length > 0 && <art.Flora items={flora} />}
+      {art.Hills && hills.length > 0 && <art.Hills hills={hills} />}
+      {art.GroundCover && <art.GroundCover />}
     </>
   );
 }

@@ -23,11 +23,15 @@ export function cafetal(d: Department): ZoneSpec {
         pz = z + (r() - 0.5) * 0.4,
         y = Z.h(px, pz),
         s = 0.62 + r() * 0.2;
-      Z.add(
-        bl(px, y + s * 0.85, pz, s, 'leaf', r() < 0.5 ? '#2d6a3a' : '#357a42', { s: [1, 1, 1], n: 6 }),
-        bx(px + s * 0.7, y + s, pz + s * 0.5, 0.15, 0.15, 0.15, 'plastic', '#d62828', { solid: false }),
-        bx(px - s * 0.5, y + s * 1.3, pz - s * 0.7, 0.15, 0.15, 0.15, 'plastic', '#d62828', { solid: false }),
-        bx(px - s * 0.3, y + s * 0.6, pz + s * 0.9, 0.15, 0.15, 0.15, 'plastic', '#e85d04', { solid: false }),
+      const c = r() < 0.5 ? '#2d6a3a' : '#357a42';
+      Z.plant(
+        [
+          bl(px, y + s * 0.85, pz, s, 'leaf', c, { s: [1, 1, 1], n: 6 }),
+          bx(px + s * 0.7, y + s, pz + s * 0.5, 0.15, 0.15, 0.15, 'plastic', '#d62828', { solid: false }),
+          bx(px - s * 0.5, y + s * 1.3, pz - s * 0.7, 0.15, 0.15, 0.15, 'plastic', '#d62828', { solid: false }),
+          bx(px - s * 0.3, y + s * 0.6, pz + s * 0.9, 0.15, 0.15, 0.15, 'plastic', '#e85d04', { solid: false }),
+        ],
+        { k: 'cafe', p: [px, y, pz], s: s * 1.25, c: '#3f8a40', seed: Math.round(px * 3 + pz * 7) },
       );
     }
   for (const [x, z] of [

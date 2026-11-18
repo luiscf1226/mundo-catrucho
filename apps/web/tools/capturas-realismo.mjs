@@ -26,6 +26,15 @@ const VISTAS = [
   // agua: el Río Plátano en Gracias a Dios y el mar de Roatán
   ['rio', 'graciasadios', 15.5, [-8, 30, -1.2], { pos: [-4, 5, 40], target: [16, 0, 18], fov: 55 }],
   ['mar', 'islas', 15.5, [0, -12, Math.PI], { pos: [10, 5, -8], target: [-6, 0, -42], fov: 55 }],
+  // vegetación y terreno: bosque, costa con palmas, sur seco, cerros, platanar, selva y el mapa desde arriba
+  ['olancho-pasto', 'olancho', 15.5, [-10, 30, 0], { pos: [-12, 1.7, 27], target: [-22, 0.4, 14], fov: 55 }],
+  ['olancho-bosque', 'olancho', 15.5, [-10, 30, 0], { pos: [-8, 4, 32], target: [-35, 3, 8], fov: 55 }],
+  ['atlantida-costa', 'atlantida', 15.5, [0, 30, 0], { pos: [10, 4, 0], target: [-30, 3, -17], fov: 55 }],
+  ['choluteca-seco', 'choluteca', 15.5, [0, 42, 0], { pos: [8, 5, 36], target: [-25, 2, 5], fov: 55 }],
+  ['lempira-cerros', 'lempira', 15.5, [0, 42, 0], { pos: [6, 5, 50], target: [0, 7, -20], fov: 55 }],
+  ['lapaz-platanar', 'lapaz', 15.5, [0, 30, 0], { pos: [0, 5, 2], target: [22, 2, -25], fov: 55 }],
+  ['copan-selva', 'copan', 15.5, [0, 42, 0], { pos: [0, 6, 46], target: [-30, 5, 0], fov: 55 }],
+  ['lobby-arriba', null, 15.5, [-49, 121, 0], { pos: [-40, 55, 170], target: [-30, 0, 70], fov: 50 }],
 ];
 // MC_VISTAS=rio,mar saca solo esas vistas (y salta el fútbol) para iterar rápido
 const SOLO = process.env.MC_VISTAS?.split(',');
@@ -39,6 +48,10 @@ const ok = await run('capturas-realismo', file, { hash: `#go${EXTRA}`, width: 12
   await t.waitFor(`${S}.scene.kind==='lobby' && !!window.__mc.gl`, 20000, 'el lobby');
   const tabla = [];
   for (const [nombre, dept, h, [x, z, yaw], cam] of VISTAS.filter(([n]) => !SOLO || SOLO.includes(n))) {
+    if (!dept && (await t.ev(`${S}.scene.kind`)) !== 'lobby') {
+      await t.ev(`${S}.goLobby()`);
+      await t.waitFor(`${S}.scene.kind==='lobby'`, 30000, 'volver al lobby');
+    }
     if (dept && (await t.ev(`${S}.scene.id`)) !== dept) {
       await t.ev(`${S}.travel('${dept}')`);
       await t.waitFor(`${S}.scene.kind==='dept' && ${S}.scene.id==='${dept}'`, 30000, dept);
