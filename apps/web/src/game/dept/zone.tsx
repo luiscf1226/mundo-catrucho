@@ -447,8 +447,7 @@ export function ZoneScenery({ spec }: { spec: ZoneSpec }) {
   useLayoutEffect(() => {
     const levels = spec.water.filter((w) => (w.mat ?? 'water') === 'water').map((w) => w.y);
     if (!levels.length) return;
-    art.shore?.(spec.f.data, spec.f.n, spec.f.cell, levels);
-    return () => art.shore?.(null);
+    return art.shore?.(spec.f.data, spec.f.n, spec.f.cell, levels);
   }, [spec]);
   return (
     <>

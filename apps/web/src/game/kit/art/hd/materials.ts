@@ -25,13 +25,13 @@ export const G = {
 };
 
 /** Le dice al agua dónde está el fondo: la rejilla de alturas de la zona (n × n puntos cada `cell` m, centrada en
- *  el origen) y los niveles de sus planos de agua. Sin esto (lobby, pilas, fuentes) el agua sigue como siempre. */
-export function setShore(data: Float32Array | null, n = 0, cell = 1, levels: number[] = []) {
-  const old = G.tShore.value;
+ *  el origen) y los niveles de sus planos de agua. Sin esto (lobby, pilas, fuentes) el agua sigue como siempre.
+ *  Devuelve cómo quitarla; solo la quita si nadie puso otra después (una zona puede desmontarse tarde). */
+export function setShore(data: Float32Array, n: number, cell: number, levels: number[]) {
+  G.tShore.value?.dispose();
   G.tShore.value = null;
   G.uShoreBox.value.w = 0;
-  old?.dispose();
-  if (!data || n < 2) return;
+  if (n < 2) return () => {};
   const half = ((n - 1) * cell) / 2,
     h16 = new Uint16Array(n * n);
   for (let i = 0; i < h16.length; i++) h16[i] = THREE.DataUtils.toHalfFloat(data[i]);
@@ -42,6 +42,12 @@ export function setShore(data: Float32Array | null, n = 0, cell = 1, levels: num
   // el centro del texel i cae en x = −half + i·cell
   G.uShoreBox.value.set(-half - cell / 2, -half - cell / 2, n * cell, 1);
   G.uShoreY.value.set(levels[0] ?? -999, levels[1] ?? -999);
+  return () => {
+    if (G.tShore.value !== t) return;
+    G.tShore.value = null;
+    G.uShoreBox.value.w = 0;
+    t.dispose();
+  };
 }
 // textura vacía para que el sampler siempre tenga algo
 const SHORE0 = new THREE.DataTexture(new Uint16Array([0]), 1, 1, THREE.RedFormat, THREE.HalfFloatType);

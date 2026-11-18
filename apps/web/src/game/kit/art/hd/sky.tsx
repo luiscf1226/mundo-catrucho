@@ -563,6 +563,9 @@ export function SkyRig({
       prevExp = gl.toneMappingExposure;
     scene.fog = R.fog;
     scene.background = new THREE.Color('#b4dcfb');
+    // para las pruebas: lluvia, piso mojado y charcos del momento
+    const mc = (window as Window & { __mc?: Record<string, unknown> }).__mc;
+    if (mc) mc.clima = world;
     return () => {
       scene.fog = prevFog;
       scene.background = prevBg;
