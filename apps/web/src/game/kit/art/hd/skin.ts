@@ -110,9 +110,14 @@ export function loft(rings: Ring[], seg = 14): THREE.BufferGeometry {
   g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
   g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
   g.setIndex(idx);
+  return loftNormals(g, seg);
+}
+/** recalcula las normales de un loft (después de moverle vértices) sin que se note la costura de atrás */
+export function loftNormals(g: THREE.BufferGeometry, seg: number): THREE.BufferGeometry {
   g.computeVertexNormals();
   // la costura (j = 0 y j = seg) comparte posición: se promedian las normales para que no se note
-  const N = g.attributes.normal;
+  const N = g.attributes.normal,
+    n = N.count / (seg + 1);
   for (let i = 0; i < n; i++) {
     const a = i * (seg + 1),
       b = a + seg;

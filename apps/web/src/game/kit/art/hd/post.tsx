@@ -38,8 +38,11 @@ void main() {
   vec3 ddy = abs( pu.z - p.z ) < abs( p.z - pd.z ) ? pu - p : p - pd;
   vec3 n = normalize( cross( ddx, ddy ) );
   if ( dot( n, p ) > 0.0 ) n = -n;
-  float ssR = min( uProjScale * uRadius / -z, 90.0 );
-  float r2 = uRadius * uRadius, j = ign( gl_FragCoord.xy ), ang = j * 6.2832, occ = 0.0, bias = 0.004 - 0.002 * z;
+  // radio que se achica de cerca: con 1,5 m fijo, en primer plano el cuello, las axilas y los
+  // tapiales se veían negros; de lejos sigue asentando casas y postes
+  float rad = uRadius * clamp( -z / 8.0, 0.15, 1.0 );
+  float ssR = min( uProjScale * rad / -z, 90.0 );
+  float r2 = rad * rad, j = ign( gl_FragCoord.xy ), ang = j * 6.2832, occ = 0.0, bias = 0.004 - 0.002 * z;
   for ( int i = 0; i < AO_N; i++ ) {
     // espiral con ángulo áureo; el giro y el radio cambian por píxel y el desenfoque junta el resultado
     float a = ( float( i ) + fract( j * 7.31 + float( i ) * 0.618 ) ) / float( AO_N ), th = float( i ) * 2.39996 + ang;

@@ -83,7 +83,7 @@ try {
   );
   const clip = JSON.parse(
     await t.ev(
-      `(()=>{const b=document.querySelector('[data-testid=avatar-view]').getBoundingClientRect();return JSON.stringify({x:b.left+b.width*0.3,y:b.top+b.height*0.06,width:b.width*0.4,height:b.height*0.8})})()`,
+      `(()=>{const b=document.querySelector('[data-testid=avatar-view]').getBoundingClientRect();return JSON.stringify({x:b.left+b.width*0.3,y:b.top+b.height*0.03,width:b.width*0.4,height:b.height*0.94})})()`,
     ),
   );
   const views = [

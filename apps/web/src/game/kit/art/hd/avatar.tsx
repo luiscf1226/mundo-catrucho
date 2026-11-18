@@ -19,7 +19,26 @@ import { configKey } from './avatarTex';
 const LID_OPEN = -1.05;
 /** distancia a la cámara desde la que se usa la malla liviana, por calidad */
 const LOD_M = { baja: 3.5, media: 7, alta: 11 } as const;
-const _wp = new THREE.Vector3();
+const _wp = new THREE.Vector3(),
+  _lp = new THREE.Vector3(),
+  _inv = new THREE.Matrix4();
+/** gesto de la cara por animación: [sonrisa, boca abierta, cejas] (negativo = comisuras o cejas abajo) */
+const GESTO: Partial<Record<string, readonly [number, number, number]>> = {
+  celebrate: [1, 0.75, 0.6],
+  victoria: [1, 0.9, 0.7],
+  gol: [1, 1, 0.8],
+  dance: [0.8, 0.2, 0.3],
+  dance2: [0.8, 0.25, 0.35],
+  wave: [0.75, 0.15, 0.35],
+  clap: [0.85, 0.35, 0.4],
+  asombro: [0, 1, 1],
+  choque: [-0.4, 0.55, -0.7],
+  mareo: [-0.3, 0.3, -0.5],
+  kick: [0, 0.15, -0.45],
+  throw: [0, 0.15, -0.4],
+};
+/** a menos de esta distancia de la cámara (y en calidad alta) los ojos la siguen un poco */
+const LOOK_M = 4.5;
 const tmp = new Float32Array(PN),
   acc = new Float32Array(PN);
 class Rig {
@@ -32,6 +51,17 @@ class Rig {
   ph = Math.random() * 6;
   seed = Math.random() * 10;
   blinkAt = 1 + Math.random() * 3;
+  /** gesto actual (sonrisa, boca, cejas) y mirada (giro, cabeceo) con su objetivo y movimientos chiquitos */
+  face = [0, 0, 0];
+  gaze = [0, 0];
+  aim = [0, 0];
+  sacc = [0, 0];
+  saccAt = 0.5 + Math.random() * 2;
+  /** posiciones de reposo de los huesos de la cara (relativas a la cabeza) */
+  base: THREE.Vector3[] = [];
+  /** centro entre los ojos en el espacio de la cabeza */
+  eyeMid = new THREE.Vector3();
+  alta = false;
   mv = 0;
   air = 0;
   lastT = -1;
@@ -64,12 +94,30 @@ class Rig {
     this.mesh.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, 1, 0), 1.9);
     this.bones[B.lid].rotation.x = LID_OPEN;
     this.bones[B.head].add(this.globito.sprite);
+    this.base = this.bones.map((b) => b.position.clone());
+    const h = REST[B.head],
+      e = REST[B.eyeL];
+    this.eyeMid.set(0, e[1] - h[1], e[2] - h[2]);
+  }
+  /** los ojos siguen un poco a la cámara cuando está cerca y de frente (solo en calidad alta) */
+  look(cam: THREE.Vector3) {
+    this.aim[0] = this.aim[1] = 0;
+    if (!this.alta || _wp.setFromMatrixPosition(this.mesh.matrixWorld).distanceTo(cam) > LOOK_M) return;
+    _inv.copy(this.bones[B.head].matrixWorld).invert();
+    _lp.copy(cam).applyMatrix4(_inv).sub(this.eyeMid);
+    const flat = Math.hypot(_lp.x, _lp.z);
+    // de lado o por detrás no se fuerza la mirada: los ojos vuelven al frente
+    if (_lp.z < flat * 0.35) return;
+    const k = 1 - Math.max(0, (_wp.distanceTo(cam) - LOOK_M * 0.7) / (LOOK_M * 0.3));
+    this.aim[0] = Math.max(-0.42, Math.min(0.42, Math.atan2(_lp.x, _lp.z) * 0.8)) * k;
+    this.aim[1] = Math.max(-0.28, Math.min(0.22, Math.atan2(_lp.y, flat) * 0.8)) * k;
   }
   /** malla completa de cerca, liviana de lejos (mismos huesos y material; cambia solo la geometría) */
   lod(cam: THREE.Vector3) {
     const q = calidadEfectiva(useGame.getState().profile.settings),
-      m = LOD_M[q],
-      d = _wp.setFromMatrixPosition(this.mesh.matrixWorld).distanceTo(cam),
+      m = LOD_M[q];
+    this.alta = q === 'alta';
+    const d = _wp.setFromMatrixPosition(this.mesh.matrixWorld).distanceTo(cam),
       lite = this.mesh.geometry === this.full ? d > m * 1.1 : d > m;
     const g = lite ? (this.lite ??= avatarGeometry(this.cfg, true)) : this.full;
     if (this.mesh.geometry !== g) this.mesh.geometry = g;
@@ -106,12 +154,39 @@ class Rig {
     const bn = this.bones;
     bn[0].position.set(acc[0], acc[1], acc[2]);
     for (let i = 0; i < 14; i++) bn[i].rotation.set(acc[3 + i * 3], acc[4 + i * 3], acc[5 + i * 3]);
-    // --- movimiento secundario: parpadeo, capa, falda, coleta
+    // --- la cara: gesto según la animación (sonrisa, boca, cejas) y la mirada
+    const gs = GESTO[anim],
+      fk = 1 - Math.exp(-dt * 7),
+      fc = this.face;
+    fc[0] += ((gs?.[0] ?? 0) - fc[0]) * fk;
+    fc[1] += ((gs?.[1] ?? 0) * (anim === 'asombro' ? 1 : 0.72 + 0.28 * Math.sin(t * 9 + this.seed)) - fc[1]) * fk;
+    fc[2] += ((gs?.[2] ?? 0) - fc[2]) * fk;
+    const [smile, jaw, brow] = fc,
+      bs = this.base;
+    bn[B.jaw].rotation.x = 0.12 * Math.max(0, jaw);
+    bn[B.brow].position.set(bs[B.brow].x, bs[B.brow].y + 0.0034 * brow, bs[B.brow].z + 0.0006 * Math.max(0, brow));
+    bn[B.mouth].position.set(bs[B.mouth].x, bs[B.mouth].y + 0.0024 * smile, bs[B.mouth].z - 0.0008 * Math.abs(smile));
+    bn[B.mouth].scale.set(1 + 0.08 * smile, 1, 1);
+    if (t > this.saccAt) {
+      // movimientos chiquitos de los ojos para que no se vean fijos
+      this.sacc[0] = (Math.random() - 0.5) * 0.16;
+      this.sacc[1] = (Math.random() - 0.5) * 0.08;
+      this.saccAt = t + 0.6 + Math.random() * 2.2;
+    }
+    const gk = 1 - Math.exp(-dt * 14),
+      gz = this.gaze;
+    gz[0] += (this.aim[0] + this.sacc[0] - gz[0]) * gk;
+    gz[1] += (this.aim[1] + this.sacc[1] - gz[1]) * gk;
+    for (const e of [B.eyeL, B.eyeR]) bn[e].rotation.set(-gz[1], gz[0], 0);
+    // párpado: entrecierra los ojos al sonreír; parpadea de vez en cuando
+    const open = LID_OPEN * (1 - 0.2 * Math.max(0, smile));
+    bn[B.lid].rotation.x = open;
     if (t > this.blinkAt) {
       const u = (t - this.blinkAt) / 0.2;
-      bn[B.lid].rotation.x = u >= 1 ? LID_OPEN : LID_OPEN * (1 - Math.sin(u * Math.PI) ** 0.6);
+      bn[B.lid].rotation.x = u >= 1 ? open : open * (1 - Math.sin(u * Math.PI) ** 0.6);
       if (u >= 1) this.blinkAt = t + 1.6 + Math.random() * 3.6;
     }
+    // --- movimiento secundario: capa, falda, coleta
     const moving = anim === 'walk' || anim === 'run' || anim === 'carry' ? Math.min(1, sp / 8) : 0,
       inAir = anim === 'fall' || anim === 'jump' || anim === 'victoria' || anim === 'gol' ? 1 : 0,
       dance =
@@ -170,6 +245,7 @@ export function Avatar({ config, state, name, scale = 1 }: AvatarProps) {
   useFrame((st, dt) => {
     rig.update(state, st.clock.elapsedTime, Math.min(dt, 0.1));
     rig.lod(st.camera.position);
+    rig.look(st.camera.position);
     cuerpo.current?.scale.set(rig.ex.sx, rig.ex.sy, rig.ex.sz);
     // el nombre sube con el muñeco cuando brinca (victoria, gol, susto)
     if (sube.current) sube.current.position.y = Math.max(0, rig.bones[0].position.y) * rig.ex.sy;

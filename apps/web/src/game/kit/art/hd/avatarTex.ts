@@ -4,8 +4,8 @@ import * as THREE from 'three';
 import apodos from '../../../../../shared/data/apodos.json';
 import { SHOP } from '../../../../core/data';
 import type { AvatarConfig } from '../../../../core/types';
-import { EYE_RECT, hairline, lineAt } from './avatarAnat';
-import { cut, R, SWATCH, type SwatchName, swatchCell } from './avatarGeo';
+import { EAR_RECT, EYE_RECT, hairline, lineAt, NECK_RECT } from './avatarAnat';
+import { cut, R, SWATCH, type SwatchName, setClubShirts, swatchCell } from './avatarGeo';
 import { AH, AW, type Rect } from './skin';
 import { rng } from './tex';
 
@@ -89,6 +89,18 @@ function ribbons(c: Ctx, x: number, y: number, w: number, h: number, n = 6, off 
   }
 }
 
+/**
+ * Tono de piel con que se pinta el atlas a partir del color de la tienda: menos saturado y un poco hacia el rojo (los
+ * tonos medios se veían anaranjados con la luz de la tarde). Los oscuros pierden menos saturación.
+ */
+export function tonoPiel(hex: string) {
+  const c = C3(hex),
+    hsl = { h: 0, s: 0, l: 0 };
+  c.getHSL(hsl);
+  const k = hsl.l < 0.3 ? 0.84 : 0.7;
+  c.setHSL(hsl.h + (0.058 - hsl.h) * 0.35, hsl.s * k, hsl.l);
+  return css(c);
+}
 /** semilla estable por texto (para que cada configuración tenga sus manchitas y su color de ojos) */
 const hash = (t: string) => {
   let h = 2166136261;
@@ -204,7 +216,16 @@ function face(c: Ctx, cfg: AvatarConfig) {
     c.globalAlpha = 1;
   };
   const shadow = mix(skin, '#2a0f08', 0.55),
-    warm = mix(skin, '#c2403a', 0.6);
+    warm = mix(skin, '#c2403a', 0.6),
+    cool = mix(skin, '#3c4258', 0.5),
+    gold = mix(skin, '#d6ad62', 0.5);
+  // zonas de color de una cara de verdad: frente más amarilla, nariz, mejillas y orejas más rojas, quijada más fría
+  blob(X(0), Y(0.52), 120, 46, gold, 0.2);
+  for (const s of [-1, 1]) {
+    blob(X(s * 0.62), Y(-0.62), 46, 40, cool, fem ? 0.1 : 0.16);
+    blob(X(s * 0.72), Y(-0.05), 22, 46, warm, 0.1);
+  }
+  blob(X(0), Y(-0.86), 60, 22, cool, 0.12);
   // ojeras y cuencas, rubor en mejillas, nariz y orejas, sombra bajo el labio y en la quijada
   for (const s of [-1, 1]) {
     blob(X(s * 0.42), Y(0.05), 30, 22, shadow, 0.13);
@@ -212,7 +233,7 @@ function face(c: Ctx, cfg: AvatarConfig) {
     blob(X(s * 0.47), Y(-0.24), 34, 24, warm, f === 'cara_feliz' ? 0.3 : 0.17);
     blob(X(s * 0.16), Y(-0.24), 9, 14, shadow, 0.12);
   }
-  blob(X(0), Y(-0.24), 14, 18, warm, 0.2);
+  blob(X(0), Y(-0.2), 15, 24, warm, 0.24);
   blob(X(0), Y(-0.69), 26, 8, shadow, 0.22);
   blob(X(0), Y(-0.9), 70, 26, shadow, 0.16);
   // barba de pocos días (hombres): una sombra fría y granulada
@@ -305,6 +326,13 @@ function face(c: Ctx, cfg: AvatarConfig) {
     c.moveTo(X(-0.24), cy - smile + wink);
     c.bezierCurveTo(X(-0.1), cy + 1.5, X(0.1), cy + 1.5, X(0.24), cy - smile - wink);
     c.stroke();
+    // centro de la boca casi negro: al abrir la quijada esta raya se estira y la boca se ve entreabierta
+    c.strokeStyle = mix(lipD, '#1a0606', 0.7);
+    c.lineWidth = 1.3;
+    c.beginPath();
+    c.moveTo(X(-0.14), cy + 0.2);
+    c.bezierCurveTo(X(-0.06), cy + 1, X(0.06), cy + 1, X(0.14), cy + 0.2);
+    c.stroke();
     for (const s of [-1, 1]) blob(X(s * 0.25), cy - smile - s * wink, 5, 5, shadow, 0.45);
   }
   // cejas: pelitos en el color del pelo, más gruesas por dentro
@@ -359,6 +387,25 @@ function face(c: Ctx, cfg: AvatarConfig) {
     c.globalAlpha = 1;
   }
   region(c, EYE_RECT, (w) => eyeTex(c, cfg, w));
+  // orejas: más rojas y con el hueco más oscuro (la oreja usa el cuadro como un disco: centro = adentro)
+  region(c, EAR_RECT, (w) => {
+    skinFill(c, w, w, mix(skin, '#b8443c', 0.16), 11, 0.5);
+    const g = c.createRadialGradient(w / 2, w / 2, 0, w / 2, w / 2, w / 2);
+    g.addColorStop(0, mix(skin, '#3a1410', 0.45));
+    g.addColorStop(0.45, 'rgba(0,0,0,0)');
+    c.fillStyle = g;
+    c.fillRect(0, 0, w, w);
+  });
+  // cuello: arriba (bajo la quijada) más oscuro y frío, abajo el tono del pecho
+  region(c, NECK_RECT, (w, h) => {
+    skinFill(c, w, h, skin, 17, 0.45);
+    const g = c.createLinearGradient(0, 0, 0, h);
+    g.addColorStop(0, mix(skin, '#2c2a3a', 0.32));
+    g.addColorStop(0.45, mix(skin, '#3c4258', 0.08));
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    c.fillStyle = g;
+    c.fillRect(0, 0, w, h);
+  });
 }
 
 interface Sleeve {
@@ -366,43 +413,61 @@ interface Sleeve {
   paint: (c: Ctx, len: number) => void;
 }
 const HEM = 172;
+/**
+ * Banda de arriba del torso (filas 0 a ~13 del lienzo): el cuello de la camisa. La geometría (avatarGeo.ts) hace el
+ * borde con grosor; aquí va la tela del cuello con su acanalado y la costura. Redondo y en V llevan tela (con `collar`
+ * o la misma camisa un poco más oscura); en V, además, la piel del escote. `wide` = escote abierto, piel arriba.
+ */
 function neck(c: Ctx, skin: string, kind: 'round' | 'v' | 'wide', collar?: string) {
-  c.fillStyle = skin;
-  c.fillRect(0, 0, 512, kind === 'wide' ? 24 : 9);
-  if (kind === 'round') {
-    ell(c, 256, 6, 36, 24);
-    c.fill();
-    if (collar) {
-      c.strokeStyle = collar;
-      c.lineWidth = 6;
-      c.beginPath();
-      c.ellipse(256, 6, 38, 26, 0, 0.12, Math.PI - 0.12);
-      c.stroke();
-      c.fillStyle = collar;
-      c.fillRect(0, 8, 216, 6);
-      c.fillRect(296, 8, 216, 6);
-    }
-  } else if (kind === 'v') {
-    c.beginPath();
-    c.moveTo(232, 8);
-    c.lineTo(256, 52);
-    c.lineTo(280, 8);
-    c.fill();
-    if (collar) {
-      c.strokeStyle = collar;
-      c.lineWidth = 7;
-      c.lineJoin = 'miter';
-      c.beginPath();
-      c.moveTo(0, 11);
-      c.lineTo(230, 11);
-      c.lineTo(256, 56);
-      c.lineTo(282, 11);
-      c.lineTo(512, 11);
-      c.stroke();
-    }
-  } else {
+  if (kind === 'wide') {
+    c.fillStyle = skin;
+    c.fillRect(0, 0, 512, 24);
     ell(c, 256, 24, 80, 20);
     c.fill();
+    return;
+  }
+  const B = 13;
+  if (kind === 'v') {
+    // piel del escote en V (abajo del cuello de tela)
+    c.fillStyle = skin;
+    c.beginPath();
+    c.moveTo(229, B - 2);
+    c.lineTo(256, 46);
+    c.lineTo(283, B - 2);
+    c.fill();
+  }
+  // tela del cuello: el color propio o la camisa oscurecida, con acanalado fino
+  if (collar) {
+    c.fillStyle = collar;
+    c.fillRect(0, 0, 512, B);
+  } else {
+    c.fillStyle = 'rgba(0,0,0,0.14)';
+    c.fillRect(0, 0, 512, B);
+  }
+  c.fillStyle = 'rgba(0,0,0,0.12)';
+  for (let x = 0; x < 512; x += 3) c.fillRect(x, 0, 1, B);
+  // canto de arriba con luz, costura abajo
+  c.fillStyle = 'rgba(255,255,255,0.14)';
+  c.fillRect(0, 2, 512, 2);
+  c.fillStyle = 'rgba(0,0,0,0.28)';
+  c.fillRect(0, B, 512, 1.5);
+  if (kind === 'v') {
+    // el cuello de tela sigue los dos lados de la V
+    c.strokeStyle = collar ?? 'rgba(0,0,0,0.14)';
+    c.lineWidth = 6;
+    c.lineJoin = 'miter';
+    c.beginPath();
+    c.moveTo(226, B - 4);
+    c.lineTo(256, 49);
+    c.lineTo(286, B - 4);
+    c.stroke();
+    c.strokeStyle = 'rgba(0,0,0,0.3)';
+    c.lineWidth = 1.2;
+    c.beginPath();
+    c.moveTo(221, B);
+    c.lineTo(256, 54);
+    c.lineTo(291, B);
+    c.stroke();
   }
 }
 function lapels(c: Ctx, col: string) {
@@ -2020,6 +2085,9 @@ export const CLS = { algodon: 0, mezclilla: 1, tejido: 2, cuero: 3, piel: 4, pel
 type Cls = (typeof CLS)[keyof typeof CLS];
 /** camisas de tejido deportivo: las de los atuendos de club y de la Selección */
 let KNIT: Set<string> | null = null;
+setClubShirts(() =>
+  SHOP.items.filter((i) => i.grupo === 'club' || i.grupo === 'seleccion').map((i) => i.set?.shirt ?? ''),
+);
 const knit = (shirt: string) =>
   (KNIT ??= new Set(
     SHOP.items.filter((i) => i.grupo === 'club' || i.grupo === 'seleccion').map((i) => i.set?.shirt ?? ''),
@@ -2126,10 +2194,11 @@ function ormFor(cfg: AvatarConfig, cv: HTMLCanvasElement): THREE.DataTexture {
 
 const cache = new Map<string, AvatarMaps>();
 /** textura y ORM del avatar para una configuración (cacheadas; las más viejas se liberan y se vuelven a subir) */
-export function avatarMaps(cfg: AvatarConfig): AvatarMaps {
-  const key = configKey(cfg);
+export function avatarMaps(base: AvatarConfig): AvatarMaps {
+  const key = configKey(base);
   let t = cache.get(key);
   if (t) return t;
+  const cfg = { ...base, skin: tonoPiel(base.skin) };
   const cv = document.createElement('canvas');
   cv.width = AW;
   cv.height = AH;
