@@ -15,6 +15,7 @@ import { Coin, Icon, type IconName } from '../components/Icon';
 import { Bar, Btn, Coins, Note, Panel, Tabs, Tag } from '../components/kit';
 import { JugarConAlguien } from '../Juntos';
 import { act, copyText, cx, EMOTE_ICON, g, roomLabel, usePad, useTouch } from '../lib';
+import { comoMision } from '../misiones';
 
 // ------------------------------------------------------------------ misiones del día
 export function MissionsPanel() {
@@ -26,7 +27,8 @@ export function MissionsPanel() {
         {daily.missions.map((dm) => {
           const m = MISSIONS.find((x) => x.id === dm.id);
           if (!m) return null;
-          const done = dm.progress >= m.count;
+          const done = dm.progress >= m.count,
+            como = comoMision(m);
           return (
             <div
               key={dm.id}
@@ -41,6 +43,11 @@ export function MissionsPanel() {
               </span>
               <div className="min-w-0 flex-1">
                 <b className="block leading-tight">{m.text}</b>
+                {!dm.claimed && !done && como.pista && (
+                  <span data-testid={`mission-como-${dm.id}`} className="mt-0.5 block text-xs leading-snug text-muted">
+                    {como.pista}
+                  </span>
+                )}
                 <div className="mt-1.5 flex items-center gap-2">
                   <Bar value={dm.progress} max={m.count} color={done ? 'var(--mc-gold)' : undefined} cls="flex-1" />
                   <span className="mc-num w-12 text-right text-xs font-extrabold">
@@ -72,6 +79,10 @@ export function MissionsPanel() {
                 >
                   Cobrar
                 </Btn>
+              ) : como.ir ? (
+                <Btn id={`mission-ir-${dm.id}`} tone="primary" size="sm" icon={como.ir.icon} onClick={como.ir.hacer}>
+                  {como.ir.label}
+                </Btn>
               ) : null}
             </div>
           );
@@ -80,7 +91,7 @@ export function MissionsPanel() {
       <Note cls="mt-3" icon="clock">
         {left === 0
           ? '¡Cheque! Ya cobraste todo por hoy. Mañana hay misiones nuevas.'
-          : 'Las misiones cambian cada día. Las que completes se cobran aquí.'}
+          : 'Las misiones cambian cada día. Las que completés se cobran aquí.'}
       </Note>
     </Panel>
   );
@@ -172,7 +183,7 @@ function LeaderboardLocal() {
               {r.name}
               {r.you && (
                 <span className="ml-1.5">
-                  <Tag>Tú</Tag>
+                  <Tag>Vos</Tag>
                 </span>
               )}
             </span>
@@ -182,7 +193,7 @@ function LeaderboardLocal() {
       </ol>
       {!you && (
         <div className="mc-card mt-2 flex items-center justify-between gap-2 p-2.5 text-sm">
-          <span className="font-bold">Aún no tienes marca en este minijuego.</span>
+          <span className="font-bold">Todavía no tenés marca en este minijuego.</span>
           <Btn id="lb-play" tone="play" size="sm" icon="play" onClick={() => g().startMinigame(id)}>
             Jugar
           </Btn>
