@@ -5,6 +5,7 @@ import { input } from '../../../core/input';
 import type { AvatarConfig, AvatarState, V3 } from '../../../core/types';
 import { art, Ball, Block, Ground, Label, P, useTick } from '../../kit';
 import { type Partida, rng } from '../api';
+import { Alrededores, hayPaisaje } from '../kit/Paisaje';
 
 // ------------------------------------------------------------------ mantener (tecla F / espacio, puntero, táctil)
 /** Devuelve una función que dice si el jugador está "manteniendo" la acción. Llamarla una vez por cuadro. */
@@ -311,7 +312,16 @@ export function Escenario({
         indoor={e.indoor}
         shadowRadius={30}
       />
-      <Ground size={ground} color={tint ?? e.g} mat={e.m} />
+      <Ground size={ground} color={tint ?? e.g} mat={e.m} y={hayPaisaje() ? 0.012 : 0} />
+      {fondo !== 'cueva' && (
+        <Alrededores
+          fondo={fondo}
+          llano={[-ground / 2, ground / 2, -ground / 2, ground / 2]}
+          m={e.m === 'sand' ? 'sand' : 'grass'}
+          c={e.m === 'sand' ? e.g : undefined}
+          marDesde={-47}
+        />
+      )}
       {e.water && (
         <Block pos={[0, 0.03, -30]} size={[120, 0.06, 34]} mat="water" color={e.water} solid={false} cast={false} />
       )}

@@ -13,6 +13,7 @@ import { art, Ball, Block, Cyl, Interactable, Label, P, Spawn, useMgTick, useTic
 import { finish, type Guia, type Partida, partida, rng, setHud, starsFor } from './api';
 import { BotView, conTema, Escenario, Fx, faceTo, fondoDe, fx, makeBots, useWanderers } from './atrapa/comun';
 import { Dona, nuevoPerro, Perro } from './cocina/personajes';
+import { hayPaisaje, MesaBase } from './kit/Paisaje';
 
 type Par = [string, string];
 const PASOS: Par[] = [
@@ -624,7 +625,18 @@ export function Cocina() {
       <Spawn pos={[2.4, 0, 3.3]} />
       <Fx />
       {/* piso del puesto, mostrador y toldo */}
-      <Block pos={[0, 0.03, -0.3]} size={[18, 0.06, 10.5]} mat="tile" color="#d9c9a0" solid={false} receive />
+      {hayPaisaje() ? (
+        <MesaBase
+          pos={[0, 0.03, -0.3]}
+          size={[18, 0.06, 10.5]}
+          mat="tile"
+          color="#d9c9a0"
+          fondo={fondo}
+          matas={false}
+        />
+      ) : (
+        <Block pos={[0, 0.03, -0.3]} size={[18, 0.06, 10.5]} mat="tile" color="#d9c9a0" solid={false} receive />
+      )}
       <Block pos={[0, 0.5, -4.5]} size={[16, 1, 0.9]} mat="wood" color="#b9773f" solid={false} />
       <Block pos={[0, 1.03, -4.5]} size={[16.3, 0.1, 1.15]} mat="wood" color="#e0aa68" solid={false} />
       {[-7.9, 7.9].map((x) => (

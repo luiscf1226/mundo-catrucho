@@ -162,6 +162,7 @@ export interface ArtPack {
   Flora?: FC<{ items: FloraItem[] }>;
   /** cerros de fondo con relieve, fusionados en una malla */
   Hills?: FC<{ hills: HillDef[] }>;
-  /** zacate, matas y florcitas cerca de la cámara sobre el piso de zacate de la escena */
-  GroundCover?: FC;
+  /** zacate, matas y florcitas cerca de la cámara sobre el piso de zacate de la escena. `area` [x0, x1, z0, z1] es el
+   *  piso que se mira (si falta, el límite del jugador); en los `holes` no crece (donde se juega). */
+  GroundCover?: FC<{ area?: [number, number, number, number]; holes?: [number, number, number, number][] }>;
 }

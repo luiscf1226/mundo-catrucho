@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { input } from '../../../core/input';
 import { Block, Label, Spawn } from '../../kit';
 import type { Guia, Partida } from '../api';
-import { useMesaMaterial } from '../kit/Ambiente';
+import { MesaJuego } from '../kit/Ambiente';
 
 export const limitar = (n: number) => Math.max(-1, Math.min(1, n));
 /** Cursor de dos ejes: teclado/palanca lo empujan, el puntero y el stick derecho lo ponen directo. */
@@ -41,11 +41,10 @@ export const controles: Pick<Guia, 'keys' | 'touch'> = {
 export const metas = (p: Partida): [number, number, number] => [120 + Math.round(p.dif * 120), 360, 600];
 export const duracion = () => 75;
 export function Mesa({ titulo, children }: { titulo: string; children: ReactNode }) {
-  const material = useMesaMaterial();
   return (
     <>
       <Spawn pos={[-6, 0, 3]} />
-      <Block pos={[-1, 0.35, 0]} size={[10, 0.7, 8]} {...material} solid={false} />
+      <MesaJuego pos={[-1, 0.35, 0]} size={[10, 0.7, 8]} />
       <Label pos={[-1, 0.8, 5]} text={titulo} h={0.45} />
       {children}
     </>

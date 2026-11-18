@@ -1,10 +1,11 @@
 import { useThree } from '@react-three/fiber';
 import { createContext, useContext, useLayoutEffect } from 'react';
 import { player } from '../../../core/player';
-import type { MinigameId } from '../../../core/types';
+import type { MinigameId, V3 } from '../../../core/types';
 import { Block, Cyl, P } from '../../kit';
 import type { MatKind } from '../../kit/art/types';
 import { Escenario, type Fondo } from '../corte/common';
+import { hayPaisaje, MesaBase, type Rect } from './Paisaje';
 
 const fondos: Record<string, Fondo> = {
   rosquilla: 'pueblo',
@@ -51,6 +52,19 @@ export function fondoMotor(id: MinigameId, tema: unknown, fondo?: Fondo): Fondo 
   return fondo ?? fondos[id.split('.')[1]] ?? 'pueblo';
 }
 export const AmbienteContext = createContext<Fondo>('pueblo');
+/** Río del fondo «rio» (HD): corre a la izquierda de la mesa, donde antes iba la franja de agua. */
+const CAUCE = { x: -11.5, w: 4.5 };
+/** Claro donde se juega (sin árboles) y dónde no crece zacate: la mesa, el título y los bots. */
+const CLARO: Rect = [-9.5, 10.5, -7, 7];
+const ZACATE: Rect[] = [[-6.2, 4.2, -4.2, 4.2]];
+/** Base de la mesa de juego de los departamentos: en HD, asentada en el terreno con borde natural (ver Paisaje);
+ *  si no, la losa de siempre. Misma cara de arriba y mismo tamaño. */
+export function MesaJuego({ pos, size }: { pos: V3; size: V3 }) {
+  const fondo = useContext(AmbienteContext),
+    { mat, color } = useMesaMaterial();
+  if (!hayPaisaje()) return <Block pos={pos} size={size} mat={mat} color={color} solid={false} />;
+  return <MesaBase pos={pos} size={size} mat={mat} color={color} fondo={fondo} />;
+}
 export function useMesaMaterial(): { mat: MatKind; color: string } {
   const fondo = useContext(AmbienteContext);
   if (fondo === 'costa' || fondo === 'ciudad') return { mat: 'concrete', color: '#94a8ad' };
@@ -72,10 +86,18 @@ export function Ambiente({ fondo }: { fondo: Fondo }) {
       player.fixedCam = null;
     };
   }, [size.width, size.height]);
+  const hd = hayPaisaje();
   return (
     <>
-      <Escenario fondo={fondo} deck={false} />
-      {fondo !== 'ciudad' &&
+      <Escenario
+        fondo={fondo}
+        deck={false}
+        cauce={hd && fondo === 'rio' ? CAUCE : undefined}
+        claro={CLARO}
+        zacate={ZACATE}
+      />
+      {!hd &&
+        fondo !== 'ciudad' &&
         fondo !== 'mercado' &&
         fondo !== 'pueblo' &&
         fondo !== 'cueva' &&
@@ -106,8 +128,8 @@ export function Ambiente({ fondo }: { fondo: Fondo }) {
       )}
       {fondo === 'rio' && (
         <>
-          <Block pos={[-9, 0.1, -2]} size={[4, 0.12, 30]} color="#65b8c8" mat="water" solid={false} />
-          <P.Rock pos={[-6, 0, -5]} scale={1.5} solid={false} />
+          {!hd && <Block pos={[-9, 0.1, -2]} size={[4, 0.12, 30]} color="#65b8c8" mat="water" solid={false} />}
+          <P.Rock pos={hd ? [-8.2, 0, -6] : [-6, 0, -5]} scale={1.5} solid={false} />
         </>
       )}
       {fondo === 'costa' && (
