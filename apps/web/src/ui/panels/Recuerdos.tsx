@@ -75,7 +75,7 @@ function Actividad({ lugar }: { lugar: LugarTuristico }) {
     tipo === 'subir'
       ? ['Buscá apoyo firme', 'Subí por el sendero', 'Llegá al mirador']
       : tipo === 'probar'
-        ? ['Laváte las manos', 'Probá un bocadito', 'Contale al anfitrión qué te pareció']
+        ? ['Lavate las manos', 'Probá un bocadito', 'Contale al anfitrión qué te pareció']
         : ['Recibí la artesanía', 'Envolvela con cuidado', 'Entregala al anfitrión'];
   return (
     <div data-testid="turismo-actividad" data-tipo={tipo} className="flex flex-col gap-4">

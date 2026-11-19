@@ -73,7 +73,7 @@ const ok = await run('capturas-minijuegos', file, { hash: '#go', width: 1280, he
     await t.ev(`window.__mc.input.reset();${S}.setModo('solo');${S}.${abrir}`);
     await t.click('mg-start', 30000);
     await t.waitFor(`${S}.mg?.phase==='playing'`, 30000, nombre);
-    // la cuenta de «¡Preparáte!» dura 3 s; las sombras y el posproceso se asientan
+    // la cuenta de «¡Preparate!» dura 3 s; las sombras y el posproceso se asientan
     await t.sleep(4500);
     if (luego) {
       await t.ev(luego);
