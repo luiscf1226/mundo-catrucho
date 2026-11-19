@@ -233,12 +233,21 @@ function botPesca({ normal }) {
 const BOTS = { corte: botCorte, monta: botMonta, ritmo: botRitmo, atrapa: botAtrapa, pesca: botPesca };
 
 // ------------------------------------------------------------------ una partida
-async function partida(t, motor, etapa, bot) {
+async function partida(t, motor, etapa, bot, intento = 0) {
   const id = JUEGO[motor];
   await t.ev(
     `(()=>{const S=window.__mc.store;S.setState(s=>({profile:{...s.profile,juegos:{...s.profile.juegos,'${id}':{etapa:${etapa},stars:[],best:0,label:'',veces:0}}}}));S.getState().startJuego('${id}')})()`,
   );
   await t.waitFor(`!!document.querySelector('[data-testid=mg-start]')`, 15000, 'tarjeta de inicio');
+  // otro intento es otra partida, como «Jugar otra vez»: cambia la semilla (qué pez pica, qué corcoveo viene)
+  if (intento > 0) {
+    await t.ev(`for (let i = 0; i < ${intento}; i++) window.__mc.store.getState().replayMinigame()`);
+    await t.waitFor(
+      `window.__mc.store.getState().mg?.run === ${intento} && !!document.querySelector('[data-testid=mg-start]')`,
+      15000,
+      'otra partida',
+    );
+  }
   const mg = await t.ev(`JSON.stringify(window.__mc.store.getState().mg)`);
   assert.equal(JSON.parse(mg).etapa, etapa, `${motor}: abre la etapa ${etapa + 1}`);
   const tarjeta = await t.text('mg-intro');
@@ -314,20 +323,22 @@ async function worker() {
     const nombre = `${k.m}-e${k.etapa + 1}-${k.bot ?? 'datos'}`;
     let r = null,
       mejor = null;
+    let intento = 0;
     const juega = () =>
       run(nombre, file, { hash: '#test,go', width: 960, height: 540 }, async (t) => {
-        r = await partida(t, k.m, k.etapa, k.bot);
+        r = await partida(t, k.m, k.etapa, k.bot, intento);
       });
     // con varios Chromium a la vez a veces uno no arranca: se reintenta una vez
     let pasa = await juega().catch(() => juega());
-    // quien juega bien también puede caerse: como una persona, vuelve a intentar y cuenta su mejor partida (como
-    // `best` en el perfil). En pesca el puntaje lo decide sobre todo qué pez pica (simulado: el bueno saca 2⭐ en la
-    // última ~75 % de las veces), así que ahí tiene un intento más.
+    // quien juega bien también puede caerse: como una persona, juega otra partida y cuenta la mejor (como `best` en el
+    // perfil). En pesca el puntaje lo decide sobre todo qué pez pica (simulado: el bueno saca 2⭐ en la última ~75 %
+    // de las partidas), así que ahí tiene una partida más.
     const pide = k.m === 'pesca' ? 2 : 3;
     for (let i = 0; pasa && k.bot === 'bueno' && i < (k.m === 'pesca' ? 2 : 1); i++) {
       if (!mejor || (r?.res?.stars ?? 0) > mejor.res.stars) mejor = r;
       if (mejor.res.stars >= (i === 0 ? 3 : pide)) break;
       console.log(`  ${nombre}: intento ${i + 1} ${r.res.label}, otra vez`);
+      intento = i + 1;
       pasa = await juega().catch(() => juega());
     }
     if (mejor && (mejor.res.stars > (r?.res?.stars ?? -1) || !pasa)) r = mejor;
@@ -361,7 +372,7 @@ for (const r of resultados) {
     if (r.motor === 'pesca' && r.res?.stars === 3) console.log(`AVISO ${msg}`);
     else check(r.res && r.res.stars < 3, msg);
   }
-  // pesca: el puntaje depende mucho de qué pez pica; con un solo intento basta que el bueno saque 2⭐
+  // pesca: el puntaje depende mucho de qué pez pica; basta que el bueno saque 2⭐ en su mejor partida
   if (r.bot === 'bueno')
     check(
       r.res?.stars >= (r.motor === 'pesca' ? 2 : 3),
