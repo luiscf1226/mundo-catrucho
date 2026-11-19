@@ -1064,6 +1064,12 @@ export function PausePanel() {
         <Btn id="pause-memes" tone="neutral" icon="sparkle" onClick={() => g().openPanel('memes')}>
           Memes
         </Btn>
+        <Btn id="pause-amigos" tone="neutral" icon="users" onClick={() => g().openPanel('amigos')}>
+          Amigos
+        </Btn>
+        <Btn id="pause-postales" tone="neutral" icon="camera" onClick={() => g().openPanel('recuerdos')}>
+          Postales
+        </Btn>
         <Btn id="pause-salas" tone="neutral" icon="users" onClick={() => g().openPanel('salas')}>
           Salas
         </Btn>

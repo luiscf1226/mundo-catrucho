@@ -26,6 +26,9 @@ const SIDE: [PanelId, IconName, string][] = [
   ['pausa', 'pause', 'Pausa'],
 ];
 
+/** Paneles que en celular acostado se abren desde Pausa (o con su botón táctil) en vez del HUD. */
+const EN_PAUSA: PanelId[] = ['emotes', 'amigos', 'memes', 'recuerdos'];
+
 function Wallet() {
   const p = useGame((s) => s.profile),
     shown = useCountUp(p.coins, 700),
@@ -425,10 +428,14 @@ export function Hud() {
     lobby = useGame((s) => s.scene.kind === 'lobby'),
     viaje = useGame((s) => s.scene.kind === 'viaje'),
     overview = useOverview(),
-    baja = useBaja();
+    baja = useBaja(),
+    touch = useTouch();
   useGuia();
   useAvisoMisiones();
-  const side = SIDE.filter(([id]) => !mg || id === 'pausa' || id === 'emotes');
+  // celular acostado: en una columna los botones bajaban hasta los táctiles y en fila tapaban la billetera. Quedan
+  // los de siempre en una fila; emotes tiene su botón táctil y amigos, memes y postales están en Pausa.
+  const acostado = baja && touch;
+  const side = SIDE.filter(([id]) => (mg ? id === 'pausa' || id === 'emotes' : !acostado || !EN_PAUSA.includes(id)));
   return (
     <div data-testid="hud" className="pad-safe pointer-events-none absolute inset-0 text-hudfg">
       <div className="flex items-start justify-between gap-2">
@@ -438,7 +445,10 @@ export function Hud() {
           {!mg && !overview && !viaje && !baja && <Guia />}
         </div>
         <div
-          className={cx('pointer-events-auto flex flex-none gap-1.5', mg ? 'flex-row' : 'flex-col-reverse sm:flex-row')}
+          className={cx(
+            'pointer-events-auto flex flex-none',
+            mg ? 'flex-row gap-1.5' : acostado ? 'flex-row gap-1' : 'flex-col-reverse gap-1.5 sm:flex-row',
+          )}
         >
           {lobby && !mg && (
             <IBtn
