@@ -69,6 +69,8 @@ function botCorte({ normal }) {
   }, 20);
 }
 function botMonta({ normal }) {
+  // mide por tiempo de juego (st.t), no por reloj de pared: decide una vez por cuadro nuevo y ve la aguja como
+  // estaba exactamente `lag` segundos de juego antes (interpolada), así el retraso no crece cuando bajan los cuadros
   const T = window.__mcTest.monta,
     I = window.__mc.input,
     hist = [];
@@ -80,11 +82,15 @@ function botMonta({ normal }) {
   setInterval(() => {
     const s = T.st,
       t = s.t;
+    if (hist.length && hist[hist.length - 1][0] === t) return; // sin cuadro nuevo no hay nada nuevo que ver
     hist.push([t, s.L, s.V]);
     while (hist.length > 2 && hist[1][0] <= t - lag) hist.shift();
-    const [, L, V] = hist[0];
-    const u = L * 1.4 + V * 0.5;
-    I.kx = Math.abs(u) < zona ? 0 : Math.sign(u); // teclado: todo o nada
+    const [a, b] = hist,
+      u = b && b[0] > a[0] ? Math.max(0, Math.min(1, (t - lag - a[0]) / (b[0] - a[0]))) : 0,
+      L = a[1] + ((b?.[1] ?? a[1]) - a[1]) * u,
+      V = a[2] + ((b?.[2] ?? a[2]) - a[2]) * u;
+    const w = L * 1.4 + V * 0.5;
+    I.kx = Math.abs(w) < zona ? 0 : Math.sign(w); // teclado: todo o nada
     for (const e of s.ev) {
       if (!e.big || e.fired || plan.has(e)) continue;
       if (e.t - t < 0.9) plan.set(e, Math.random() < olvida ? -1 : e.t - 0.15 + (Math.random() - 0.5) * 2 * sj * 1.7);
@@ -94,7 +100,7 @@ function botMonta({ normal }) {
         e.done_ = true;
         I.press('jump');
       }
-  }, 16);
+  }, 4);
 }
 function botRitmo({ normal }) {
   const T = window.__mcTest.ritmo,
@@ -187,13 +193,18 @@ function botPesca({ normal }) {
     desde = 0,
     soltarEn = 0,
     avisoVisto = -1;
+  let visto = -1;
   const set = (on) => {
     if (on !== held) key(on);
     held = on;
   };
   setInterval(() => {
+    // tiempo de juego (s.reloj), no de pared: con pocos cuadros el juego va más lento y el bot no debe ganar ventaja
+    // ni cargar el tiro de menos; decide una vez por cuadro nuevo
     const s = T.state(),
-      now = performance.now() / 1000;
+      now = s.reloj;
+    if (now === visto) return;
+    visto = now;
     if (s.fase !== fase) {
       fase = s.fase;
       desde = now;
@@ -217,7 +228,7 @@ function botPesca({ normal }) {
       const tirando = avisoVisto >= 0 && now - avisoVisto > reac;
       set(!(tirando || s.tension > roja));
     } else set(false);
-  }, 20);
+  }, 4);
 }
 const BOTS = { corte: botCorte, monta: botMonta, ritmo: botRitmo, atrapa: botAtrapa, pesca: botPesca };
 
@@ -301,18 +312,25 @@ async function worker() {
     const k = tareas.shift();
     if (!k) return;
     const nombre = `${k.m}-e${k.etapa + 1}-${k.bot ?? 'datos'}`;
-    let r = null;
+    let r = null,
+      mejor = null;
     const juega = () =>
       run(nombre, file, { hash: '#test,go', width: 960, height: 540 }, async (t) => {
         r = await partida(t, k.m, k.etapa, k.bot);
       });
     // con varios Chromium a la vez a veces uno no arranca: se reintenta una vez
     let pasa = await juega().catch(() => juega());
-    // quien juega bien también puede caerse: como una persona, tiene un segundo intento para las 3⭐
-    if (pasa && k.bot === 'bueno' && r?.res?.stars < 3) {
-      console.log(`  ${nombre}: primer intento ${r.res.label}, otra vez`);
+    // quien juega bien también puede caerse: como una persona, vuelve a intentar y cuenta su mejor partida (como
+    // `best` en el perfil). En pesca el puntaje lo decide sobre todo qué pez pica (simulado: el bueno saca 2⭐ en la
+    // última ~75 % de las veces), así que ahí tiene un intento más.
+    const pide = k.m === 'pesca' ? 2 : 3;
+    for (let i = 0; pasa && k.bot === 'bueno' && i < (k.m === 'pesca' ? 2 : 1); i++) {
+      if (!mejor || (r?.res?.stars ?? 0) > mejor.res.stars) mejor = r;
+      if (mejor.res.stars >= (i === 0 ? 3 : pide)) break;
+      console.log(`  ${nombre}: intento ${i + 1} ${r.res.label}, otra vez`);
       pasa = await juega().catch(() => juega());
     }
+    if (mejor && (mejor.res.stars > (r?.res?.stars ?? -1) || !pasa)) r = mejor;
     if (r) {
       resultados.push(r);
       console.log(

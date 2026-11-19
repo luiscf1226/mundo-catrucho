@@ -174,6 +174,8 @@ export function Pesca() {
   const s = useRef({
     fase: 'idle' as Fase,
     t: dur,
+    /** tiempo de juego corrido (sin castigos): reloj de las pruebas */
+    reloj: 0,
     score: 0,
     racha: 0,
     n: 0,
@@ -282,6 +284,7 @@ export function Pesca() {
         state: () => ({
           fase: s.fase,
           t: s.t,
+          reloj: s.reloj,
           score: s.score,
           n: s.n,
           basura: s.basura,
@@ -320,6 +323,7 @@ export function Pesca() {
       edge = held && !s.prev;
     s.prev = held;
     s.t -= dt;
+    s.reloj += dt;
     s.frase -= dt;
     if (s.lock && !held) s.lock = false;
     if (s.frase <= 0) {
