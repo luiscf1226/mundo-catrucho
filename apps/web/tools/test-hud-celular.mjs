@@ -24,6 +24,24 @@ const choques = `(()=>{const caja=e=>e.getBoundingClientRect(),out=[];
   for(const a of botones)for(const b of vis)if(a!==b&&!b.dataset.testid.startsWith('hud-btn-')&&tapa(caja(a),caja(b)))out.push(a.dataset.testid+' tapa '+b.dataset.testid);
   return out.join(', ')})()`;
 
+// Toque fiable sin GPU: el botón tiene que ser lo que está encima en su centro (nada lo tapa) y se activa en el DOM.
+// El toque sintético de CDP a veces se pierde cuando el hilo principal está ocupado dibujando (GitHub, sin GPU).
+const tocar = async (t, tid) => {
+  await t.waitFor(`!!document.querySelector('[data-testid="${tid}"]')`, 10000, `data-testid=${tid}`);
+  const r =
+    await t.ev(`(()=>{const e=document.querySelector('[data-testid="${tid}"]');e.scrollIntoView({block:'center'});
+    const b=e.getBoundingClientRect(),en=document.elementFromPoint(b.left+b.width/2,b.top+b.height/2);
+    if(!en||!(e.contains(en)||en.contains(e)))return 'tapado por '+(en?.dataset?.testid||en?.className||en?.tagName);e.click();return 'ok'})()`);
+  if (r !== 'ok') throw Error(`no se puede tocar ${tid}: ${r}`);
+};
+
+const escenaLista = async (t) => {
+  const sinCarga = `!document.querySelector('[data-testid=scene-loading]') && !!window.__mc.gl`;
+  await t.waitFor(sinCarga, 60000, 'sin pantalla de carga');
+  const f0 = await t.ev('window.__mc.gl.info.render.frame');
+  await t.waitFor(`${sinCarga} && window.__mc.gl.info.render.frame > ${f0 + 3}`, 60000, 'la escena dibujando');
+};
+
 let ok = true;
 for (const [w, h] of [
   [844, 390],
@@ -46,11 +64,10 @@ for (const [w, h] of [
       if (fotos) await t.shot(`${out}/lobby-${w}x${h}.png`);
       // en un departamento (sin el botón de vista) tampoco
       await t.ev(`${S}.travel('olancho')`);
-      await t.waitFor(
-        `${S}.scene.id === 'olancho' && !document.querySelector('[data-testid=scene-loading]')`,
-        20000,
-        'Olancho',
-      );
+      // la pantalla de carga sale un momento después de viajar y tapa el HUD: se espera que Olancho ya esté
+      // dibujando sin ella
+      await t.waitFor(`${S}.scene.id === 'olancho'`, 20000, 'Olancho');
+      await escenaLista(t);
       const mal2 = await t.ev(choques);
       if (mal2) throw Error(`${w}x${h} Olancho: ${mal2}`);
       // lo que salió del HUD se abre desde Pausa
@@ -59,10 +76,10 @@ for (const [w, h] of [
         ['pause-postales', 'recuerdos'],
         ['pause-memes', 'memes'],
       ]) {
-        await t.click('hud-btn-pausa');
-        await t.waitFor(`${S}.panel === 'pausa'`, 5000, 'pausa');
-        await t.click(boton);
-        await t.waitFor(`${S}.panel === '${panel}'`, 5000, `${boton} abre ${panel}`);
+        await tocar(t, 'hud-btn-pausa');
+        await t.waitFor(`${S}.panel === 'pausa'`, 15000, 'pausa');
+        await tocar(t, boton);
+        await t.waitFor(`${S}.panel === '${panel}'`, 15000, `${boton} abre ${panel}`);
         await t.ev(`${S}.closePanel()`);
       }
     })) && ok;
