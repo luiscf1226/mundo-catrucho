@@ -28,6 +28,12 @@ const ok = await run(
     console.log(`calidad ${q}, posproceso ${await t.ev('window.__mc.post ?? null')}`);
     await t.ev(`${S}.travel('franciscomorazan')`);
     await t.waitFor(`${S}.scene.kind==='dept' && ${S}.scene.id==='franciscomorazan'`, 30000, 'Tegucigalpa');
+    // el cielo de la escena nueva arranca con el clima de ese momento (R.first en sky.tsx): si la lluvia llega antes
+    // de que Tegucigalpa termine de montar, el piso nace mojado. Sin GPU la escena tarda: se espera que cargue y
+    // dibuje unos cuadros.
+    await t.waitFor(`!document.querySelector('[data-testid=scene-loading]')`, 60000, 'Tegucigalpa cargada');
+    const f0 = await t.ev('window.__mc.gl.info.render.frame');
+    await t.waitFor(`window.__mc.gl.info.render.frame > ${f0 + 3}`, 60000, 'cuadros de Tegucigalpa');
     await t.waitFor(`${W} && ${W}.wet < 0.05 && ${W}.rain < 0.05`, 30000, 'piso seco al empezar');
     await clima(t, 'lluvia');
     // empieza a llover: el piso todavía no está mojado del todo y los charcos van detrás
