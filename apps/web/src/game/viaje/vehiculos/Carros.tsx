@@ -5,6 +5,7 @@
 import { bl, bx, cy, type Merged, mergePieces, type Pc, PI, rk } from '../../dept/lib';
 import { Mallas } from '../../minigames/kit/fundido';
 import { cayucoPlat, lancha } from '../../minigames/pesca/botes';
+import { vacaSuelta } from '../eventos/decorado';
 import { type ObstacleKind, type VehicleKind, vehicles } from '../model';
 
 const LLANTA = '#1b1d20',
@@ -284,27 +285,7 @@ function vacaPcs(perro: boolean): Pc[] {
     for (const x of [-0.38, 0.38]) for (const z of [-0.14, 0.14]) out.push(cy(x, 0.2, z, 0.05, 0.42, 'cloth', c, sin));
     return out;
   }
-  // vaca: cuerpo, panza, cabeza baja con cachos, ubre, cola y manchas
-  const c = '#eee3c8';
-  out.push(
-    bl(0, 1.0, 0, 0.62, 'cloth', c, { s: [1.55, 0.72, 0.68] }),
-    bl(0.55, 1.12, 0, 0.42, 'cloth', c, { s: [0.9, 0.9, 1] }),
-    bl(1.1, 0.95, 0, 0.24, 'cloth', '#d9cdb0', { s: [1.5, 1.0, 0.9] }),
-    bl(1.4, 0.86, 0, 0.14, 'cloth', '#3a302a', { s: [0.9, 0.8, 1.1] }),
-    bx(1.05, 1.18, 0.2, 0.05, 0.22, 0.05, 'stone', '#e9e1cf', { e: [0.5, 0, 0], ...sin }),
-    bx(1.05, 1.18, -0.2, 0.05, 0.22, 0.05, 'stone', '#e9e1cf', { e: [-0.5, 0, 0], ...sin }),
-    bl(-0.45, 1.2, 0.3, 0.3, 'cloth', '#3d342e', { s: [1, 0.6, 0.4] }),
-    bl(0.2, 1.05, -0.32, 0.26, 'cloth', '#3d342e', { s: [1.2, 0.7, 0.3] }),
-    bl(-0.3, 0.6, 0, 0.16, 'cloth', '#e8a8a0', { s: [1, 0.7, 1] }),
-    bx(-0.98, 0.85, 0, 0.05, 0.6, 0.05, 'cloth', '#3d342e', { e: [0, 0, -0.2], ...sin }),
-  );
-  for (const x of [-0.6, 0.6])
-    for (const z of [-0.24, 0.24])
-      out.push(
-        cy(x, 0.36, z, 0.08, 0.74, 'cloth', '#d9cdb0', sin),
-        cy(x, 0.05, z, 0.085, 0.1, 'stone', '#2e2a26', sin),
-      );
-  return out;
+  return vacaSuelta();
 }
 function estorbo(kind: ObstacleKind): Pc[] {
   if (kind === 'bache') {
