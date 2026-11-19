@@ -13,13 +13,15 @@ if (!file) {
 const out = resolve(outArg);
 mkdirSync(out, { recursive: true });
 const S = `window.__mc.store.getState()`;
+// después de recargar: la página nueva (sin la marca de la vieja), con el juego cargado y el menú
+const NUEVA = `!window.__vieja && !!window.__mc?.store && !!document.querySelector('[data-testid=menu]')`;
 const paso = (t) => t.ev(`${S}.profile.guia`);
 const espera = (t, n, que) => t.waitFor(`${S}.profile.guia >= ${n}`, 20000, que);
 
 const nuevo = await run('guia-nuevo', file, { hash: '#test', width: 1280, height: 720 }, async (t) => {
   await t.ev(`localStorage.clear()`);
-  await t.ev(`location.reload()`);
-  await t.waitFor(`!!document.querySelector('[data-testid=menu]')`);
+  await t.ev(`window.__vieja=1;location.reload()`);
+  await t.waitFor(NUEVA, 30000, 'la página recargada');
   await t.click('btn-jugar');
   await t.waitFor(`!!document.querySelector('[data-testid=panel-personaje]')`, 8000, 'editor de personaje');
   await t.click('ed-done');
@@ -28,7 +30,7 @@ const nuevo = await run('guia-nuevo', file, { hash: '#test', width: 1280, height
   await t.waitFor(`!document.querySelector('[data-testid=celebration]')`, 8000, 'fin de la celebración');
   await t.shot(`${out}/01-caminar.png`);
   // 1. caminar: se cumple al moverse unos metros
-  await t.holdUntil(['w'], `${S}.profile.guia >= 1`, 20000);
+  await t.holdUntil(['w'], `${S}.profile.guia >= 1`, 60000); // sin GPU se camina a pocos cuadros por segundo
   await t.sleep(300);
   await t.shot(`${out}/02-viajar.png`);
   // 2. viajar: el botón abre el mapa
@@ -104,8 +106,8 @@ const nuevo = await run('guia-nuevo', file, { hash: '#test', width: 1280, height
 
 const saltar = await run('guia-saltar', file, { hash: '#test', width: 390, height: 844, touch: true }, async (t) => {
   await t.ev(`localStorage.clear()`);
-  await t.ev(`location.reload()`);
-  await t.waitFor(`!!document.querySelector('[data-testid=menu]')`);
+  await t.ev(`window.__vieja=1;location.reload()`);
+  await t.waitFor(NUEVA, 30000, 'la página recargada');
   await t.ev(`${S}.enterWorld()`);
   await t.waitFor(`${S}.panel === 'personaje'`);
   await t.ev(`${S}.finishCreation(); ${S}.closePanel()`);
@@ -123,9 +125,9 @@ const saltar = await run('guia-saltar', file, { hash: '#test', width: 390, heigh
   await t.waitFor(`${S}.profile.guia === 4 && !document.querySelector('[data-testid=guia]')`, 5000, 'saltar la guía');
   // quien ya jugaba antes de la guía no la ve
   await t.ev(
-    `(()=>{const p=JSON.parse(localStorage.getItem('mundo-catrucho-v1'));delete p.guia;localStorage.setItem('mundo-catrucho-v1',JSON.stringify(p));location.reload()})()`,
+    `(()=>{const p=JSON.parse(localStorage.getItem('mundo-catrucho-v1'));delete p.guia;localStorage.setItem('mundo-catrucho-v1',JSON.stringify(p));window.__vieja=1;location.reload()})()`,
   );
-  await t.waitFor(`!!document.querySelector('[data-testid=menu]')`);
+  await t.waitFor(NUEVA, 30000, 'la página recargada');
   if ((await paso(t)) !== 4) throw Error('un perfil viejo debe arrancar con la guía terminada');
 });
 
@@ -140,8 +142,8 @@ for (const [w, h] of [
   acostado =
     (await run(`guia-acostado-${w}x${h}`, file, { hash: '#test', width: w, height: h, touch: true }, async (t) => {
       await t.ev(`localStorage.clear()`);
-      await t.ev(`location.reload()`);
-      await t.waitFor(`!!document.querySelector('[data-testid=menu]')`);
+      await t.ev(`window.__vieja=1;location.reload()`);
+      await t.waitFor(NUEVA, 30000, 'la página recargada');
       await t.ev(`${S}.enterWorld()`);
       await t.waitFor(`${S}.panel === 'personaje'`);
       await t.ev(`${S}.finishCreation(); ${S}.closePanel(); ${S}.pasoGuia(1)`);

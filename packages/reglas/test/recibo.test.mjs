@@ -94,7 +94,10 @@ test('recibo: verifica, y alterado o con otra llave no', async () => {
   json.resultados[1].puntos = 9999;
   const falso = `${Buffer.from(JSON.stringify(json)).toString('base64url')}.${firma}`;
   assert.equal(await verificarRecibo(falso, secreto), null, 'puntos alterados');
-  assert.equal(await verificarRecibo(`${cuerpo}.${firma.slice(0, -2)}AA`, secreto), null, 'firma alterada');
+  // el primer carácter son 6 bits de datos: cambiarlo siempre cambia la firma (el último solo lleva 4 y cambiar los
+  // dos últimos por «AA» dejaba la misma firma una vez cada ~1000 recibos)
+  const otraFirma = `${firma[0] === 'A' ? 'B' : 'A'}${firma.slice(1)}`;
+  assert.equal(await verificarRecibo(`${cuerpo}.${otraFirma}`, secreto), null, 'firma alterada');
   assert.equal(await verificarRecibo(`${t}.x`, secreto), null);
   assert.equal(await verificarRecibo(null, secreto), null);
   // un acta firmada con los mismos datos no es un recibo
