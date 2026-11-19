@@ -90,7 +90,8 @@ export async function launch(
   };
   process.on('exit', kill);
   let ws;
-  for (let i = 0; i < 80 && !ws; i++) {
+  // en GitHub, con el runner recién levantado, Chromium a veces tarda más de 16 s en abrir el puerto de depuración
+  for (let i = 0; i < 300 * LENTO && !ws; i++) {
     try {
       const j = await (await fetch(`http://127.0.0.1:${port}/json`)).json();
       const p = j.find((x) => x.type === 'page');
