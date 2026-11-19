@@ -80,6 +80,8 @@ export interface Pc {
   /** emisión: >0 luz cálida que se enciende de noche (ventanas), <0 brillo propio siempre; ≥2 es una lámpara y
    *  además deja un charco de luz en el piso debajo */
   em?: number;
+  /** caja sin bordes redondeados (12 triángulos en vez de ~300): para lo que se ve de lejos */
+  liso?: boolean;
 }
 export interface PcOpt {
   /** giro en Y */ r?: number /** Euler [x, y, z] (orden YXZ: primero inclina, luego gira) */;
@@ -195,7 +197,7 @@ function geoOf(q: Pc): THREE.BufferGeometry {
   let g: THREE.BufferGeometry;
   S.set(1, 1, 1);
   if (q.g === 'box') {
-    const tiny = Math.max(q.s[0], q.s[1], q.s[2]) < 0.7 || Math.min(q.s[0], q.s[1], q.s[2]) < 0.13;
+    const tiny = q.liso || Math.max(q.s[0], q.s[1], q.s[2]) < 0.7 || Math.min(q.s[0], q.s[1], q.s[2]) < 0.13;
     g = ((!tiny && art.boxGeometry?.(q.s[0], q.s[1], q.s[2])) || new THREE.BoxGeometry(q.s[0], q.s[1], q.s[2])).clone();
   } else if (q.g === 'cyl') g = new THREE.CylinderGeometry(q.s[0] * (q.rt ?? 1), q.s[0], q.s[1], q.n ?? 10);
   else if (q.g === 'rock') {

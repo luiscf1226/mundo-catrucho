@@ -1,5 +1,6 @@
 // Peces, basura y plataformas del motor «pesca».
-import { Ball, Block, Cyl } from '../../kit';
+import { art, Ball, Block, Cyl } from '../../kit';
+import { PlatForma } from './botes';
 
 const S = { solid: false } as const;
 const hash = (s: string) => {
@@ -71,6 +72,12 @@ export function Basura({ nombre }: { nombre: string }) {
 /** Plataforma desde donde se pesca. La parte de arriba queda en y = 0. `big` = la del jugador. */
 export function Plat({ desde, pos, big = false }: { desde: string; pos: [number, number, number]; big?: boolean }) {
   const [x, , z] = pos;
+  if (art.fused && desde !== 'orilla')
+    return (
+      <group position={[x, 0, z]}>
+        <PlatForma desde={desde} big={big} />
+      </group>
+    );
   if (desde === 'lancha')
     return (
       <group>
