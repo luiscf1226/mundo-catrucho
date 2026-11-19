@@ -61,13 +61,17 @@ export function useGuia() {
   useEffect(() => {
     if (!created || paso >= GUIA_PASOS) return;
     if (paso === 0) {
-      let desde: number[] | null = null;
+      // suma lo caminado de verdad: el teletransporte al cargar la escena no tiene velocidad y salta varios metros
+      let antes: number[] | null = null,
+        caminado = 0;
       const t = setInterval(() => {
         const s = g();
         if (s.screen !== 'world' || s.panel || s.mg) return;
-        const p = player.pos;
-        desde ??= [p[0], p[2]];
-        if (Math.hypot(p[0] - desde[0], p[2] - desde[1]) > 6) s.pasoGuia(1);
+        const p = player.pos,
+          tramo = antes ? Math.hypot(p[0] - antes[0], p[2] - antes[1]) : 0;
+        if (player.state.speed > 0.6 && tramo < 3) caminado += tramo;
+        antes = [p[0], p[2]];
+        if (caminado > 6) s.pasoGuia(1);
       }, 250);
       return () => clearInterval(t);
     }
