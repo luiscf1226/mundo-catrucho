@@ -192,7 +192,7 @@ export function AvatarView({
       </Safe3D>
       {hint && (
         <span className="mc-label pointer-events-none absolute inset-x-0 bottom-1 text-center opacity-70">
-          Arrastra para girar
+          Arrastrá para girar
         </span>
       )}
     </div>
