@@ -167,7 +167,7 @@ export function defineMotor<P, S>(def: Definicion<P, S>) {
       setHud({
         timer: Math.ceil(Math.max(0, sesion.duracion - m.tiempo)),
         score: `${m.puntos} pts`,
-        objective: m.cuenta > 0 ? `¡Preparáte! ${Math.ceil(m.cuenta)}` : `Meta ${sesion.metas[0]} pts · ${m.objetivo}`,
+        objective: m.cuenta > 0 ? `¡Preparate! ${Math.ceil(m.cuenta)}` : `Meta ${sesion.metas[0]} pts · ${m.objetivo}`,
         lines: [...m.lineas, ...[lineaModo(m.partida.modo, modos)].filter((linea) => linea !== null)],
       });
       pintar((n) => n + 1);
@@ -212,7 +212,7 @@ export function defineMotor<P, S>(def: Definicion<P, S>) {
       <AmbienteContext.Provider value={fondoMotor(def.id, m.partida.tema.fondo, def.fondo)}>
         {!libre && <Ambiente fondo={fondoMotor(def.id, m.partida.tema.fondo, def.fondo)} />}
         <def.Escena motor={m} />
-        {m.cuenta > 0 && !libre && <Label pos={[0, 4, 0]} text={`¡Preparáte! ${Math.ceil(m.cuenta)}`} h={0.7} />}
+        {m.cuenta > 0 && !libre && <Label pos={[0, 4, 0]} text={`¡Preparate! ${Math.ceil(m.cuenta)}`} h={0.7} />}
         {sesion.bots.map((b, i) => (
           <BotAvatar
             key={i}
