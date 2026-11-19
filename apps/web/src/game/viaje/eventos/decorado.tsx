@@ -282,7 +282,7 @@ function obra(): Pc[] {
 function peaje(): Pc[] {
   const out: Pc[] = [
     bx(0, 4.85, -1, 15.4, 0.28, 4.4, 'metal', '#e9ecec', sin),
-    bx(0, 4.55, -1, 15.6, 0.45, 4.6, 'metal', '#267c81', sin),
+    bx(0, 4.55, -1, 15.6, 0.45, 4.6, 'plastic', '#267c81', sin),
     bx(0, 4.33, 1.31, 15.6, 0.06, 0.02, 'plastic', '#f6f1dc', sin),
     bx(0, 4.33, -3.31, 15.6, 0.06, 0.02, 'plastic', '#f6f1dc', sin),
   ];
