@@ -4,8 +4,10 @@
 //  2. Oclusión ambiental desde la profundidad (estilo SAO, a media resolución, sin pasada de normales: no suma
 //     llamadas de dibujo de la escena) con desenfoque que respeta bordes. Asienta objetos y gente en el suelo.
 //  3. Resplandor (bloom) solo en lo muy brillante: sol, neones y luces de noche. Cadena de mips pequeña.
-//  4. Compuesto final: oclusión, resplandor, viñeta ligera y tramado contra bandas.
-// Cuesta unas 14 llamadas de dibujo de pantalla completa. Las cuenta `gl.info` como el resto.
+//  4. Solo en alta: rayos de sol (desenfoque radial desde el sol, a un cuarto de resolución) si el sol está delante.
+//  5. Compuesto final: oclusión (solo sobre la luz ambiental: el alfa de la escena dice cuánta es, ver FRAG_SPLIT en
+//     materials.ts), en alta reflejos en pantalla sobre el piso mojado, resplandor, rayos, viñeta y tramado.
+// Cuesta unas 13 llamadas de dibujo de pantalla completa (14 en alta con el sol a la vista). Las cuenta `gl.info`.
 
 import { useFrame, useThree } from '@react-three/fiber';
 import { type ReactNode, useEffect, useMemo } from 'react';
@@ -109,13 +111,74 @@ void main() {
   gl_FragColor = vec4( s / 12.0 + texture2D( tAdd, vUv ).rgb, 1.0 );
 }
 `;
-const COMP_FRAG = /* glsl */ `
-#include <packing>
-uniform sampler2D tColor, tDepth, tAO, tBloom; uniform vec2 uAOTexel; uniform float uNear, uFar, uAOK, uBloomK, uVig, uAspect;
-varying vec2 vUv;
+// --- rayos de sol: desde cada píxel hacia el sol, junta lo que sea cielo brillante (las nubes, los edificios y los
+// árboles lo tapan y dejan las franjas de sombra)
+const RAYS_FRAG = /* glsl */ `
+uniform sampler2D tColor, tDepth; uniform vec2 uSun; uniform float uAspect; varying vec2 vUv;
 ${IGN}
 void main() {
-  vec3 c = texture2D( tColor, vUv ).rgb;
+  vec2 d = ( uSun - vUv ) / 30.0; vec2 uv = vUv + d * ign( gl_FragCoord.xy );
+  vec3 acc = vec3( 0.0 ); float w = 1.0;
+  for ( int i = 0; i < 30; i++ ) {
+    vec2 q = clamp( uv, 0.001, 0.999 );
+    vec3 c = texture2D( tColor, q ).rgb;
+    float sky = step( 0.99999, texture2D( tDepth, q ).x );
+    acc += c * sky * smoothstep( 0.62, 0.95, max( c.r, max( c.g, c.b ) ) ) * w;
+    w *= 0.955; uv += d;
+  }
+  vec2 r = ( vUv - uSun ) * vec2( uAspect, 1.0 );
+  gl_FragColor = vec4( acc / 30.0 * ( 1.0 - smoothstep( 0.0, 1.1, length( r ) ) ), 1.0 );
+}
+`;
+const COMP_FRAG = /* glsl */ `
+#include <packing>
+uniform sampler2D tColor, tDepth, tAO, tBloom, tRays; uniform vec2 uAOTexel, uProjK; uniform float uNear, uFar, uAOK, uBloomK, uVig, uAspect, uRaysK, uSSR;
+uniform mat4 uProj; uniform vec3 uUp;
+varying vec2 vUv;
+${IGN}
+float vzc( vec2 uv ) { return perspectiveDepthToViewZ( texture2D( tDepth, uv ).x, uNear, uFar ); }
+vec3 vposc( vec2 uv, float z ) { return vec3( ( uv * 2.0 - 1.0 ) * uProjK * -z, z ); }
+void main() {
+  vec4 c4 = texture2D( tColor, vUv );
+  vec3 c = c4.rgb;
+  // alfa de la escena: ≤ 1 = parte ambiental de la luz; > 1.25 = piso mojado que refleja (1.5 + cuánto)
+  float ambK = c4.a <= 1.0 ? c4.a : ( c4.a > 1.25 ? 0.75 : 1.0 ), reflK = c4.a > 1.25 ? clamp( c4.a - 1.5, 0.0, 1.0 ) : 0.0;
+  #ifdef USE_SSR
+  if ( reflK > 0.01 && uSSR > 0.01 ) {
+    // reflejo en pantalla: el rayo rebota en el piso (plano, hacia arriba) y avanza hasta chocar con la profundidad
+    float z0 = vzc( vUv );
+    vec3 P = vposc( vUv, z0 ), V = normalize( P ), R = reflect( V, uUp );
+    // solo donde la profundidad dice que es piso (lo aditivo encima de una pared también sube el alfa)
+    vec3 px = vposc( vUv + vec2( uAOTexel.x * 0.5, 0.0 ), vzc( vUv + vec2( uAOTexel.x * 0.5, 0.0 ) ) ) - P;
+    vec3 py = vposc( vUv + vec2( 0.0, uAOTexel.y * 0.5 ), vzc( vUv + vec2( 0.0, uAOTexel.y * 0.5 ) ) ) - P;
+    reflK *= smoothstep( 0.75, 0.92, abs( dot( normalize( cross( px, py ) ), uUp ) ) );
+    float fres = 0.05 + 0.95 * pow( 1.0 - max( dot( -V, uUp ), 0.0 ), 4.0 );
+    float stepL = 0.15 + 0.02 * -z0, j = ign( gl_FragCoord.xy );
+    vec3 Q = P + R * stepL * j;
+    vec3 hit = vec3( 0.0 ); float got = 0.0;
+    for ( int i = 0; i < 26; i++ ) {
+      Q += R * stepL; stepL *= 1.13;
+      vec4 cp = uProj * vec4( Q, 1.0 );
+      vec2 suv = cp.xy / cp.w * 0.5 + 0.5;
+      if ( cp.w <= 0.0 || suv.x < 0.0 || suv.y < 0.0 || suv.x > 1.0 || suv.y > 1.0 ) break;
+      float sz = vzc( suv );
+      if ( Q.z < sz && sz - Q.z < stepL * 1.6 + 0.25 ) {
+        // afina el choque con una búsqueda binaria corta
+        vec3 a = Q - R * stepL, b = Q;
+        for ( int k = 0; k < 4; k++ ) {
+          vec3 m = ( a + b ) * 0.5; vec4 mp = uProj * vec4( m, 1.0 ); vec2 mu = mp.xy / mp.w * 0.5 + 0.5;
+          if ( m.z < vzc( mu ) ) b = m; else a = m;
+        }
+        vec4 bp = uProj * vec4( b, 1.0 ); suv = bp.xy / bp.w * 0.5 + 0.5;
+        vec2 e = min( suv, 1.0 - suv );
+        got = smoothstep( 0.0, 0.08, min( e.x, e.y ) ) * ( 1.0 - float( i ) / 26.0 ) * step( texture2D( tDepth, suv ).x, 0.99999 );
+        hit = texture2D( tColor, suv ).rgb;
+        break;
+      }
+    }
+    c = mix( c, hit, got * min( 1.0, reflK * 1.5 ) * mix( 0.3, 1.0, fres ) * uSSR );
+  }
+  #endif
   #ifdef USE_AO
   {
     // subida de media resolución que toma los vecinos con la misma profundidad (sin halos en las siluetas)
@@ -131,15 +194,23 @@ void main() {
     }
     // si ningún vecino es de la misma superficie (cosas finas y lejanas), sin oclusión
     float ao = ( s + 0.02 ) / ( w + 0.02 );
-    c *= mix( 1.0, ao, uAOK );
+    // solo la luz ambiental se ocluye: lo que da al sol casi no se oscurece (sí su parte de cielo)
+    c *= mix( 1.0, ao, uAOK * ambK );
     #ifdef VER_AO
       c = vec3( ao );
+    #endif
+    #ifdef VER_SPLIT
+      c = vec3( reflK, ambK, 0.0 );
     #endif
   }
   #endif
   #ifdef USE_BLOOM
     vec3 bl = texture2D( tBloom, vUv ).rgb * uBloomK;
     c = 1.0 - ( 1.0 - c ) * ( 1.0 - min( bl, 1.0 ) );
+  #endif
+  #ifdef USE_RAYS
+    vec3 ry = texture2D( tRays, vUv ).rgb * uRaysK;
+    c = 1.0 - ( 1.0 - c ) * ( 1.0 - min( ry, 1.0 ) );
   #endif
   vec2 q = ( vUv - 0.5 ) * vec2( uAspect, 1.0 );
   c *= 1.0 - uVig * smoothstep( 0.45, 1.15, length( q ) );
@@ -149,6 +220,9 @@ void main() {
 `;
 
 type Nivel = 'media' | 'alta';
+const sunV = new THREE.Vector3(),
+  sunDir = new THREE.Vector3(),
+  camDir = new THREE.Vector3();
 const rt = (type: THREE.TextureDataType = THREE.HalfFloatType) =>
   new THREE.WebGLRenderTarget(1, 1, {
     type,
@@ -209,6 +283,13 @@ function crear(nivel: Nivel) {
     uThr: { value: 0.9 },
     uKnee: { value: 0.08 },
   });
+  const rays = rt(),
+    raysM = pass(RAYS_FRAG, {
+      tColor: { value: escena.texture },
+      tDepth: { value: depth },
+      uSun: { value: new THREE.Vector2() },
+      uAspect: { value: 1 },
+    });
   const downM = pass(DOWN_FRAG, { tSrc: { value: null }, uTexel: { value: new THREE.Vector2() } });
   const upM = pass(UP_FRAG, { tSrc: { value: null }, tAdd: { value: null }, uTexel: { value: new THREE.Vector2() } });
   const comp = pass(
@@ -218,6 +299,12 @@ function crear(nivel: Nivel) {
       tDepth: { value: depth },
       tAO: { value: aoA.texture },
       tBloom: { value: up[3].texture },
+      tRays: { value: rays.texture },
+      uRaysK: { value: 0 },
+      uSSR: { value: 0 },
+      uProj: { value: new THREE.Matrix4() },
+      uProjK: { value: new THREE.Vector2() },
+      uUp: { value: new THREE.Vector3(0, 1, 0) },
       uAOTexel: { value: new THREE.Vector2() },
       uNear: { value: 0.1 },
       uFar: { value: 700 },
@@ -227,7 +314,14 @@ function crear(nivel: Nivel) {
       uAspect: { value: 1 },
     },
     // #ver-ao en la dirección muestra solo la oclusión (para ajustar)
-    { USE_AO: '', USE_BLOOM: '', ...(location.hash.includes('ver-ao') ? { VER_AO: '' } : {}) },
+    {
+      USE_AO: '',
+      USE_BLOOM: '',
+      ...(alta ? { USE_SSR: '', USE_RAYS: '' } : {}),
+      ...(location.hash.includes('ver-ao') ? { VER_AO: '' } : {}),
+      // #ver-split: rojo = cuánto refleja el piso mojado, verde = parte ambiental de la luz
+      ...(location.hash.includes('ver-split') ? { VER_SPLIT: '' } : {}),
+    },
   );
   const quad = new THREE.Mesh(new THREE.BufferGeometry(), comp);
   // un solo triángulo que tapa la pantalla
@@ -246,6 +340,9 @@ function crear(nivel: Nivel) {
     down,
     up,
     preM,
+    rays,
+    raysM,
+    alta,
     downM,
     upM,
     comp,
@@ -258,9 +355,9 @@ function crear(nivel: Nivel) {
     /** llamadas de dibujo del posproceso en el último cuadro (las pruebas las leen en __mc.postPasadas) */
     pasadas: 0,
     dispose() {
-      for (const r of [escena, aoA, aoB, pre, ...down, ...up]) r.dispose();
+      for (const r of [escena, aoA, aoB, pre, rays, ...down, ...up]) r.dispose();
       depth.dispose();
-      for (const m of [ao, blur, preM, downM, upM, comp]) m.dispose();
+      for (const m of [ao, blur, preM, raysM, downM, upM, comp]) m.dispose();
       quad.geometry.dispose();
     },
   };
@@ -300,13 +397,18 @@ function Post({ nivel }: { nivel: Nivel }) {
       P.aoA.setSize(hw, hh);
       P.aoB.setSize(hw, hh);
       P.pre.setSize(hw, hh);
+      if (P.alta) P.rays.setSize(Math.max(1, W >> 2), Math.max(1, H >> 2));
       P.down.forEach((r, i) => r.setSize(Math.max(1, hw >> (i + 1)), Math.max(1, hh >> (i + 1))));
       P.up.forEach((r, i) => r.setSize(Math.max(1, hw >> (3 - i)), Math.max(1, hh >> (3 - i))));
     }
     const prevRT = gl.getRenderTarget();
     // 1. la escena
     gl.setRenderTarget(P.escena);
+    // solo mientras se dibuja la escena aquí los materiales guardan en el alfa la luz ambiental y el reflejo (G es de
+    // toda la página: otro lienzo con fondo transparente, como el del personaje, no debe verlo)
+    G.uSplit.value = 1;
     gl.render(st.scene, cam);
+    G.uSplit.value = 0;
     const c0 = gl.info.render.calls;
     const draw = (m: THREE.ShaderMaterial, target: THREE.WebGLRenderTarget | null) => {
       P.quad.material = m;
@@ -349,8 +451,27 @@ function Post({ nivel }: { nivel: Nivel }) {
       draw(P.upM, P.up[i]);
       src = P.up[i];
     }
-    // 4. compuesto a la pantalla
+    // 4. rayos de sol (alta): solo con el sol delante de la cámara y cerca de la pantalla
     const c = P.comp.uniforms;
+    c.uRaysK.value = 0;
+    if (P.alta) {
+      sunV.copy(G.uSunDir.value).multiplyScalar(500).add(cam.position).project(cam);
+      const delante = sunDir.copy(G.uSunDir.value).dot(cam.getWorldDirection(camDir)) > 0.05,
+        luz = G.uSunCol.value.r + G.uSunCol.value.g + G.uSunCol.value.b;
+      if (delante && luz > 0.15 && Math.abs(sunV.x) < 1.6 && Math.abs(sunV.y) < 1.6) {
+        P.raysM.uniforms.uSun.value.set(sunV.x * 0.5 + 0.5, sunV.y * 0.5 + 0.5);
+        P.raysM.uniforms.uAspect.value = W / H;
+        draw(P.raysM, P.rays);
+        c.uRaysK.value = Math.min(1, luz / 2) * 0.7;
+      }
+      // reflejos del piso mojado
+      c.uSSR.value = G.uWet.value;
+      c.uProj.value.copy(cam.projectionMatrix);
+      c.uProjK.value.set(1 / cam.projectionMatrix.elements[0], 1 / cam.projectionMatrix.elements[5]);
+      const e = cam.matrixWorldInverse.elements;
+      c.uUp.value.set(e[4], e[5], e[6]).normalize();
+    }
+    // 5. compuesto a la pantalla
     c.uAOTexel.value.set(1 / P.aoA.width, 1 / P.aoA.height);
     c.uNear.value = near;
     c.uFar.value = far;

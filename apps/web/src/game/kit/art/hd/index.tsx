@@ -14,7 +14,7 @@ import { Avatar } from './avatar';
 import { Flora } from './flora';
 import { Builder, gRock, roundedBox } from './geo';
 import { GroundCover } from './grass';
-import { hdMaterial, kindInfo, poolMaterial, propMaterial } from './materials';
+import { hdMaterial, kindInfo, poolMaterial, propMaterial, setShore } from './materials';
 import { Effects } from './post';
 import { props1 } from './props1';
 import { props2 } from './props2';
@@ -44,5 +44,6 @@ export const pack: ArtPack = {
   Flora,
   Hills,
   GroundCover,
+  shore: setShore,
   props: { ...props1, ...props2, ...props3 },
 };
