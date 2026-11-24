@@ -228,11 +228,13 @@ const ok = await run(
         );
         fila.cercanos = cercanos;
         const giro0 = await t.ev('window.__mc.player.camYaw');
-        await t.drag(W * 0.45, H * 0.4, W * 0.6, H * 0.45, 8);
+        if (!(await t.exists('mg-result'))) await t.drag(W * 0.45, H * 0.4, W * 0.6, H * 0.45, 8);
         await cuadros(3);
         const giro = Math.abs((await t.ev('window.__mc.player.camYaw')) - giro0) > 0.01;
         const usa = {};
         for (const b of ['fire', 'use', 'alt', 'jump']) {
+          // un motor corto (Monta: el toro te bota) puede terminar en plena prueba y los controles se esconden
+          if (await t.exists('mg-result')) break;
           const p = await centro(b);
           await t.ev(`window.__mc.input.pressed.delete('${b}')`);
           const antes = await mirar(`i.__cuenta['toca:${b}'] ?? 0`);
@@ -245,7 +247,7 @@ const ok = await run(
           await cuadros(2);
           assert.ok(llego, `El botón ${b} no registra el toque`);
         }
-        await toque(W * 0.5, H * 0.42);
+        if (!(await t.exists('mg-result'))) await toque(W * 0.5, H * 0.42);
         await cuadros(3);
         await revisarHud(id);
         await t.shot(`${out}/${id}-jugando.png`);
