@@ -4,7 +4,7 @@
     "lugares": [
       ["centro", "Centro de Tegus", "ciudad", "Parque Central, la Catedral y el Paseo Liquidámbar."],
       ["picacho", "El Picacho", "montana", "El Cristo mira toda la capital."],
-      ["suyapa", "Basílica de Suyapa", "iglesia", "La Virgen de Suyapa mide apenas 6 centímetros."],
+      ["suyapa", "Basílica de Suyapa", "iglesia", "La Virgen de Suyapa mide apenas 6,5 centímetros."],
       ["comayaguela", "Mercados de Comayagüela", "mercado", "Aquí se consigue de todo, y regateando."],
       ["estadio", "Estadio Nacional", "estadio", "La casa del clásico capitalino."],
       ["valle", "Valle de Ángeles", "pueblo", "Artesanías de madera y pupusas de domingo."],
@@ -25,7 +25,7 @@
       ["cheque", "todo bien"],
       ["pisto", "dinero"],
       ["alero", "amigo de confianza"],
-      ["burra", "almuerzo para llevar"],
+      ["chepo", "policía"],
       ["trancazo", "tráfico parado"]
     ],
     "juegos": [

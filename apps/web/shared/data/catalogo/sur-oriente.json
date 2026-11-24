@@ -12,7 +12,7 @@
       ["boqueron", "El Boquerón", "rio", "Un cañón entre Juticalpa y Catacamas."]
     ],
     "comidas": [
-      ["Tapado olanchano", "juticalpa", "Carne salada, costilla, plátano y yuca en leche de coco."],
+      ["Tapado olanchano", "juticalpa", "Carne salada, costilla, plátano y yuca en un caldo espeso. El olanchano no lleva leche de coco; el costeño sí."],
       ["Queso y cuajada", "catacamas", "El queso olanchano viaja a todo el país."],
       ["Vino de coyol", "lepaguare", "La savia del coyol se fermenta dentro del mismo tronco."],
       ["Carne asada con chismol", "catacamas", "Aquí la res se respeta."]
@@ -20,7 +20,7 @@
     "palabras": [
       ["macizo", "muy bueno"],
       ["corvo", "machete largo"],
-      ["cuaco", "caballo"],
+      ["bestia", "caballo o mula de carga"],
       ["riata", "lazo de vaquero"],
       ["jaripeo", "fiesta de montar toros"],
       ["coyol", "palma de la que sale el vino"],
