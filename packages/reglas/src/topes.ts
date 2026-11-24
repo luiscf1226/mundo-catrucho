@@ -333,13 +333,13 @@ export const TOPES: Record<string, TopeMotor> = {
   // +45 por ficha con las dos caras, una observación cada 0,8 s
   'copan.hojas': conRitmo(copan, 40),
   'islas.absorcion': islas(110, 220, 330, 60, 85, 15),
-  'islas.ballena': islas(80, 170, 260, 60, 75, 15),
+  'islas.ballena': islas(80, 170, 240, 60, 75, 15),
   'islas.bonacca': islas(120, 260, 400, 80, 80, 15),
   'islas.cangrejo': islas(120, 240, 360, 60, 80, 10),
   'islas.colorprofundo': islas(140, 300, 460, 80, 75, 15),
   'islas.coral': islas(120, 260, 400, 80, 80, 15),
   'islas.estela': islas(120, 260, 400, 80, 80, 15),
-  'islas.flotacion': islas(100, 220, 340, 60, 80, 15),
+  'islas.flotacion': islas(100, 200, 300, 0, 80, 15),
   // alfombra de 8–16 plantillas: 5 por celda + 10 por borde limpio + 5 × plantillas al terminarla (~24 pts/s fino)
   'comayagua.aserrin': conRitmo(comayagua(140, 300, 460, 60), 35),
   'comayagua.reloj': comayagua(120, 300, 460, 60),

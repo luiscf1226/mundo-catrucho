@@ -355,9 +355,9 @@
     "lugares": [
       ["roatan", "Roatán", "isla", "La isla más grande, rodeada de arrecife."],
       ["westbay", "West Bay", "playa", "Arena blanca y agua transparente."],
-      ["utila", "Utila", "isla", "Uno de los mejores lugares del mundo para ver al tiburón ballena."],
+      ["utila", "Utila", "isla", "Famosa por los encuentros con el tiburón ballena, aunque nadie los garantiza."],
       ["guanaja", "Guanaja", "isla", "La isla de los pinos; Bonacca es un pueblo sobre el agua."],
-      ["arrecife", "Arrecife Mesoamericano", "playa", "El segundo arrecife de coral más grande del mundo."],
+      ["arrecife", "Arrecife Mesoamericano", "playa", "La segunda barrera de coral más grande del mundo."],
       ["puntagorda", "Punta Gorda", "pueblo", "El primer pueblo garífuna de Honduras, de 1797."],
       ["coxen", "Coxen Hole", "puerto", "Aquí atracan los cruceros."]
     ],
@@ -365,7 +365,7 @@
       ["Arroz con frijoles y coco", "coxen", "Rice and beans, la base de todo plato isleño."],
       ["Johnny cake", "coxen", "Pan isleño para el viaje en lancha."],
       ["Cangrejo azul", "puntagorda", "Sale con las primeras lluvias."],
-      ["Pan de coco isleño", "roatan", "Más dulce que el de tierra firme."]
+      ["Pan de coco isleño", "roatan", "Hecho en casa, con coco rallado."]
     ],
     "palabras": [
       ["wha' happen?", "¿qué pasó? (inglés isleño)"],

@@ -88,12 +88,13 @@ function elegir(m: Sesion, i: number) {
     m.sumar(30 + (r.t < 5 ? 10 : 0));
     s.aviso = `¡Exacto! Era ${COLORES[r.real].nombre}: el agua solo lo apagaba.`;
   } else if (o.clase === 'absorbido') {
+    // adivinar tiene que salir caro: con tres opciones al azar rinde (40 − 30 − 20) / 3 por foto
     s.absorbidos++;
-    m.sumar(-15);
+    m.sumar(-30);
     s.aviso = 'Ese tono es el agua, no el coral. El rojo se queda arriba.';
   } else {
     s.fallos++;
-    m.sumar(-5);
+    m.sumar(-20);
     s.aviso = 'Ese color no sale de estas fotos.';
   }
 }

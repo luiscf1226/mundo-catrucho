@@ -81,7 +81,8 @@ const motor = defineMotor({
     nombre: texto(p.tema.nombre, 'Trimado de buceo'),
     semilla: p.seed,
   }),
-  metas: (p) => [100 + Math.round(p.dif * 60), 220 + Math.round(p.dif * 60), 340 + Math.round(p.dif * 60)],
+  // cada etapa achica la tolerancia y sube la corriente: las metas no suben encima (una foto cada ~6 s en todas)
+  metas: () => [100, 200, 300],
   duracion: (p) => 80 + Math.round(p.dif * 15),
   crear: (p): Estado => ({
     d: 3,
@@ -167,12 +168,13 @@ const motor = defineMotor({
       return;
     }
     const p = m.parametros;
-    // cuánto aire hace falta para frenar hacia la meta, igual que lo calcularía alguien con práctica
+    // cuánto aire hace falta para frenar hacia la meta, igual que lo calcularía alguien con práctica; ya en la
+    // marca, la respiración (rápida) frena el vaivén: inhala si se hunde y suelta si sube
     const respira = s.pulmon * 0.16;
-    const quiere = (s.meta - s.d) * 0.3 - s.w * 0.9;
+    const quiere = (s.meta - s.d) * 0.45 - s.w * 1.2;
     const necesita = (p.peso - respira - quiere) * (1 + s.d / 10);
     s.chaleco = s.aire < necesita - 0.015 ? 1 : s.aire > necesita + 0.015 ? -1 : 0;
-    s.resp = 0;
+    s.resp = Math.abs(s.d - s.meta) < p.tolerancia && Math.abs(s.w) > 0.06 ? Math.sign(s.w) : 0;
     s.auto = true;
     if (s.estable >= 1.1) foto(m);
   },
