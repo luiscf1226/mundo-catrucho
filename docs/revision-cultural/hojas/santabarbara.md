@@ -15,7 +15,7 @@
 ## Lugares
 
 - [ ] **Santa Bárbara** (ciudad): Tierra de junco y café.
-- [ ] **Castillo Bográn** (fuerte): Ruinas de la casa de campo de un presidente.
+- [ ] **Castillo Bográn** (fuerte): Ruinas de una antigua casa de la familia Bográn.
 - [ ] **Trinidad** (pueblo): Aquí queman las chimeneas gigantes.
 - [ ] **Orilla del Lago de Yojoa** (lago): El lado tranquilo del lago.
 - [ ] **Montaña de Santa Bárbara** (montana): La segunda montaña más alta del país.
@@ -145,7 +145,7 @@ Sorpresas escondidas en el mapa. El texto es el que lee el jugador.
 ## La cabecera (Santa Bárbara)
 
 - [ ] **Pulpería:** Pulpería El Junco
-- [ ] **Iglesia de Santa Bárbara**: La iglesia de la cabecera, al pie de la montaña de Santa Bárbara.
+- [ ] **Iglesia de Santa Bárbara**: La iglesia de la cabecera de los pateplumas.
 - [ ] **Cooperativa del junco**: Sombreros, petates y canastas de junco tejidos a mano. Es la artesanía que hizo famosa a Santa Bárbara.
 - [ ] **Parque Central de Santa Bárbara**: Aquí se venden los sombreros de junco recién tejidos.
 

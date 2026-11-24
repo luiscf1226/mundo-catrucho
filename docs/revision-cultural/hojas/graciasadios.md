@@ -17,7 +17,7 @@
 - [ ] **Puerto Lempira** (puerto): Capital de La Mosquitia, a la orilla de la laguna.
 - [ ] **Laguna de Caratasca** (lago): La laguna más grande de Honduras.
 - [ ] **Biosfera del Río Plátano** (selva): Patrimonio de la Humanidad.
-- [ ] **Ciudad Blanca** (ruinas): La ciudad perdida del Dios Mono.
+- [ ] **Ciudad Blanca** (ruinas): Leyenda de una ciudad perdida en la selva.
 - [ ] **Río Patuca** (rio): Uno de los ríos más largos de Centroamérica.
 - [ ] **Brus Laguna** (pueblo): Pueblo miskito entre sabana y laguna.
 
@@ -137,16 +137,16 @@ Sorpresas escondidas en el mapa. El texto es el que lee el jugador.
 - [ ] ✈️🛶 **Por agua o por aire**: «A La Mosquitia se llega por agua o por aire.»
   - Qué es: Gracias a Dios es remoto y casi sin carreteras: se llega sobre todo por agua o en avión.
   - Fuente: <https://en.wikipedia.org/wiki/Gracias_a_Dios_Department>
-- [ ] 🌳🦜 **La selva más grande**: «Río Plátano: la selva más grande de Centroamérica.»
+- [ ] 🌳🦜 **La selva más grande**: «Río Plátano: parte de la selva más grande de Centroamérica.»
   - Qué es: La Reserva del Río Plátano, patrimonio de la UNESCO, es parte de la mayor área silvestre de Centroamérica.
   - Fuente: <https://en.wikipedia.org/wiki/Gracias_a_Dios_Department>
 
 ## La cabecera (Puerto Lempira)
 
 - [ ] **Pulpería:** Pulpería La Moskitia
-- [ ] **Muelle de Puerto Lempira**: Aquí llegan los pipantes y las lanchas desde las comunidades misquitas por la laguna de Caratasca.
-- [ ] **Pista de aterrizaje**: A la Moskitia no llega carretera: se viene en avioneta o en lancha. Esta pista es la puerta de entrada.
-- [ ] **Iglesia Morava**: La iglesia morava es la más vieja de la Moskitia. Los cantos en misquito se oyen desde la calle.
+- [ ] **Muelle de Puerto Lempira**: Aquí llegan los pipantes y las lanchas desde las comunidades miskitas por la laguna de Caratasca.
+- [ ] **Pista de aterrizaje**: A la Moskitia casi no llega carretera: se viene en avioneta o en lancha. Esta pista es la puerta de entrada.
+- [ ] **Iglesia Morava**: Muchas familias miskitas son moravas. Los cantos en miskito se oyen desde la calle.
 
 ## Rótulos y textos en pantalla
 

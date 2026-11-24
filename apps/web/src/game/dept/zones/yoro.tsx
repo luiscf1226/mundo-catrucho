@@ -72,7 +72,7 @@ export function lluvia(d: Department): ZoneSpec {
     .n(<P.Tree pos={[13, 0, -13]} seed={1} />)
     .n(<P.Tree pos={[-13, 0, 9]} seed={2} />)
     .n(<P.Tree pos={[13.5, 0, 12]} seed={3} />);
-  Z.n(<P.Sign pos={[-19.5, 0, 9]} rot={PI / 2} text="El Pantano: aquí llueven peces" />);
+  Z.n(<P.Sign pos={[-19.5, 0, 9]} rot={PI / 2} text="El Pantano: dicen que llueven peces" />);
   // peces en el suelo y charcos
   const blocked = (x: number, z: number) =>
     inR(x, z, -15, -7, -13, -7) ||

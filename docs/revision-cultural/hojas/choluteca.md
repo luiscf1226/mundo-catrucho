@@ -32,7 +32,7 @@
 ## Palabras
 
 - [ ] **chigüín**: niño (así se dice en el sur)
-- [ ] **ideay**: ¿y entonces? (del sur)
+- [ ] **ideay**: ¿y entonces?
 - [ ] **canícula**: los días más secos y calientes
 - [ ] **marañón**: fruta de la que sale la semilla tostada
 - [ ] **cuzuco**: armadillo
@@ -149,7 +149,7 @@ Sorpresas escondidas en el mapa. El texto es el que lee el jugador.
 - [ ] **Pulpería:** Pulpería Los Cipotes
 - [ ] **Catedral de la Inmaculada**: La catedral colonial de Choluteca, blanca y fresca. Afuera el sol del sur pega a 38 grados.
 - [ ] **Parque José Cecilio del Valle**: El parque central lleva el nombre del sabio Valle, que nació aquí y escribió el Acta de Independencia de 1821.
-- [ ] **Estadio Fausto Flores Lagos**: El estadio de Choluteca. Los partidos son de noche porque de día no hay quien aguante el calor.
+- [ ] **Estadio Fausto Flores Lagos**: El estadio de Choluteca. Muchos partidos se juegan de noche: de día el calor no perdona.
 
 ## Rótulos y textos en pantalla
 

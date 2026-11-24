@@ -14,7 +14,7 @@
 
 ## Lugares
 
-- [ ] **Trujillo** (ciudad): Aquí Colón pisó tierra firme en 1502.
+- [ ] **Trujillo** (ciudad): Cerca de aquí Colón pisó tierra firme en 1502.
 - [ ] **Fortaleza de Santa Bárbara** (fuerte): Cañones mirando la bahía.
 - [ ] **Santa Fe** (pueblo): Pueblo garífuna de pescadores.
 - [ ] **Laguna de Guaimoreto** (lago): Manglares, aves y cocodrilos.

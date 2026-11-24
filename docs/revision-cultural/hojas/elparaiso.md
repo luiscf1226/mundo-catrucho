@@ -8,7 +8,7 @@
 
 - [ ] **Cabecera:** Yuscarán
 - [ ] **Lugar emblema:** Yuscarán, pueblo minero
-- [ ] **Dato del mapa:** Danlí celebra cada agosto el Festival Nacional del Maíz.
+- [ ] **Dato del mapa:** Danlí celebra cada agosto el Festival Internacional del Maíz.
 - [ ] **Coleccionable:** Mazorca dorada
 - [ ] **Esencia:** Danlí convierte el maíz en fiesta mientras Yuscarán conserva su memoria minera entre aleros.
 
@@ -35,7 +35,7 @@
 - [ ] **tapiscar**: cosechar el maíz
 - [ ] **tusa**: hoja que envuelve el elote
 - [ ] **puro**: cigarro hecho a mano
-- [ ] **chagüite**: plática larga
+- [ ] **chagüite**: siembra de plátano o guineo
 
 ## Juegos
 
@@ -44,7 +44,7 @@ Nombre, dónde pasa, de qué va y el guiño que sale al jugar.
 - [ ] 🫔 **Danlí pregunta por su maíz** · Danlí · motor `elparaiso.trivia` · 5 etapas
   - De qué va: Respondé preguntas con fichas visibles y consultas limitadas.
   - Guiño: La mazorca pregunta, pero también tiene ficha.
-  - Textos del juego: «Sin ficha, mejor pasá.» · «¿En qué mes celebra Danlí su Festival del Maíz?» · «Agosto» · «Diciembre» · «Marzo» · «Ficha: Danlí celebra el Festival del Maíz en agosto.» · «¿Qué es una montuca?» · «Tamal de elote relleno» · «Tortilla de harina» · «Sopa de frijoles» · «Ficha: la montuca es tamal de elote con relleno.» · «¿Qué es una rigua?» · «Tortilla gruesa de elote» · «Pan de yuca» · «Dulce de coco» · «Ficha: la rigua es tortilla gruesa de elote.» · «¿Qué hacés cuando tapiscás?» · «Cosechar el maíz» · «Pelar café» · «Pescar en el río» · «Ficha: tapiscar es cosechar el maíz.» · «¿Cómo se llama la hoja que envuelve el elote?» · «Tusa» · «Penca» · «Concha» · «Ficha: la tusa envuelve el elote.» · «¿Qué juego tradicional nombra el plan de Danlí?» · «Caballitos de palo» · «Boliche» · «Golf» · «Ficha: el plan de Danlí nombra los caballitos de palo.» · «¿De qué se hace el atol de la feria?» · «Elote» · «Arroz» · «Yuca» · «Ficha: el atol de elote se hace con maíz tierno.» · «¿Junto a qué reserva queda Yuscarán?» · «Monserrat» · «Celaque» · «Pico Bonito» · «Ficha: Yuscarán está en las laderas de Monserrat.»
+  - Textos del juego: «Sin ficha, mejor pasá.» · «¿En qué mes celebra Danlí su Festival del Maíz?» · «Agosto» · «Diciembre» · «Marzo» · «Ficha: Danlí celebra el Festival del Maíz en agosto.» · «¿Qué es una montuca?» · «Tamal de elote relleno» · «Tortilla de harina» · «Sopa de frijoles» · «Ficha: la montuca es tamal de elote con relleno.» · «¿Qué es una rigua?» · «Tortilla gruesa de elote» · «Pan de yuca» · «Dulce de coco» · «Ficha: la rigua es tortilla gruesa de elote.» · «¿Qué hacés cuando tapiscás?» · «Cosechar el maíz» · «Pelar café» · «Pescar en el río» · «Ficha: tapiscar es cosechar el maíz.» · «¿Cómo se llama la hoja que envuelve el elote?» · «Tusa» · «Penca» · «Concha» · «Ficha: la tusa envuelve el elote.» · «¿Qué juego tradicional aparece en el plan municipal de Danlí?» · «Caballitos de palo» · «Boliche» · «Golf» · «Ficha: el plan municipal de Danlí nombra los caballitos de palo.» · «¿De qué se hace el atol de la feria?» · «Elote» · «Arroz» · «Yuca» · «Ficha: el atol de elote se hace con maíz tierno.» · «¿Junto a qué reserva queda Yuscarán?» · «Monserrat» · «Celaque» · «Pico Bonito» · «Ficha: Yuscarán está en las laderas de Monserrat.»
 - [ ] 🫔 **La mazorca te puso examen** · Danlí · motor `elparaiso.trivia` · 4 etapas
   - De qué va: Detectá afirmaciones sin fuente entre dos respuestas plausibles y justificá cuál queda pendiente.
   - Guiño: La mazorca pregunta, pero también tiene ficha.
@@ -162,7 +162,7 @@ Sorpresas escondidas en el mapa. El texto es el que lee el jugador.
 ## La cabecera (Yuscarán)
 
 - [ ] **Pulpería:** Pulpería Doña Chepa
-- [ ] **Casa Fortín**: Casona colonial de Yuscarán convertida en museo. El pueblo entero es monumento nacional por sus calles de piedra.
+- [ ] **Casa Fortín**: Casona colonial de Yuscarán convertida en museo. El pueblo entero fue declarado monumento nacional.
 - [ ] **Destilería de guaro**: Yuscarán es famoso por su aguardiente de caña. Aquí se huele el guaro desde la calle.
 - [ ] **Iglesia de Yuscarán**: La iglesia del antiguo pueblo minero, con el cerro Monserrat de fondo.
 

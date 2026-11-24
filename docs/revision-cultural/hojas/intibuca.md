@@ -14,8 +14,8 @@
 
 ## Lugares
 
-- [ ] **La Esperanza** (ciudad): La ciudad más alta y más fría de Honduras.
-- [ ] **La Gruta** (iglesia): Capilla tallada en la roca, mirando la ciudad.
+- [ ] **La Esperanza** (ciudad): La ciudad más alta de Honduras, y de las más frías.
+- [ ] **La Gruta** (iglesia): Capilla dentro de una cueva del cerro, mirando la ciudad.
 - [ ] **Mercado lenca** (mercado): Papas, fresas y pañuelos de colores.
 - [ ] **Yamaranguila** (pueblo): Corazón lenca, con su cascada.
 - [ ] **Laguna de Chiligatoro** (lago): Laguna entre pinos y neblina.
@@ -44,10 +44,10 @@ Nombre, dónde pasa, de qué va y el guiño que sale al jugar.
 
 - [ ] 🍄 **Carrera entre dos plazas** · La Esperanza · motor `intibuca.carrera` · 5 etapas
   - De qué va: Corré un circuito con puestos de abrigo intermedios.
-  - Guiño: El frío ya salió y vos ni te amarrás.
+  - Guiño: El frío ya salió y vos todavía sin chumpa.
 - [ ] 🍄 **El frío va ganando** · La Esperanza · motor `intibuca.carrera` · 4 etapas
   - De qué va: Elegí entre carril soleado largo y carril frío corto con una reserva térmica limitada.
-  - Guiño: El frío ya salió y vos ni te amarrás.
+  - Guiño: El frío ya salió y vos todavía sin chumpa.
 - [ ] 🧩 **Tela del mercado lenca** · Mercado lenca · motor `intibuca.telar` · 5 etapas
   - De qué va: Tejé una franja conservando su motivo por ambas caras.
   - Guiño: La bufanda tiene dos lados, no te hagás.
@@ -154,7 +154,7 @@ Sorpresas escondidas en el mapa. El texto es el que lee el jugador.
 ## La cabecera (La Esperanza)
 
 - [ ] **Pulpería:** Pulpería El Frío
-- [ ] **Catedral de La Esperanza**: La iglesia de la ciudad más alta de Honduras. Traé suéter: aquí el frío es en serio.
+- [ ] **Iglesia de La Esperanza**: La iglesia de la ciudad más alta de Honduras. Traé suéter: aquí el frío es en serio.
 - [ ] **Parque Central de La Esperanza**: Mujeres lencas con sus pañuelos de colores venden atol, papas y fresas alrededor del parque.
 - [ ] **Casa de la Cultura**: Muestra los tejidos, la cerámica y las tradiciones del pueblo lenca de Intibucá.
 

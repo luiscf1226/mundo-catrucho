@@ -9,7 +9,7 @@
 - [ ] **Cabecera:** Gracias
 - [ ] **Lugar emblema:** Fuerte San Cristóbal
 - [ ] **Dato del mapa:** El departamento lleva el nombre de Lempira, líder lenca que resistió la conquista en 1537. La moneda de Honduras también.
-- [ ] **Coleccionable:** Penacho lenca
+- [ ] **Coleccionable:** Penacho de Lempira
 - [ ] **Esencia:** Celaque reparte agua, La Campa levanta barro y Erandique guarda color dentro del ópalo.
 
 ## Lugares
@@ -163,7 +163,7 @@ Sorpresas escondidas en el mapa. El texto es el que lee el jugador.
 ## La cabecera (Gracias)
 
 - [ ] **Pulpería:** Pulpería Celaque
-- [ ] **Iglesia San Marcos**: La iglesia colonial de Gracias, que fue capital de toda Centroamérica en 1544.
+- [ ] **Iglesia San Marcos**: La iglesia colonial de Gracias, la ciudad donde en 1544 se instaló la Audiencia de los Confines.
 - [ ] **Casa Galeano**: Casona colonial convertida en museo, con jardín botánico y la historia lenca de Lempira.
 - [ ] **Parque Central de Gracias**: Calles empedradas, casas de adobe y techos de teja alrededor. Al fondo, la montaña de Celaque.
 

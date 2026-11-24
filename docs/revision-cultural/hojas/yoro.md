@@ -14,17 +14,17 @@
 
 ## Lugares
 
-- [ ] **Yoro** (ciudad): Donde llueven peces.
+- [ ] **Yoro** (ciudad): Donde cuentan que llueven peces.
 - [ ] **El Progreso** (ciudad): La Perla del Ulúa, ciudad bananera.
 - [ ] **Olanchito** (ciudad): La Ciudad Cívica, tierra de escritores y bananos.
 - [ ] **Pico Pijol** (parque): Bosque nublado y cascadas.
 - [ ] **Río Ulúa** (rio): Uno de los ríos más grandes del país.
-- [ ] **Montañas tolupanes** (pueblo): Aquí vive el pueblo tolupán.
+- [ ] **Montañas tolupanes** (pueblo): Aquí viven tribus del pueblo tolupán.
 - [ ] **Campos bananeros** (finca): Por aquí rodó el tren bananero.
 
 ## Comidas
 
-- [ ] **Sardinitas de la lluvia** (Yoro): Pescaditos fritos, recién caídos del cielo.
+- [ ] **Sardinitas de la lluvia** (Yoro): Pescaditos fritos; dicen que caen del cielo.
 - [ ] **Mínimos** (El Progreso): Aquí al banano se le dice mínimo.
 - [ ] **Coyoles en miel** (Olanchito): Dulce de Semana Santa: se chupan, no se muerden.
 
@@ -135,7 +135,7 @@ Sorpresas escondidas en el mapa. El texto es el que lee el jugador.
 ## Memes y frases
 
 - [ ] 🌧️🐟 **Lluvia de peces**: «¿Lluvia de peces? En Yoro no es chiste.»
-  - Qué es: Tras los primeros aguaceros fuertes de mayo o junio aparecen peces en el suelo en Yoro; hay festival desde 1998.
+  - Qué es: Tras los primeros aguaceros fuertes de mayo o junio, en Yoro cuentan que aparecen peces en el suelo; hay festival desde 1998.
   - Fuente: <https://www.elheraldo.hn/honduras/cae-lluvia-de-peces-yoro-fenomenos-mas-curiosos-honduras-AB31031144>
 - [ ] 🦪🏞️ **La Perla del Ulúa**: «El Progreso brilla: ¡la Perla del Ulúa!»
   - Qué es: El Progreso es conocida como «la Perla del Ulúa» por estar a orillas del río Ulúa.
@@ -147,8 +147,8 @@ Sorpresas escondidas en el mapa. El texto es el que lee el jugador.
 ## La cabecera (Yoro)
 
 - [ ] **Pulpería:** Pulpería Lluvia de Peces
-- [ ] **Iglesia de Yoro**: Aquí se reza para que siga la lluvia de peces de cada junio. El padre Subirana pidió ese milagro, dicen.
-- [ ] **Parque Central de Yoro**: El parque de la cabecera, con su kiosko y vendedoras de tamales y pan de mantequilla.
+- [ ] **Iglesia de Yoro**: La iglesia de la cabecera. Cuenta la leyenda que el padre Subirana rezó por la gente pobre y que de ahí vino la lluvia de peces.
+- [ ] **Parque Central de Yoro**: El parque de la cabecera, con su kiosco y vendedoras de tamales y pan de mantequilla.
 - [ ] **Mercado de Yoro**: Pescado frito, yuca con chicharrón y frutas de la costa. Si llueven peces, aquí se venden.
 
 ## Rótulos y textos en pantalla
@@ -175,7 +175,7 @@ ortografía; si algo está mal, anotá el archivo y la línea.
 | 46 | Mercadito |
 | 56 | Festival de la Lluvia de Peces |
 | 57 | Comedor |
-| 75 | El Pantano: aquí llueven peces |
+| 75 | El Pantano: dicen que llueven peces |
 | 126 | Doña Rosa |
 
 </details>

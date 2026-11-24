@@ -3866,7 +3866,7 @@
         "motor": "intibuca.carrera",
         "tipo": "estrella",
         "deQueVa": "Corré un circuito con puestos de abrigo intermedios.",
-        "guino": "El frío ya salió y vos ni te amarrás.",
+        "guino": "El frío ya salió y vos todavía sin chumpa.",
         "etapas": 5,
         "origen": null
       },
@@ -3878,7 +3878,7 @@
         "motor": "intibuca.carrera",
         "tipo": "normal",
         "deQueVa": "Elegí entre carril soleado largo y carril frío corto con una reserva térmica limitada.",
-        "guino": "El frío ya salió y vos ni te amarrás.",
+        "guino": "El frío ya salió y vos todavía sin chumpa.",
         "etapas": 4,
         "origen": null
       },

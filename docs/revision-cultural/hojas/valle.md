@@ -33,7 +33,7 @@
 - [ ] **punche**: cangrejo del manglar
 - [ ] **bicitaxi**: triciclo que lleva pasajeros
 - [ ] **chigüín**: niño
-- [ ] **playón**: playa ancha de arena negra
+- [ ] **playón**: playa ancha y abierta
 - [ ] **sofoco**: calor que ahoga
 
 ## Juegos
@@ -145,9 +145,9 @@ Sorpresas escondidas en el mapa. El texto es el que lee el jugador.
 ## La cabecera (Nacaome)
 
 - [ ] **Pulpería:** Pulpería El Golfo
-- [ ] **Iglesia de Nacaome**: Iglesia colonial de la cabecera de Valle. Nacaome fue capital de Honduras por un tiempo en el siglo XIX.
+- [ ] **Iglesia de Nacaome**: Iglesia colonial de la cabecera de Valle.
 - [ ] **Salineras del golfo**: El agua del golfo de Fonseca se seca al sol en pilas hasta que queda la sal. Brilla que encandila.
-- [ ] **Parque Central de Nacaome**: Sombra de almendros y raspados de colores para el calor del sur.
+- [ ] **Parque Central de Nacaome**: Sombra de almendros y minutas de colores para el calor del sur.
 
 ## Rótulos y textos en pantalla
 

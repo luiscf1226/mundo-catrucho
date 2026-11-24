@@ -145,8 +145,8 @@ Sorpresas escondidas en el mapa. El texto es el que lee el jugador.
 ## La cabecera (La Paz)
 
 - [ ] **Pulpería:** Pulpería La Paz de Dios
-- [ ] **Parroquia de La Paz**: La iglesia de la cabecera, frente al parque. En la feria de noviembre se llena de gente.
-- [ ] **Parque Central de La Paz**: Tranquilo, con árboles grandes y el kiosko. Aquí se toma el cafecito de Marcala.
+- [ ] **Parroquia de La Paz**: La iglesia de la cabecera, frente al parque. En la feria patronal se llena de gente.
+- [ ] **Parque Central de La Paz**: Tranquilo, con árboles grandes y el kiosco. Aquí se toma el cafecito de Marcala.
 - [ ] **Beneficio de café**: Aquí se lava, seca y trilla el café de altura de La Paz antes de venderlo afuera.
 
 ## Rótulos y textos en pantalla
