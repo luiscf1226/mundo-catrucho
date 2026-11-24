@@ -51,9 +51,11 @@ export const guia: Guia = {
     ['Soltar', 'lanzar / aflojar la línea'],
     ['F al picar', 'enganchar'],
     ['A / D', 'apuntar'],
+    ['E', 'soltar la bota o la llanta que quedó en la lancha'],
   ],
   touch: [
     ['Mantené la pantalla o 🎯', 'cargar, lanzar y jalar'],
+    ['✋', 'soltar la captura incidental'],
     ['Toque al picar', 'enganchar'],
     ['Palanca', 'apuntar'],
   ],
@@ -136,6 +138,8 @@ export function Pesca() {
     ag = AGUA[agua];
   const peces = useMemo(() => normPeces(T), [T]);
   const basura: string[] = Array.isArray(T.basura) && T.basura.length ? T.basura : BASURA;
+  /** «La bota no es pescado»: la captura incidental queda en la lancha y hay que soltarla (E) antes de volver a lanzar */
+  const soltar = T.variante === 'la-bota-no-es-pescado';
   const meta = useMemo(() => metasDe(T, P0.dif), [T, P0]),
     dur = SEG(P0.dif),
     pz = PZ[desde];
@@ -212,6 +216,8 @@ export function Pesca() {
     fishP: [0, 0, 0] as [number, number, number],
     t0: 0,
     prevFase: 'idle' as Fase,
+    estorbo: null as null | string,
+    soltadas: 0,
   }).current;
 
   const refs = {
@@ -238,7 +244,7 @@ export function Pesca() {
   );
 
   const eligePez = (carga: number) => {
-    if (rnd() < 0.12 + 0.04 * P0.dif) {
+    if (rnd() < (soltar ? 0.24 : 0.12) + 0.04 * P0.dif) {
       const n = basura[Math.floor(rnd() * basura.length)];
       return { n, p: 0, c: '#777', f: 0.04, junk: true };
     }
@@ -289,6 +295,8 @@ export function Pesca() {
           n: s.n,
           basura: s.basura,
           perdidos: s.perdidos,
+          estorbo: s.estorbo,
+          soltadas: s.soltadas,
           tension: s.tension,
           aviso: s.aviso > 0,
           tiron: s.tiron > 0,
@@ -305,6 +313,10 @@ export function Pesca() {
           ? {
               skip: (n: number) => {
                 s.t = Math.max(0, s.t - n);
+              },
+              /** deja una captura incidental en la lancha, como si la hubieras sacado */
+              enLancha: (n: string) => {
+                if (soltar) s.estorbo = n;
               },
             }
           : {}),
@@ -334,6 +346,20 @@ export function Pesca() {
     if (s.fase === 'idle' || s.fase === 'carga') s.aim = Math.max(-7.5, Math.min(7.5, s.aim + input.mx * 6 * dt));
     switch (s.fase) {
       case 'idle':
+        if (s.estorbo) {
+          s.msg = `${s.estorbo} en la lancha · soltala con E antes de seguir`;
+          if (input.take('use')) {
+            useGame.getState().toast(`${s.estorbo}: al saco de basura, no al menú del lago`, '♻️');
+            s.estorbo = null;
+            s.soltadas++;
+            s.lock = held;
+            audio.sfx('pickup');
+          } else if (held && !s.lock) {
+            s.lock = true;
+            audio.sfx('error');
+          }
+          break;
+        }
         s.msg = `Mantené ${K} para cargar el tiro`;
         if (held && !s.lock) {
           s.fase = 'carga';
@@ -470,6 +496,7 @@ export function Pesca() {
           if (pez.junk) {
             s.basura++;
             s.racha = 0;
+            if (soltar) s.estorbo = pez.n;
             audio.sfx('lose');
             s.msg = pez.n;
             useGame
@@ -543,7 +570,7 @@ export function Pesca() {
       score: `${s.score} pts`,
       objective: s.score >= meta[2] ? '¡Tres estrellas!' : `Meta: ${sig} pts`,
       lines: [
-        `Pescados: ${s.n}${s.racha > 1 ? ` · racha x${s.racha}` : ''}`,
+        `Pescados: ${s.n}${s.racha > 1 ? ` · racha x${s.racha}` : ''}${soltar ? ` · Soltadas ${s.soltadas}` : ''}`,
         ...rivals.map((r) => `${r.b.name}: ${r.score}`),
       ],
     });
@@ -554,7 +581,7 @@ export function Pesca() {
         stars: starsFor(s.score, meta[0], meta[1], meta[2]),
         score: s.score,
         label: `${s.score} pts`,
-        stats: { pescados: s.n, basura: s.basura, perdidos: s.perdidos, mejorPez: s.mejor },
+        stats: { pescados: s.n, basura: s.basura, perdidos: s.perdidos, mejorPez: s.mejor, soltadas: s.soltadas },
       });
     }
     if (s.msg !== s.shown) {

@@ -46,7 +46,8 @@ const motor = defineMotor({
     goal: 'Guardá esfuerzo descansando. F sube un tramo; la mochila pierde capacidad con la altura. El último cuesta 30 extra y exige 8 de reserva.',
     ...controles,
   },
-  etapa: (p) => ({ recarga: 15 - p.dif * 4, coste: 7 + p.dif * 3 }),
+  // el esfuerzo se recupera despacio: subir apenas alcanza la reserva deja sin aire el tramo final
+  etapa: (p) => ({ recarga: 8 - p.dif * 2, coste: 7 + p.dif * 3 }),
   metas: (p) => [80 + Math.round(p.dif * 80), 240, 400],
   duracion: (p) => 80 + p.dif * 20,
   crear: (): Estado => ({

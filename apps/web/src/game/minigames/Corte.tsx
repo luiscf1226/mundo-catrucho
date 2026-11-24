@@ -116,10 +116,14 @@ function Arma({ tipo }: { tipo: Arma }) {
   );
 }
 
+/** altura de los dos pisos del pastel en la variante «¡La tajada pidió escritura!» */
+const PISOS = [2.3, 4.3];
 export function Corte() {
   const P = useMemo(partida, []),
     fondo = fondoDe(P, 'finca');
   const arma: Arma = (['machete', 'cuchillo', 'hacha'] as const).includes(P.tema.arma) ? P.tema.arma : 'machete';
+  /** «¡La tajada pidió escritura!»: el pastel tiene dos pisos que giran en sentidos opuestos, con adornos entre las porciones */
+  const pisos = P.tema.variante === 'la-tajada-pidio-escritura';
   const R = useMemo(() => rng(P.seed), [P]),
     size = useThree((s) => s.size);
   const { done, end } = useFinisher();
@@ -335,8 +339,25 @@ export function Corte() {
         const bad = R() < 0.14 + 0.2 * dif,
           cand = slots.filter((s) => !s.on && s.bad === bad);
         if (!cand.length) continue;
-        const s = cand[Math.floor(R() * cand.length)],
-          x0 = (R() * 2 - 1) * 4.2,
+        const s = cand[Math.floor(R() * cand.length)];
+        if (pisos) {
+          // piso de abajo gira a la derecha y el de arriba a la izquierda; la pieza entra por el borde
+          const piso = R() < 0.5 ? 0 : 1,
+            dir = piso ? -1 : 1;
+          Object.assign(s, {
+            on: true,
+            cut: false,
+            x: -5.8 * dir - dir * j * 1.6,
+            y: piso ? PISOS[1] : PISOS[0],
+            vx: dir * (2.4 + 1.4 * dif),
+            vy: 0,
+            r: 0,
+            vr: dir * 0.6,
+            t: 0,
+          });
+          continue;
+        }
+        const x0 = (R() * 2 - 1) * 4.2,
           h = 4.4 + R() * 2.6,
           vy = Math.sqrt(2 * g * h),
           T = (2 * vy) / g,
@@ -359,14 +380,14 @@ export function Corte() {
     for (const s of slots) {
       if (!s.on) continue;
       if (!s.cut) {
-        s.vy -= g * dt;
+        if (!pisos) s.vy -= g * dt;
         s.x += s.vx * dt;
         s.y += s.vy * dt;
         s.r += s.vr * dt;
         if (kinds[s.type].nombre === 'avispa') s.x += Math.sin(S.t * 9 + s.type) * 0.02;
         const rad = kinds[s.type].shape.r * 1.45 + 0.4;
         if ((fire || swipe) && Math.hypot(s.x - wx, s.y - wy) < rad + (fire ? 0.35 : 0)) cutSlot(s, wx, wy);
-        else if (s.y < -0.6 && s.vy < 0) {
+        else if (pisos ? Math.abs(s.x) > 6.2 && s.x * s.vx > 0 : s.y < -0.6 && s.vy < 0) {
           s.on = false;
           if (!s.bad) {
             if (S.combo >= 3) useGame.getState().toast('¡Se te fue una!', '💨');
@@ -442,7 +463,9 @@ export function Corte() {
       objective: `Meta ${meta[0]} pts · Combo ×${S.mult}${S.combo > 3 ? ` (${S.combo} seguidos)` : ''}`,
       lines: [
         `Cortadas ${S.cuts} · Falladas ${S.miss} · Evitá ${S.evita}`,
-        'Clic / F / 🎯 para cortar · arrastrá rápido para varias',
+        pisos
+          ? 'Dos pisos giran al revés · cortá las porciones, no los adornos'
+          : 'Clic / F / 🎯 para cortar · arrastrá rápido para varias',
       ],
     });
     if (S.t >= dur) {
@@ -493,6 +516,19 @@ export function Corte() {
       {[-6.8, -3.4, 0, 3.4, 6.8].map((x) => (
         <Block key={x} pos={[x, 0.5, 2.05]} size={[0.5, 1.0, 0.12]} color="#8b5a25" mat="wood" solid={false} />
       ))}
+      {pisos &&
+        PISOS.map((y, i) => (
+          <group key={y}>
+            <Block
+              pos={[0, y - 0.75, -0.6]}
+              size={[12.5, 0.5, 0.6]}
+              color={i ? '#f7c6dc' : '#fbe3a8'}
+              mat="plastic"
+              solid={false}
+            />
+            <Label pos={[i ? -5.4 : 5.4, y - 0.75, -0.2]} text={i ? '◀ gira' : 'gira ▶'} h={0.32} />
+          </group>
+        ))}
       {slots.map((s, i) => {
         const k = kinds[s.type];
         return (

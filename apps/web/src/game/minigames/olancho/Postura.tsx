@@ -21,7 +21,7 @@ function avanzar(m: Sesion, dt: number, marcha: number) {
   const v = s.agachado ? 0.65 : 1 - viento;
   s.paso += Math.max(0, marcha) * dt * v;
   if (s.paso >= 6) {
-    m.sumar(40);
+    m.sumar(65);
     s.buenas++;
     s.paso = 0;
     s.aviso = 'Marca alcanzada; seguí hacia la siguiente';
@@ -42,7 +42,7 @@ const motor = defineMotor({
     ],
   },
   etapa: (p) => ({
-    viento: 0.3 + p.dif * 0.5,
+    viento: 0.3 + p.dif * 0.25,
     nombre: typeof p.tema.nombre === 'string' ? p.tema.nombre : 'Maqueta del bosque enano de Agalta',
   }),
   metas,

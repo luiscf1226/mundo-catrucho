@@ -53,7 +53,13 @@ interface Customer {
   z: number;
   state: AvatarState;
   happy: boolean;
+  /** «Sábado de fiado»: lo apunta en la libreta en vez de pagar */
+  fia?: boolean;
+  /** «Sábado de fiado»: trae un abono para la cuenta (índice en la libreta) además de su compra */
+  abona?: number;
 }
+/** cuentas que caben en la libreta */
+const LIBRETA = 4;
 const products: Piece[] = Array.from({ length: 36 }, (_, i) => ({
   p: [-6 + (i % 6) * 0.38, 1.5 + Math.floor(i / 12) * 0.5, -3.3 + (Math.floor(i / 6) % 2) * 0.5],
   s: [0.26, 0.36, 0.24],
@@ -75,7 +81,8 @@ function Food({ item, pos = [0, 0, 0] }: { item: Item; pos?: V3 }) {
 export function Pulperia() {
   const hd = !!art.fused;
   const avatar = useGame((s) => s.profile.avatar);
-  const { dif } = useMemo(partida, []);
+  const { dif, tema } = useMemo(partida, []);
+  const fiado = tema.variante === 'sabado-de-fiado';
   const [, draw] = useState(0);
   const carried = useRef<Group>(null);
   const s = useRef({
@@ -94,6 +101,10 @@ export function Pulperia() {
     served: 0,
     wrong: 0,
     lost: 0,
+    /** libreta del fiado: cuánto debe cada cuenta (id del cliente que fió) */
+    libreta: [] as { id: number; debe: number }[],
+    abonos: 0,
+    fiados: 0,
   }).current;
   function pickup(item: Item) {
     if (useGame.getState().mg?.phase !== 'playing') return;
@@ -123,14 +134,35 @@ export function Pulperia() {
     }
     s.combo++;
     const pay = goods[c.item].price + Math.round((8 * c.patience) / c.max) + Math.min(6, s.combo - 1);
-    s.money += pay;
+    if (c.fia) {
+      // se apunta en la libreta: hoy no entra pisto, la cuenta se salda cuando venga a abonar
+      s.libreta.push({ id: c.id, debe: pay });
+      s.fiados++;
+      s.held = null;
+      c.stage = 'leave';
+      c.happy = true;
+      c.state.anim = 'walk';
+      s.served++;
+      audio.sfx('click');
+      useGame.getState().toast(`Apuntado en la libreta: L. ${pay}`, '📒');
+      return;
+    }
+    const cuenta = c.abona !== undefined ? s.libreta.findIndex((l) => l.id === c.abona) : -1;
+    const abono = cuenta >= 0 ? s.libreta[cuenta].debe + 4 : 0;
+    if (cuenta >= 0) {
+      s.libreta.splice(cuenta, 1);
+      s.abonos++;
+    }
+    s.money += pay + abono;
     s.held = null;
     c.stage = 'leave';
     c.happy = true;
     c.state.anim = 'walk';
     s.served++;
     audio.sfx('coin');
-    useGame.getState().toast(`¡Gracias! +L. ${pay}`, '💰');
+    useGame
+      .getState()
+      .toast(abono ? `¡Cuadraste la cuenta! Compra L. ${pay} + abono L. ${abono}` : `¡Gracias! +L. ${pay}`, '💰');
   }
   useEffect(() => {
     phys.limit = { minX: -6.6, maxX: 6.6, minZ: -3, maxZ: 5 };
@@ -150,11 +182,17 @@ export function Pulperia() {
           wrong: s.wrong,
           lost: s.lost,
           blackout: s.blackout,
+          fiado,
+          libreta: s.libreta.map((l) => ({ ...l })),
+          abonos: s.abonos,
+          fiados: s.fiados,
           customers: s.customers.map((c) => ({
             slot: c.slot,
             item: c.item,
             stage: c.stage,
             patience: c.patience,
+            fia: !!c.fia,
+            abona: c.abona ?? null,
           })),
         }),
         stations: goods,
@@ -193,7 +231,14 @@ export function Pulperia() {
     if (s.arrival <= 0 && s.customers.filter((c) => c.stage !== 'leave').length < 3) {
       const slot = [0, 1, 2].find((i) => !s.customers.some((c) => c.slot === i && c.stage !== 'leave')) ?? 0;
       const max = (25 - s.elapsed / 15) * (1.15 - 0.3 * dif); // paciencia: más en la etapa 1, menos en la última
+      // sábado de fiado: uno de cada tres fía (si cabe en la libreta) y otro viene a abonar una cuenta vieja
+      const pendientes = s.libreta.filter((l) => !s.customers.some((c) => c.abona === l.id && c.stage !== 'leave'));
+      const fia = fiado && s.next % 3 === 1 && s.libreta.length < LIBRETA;
+      const abona = fiado && !fia && s.next % 3 !== 1 && pendientes.length ? pendientes[0].id : undefined;
+      if (fiado && s.next % 3 === 1 && !fia) useGame.getState().toast('La libreta está llena: hoy al contado', '📒');
       s.customers.push({
+        fia,
+        abona,
         id: s.next,
         slot,
         item: menu[s.next % 4],
@@ -254,6 +299,11 @@ export function Pulperia() {
       lines: [
         `Llevás: ${s.held ? goods[s.held].name : 'manos libres'}`,
         `Combo x${s.combo}${s.blackout ? ' · ¡SIN LUZ!' : ''}`,
+        ...(fiado
+          ? [
+              `📒 Libreta ${s.libreta.length}/${LIBRETA} · debe L. ${s.libreta.reduce((a, l) => a + l.debe, 0)} · abonos ${s.abonos}`,
+            ]
+          : []),
         s.cook > 0 ? `Comal: ${Math.round((s.cook / 1.5) * 100)}%` : 'E: agarrar / entregar · comal: esperá 1.5 s',
       ],
     });
@@ -263,7 +313,8 @@ export function Pulperia() {
         won: s.money >= r.bronze,
         stars: starsFor(s.money, r.bronze, r.silver, r.gold),
         score: s.money,
-        label: `L. ${s.money}`,
+        label: fiado && s.libreta.length ? `L. ${s.money} · ${s.libreta.length} en la libreta` : `L. ${s.money}`,
+        ...(fiado ? { stats: { abonos: s.abonos, fiados: s.fiados, pendientes: s.libreta.length } } : {}),
       });
     }
     if (s.refresh > 0.08) {
@@ -397,7 +448,7 @@ export function Pulperia() {
                 ? c.happy
                   ? '¡Gracias!'
                   : '¡Qué tardado!'
-                : `${c.slot + 1} · ${goods[c.item].icon} ${goods[c.item].name}`
+                : `${c.slot + 1} · ${goods[c.item].icon} ${goods[c.item].name}${c.fia ? ' · 📒 fiado' : c.abona !== undefined ? ' · 💵 abona' : ''}`
             }
             h={0.5}
           />

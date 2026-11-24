@@ -40,8 +40,9 @@ const motor = defineMotor({
     ],
   },
   etapa: (p) => ({
-    llegada: 2.4 - p.dif * 0.9,
-    paso: 1.1 + p.dif * 0.5,
+    // en la última etapa las colas crecen más rápido, pero no tanto que vaciarlas sea imposible
+    llegada: 2.4 - p.dif * 0.5,
+    paso: 1.1 + p.dif * 0.35,
     nombre: typeof p.tema.nombre === 'string' ? p.tema.nombre : 'Puentes de las dos ciudades',
   }),
   metas: (p) => [80 + Math.round(p.dif * 50), 160 + Math.round(p.dif * 50), 260 + Math.round(p.dif * 50)],
