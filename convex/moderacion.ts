@@ -21,7 +21,7 @@ import {
 } from 'convex/server';
 import { type GenericId, v } from 'convex/values';
 import { secretoSalas, usuarioDePublico } from './amigos';
-import { asegurarUsuario, quien, tokenDe } from './identidad';
+import { asegurarUsuario, quien, usuarioDe } from './identidad';
 import type schema from './schema';
 
 type Modelo = DataModelFromSchemaDefinition<typeof schema>;
@@ -151,11 +151,7 @@ export const resolver = internalMutation({
 export const olvidarSocial = internalMutation({
   args: quien,
   handler: async (ctx, args) => {
-    const token = await tokenDe(args);
-    const usuario = await ctx.db
-      .query('usuarios')
-      .withIndex('por_token', (q) => q.eq('tokenIdentifier', token))
-      .unique();
+    const usuario = await usuarioDe(ctx, args);
     if (!usuario) return 0;
     const id = usuario._id;
     let n = 0;

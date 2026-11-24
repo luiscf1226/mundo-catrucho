@@ -53,9 +53,10 @@ export const entrar = mutation({
       if (!c.entro) await ctx.db.patch(c._id, { entro: true });
     }
     const { logros } = await terminar(s);
-    const perfil = await ctx.db.get(s.perfilId);
+    const perfil = await ctx.db.get(s.perfilId),
+      usuario = await ctx.db.get(s.usuarioId);
     if (!perfil) throw new Error('Sin perfil.');
-    return { ...vista(perfil, await compradosDe(ctx, s.usuarioId)), logros };
+    return { ...vista(perfil, await compradosDe(ctx, s.usuarioId)), logros, nombre: usuario?.nombre };
   },
 });
 

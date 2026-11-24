@@ -20,4 +20,16 @@ if (location.hash.includes('go')) {
   if (!g.profile.created) g.finishCreation();
   g.enterWorld();
 }
-createRoot(document.getElementById('root')!).render(<App />);
+const raiz = createRoot(document.getElementById('root')!);
+// MC-07: con la llave de Clerk (y Convex) el juego va dentro de su proveedor; sin ella este bloque no se compila
+if (__CLERK__)
+  import('./core/clerk').then(
+    ({ ConClerk }) =>
+      raiz.render(
+        <ConClerk>
+          <App />
+        </ConClerk>,
+      ),
+    () => raiz.render(<App />),
+  );
+else raiz.render(<App />);

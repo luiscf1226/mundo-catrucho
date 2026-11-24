@@ -5,7 +5,8 @@ name: Despliegue
 # código. Si falta una llave, ese paso se salta con un aviso y el flujo queda en verde. Ver docs/ENTORNOS.md.
 #
 #   Secretos:  CLOUDFLARE_API_TOKEN (obligatorio para publicar), SALA_SECRETO, CONVEX_DEPLOY_KEY (opcional)
-#   Variables: VITE_CONVEX_URL (si no hay CONVEX_DEPLOY_KEY), CONVEX_SITE_URL, CLOUDFLARE_ACCOUNT_ID (opcional)
+#   Variables: VITE_CONVEX_URL (si no hay CONVEX_DEPLOY_KEY), CONVEX_SITE_URL, CLOUDFLARE_ACCOUNT_ID (opcional),
+#              VITE_CLERK_PUBLISHABLE_KEY (opcional, MC-07: sin ella el juego no usa Clerk)
 
 on:
   push:
@@ -44,6 +45,7 @@ jobs:
       CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
       VITE_CONVEX_URL: ${{ vars.VITE_CONVEX_URL }}
       VITE_SALAS_URL: ${{ vars.VITE_SALAS_URL }}
+      VITE_CLERK_PUBLISHABLE_KEY: ${{ vars.VITE_CLERK_PUBLISHABLE_KEY }}
       CONVEX_SITE_URL: ${{ vars.CONVEX_SITE_URL }}
     steps:
       - uses: actions/checkout@v4

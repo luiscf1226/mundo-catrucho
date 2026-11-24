@@ -16,6 +16,7 @@ import { Bar, Btn, Coins, Note, Panel, Tabs, Tag } from '../components/kit';
 import { JugarConAlguien } from '../Juntos';
 import { act, copyText, cx, EMOTE_ICON, g, roomLabel, usePad, useTouch } from '../lib';
 import { comoMision } from '../misiones';
+import { TuCuenta } from './Cuenta';
 
 // ------------------------------------------------------------------ misiones del día
 export function MissionsPanel() {
@@ -758,6 +759,7 @@ export function SettingsPanel() {
             }}
           />
         </label>
+        {SERVIDOR && <TuCuenta />}
         <div className={cx('mc-card flex flex-wrap items-center gap-2 px-3 py-2', sure && 'mc-danger')}>
           <Icon name="trash" size={22} cls="text-bad" />
           {sure ? (
@@ -782,7 +784,11 @@ export function SettingsPanel() {
           )}
         </div>
       </div>
-      <Note cls="mt-3">Tu progreso se guarda solo en este navegador.</Note>
+      <Note cls="mt-3">
+        {SERVIDOR
+          ? 'Tu avance vive en tu cuenta del servidor: con un código lo seguís en otro dispositivo.'
+          : 'Tu progreso se guarda solo en este navegador.'}
+      </Note>
     </Panel>
   );
 }
