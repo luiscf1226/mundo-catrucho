@@ -1,11 +1,13 @@
 // MC-37 · Comayagua: 12 puestos jugables, 7 lugares y 3 locuras que se descubren caminando,
-// controles reales de los ocho motores (teclado, toque y mando) y capturas en capturas/mc-37/.
+// controles reales de los ocho motores (teclado, toque y mando), oro en todas las etapas dentro de los TOPES,
+// no jugar y machacar F pierden, y capturas en capturas/mc-37/.
 // Uso: node tools/test-comayagua.mjs <archivo.html>
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { locuraCaminando, lugaresTuristicos } from './explorar.mjs';
 import { run } from './harness.mjs';
+import { etapasConOro, motoresHonestos } from './motores-depto.mjs';
 
 const file = process.argv[2] ?? 'apps/web/dist/mundo-catrucho-hd.html';
 const raiz = resolve(import.meta.dirname, '../../..');
@@ -169,6 +171,8 @@ const ok = await run('comayagua', file, { hash: '#test', width: 1280, height: 80
   await t.waitFor(`${E}.stats.sel === 2`, 15000, 'X cambia de eje');
   await t.ev('(()=>{const b=window.__pad.buttons[2];b.pressed=false;b.value=0})()');
   console.log('PASA mando en el reloj');
+  // --- cada juego con oro en todas sus etapas y dentro de los TOPES; no jugar y machacar F pierden
+  await motoresHonestos(t, await etapasConOro(t, { depto: 'comayagua', juegos }));
   assert.equal(t.errors.length, 0, 'sin excepciones ni red');
 });
 const tactil = await run(

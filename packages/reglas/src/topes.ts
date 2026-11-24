@@ -337,7 +337,7 @@ export const TOPES: Record<string, TopeMotor> = {
   // alfombra de 8–16 plantillas: 5 por celda + 10 por borde limpio + 5 × plantillas al terminarla (~24 pts/s fino)
   'comayagua.aserrin': conRitmo(comayagua(140, 300, 460, 60), 35),
   'comayagua.reloj': comayagua(120, 300, 460, 60),
-  'comayagua.eco': comayagua(100, 220, 340, 40),
+  'comayagua.eco': comayagua(100, 220, 340, 10),
   'comayagua.pilon': comayagua(120, 260, 400, 60),
   'comayagua.tenampua': comayagua(100, 220, 340, 40),
   'comayagua.anden': comayagua(80, 180, 280, 40),
