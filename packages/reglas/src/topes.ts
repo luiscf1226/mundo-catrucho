@@ -288,7 +288,8 @@ export const TOPES: Record<string, TopeMotor> = {
     duracionMin: ({ puntos }) => 120 - puntos / 10,
     puntosPorSegundo: 100,
   },
-  'copan.adoquin': copan,
+  // Copán: ritmo máximo medido jugando fino (test-copan) con margen; atol y guaras caben en los 20 del kit
+  'copan.adoquin': conRitmo(copan, 30),
   'copan.atol': copan,
   'lempira.barro': lempira,
   'lempira.opalo': conRitmo(lempira, 40),
@@ -341,24 +342,29 @@ export const TOPES: Record<string, TopeMotor> = {
   'colon.redjuvenil': conRitmo(colon, 40),
   'colon.plano': conRitmo(colon, 40),
   'colon.racimos': conRitmo(colon, 45),
-  'copan.cadera': copan,
-  'copan.estelas': copan,
-  'copan.estratigrafia': copan,
-  'copan.glifos': copan,
-  'copan.guaras': copan,
-  'copan.hojas': copan,
+  // +30 o +35 por rebote cada 0,45–0,9 s según la etapa: hasta 60 pts/s
+  'copan.cadera': conRitmo(copan, 75),
+  // +50 por patio con dos vistas cada ~1,4 s
+  'copan.estelas': conRitmo(copan, 50),
+  // +60 por fase de tres patios, un cruce cada 0,7 s
+  'copan.estratigrafia': conRitmo(copan, 40),
+  // +40 por bloque encajado cada 0,8 s (y un poco más con apoyo)
+  'copan.glifos': conRitmo(copan, 70),
+  'copan.guaras': conRitmo(copan, 25),
+  // +45 por ficha con las dos caras, una observación cada 0,8 s
+  'copan.hojas': conRitmo(copan, 40),
   'islas.absorcion': islas(110, 220, 330, 60, 85, 15),
-  'islas.ballena': islas(80, 170, 260, 60, 75, 15),
+  'islas.ballena': islas(80, 170, 240, 60, 75, 15),
   'islas.bonacca': islas(120, 260, 400, 80, 80, 15),
   'islas.cangrejo': islas(120, 240, 360, 60, 80, 10),
   'islas.colorprofundo': islas(140, 300, 460, 80, 75, 15),
   'islas.coral': islas(120, 260, 400, 80, 80, 15),
   'islas.estela': islas(120, 260, 400, 80, 80, 15),
-  'islas.flotacion': islas(100, 220, 340, 60, 80, 15),
+  'islas.flotacion': islas(100, 200, 300, 0, 80, 15),
   // alfombra de 8–16 plantillas: 5 por celda + 10 por borde limpio + 5 × plantillas al terminarla (~24 pts/s fino)
   'comayagua.aserrin': conRitmo(comayagua(140, 300, 460, 60), 35),
   'comayagua.reloj': comayagua(120, 300, 460, 60),
-  'comayagua.eco': comayagua(100, 220, 340, 40),
+  'comayagua.eco': comayagua(100, 220, 340, 10),
   'comayagua.pilon': comayagua(120, 260, 400, 60),
   'comayagua.tenampua': comayagua(100, 220, 340, 40),
   'comayagua.anden': comayagua(80, 180, 280, 40),
@@ -371,8 +377,8 @@ export const TOPES: Record<string, TopeMotor> = {
   // cada viaje paga 10 + carga (67–93 pts) cada ~3,6 s: ~26 pts/s jugando fino
   'atlantida.vagon': conRitmo(islas(150, 400, 650, 100, 80, 15), 35),
   'atlantida.manati': islas(100, 220, 340, 60, 80, 15),
-  // 50 por unión buena (tres elecciones) + 20 por gaveta
-  'atlantida.lancetilla': conRitmo(islas(200, 450, 700, 100, 80, 15), 35),
+  // 50 por unión buena (tres elecciones) + 20 por gaveta: ~42 pts/s jugando fino
+  'atlantida.lancetilla': conRitmo(islas(200, 450, 700, 100, 80, 15), 50),
   'atlantida.canopy': islas(150, 320, 500, 80, 80, 15),
   'atlantida.carnaval': islas(120, 280, 440, 80, 80, 15),
   // Corte (Corte.tsx): reloj fijo 70–100 s, se gana con la primera meta; el combo (hasta ×5) dispara el puntaje

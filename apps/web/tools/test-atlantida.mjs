@@ -1,11 +1,13 @@
 // MC-40 · Atlántida: 12 puestos jugables, 7 lugares y 3 locuras que se descubren caminando, controles reales de los
-// ocho motores (teclado, toque y mando), la punta con respuesta del motor «ritmo» y capturas en capturas/mc-40/.
+// ocho motores (teclado, toque y mando), la punta con respuesta del motor «ritmo», oro en todas las etapas dentro de
+// los TOPES (no jugar y machacar F pierden) y capturas en capturas/mc-40/.
 // Uso: node tools/test-atlantida.mjs <archivo.html>
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { locuraCaminando, lugaresTuristicos } from './explorar.mjs';
 import { run } from './harness.mjs';
+import { etapasConOro, motoresHonestos } from './motores-depto.mjs';
 
 const file = process.argv[2] ?? 'apps/web/dist/mundo-catrucho-hd.html';
 const raiz = resolve(import.meta.dirname, '../../..');
@@ -206,6 +208,10 @@ const ok = await run('atlantida', file, { hash: '#test', width: 1280, height: 80
   await t.waitFor(`${E}.stats.rondas === 1`, 15000, 'B parte');
   await boton(1, false);
   console.log('PASA mando en los apartaderos');
+  // --- los juegos de los motores nuevos con oro en todas sus etapas y dentro de los TOPES; no jugar y machacar F
+  // pierden (la punta usa «ritmo», que revisan test-motores-a y test-dificultad)
+  const motores = await etapasConOro(t, { depto: 'atlantida', juegos: juegos.filter((j) => j[2] !== 'ritmo') });
+  await motoresHonestos(t, motores, { sinCursor: ['atlantida.balsa', 'atlantida.canopy', 'atlantida.manati'] });
   assert.equal(t.errors.length, 0, 'sin excepciones ni red');
 });
 const tactil = await run(

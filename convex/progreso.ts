@@ -15,13 +15,14 @@ import {
 } from '@mundo-catrucho/reglas';
 import {
   type DataModelFromSchemaDefinition,
+  type GenericMutationCtx,
   internalMutationGeneric,
   type MutationBuilder,
   mutationGeneric,
   type QueryBuilder,
   queryGeneric,
 } from 'convex/server';
-import { v } from 'convex/values';
+import { type GenericId, v } from 'convex/values';
 import { turismoById } from '../docs/generador/turismo';
 import {
   asegurarContadores,
@@ -36,7 +37,7 @@ import {
   sesion,
   terminar,
 } from './avance';
-import { quien, tokenDe, usuarioActual } from './identidad';
+import { quien, usuarioActual, usuarioDe, usuarioPorToken } from './identidad';
 import { juegosDelCatalogo } from './partidas';
 import type schema from './schema';
 
@@ -44,6 +45,7 @@ type Modelo = DataModelFromSchemaDefinition<typeof schema>;
 const query: QueryBuilder<Modelo, 'public'> = queryGeneric;
 const mutation: MutationBuilder<Modelo, 'public'> = mutationGeneric;
 const internalMutation: MutationBuilder<Modelo, 'internal'> = internalMutationGeneric;
+type Escritura = GenericMutationCtx<Modelo>;
 
 /** Todo el avance de quien llama, o null si nunca entró. */
 export const estado = query({
@@ -246,81 +248,104 @@ const juegoLocal = v.object({
   stars: v.optional(v.array(v.number())),
   veces: v.optional(v.number()),
 });
+/** Lo que manda el navegador de su avance guardado (MC-08). */
+export const avanceLocal = {
+  visitados: v.array(v.string()),
+  recuerdos: v.array(v.string()),
+  juegos: v.array(juegoLocal),
+  turismo: v.optional(v.array(v.object({ id: v.string(), completa: v.boolean() }))),
+};
+type AvanceLocal = {
+  visitados: string[];
+  recuerdos: string[];
+  juegos: { juegoId: string; etapa?: number; stars?: number[]; veces?: number }[];
+  turismo?: { id: string; completa: boolean }[];
+};
+/** ¿Cabe en lo que se acepta? (el navegador no puede mandar listas enormes) */
+export const avanceLocalCabe = (a: AvanceLocal) =>
+  a.visitados.length <= 100 && a.recuerdos.length <= 100 && a.juegos.length <= 2000 && (a.turismo?.length ?? 0) <= 200;
+
+/**
+ * Junta el avance del navegador con el de la cuenta, sin pagar nada: visitas, recuerdos y turismo de departamentos
+ * que existen y cuántas veces jugó cada juego del catálogo (las etapas no: solo una partida validada desbloquea).
+ * Lo que ya tenía la cuenta no baja. Lo usan `subirAvanceLocal` y el código de otro dispositivo (`cuentas.ts`).
+ */
+export async function guardarAvanceLocal(ctx: Escritura, usuarioId: GenericId<'usuarios'>, args: AvanceLocal) {
+  const catalogo = await juegosDelCatalogo(ctx);
+  const limpio = limpiarAvanceLocal(
+    {
+      visitados: args.visitados,
+      recuerdos: args.recuerdos,
+      juegos: Object.fromEntries(args.juegos.map((j) => [j.juegoId, j])),
+    },
+    (id) => catalogo.get(id)?.etapas ?? null,
+  );
+  for (const deptId of limpio.visitas) {
+    const recuerdo = limpio.recuerdos.includes(deptId);
+    const ya = await ctx.db
+      .query('visitas')
+      .withIndex('por_usuario', (q) => q.eq('usuarioId', usuarioId).eq('deptId', deptId))
+      .first();
+    if (!ya)
+      await ctx.db.insert('visitas', {
+        usuarioId,
+        deptId,
+        recuerdo,
+        visitaLocal: true,
+        ...(recuerdo ? { recuerdoLocal: true } : {}),
+      });
+    else if (recuerdo && !ya.recuerdo) await ctx.db.patch(ya._id, { recuerdo: true, recuerdoLocal: true });
+  }
+  for (const recuerdo of args.turismo ?? []) {
+    const lugar = turismoById(recuerdo.id);
+    if (!lugar || !limpio.visitas.includes(lugar.dept)) continue;
+    const visita = await ctx.db
+      .query('visitas')
+      .withIndex('por_usuario', (q) => q.eq('usuarioId', usuarioId).eq('deptId', lugar.dept))
+      .first();
+    if (!visita) continue;
+    const previos = visita.turismo ?? [],
+      anterior = previos.find((x) => x.id === lugar.id);
+    await ctx.db.patch(visita._id, {
+      turismo: [
+        ...previos.filter((x) => x.id !== lugar.id),
+        { id: lugar.id, completa: recuerdo.completa || !!anterior?.completa },
+      ],
+    });
+  }
+  for (const j of limpio.juegos) {
+    const prev = await ctx.db
+      .query('progresoJuegos')
+      .withIndex('por_usuario_juego', (q) => q.eq('usuarioId', usuarioId).eq('juegoId', j.juegoId))
+      .unique();
+    if (!prev) {
+      await ctx.db.insert('progresoJuegos', { usuarioId, ...j, mejor: 0 });
+      continue;
+    }
+    const n = Math.max(prev.estrellas.length, j.estrellas.length);
+    await ctx.db.patch(prev._id, {
+      etapa: Math.max(prev.etapa, j.etapa),
+      estrellas: Array.from({ length: n }, (_, i) => Math.max(prev.estrellas[i] ?? 0, j.estrellas[i] ?? 0)),
+      veces: Math.max(prev.veces, j.veces),
+    });
+  }
+  return limpio;
+}
+
 /**
  * La primera vez que un invitado entra con avance guardado en el navegador, sube visitas, recuerdos y cuántas
- * veces jugó cada juego (las etapas no: solo una partida validada desbloquea). No paga nada: los logros que ya cumpla quedan marcados sin pagar, y las marcas no suben (la
- * clasificación es solo de partidas validadas). Una sola vez por jugador.
+ * veces jugó cada juego (las etapas no: solo una partida validada desbloquea). No paga nada: los logros que ya
+ * cumpla quedan marcados sin pagar, y las marcas no suben (la clasificación es solo de partidas validadas). Una
+ * sola vez por jugador.
  */
 export const subirAvanceLocal = mutation({
-  args: {
-    ...quien,
-    visitados: v.array(v.string()),
-    recuerdos: v.array(v.string()),
-    juegos: v.array(juegoLocal),
-    turismo: v.optional(v.array(v.object({ id: v.string(), completa: v.boolean() }))),
-  },
+  args: { ...quien, ...avanceLocal },
   handler: async (ctx, args) => {
     const s = await sesion(ctx, args),
       c = await asegurarContadores(ctx, s.usuarioId);
     if (c.migrado) return { ok: false as const, motivo: 'ya' };
-    if (
-      args.visitados.length > 100 ||
-      args.recuerdos.length > 100 ||
-      args.juegos.length > 2000 ||
-      (args.turismo?.length ?? 0) > 200
-    )
-      return { ok: false as const, motivo: 'demasiado' };
-    const catalogo = await juegosDelCatalogo(ctx);
-    const limpio = limpiarAvanceLocal(
-      {
-        visitados: args.visitados,
-        recuerdos: args.recuerdos,
-        juegos: Object.fromEntries(args.juegos.map((j) => [j.juegoId, j])),
-      },
-      (id) => catalogo.get(id)?.etapas ?? null,
-    );
-    for (const deptId of limpio.visitas) {
-      const recuerdo = limpio.recuerdos.includes(deptId);
-      const ya = await ctx.db
-        .query('visitas')
-        .withIndex('por_usuario', (q) => q.eq('usuarioId', s.usuarioId).eq('deptId', deptId))
-        .first();
-      if (!ya) await ctx.db.insert('visitas', { usuarioId: s.usuarioId, deptId, recuerdo });
-      else if (recuerdo && !ya.recuerdo) await ctx.db.patch(ya._id, { recuerdo: true });
-    }
-    for (const recuerdo of args.turismo ?? []) {
-      const lugar = turismoById(recuerdo.id);
-      if (!lugar || !limpio.visitas.includes(lugar.dept)) continue;
-      const visita = await ctx.db
-        .query('visitas')
-        .withIndex('por_usuario', (q) => q.eq('usuarioId', s.usuarioId).eq('deptId', lugar.dept))
-        .first();
-      if (!visita) continue;
-      const previos = visita.turismo ?? [],
-        anterior = previos.find((x) => x.id === lugar.id);
-      await ctx.db.patch(visita._id, {
-        turismo: [
-          ...previos.filter((x) => x.id !== lugar.id),
-          { id: lugar.id, completa: recuerdo.completa || !!anterior?.completa },
-        ],
-      });
-    }
-    for (const j of limpio.juegos) {
-      const prev = await ctx.db
-        .query('progresoJuegos')
-        .withIndex('por_usuario_juego', (q) => q.eq('usuarioId', s.usuarioId).eq('juegoId', j.juegoId))
-        .unique();
-      if (!prev) {
-        await ctx.db.insert('progresoJuegos', { usuarioId: s.usuarioId, ...j, mejor: 0 });
-        continue;
-      }
-      const n = Math.max(prev.estrellas.length, j.estrellas.length);
-      await ctx.db.patch(prev._id, {
-        etapa: Math.max(prev.etapa, j.etapa),
-        estrellas: Array.from({ length: n }, (_, i) => Math.max(prev.estrellas[i] ?? 0, j.estrellas[i] ?? 0)),
-        veces: Math.max(prev.veces, j.veces),
-      });
-    }
+    if (!avanceLocalCabe(args)) return { ok: false as const, motivo: 'demasiado' };
+    const limpio = await guardarAvanceLocal(ctx, s.usuarioId, args);
     await ctx.db.patch(c._id, { migrado: true });
     await revisarLogros(s, { pagarlos: false });
     return {
@@ -334,17 +359,18 @@ export const subirAvanceLocal = mutation({
 
 // ------------------------------------------------------------------ administración
 /**
- * Borra a un invitado y todo lo suyo. Solo con permisos de administrador (`npx convex run`); lo usan las pruebas
+ * Borra a un invitado y todo lo suyo (con las llaves de sus otros dispositivos). Solo con permisos de administrador (`npx convex run`); lo usan las pruebas
  * para no llenar la clasificación de desarrollo.
  */
 export const olvidarInvitado = internalMutation({
-  args: quien,
+  // `token`: una cuenta sin invitado (la llave de Clerk de una prueba)
+  args: { invitado: v.optional(v.string()), token: v.optional(v.string()) },
   handler: async (ctx, args) => {
-    const token = await tokenDe(args);
-    const usuario = await ctx.db
-      .query('usuarios')
-      .withIndex('por_token', (q) => q.eq('tokenIdentifier', token))
-      .unique();
+    const usuario = args.token
+      ? await usuarioPorToken(ctx, args.token)
+      : args.invitado
+        ? await usuarioDe(ctx, { invitado: args.invitado })
+        : null;
     if (!usuario) return 0;
     const id = usuario._id;
     const viajesCompartidos = await ctx.db.query('viajesCompartidos').collect();
@@ -398,6 +424,14 @@ export const olvidarInvitado = internalMutation({
       ...(await ctx.db
         .query('partidas')
         .withIndex('por_dueno_estado', (q) => q.eq('dueno', id))
+        .collect()),
+      ...(await ctx.db
+        .query('vinculos')
+        .withIndex('por_usuario', (q) => q.eq('usuarioId', id))
+        .collect()),
+      ...(await ctx.db
+        .query('codigosDispositivo')
+        .withIndex('por_usuario', (q) => q.eq('usuarioId', id))
         .collect()),
     ];
     for (const f of filas) await ctx.db.delete(f._id);

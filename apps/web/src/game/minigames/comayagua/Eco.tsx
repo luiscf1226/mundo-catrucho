@@ -138,7 +138,8 @@ const motor = defineMotor({
     nombre: texto(p.tema.nombre, 'Eco en la cueva'),
     semilla: p.seed,
   }),
-  metas: metasLineales(100, 220, 340, 40),
+  // los pulsos bajan con la etapa: las metas suben poco para que el oro siga al alcance de quien mide bien
+  metas: metasLineales(100, 220, 340, 10),
   duracion: reloj(80, 10),
   crear: (p): Estado => {
     const s: Estado = {
@@ -218,13 +219,14 @@ const motor = defineMotor({
     if (s.pulso || s.pasar > 0) return;
     const encontradas = s.rumbos.filter((r) => r.eco !== null && r.eco > UMBRAL).length;
     // marca lo que ya oyó largo; si faltan, mide rumbos nuevos, salvo que lo que queda sin medir tenga que ser
-    // galería; sin pulsos, se la juega
+    // galería; sin pulsos no se la juega a ciegas (cada pared resta más de lo que paga una galería adivinada)
     let i = s.rumbos.findIndex((r) => r.eco !== null && r.eco > UMBRAL && !r.marca);
     let accion: 'marcar' | 'medir' = 'marcar';
     if (i < 0 && encontradas < abiertas(s)) {
       i = s.rumbos.findIndex((r) => r.eco === null && !r.marca);
       const sinMedir = s.rumbos.filter((r) => r.eco === null && !r.marca).length;
       const pendientes = s.rumbos.filter((r) => r.abierto && r.marca !== 1).length;
+      if (s.pulsos <= 0 && sinMedir > pendientes) return;
       accion = s.pulsos > 0 && sinMedir > pendientes ? 'medir' : 'marcar';
     }
     if (i < 0) return;

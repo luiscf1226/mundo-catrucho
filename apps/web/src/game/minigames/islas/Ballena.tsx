@@ -173,7 +173,8 @@ const motor = defineMotor({
     nombre: texto(p.tema.nombre, 'Distancia en Utila'),
     semilla: p.seed,
   }),
-  metas: (p) => [80 + Math.round(p.dif * 60), 170 + Math.round(p.dif * 60), 260 + Math.round(p.dif * 60)],
+  // un encuentro perfecto paga 50 y en la primera etapa caben cinco: el oro no puede pedir más de 250
+  metas: (p) => [80 + Math.round(p.dif * 60), 170 + Math.round(p.dif * 60), 240 + Math.round(p.dif * 60)],
   duracion: (p) => 75 + Math.round(p.dif * 15),
   crear: (p): Estado => ({
     c: cursor(),
@@ -256,7 +257,7 @@ const motor = defineMotor({
       intentos: s.intentos,
     };
   },
-  bot: (m, _dt, actor) => {
+  bot: (m, dt, actor) => {
     const s = m.datos;
     const e = s.enc;
     if (actor === 'compa') {
@@ -277,17 +278,31 @@ const motor = defineMotor({
       nz = -nz;
     }
     const r = (p.seguro + p.observar) / 2;
-    let x = cx + nx * r;
-    let z = cz + nz * r;
-    if (x < AREA.minX || x > AREA.maxX || z < AREA.minZ || z > AREA.maxZ) {
-      x = cx - nx * r;
-      z = cz - nz * r;
+    const dentro = (x: number, z: number) => x >= AREA.minX && x <= AREA.maxX && z >= AREA.minZ && z <= AREA.maxZ;
+    // al costado del corredor que le queda; si ese punto se sale del área, al otro costado mientras esté lejos
+    if (!dentro(cx + nx * r, cz + nz * r) && dentro(cx - nx * r, cz - nz * r) && d > p.observar + 1.6) {
+      nx = -nx;
+      nz = -nz;
     }
-    // cerca del animal solo se mueve si se aleja: nunca lo persigue
-    const hacia = (x - s.gx) * (e.x - s.gx) + (z - s.gz) * (e.z - s.gz);
-    if (d < p.observar + 1.6 && hacia > 0) {
-      x = s.gx;
-      z = s.gz;
+    let x = limitar(cx + nx * r, AREA.minX, AREA.maxX);
+    let z = limitar(cz + nz * r, AREA.minZ, AREA.maxZ);
+    if (d < p.seguro + 0.6) {
+      // se le viene encima: de costado y lejos del rumbo, a toda velocidad
+      x = limitar(s.gx + nx * 2, AREA.minX, AREA.maxX);
+      z = limitar(s.gz + nz * 2, AREA.minZ, AREA.maxZ);
+    } else {
+      // nunca lo persigue: ya cerca, si el paso lo acerca al animal va despacio (perseguir es arrimarse a más de
+      // 1,3 m/s a menos de `observar + 1,2` m)
+      const l = Math.hypot(x - s.gx, z - s.gz);
+      if (l > 0.01) {
+        const ux = (x - s.gx) / l,
+          uz = (z - s.gz) / l;
+        const arrimo = (ux * (e.x - s.gx) + uz * (e.z - s.gz)) / Math.max(d, 0.01);
+        const v = arrimo > 0 && d < p.observar + 1.6 ? Math.min(3.4, 1.1 / arrimo) : 3.4;
+        const paso = Math.min(l, v * dt);
+        x = s.gx + ux * paso;
+        z = s.gz + uz * paso;
+      }
     }
     const c = aCursor(x, z);
     s.c.x = c.x;

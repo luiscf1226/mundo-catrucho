@@ -325,7 +325,7 @@
   "colon": {
     "tipos": "⚓🥁🍊🏰",
     "lugares": [
-      ["trujillo", "Trujillo", "ciudad", "Aquí Colón pisó tierra firme en 1502."],
+      ["trujillo", "Trujillo", "ciudad", "Cerca de aquí Colón pisó tierra firme en 1502."],
       ["fortaleza", "Fortaleza de Santa Bárbara", "fuerte", "Cañones mirando la bahía."],
       ["santafe", "Santa Fe", "pueblo", "Pueblo garífuna de pescadores."],
       ["guaimoreto", "Laguna de Guaimoreto", "lago", "Manglares, aves y cocodrilos."],
@@ -367,9 +367,9 @@
     "lugares": [
       ["roatan", "Roatán", "isla", "La isla más grande, rodeada de arrecife."],
       ["westbay", "West Bay", "playa", "Arena blanca y agua transparente."],
-      ["utila", "Utila", "isla", "Uno de los mejores lugares del mundo para ver al tiburón ballena."],
+      ["utila", "Utila", "isla", "Famosa por los encuentros con el tiburón ballena, aunque nadie los garantiza."],
       ["guanaja", "Guanaja", "isla", "La isla de los pinos; Bonacca es un pueblo sobre el agua."],
-      ["arrecife", "Arrecife Mesoamericano", "playa", "El segundo arrecife de coral más grande del mundo."],
+      ["arrecife", "Arrecife Mesoamericano", "playa", "La segunda barrera de coral más grande del mundo."],
       ["puntagorda", "Punta Gorda", "pueblo", "El primer pueblo garífuna de Honduras, de 1797."],
       ["coxen", "Coxen Hole", "puerto", "Aquí atracan los cruceros."]
     ],
@@ -377,7 +377,7 @@
       ["Arroz con frijoles y coco", "coxen", "Rice and beans, la base de todo plato isleño."],
       ["Johnny cake", "coxen", "Pan isleño para el viaje en lancha."],
       ["Cangrejo azul", "puntagorda", "Sale con las primeras lluvias."],
-      ["Pan de coco isleño", "roatan", "Más dulce que el de tierra firme."]
+      ["Pan de coco isleño", "roatan", "Hecho en casa, con coco rallado."]
     ],
     "palabras": [
       ["wha' happen?", "¿qué pasó? (inglés isleño)"],
@@ -405,16 +405,16 @@
   "yoro": {
     "tipos": "🐟🍌🦎🚂",
     "lugares": [
-      ["yoroc", "Yoro", "ciudad", "Donde llueven peces."],
+      ["yoroc", "Yoro", "ciudad", "Donde cuentan que llueven peces."],
       ["progreso", "El Progreso", "ciudad", "La Perla del Ulúa, ciudad bananera."],
       ["olanchito", "Olanchito", "ciudad", "La Ciudad Cívica, tierra de escritores y bananos."],
       ["pijol", "Pico Pijol", "parque", "Bosque nublado y cascadas."],
       ["ulua", "Río Ulúa", "rio", "Uno de los ríos más grandes del país."],
-      ["tolupan", "Montañas tolupanes", "pueblo", "Aquí vive el pueblo tolupán."],
+      ["tolupan", "Montañas tolupanes", "pueblo", "Aquí viven tribus del pueblo tolupán."],
       ["bananeras", "Campos bananeros", "finca", "Por aquí rodó el tren bananero."]
     ],
     "comidas": [
-      ["Sardinitas de la lluvia", "yoroc", "Pescaditos fritos, recién caídos del cielo."],
+      ["Sardinitas de la lluvia", "yoroc", "Pescaditos fritos; dicen que caen del cielo."],
       ["Mínimos", "progreso", "Aquí al banano se le dice mínimo."],
       ["Coyoles en miel", "olanchito", "Dulce de Semana Santa: se chupan, no se muerden."]
     ],
@@ -447,7 +447,7 @@
       ["puertolempira", "Puerto Lempira", "puerto", "Capital de La Mosquitia, a la orilla de la laguna."],
       ["caratasca", "Laguna de Caratasca", "lago", "La laguna más grande de Honduras."],
       ["rioplatano", "Biosfera del Río Plátano", "selva", "Patrimonio de la Humanidad."],
-      ["ciudadblanca", "Ciudad Blanca", "ruinas", "La ciudad perdida del Dios Mono."],
+      ["ciudadblanca", "Ciudad Blanca", "ruinas", "Leyenda de una ciudad perdida en la selva."],
       ["patuca", "Río Patuca", "rio", "Uno de los ríos más largos de Centroamérica."],
       ["brus", "Brus Laguna", "pueblo", "Pueblo miskito entre sabana y laguna."]
     ],

@@ -48,12 +48,12 @@
   "comayagua": {
     "tipos": "⛪🍦🥭🐎",
     "lugares": [
-      ["catedral", "Catedral de Comayagua", "iglesia", "Su reloj es de los más antiguos de América y todavía da la hora."],
+      ["catedral", "Catedral de Comayagua", "iglesia", "Dicen que su reloj es de los más antiguos de América, y todavía da la hora."],
       ["colonial", "Centro colonial", "ciudad", "La antigua capital de Honduras."],
       ["siguatepeque", "Siguatepeque", "ciudad", "Pinos, clima fresco y parada obligada en la carretera."],
       ["taulabe", "Cuevas de Taulabé", "cueva", "Estalactitas a la orilla de la carretera."],
       ["vallec", "Valle de Comayagua", "finca", "Mangos, tomates y calor del bueno."],
-      ["tenampua", "Tenampúa", "ruinas", "Fortaleza lenca en lo alto de un cerro."]
+      ["tenampua", "Tenampúa", "ruinas", "Fortaleza prehispánica en lo alto de un cerro."]
     ],
     "comidas": [
       ["Pilón", "colonial", "Lo que en Tegus llaman paleta, aquí es pilón."],

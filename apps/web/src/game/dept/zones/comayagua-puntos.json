@@ -10,7 +10,7 @@
   {
     "id": "comayagua.visita-2",
     "nombre": "La hora en la torre",
-    "texto": "La catedral de Comayagua guarda un reloj histórico de origen árabe. Aquí ves una réplica del mecanismo: esperá la campanada y anotala.",
+    "texto": "La catedral de Comayagua guarda un reloj muy antiguo que, según la tradición, es de origen árabe. Aquí ves una réplica del mecanismo: esperá la campanada y anotala.",
     "x": -21,
     "z": -2,
     "fuente": "https://visitacomayagua.com/descubre"
@@ -66,7 +66,7 @@
   {
     "id": "comayagua.locura-2",
     "nombre": "Reloj con recreo",
-    "texto": "La réplica del taller estira las agujas como brazos y pide recreo. Tranquilo: el reloj de la catedral ni se entera.",
+    "texto": "La réplica del taller estira las agujas como brazos y pide recreo. Calma: el reloj de la catedral ni se entera.",
     "x": -21,
     "z": 14,
     "fuente": "https://visitacomayagua.com/descubre"
