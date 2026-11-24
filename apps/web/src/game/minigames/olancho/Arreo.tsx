@@ -1,7 +1,7 @@
 import { Block, Label, P } from '../../kit';
 import { defineMotor, type Motor } from '../kit';
 import { Campesino, Vaca } from '../kit/Figuras';
-import { clamp, controles, duracion, metas, mover, Taller } from './Taller';
+import { clamp, duracion, metas, mover, Taller } from './Taller';
 
 type Estado = {
   x: number;
@@ -46,7 +46,12 @@ const motor = defineMotor({
   modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   guia: {
     goal: 'Rodeá el hato. El costado cambia rumbo; detrás de su línea avanza al corral. No lo toqués ni te pongás de frente.',
-    ...controles,
+    // se arrea caminando: no hay botón de acción
+    keys: [
+      ['WASD / flechas', 'caminar alrededor del hato'],
+      ['Mouse / stick derecho', 'ubicarte'],
+    ],
+    touch: [['Palanca / arrastrá', 'caminar alrededor del hato']],
   },
   etapa: (p) => ({
     velocidad: 0.23 - p.dif * 0.06,

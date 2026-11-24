@@ -1,6 +1,6 @@
 import { input } from '../../core/input';
 import { Block, Label } from '../kit';
-import { controles, Mesa } from './cortes/comun';
+import { Mesa } from './cortes/comun';
 import { defineMotor, type Motor } from './kit';
 import { Campesino } from './kit/Figuras';
 
@@ -44,7 +44,16 @@ const motor = defineMotor({
   modos: { duo: { tipo: 'apoyo', cada: 4 }, abierto: { tipo: 'objetivo-comun', bots: 3, cada: 6 } },
   guia: {
     goal: 'Guardá esfuerzo descansando. F sube un tramo; la mochila pierde capacidad con la altura. El último cuesta 30 extra y exige 8 de reserva.',
-    ...controles,
+    // aquí no hay indicadores que mover: se sube con la acción y se descansa sin tocar nada
+    keys: [
+      ['F / clic', 'subir un tramo'],
+      ['Quieto', 'descansás y juntás reserva'],
+      ['Mando: RT', 'subir'],
+    ],
+    touch: [
+      ['🎯', 'subir un tramo'],
+      ['Quieto', 'descansás y juntás reserva'],
+    ],
   },
   etapa: (p) => ({ recarga: 15 - p.dif * 4, coste: 7 + p.dif * 3 }),
   metas: (p) => [80 + Math.round(p.dif * 80), 240, 400],

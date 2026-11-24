@@ -109,8 +109,8 @@ const motor = defineMotor({
             mat="wood"
           />
         )}
-        <Label pos={[0, 1.2, -3.5]} text="INICIO · F" h={0.3} />
-        <Label pos={[0, 1.2, 3.5]} text="FIN · F" h={0.3} />
+        <Label pos={[0, 1.2, -3.5]} text={`INICIO · ${input.touch ? '🎯' : 'F'}`} h={0.3} />
+        <Label pos={[0, 1.2, 3.5]} text={`FIN · ${input.touch ? '🎯' : 'F'}`} h={0.3} />
       </Taller>
     );
   },
