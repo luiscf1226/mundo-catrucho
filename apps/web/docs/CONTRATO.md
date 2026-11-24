@@ -491,3 +491,12 @@ La API conserva valores predeterminados para consumidores anteriores: apoyo cont
 `cada` debe ser positivo y finito. Las ayudas usan el reloj de simulación, respetan pausa y cuenta regresiva y
 no cambian metas, duración ni premios. El HUD explica el modo. `__mcTest.motor.estado()` también expone `modos`
 y `ayudas` (intervenciones programadas). `test-modos-motor.mjs` prueba contribuciones reales y aislamiento entre intentos.
+
+## Guía de primeros pasos y misiones con atajo
+
+`profile.guia` cuenta los pasos hechos de la guía (`GUIA_PASOS` = 4: caminar, viajar, jugar y ver las misiones);
+`pasoGuia(n)` la adelanta y nunca retrocede. Un perfil guardado sin `guia` que ya creó su personaje arranca con la guía
+terminada. La tarjeta (`src/ui/screens/Guia.tsx`) no sale en minijuegos, viajes ni la vista desde arriba.
+Cómo se cumple cada misión y su atajo están en `src/ui/misiones.ts` (`comoMision`): si agregás un tipo de misión en
+`progress.json`, agregale su pista ahí. `data-testid`: `guia` (con `data-paso`), `guia-ir`, `guia-saltar`,
+`mission-como-<id>`, `mission-ir-<id>`. Prueba: `node tools/test-guia.mjs <html>` (va en `web:test`).

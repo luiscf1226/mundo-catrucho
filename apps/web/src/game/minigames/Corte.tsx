@@ -153,9 +153,12 @@ export function Corte() {
   }, [P]);
   const slots = useMemo<Slot[]>(() => {
     const out: Slot[] = [],
-      hf = (): Half => ({ x: 0, y: 0, vx: 0, vy: 0, r: 0, vr: 0 });
+      hf = (): Half => ({ x: 0, y: 0, vx: 0, vy: 0, r: 0, vr: 0 }),
+      // lo que se corta necesita al menos 12 lugares en total (cada pieza cortada ocupa el suyo 1,6 s más): con un
+      // solo tipo de cosa (Olancho) cuatro lugares no daban abasto y las metas de la última etapa no se alcanzaban
+      buenas = Math.max(4, Math.ceil(12 / Math.max(1, kinds.filter((k) => !k.bad).length)));
     kinds.forEach((k, ti) => {
-      for (let i = 0; i < (k.bad ? 3 : 4); i++)
+      for (let i = 0; i < (k.bad ? 3 : buenas); i++)
         out.push({
           type: ti,
           g: null,

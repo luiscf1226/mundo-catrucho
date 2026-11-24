@@ -4,6 +4,7 @@ import { input } from '../../../core/input';
 import { useGame } from '../../../core/store';
 import { Ball, Block, Label } from '../../kit';
 import { defineMotor, type Motor } from '../kit';
+import { Objeto } from '../kit/objetos';
 import { casilla, centro, controles, cursor, duracion, Mesa, metas, mover } from './comun';
 
 type Celda = 'tallo' | 'izq' | 'der' | 'encerrado';
@@ -152,7 +153,7 @@ const motor = defineMotor({
         />
         {[0, 1].map((lado) => (
           <group key={lado} position={[lado ? 3.6 : -5.6, 0, 1.8]}>
-            <Block pos={[0, 1.15, 0]} size={[0.9, 0.9, 0.7]} color="#c9a36a" mat="cloth" solid={false} />
+            <Objeto k="saco" pos={[0, 0.7, 0]} scale={[1.7, 1.45, 1.3]} c="#c9a36a" />
             {s.sacos[lado] > 0 && <Ball pos={[0, 1.7, 0]} r={0.22} color="#f6d55c" />}
             <Label pos={[0, 2.2, 0]} text={`${lado ? 'Saco der.' : 'Saco izq.'} ${s.sacos[lado]}`} h={0.38} />
           </group>

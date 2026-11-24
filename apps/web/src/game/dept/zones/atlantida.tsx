@@ -90,6 +90,12 @@ export function playa(d: Department): ZoneSpec {
   Z.veg('palm', 16, (x, z) => Math.abs(x) > 34 && z > -6 && z < 52, { sep: 5 });
   Z.veg('tree', 34, (x, z) => (Math.abs(x) > 24 && z > 8 && Math.abs(x) < 70) || z > 50, { sep: 5 });
   Z.veg('bush', 24, (x, z) => z > 3 && Math.abs(x) > 4 && Math.abs(x) < 46 && !inR(x, z, -22, 22, 3, 46), { sep: 3 });
+  // palma africana al oeste, fuera de lo jugable (hacia Tela)
+  Z.plantacion(
+    'oilpalm',
+    { minX: -79, maxX: -52, minZ: -10, maxZ: 46 },
+    { dx: 7.2, dz: 6.3, smin: 1.2, smax: 1.55, colors: ['#4a8a40', '#3f7d3b', '#55963f'], calle: 5 },
+  );
   // Pico Bonito y la cordillera Nombre de Dios, al sur
   Z.add(
     place(mont(75, 105, '#2f7d4a'), 25, 0, 165),

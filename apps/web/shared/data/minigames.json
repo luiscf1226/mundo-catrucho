@@ -4,7 +4,7 @@
   "name": "Carrera Catrucha",
   "place": "Tegucigalpa",
   "icon": "🏃",
-  "desc": "Carrera de obstáculos por las calles de Tegucigalpa. Corre, salta y llega a la meta antes de que se acabe el tiempo.",
+  "desc": "Carrera de obstáculos por las calles de Tegucigalpa. Corré, saltá y llegá a la meta antes de que se acabe el tiempo.",
   "rules": {
    "timeLimit": 120,
    "gold": 50,
@@ -18,7 +18,7 @@
   "name": "Fútbol de Barrio",
   "place": "Cancha del barrio",
   "icon": "⚽",
-  "desc": "Potra de barrio de 2 minutos. Patea la pelota a la portería rival y mete más goles que el otro equipo.",
+  "desc": "Potra de barrio de 2 minutos. Pateá la pelota a la portería rival y meté más goles que el otro equipo.",
   "rules": {
    "duration": 120,
    "goldGoals": 3
@@ -29,7 +29,7 @@
   "name": "Feria Catracha",
   "place": "Feria patronal",
   "icon": "🎯",
-  "desc": "Tres puestos de feria: tiro con hulera, argollas y tumbalatas. Junta puntos para ganar premios.",
+  "desc": "Tres puestos de feria: tiro con hulera, argollas y tumbalatas. Juntá puntos para ganar premios.",
   "rules": {
    "booths": [
     "hulera",
@@ -47,7 +47,7 @@
   "name": "Exploradores de Honduras",
   "place": "Copán · Yojoa · Roatán",
   "icon": "🧭",
-  "desc": "Encuentra los objetos escondidos en Copán Ruinas, el Lago de Yojoa y Roatán, y desbloquea datos culturales.",
+  "desc": "Encontrá los objetos escondidos en Copán Ruinas, el Lago de Yojoa y Roatán, y desbloqueá datos culturales.",
   "rules": {
    "sites": [
     "copan",
@@ -67,7 +67,7 @@
   "place": "Pulpería Doña Toña",
   "icon": "🏪",
   "bonus": true,
-  "desc": "Atiende la pulpería: lleva a cada cliente lo que pide antes de que se vaya.",
+  "desc": "Atendé la pulpería: llevale a cada cliente lo que pide antes de que se vaya.",
   "rules": {
    "duration": 90,
    "bronze": 100,

@@ -9,7 +9,7 @@ import { textTexture } from '../../core';
 import { Placed } from '../base';
 import type { ArtProps } from '../types';
 import { Builder, gLathe, gTube, type Paint, tint } from './geo';
-import { G, hdMaterial } from './materials';
+import { G, hdMaterial, SUMA_SIN_ALFA } from './materials';
 import { cached, haloTexture, Merged, solidBox, solidCyl, TextPlane } from './pk';
 import { rng } from './tex';
 
@@ -292,7 +292,7 @@ function lampGlow() {
         color: '#ffc874',
         transparent: true,
         opacity: 0,
-        blending: THREE.AdditiveBlending,
+        ...SUMA_SIN_ALFA,
         depthWrite: false,
       }),
       pool: new THREE.MeshBasicMaterial({
@@ -300,7 +300,7 @@ function lampGlow() {
         color: '#ffb056',
         transparent: true,
         opacity: 0,
-        blending: THREE.AdditiveBlending,
+        ...SUMA_SIN_ALFA,
         depthWrite: false,
       }),
       geo: new THREE.PlaneGeometry(1, 1),
@@ -1006,11 +1006,12 @@ function netMaterial() {
   });
   return netMat;
 }
-const goalGeo = (w: number, h: number) =>
-  cached(`goal|${w}|${h}`, () => {
+const goalGeo = (w: number, h: number, d = 0.9) =>
+  cached(`goal|${w}|${h}|${d}`, () => {
     const b = new Builder(),
       m: Paint = { k: 'metal', c: '#ffffff', m: 0.2, r: 0.4 },
-      x = w / 2;
+      x = w / 2,
+      t = d * 0.56;
     b.add(
       gTube(
         [
@@ -1029,8 +1030,8 @@ const goalGeo = (w: number, h: number) =>
         gTube(
           [
             [s * x, h, 0],
-            [s * x, h, -0.5],
-            [s * x, 0.03, -0.9],
+            [s * x, h, -t],
+            [s * x, 0.03, -d],
           ],
           0.03,
           6,
@@ -1040,8 +1041,8 @@ const goalGeo = (w: number, h: number) =>
     b.add(
       gTube(
         [
-          [-x, 0.03, -0.9],
-          [x, 0.03, -0.9],
+          [-x, 0.03, -d],
+          [x, 0.03, -d],
         ],
         0.03,
         6,
@@ -1051,8 +1052,8 @@ const goalGeo = (w: number, h: number) =>
     b.add(
       gTube(
         [
-          [-x, h, -0.5],
-          [x, h, -0.5],
+          [-x, h, -t],
+          [x, h, -t],
         ],
         0.025,
         6,
@@ -1061,23 +1062,24 @@ const goalGeo = (w: number, h: number) =>
     );
     return b.build();
   });
-const netGeo = (w: number, h: number) =>
-  cached(`net|${w}|${h}`, () => {
+const netGeo = (w: number, h: number, d = 0.9) =>
+  cached(`net|${w}|${h}|${d}`, () => {
     const x = w / 2,
       k = 1 / 0.16,
+      t = d * 0.56,
       pos: number[] = [],
       uv: number[] = [],
       idx: number[] = [];
-    const quad = (a: V3, b: V3, c: V3, d: V3, uw: number, vh: number) => {
+    const quad = (a: V3, b: V3, c: V3, e: V3, uw: number, vh: number) => {
       const o = pos.length / 3;
-      pos.push(...a, ...b, ...c, ...d);
+      pos.push(...a, ...b, ...c, ...e);
       uv.push(0, 0, uw * k, 0, uw * k, vh * k, 0, vh * k);
       idx.push(o, o + 1, o + 2, o, o + 2, o + 3);
     };
-    quad([-x, 0.03, -0.9], [x, 0.03, -0.9], [x, h, -0.5], [-x, h, -0.5], w, h);
-    quad([-x, h, -0.5], [x, h, -0.5], [x, h, 0], [-x, h, 0], w, 0.5);
+    quad([-x, 0.03, -d], [x, 0.03, -d], [x, h, -t], [-x, h, -t], w, h);
+    quad([-x, h, -t], [x, h, -t], [x, h, 0], [-x, h, 0], w, t);
     for (const s of [-1, 1]) {
-      quad([s * x, 0.03, -0.9], [s * x, 0.03, 0], [s * x, h, 0], [s * x, h, -0.5], 0.9, h);
+      quad([s * x, 0.03, -d], [s * x, 0.03, 0], [s * x, h, 0], [s * x, h, -t], d, h);
     }
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
@@ -1215,10 +1217,10 @@ export const props2: Pick<
       </Placed>
     );
   },
-  Goal: ({ w = 5, h = 2.4, ...a }) => (
+  Goal: ({ w = 5, h = 2.4, d = 0.9, ...a }) => (
     <Placed {...a}>
-      <Merged g={goalGeo(w, h)} />
-      <mesh geometry={netGeo(w, h)} material={netMaterial()} />
+      <Merged g={goalGeo(w, h, d)} />
+      <mesh geometry={netGeo(w, h, d)} material={netMaterial()} />
     </Placed>
   ),
 };

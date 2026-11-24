@@ -11,6 +11,7 @@ import { art, Ball, Block, Cyl, Ground, Interactable, Label, Spawn, useMgTick } 
 import { finish, partida, rulesOf, setHud, starsFor } from './api';
 import { Fx, FxLayer } from './feria/fx';
 import { Scenery } from './feria/Scenery';
+import { Alrededores, hayPaisaje } from './kit/Paisaje';
 
 const names = ['HULERA', 'ARGOLLAS', 'TUMBALATAS'];
 const xs = [-11, 0, 11];
@@ -360,7 +361,8 @@ export function Feria() {
     <>
       <art.SkyRig time="tarde" fogFar={130} />
       <Spawn pos={[0, 0, 6]} />
-      <Ground size={70} mat="dirt" color="#b58a55" />
+      <Ground size={70} mat="dirt" color="#b58a55" y={hayPaisaje() ? 0.012 : 0} />
+      <Alrededores fondo="feria" llano={[-35, 35, -35, 35]} />
       <Scenery />
       <FxLayer fx={fx} />
       {s.booth < 0 && <Label pos={[0, 6, -16]} text={`${nombre} · ${total()} pts`} h={1} />}

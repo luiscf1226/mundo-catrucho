@@ -60,6 +60,16 @@ export function Laguna({
   return (
     <>
       <Block pos={[0, 0.012, -11]} size={[90, 0.02, 31]} color="#0b86b4" mat="water" solid={false} cast={false} />
+      {/* fondo del mar: oscuro donde es hondo, más claro al acercarse al bajo de arena */}
+      <Block pos={[0, 0.002, -11]} size={[90, 0.004, 31]} color="#1d5866" mat="sand" solid={false} cast={false} />
+      <Block
+        pos={[x, 0.0045, z]}
+        size={[ancho + 5, 0.005, largo + 5]}
+        color="#4b8f8c"
+        mat="sand"
+        solid={false}
+        cast={false}
+      />
       <Block pos={[x, 0.03, z]} size={[ancho, 0.02, largo]} color={color} mat="water" solid={false} cast={false} />
       <Block
         pos={[x, 0.006, z]}

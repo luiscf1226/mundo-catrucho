@@ -6,9 +6,10 @@ import { MOTIVOS_REPORTE, type MotivoReporte } from '@mundo-catrucho/reglas';
 import { useEffect, useRef, useState } from 'react';
 import { enviarSala, instalarChat, type MensajeSala, silenciar, social, useChat } from '../../core/chat';
 import { EN_VIVO, useSala } from '../../core/net';
-import { useGame } from '../../core/store';
+import { GUIA_PASOS, useGame } from '../../core/store';
 import { Icon } from '../components/Icon';
 import { cx, g, useTouch } from '../lib';
+import { useBaja } from '../screens/Guia';
 
 export const MOTIVO_TEXTO: Record<MotivoReporte, string> = {
   groseria: 'Groserías',
@@ -129,7 +130,10 @@ export function ChatSala() {
     mg = useGame((s) => s.mg),
     enSala = useSala((s) => s.estado === 'en-sala'),
     mensajes = useChat((s) => s.mensajes),
-    touch = useTouch();
+    touch = useTouch(),
+    baja = useBaja(),
+    // en celular acostado la guía compacta va en la misma franja que el chat: mientras se ve, la guía va primero
+    guiaCompacta = useGame((s) => s.profile.guia < GUIA_PASOS && s.scene.kind !== 'viaje') && touch && baja;
   const [texto, setTexto] = useState(''),
     [aviso, setAviso] = useState(''),
     [abierto, setAbierto] = useState(!touch),
@@ -137,7 +141,7 @@ export function ChatSala() {
     campo = useRef<HTMLInputElement>(null),
     lista = useRef<HTMLUListElement>(null);
   useEffect(instalarChat, []);
-  const visible = EN_VIVO && encendido && enSala && !mg;
+  const visible = EN_VIVO && encendido && enSala && !mg && !guiaCompacta;
   // T abre el campo para escribir (si no estás escribiendo ya en otro lado)
   useEffect(() => {
     if (!visible) return;

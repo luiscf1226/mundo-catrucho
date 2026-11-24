@@ -50,14 +50,23 @@ export function useReacciones() {
   }, []);
 }
 
-/** Locuras que se activan con solo llegar: asombro al entrar a `radio` metros; se vuelve a armar al alejarse. */
-export function useLocuraCerca(x: number, z: number, radio = 2.6) {
-  const dentro = useRef(false);
+/**
+ * Locuras que se activan con solo llegar: asombro al entrar a `radio` metros; se vuelve a armar al alejarse.
+ * Con `ficha`, la primera vez que se llega se abre su ficha (nombre y texto de la locura).
+ */
+export function useLocuraCerca(x: number, z: number, radio = 2.6, ficha?: { title: string; text: string }) {
+  const dentro = useRef(false),
+    vista = useRef(false);
   useTick(() => {
     const d = player.distTo(x, z);
     if (!dentro.current && d < radio) {
       dentro.current = true;
       reaccionLocura();
     } else if (dentro.current && d > radio + 3) dentro.current = false;
+    if (!ficha || vista.current || !dentro.current) return;
+    const s = useGame.getState();
+    if (s.dialog || s.panel) return;
+    vista.current = true;
+    s.showDialog({ ...ficha, icon: '✨' });
   });
 }

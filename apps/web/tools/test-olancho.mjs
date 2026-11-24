@@ -1,12 +1,14 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { locuraCaminando, lugaresTuristicos } from './explorar.mjs';
 import { run } from './harness.mjs';
 
 const file = process.argv[2] ?? 'apps/web/dist/mundo-catrucho-hd.html';
 const raiz = resolve(import.meta.dirname, '../../..');
 const contenido = JSON.parse(readFileSync(resolve(raiz, 'docs/generador/contenido.json'))).olancho;
 const capturas = resolve(raiz, 'capturas/mc-50');
+const locuras = JSON.parse(readFileSync(resolve(raiz, 'apps/web/src/game/dept/zones/olancho-puntos.json')));
 const ok = await run('olancho', file, { hash: '#test', width: 1280, height: 800 }, async (t) => {
   await t.click('btn-jugar');
   await t.click('ed-done');
@@ -26,17 +28,15 @@ const ok = await run('olancho', file, { hash: '#test', width: 1280, height: 800 
     await t.click('mg-back');
     await t.waitFor("!window.__mc.store.getState().mg && window.__mcTest.dept.id==='olancho'");
   }
-  for (let i = 0; i < 9; i++) {
-    const x = i < 5 ? -8 : 8,
-      z = 34 - (i % 5) * 7;
-    await t.ev(`window.__mc.player.teleport(${x},0,${z + 3},0)`);
-    await t.holdUntil('w', "!!document.querySelector('[data-testid=dialog]')", 15000);
-    const nombre = (i < 6 ? contenido.turismo[i] : contenido.locuras[i - 6]).nombre;
-    assert.ok(
-      await t.ev(`document.querySelector('[data-testid=dialog]').textContent.includes(${JSON.stringify(nombre)})`),
-      nombre,
-    );
-    if (i === 0 || i === 6 || i === 8) await t.shot(`${capturas}/descubrimiento-${i + 1}.png`);
+  assert.equal(await lugaresTuristicos(t, 'olancho'), 6);
+  // las tres locuras abren su ficha al llegar caminando
+  assert.deepEqual(
+    locuras.map((l) => l.nombre),
+    contenido.locuras.map((l) => l.nombre),
+  );
+  for (const [i, l] of locuras.entries()) {
+    await locuraCaminando(t, { x: l.pos[0], z: l.pos[1], nombre: l.nombre, texto: l.texto });
+    await t.shot(`${capturas}/locura-${i + 1}.png`);
     await t.click('dialog-close');
   }
   async function abrir(id) {

@@ -134,7 +134,7 @@ export function Social() {
         onUse={() =>
           useGame.getState().showDialog({
             title: '¡Bienvenido, cipote!',
-            text: 'WASD: caminar · Espacio: saltar · E: usar · Arrastra para mirar. Pisá el mapa para viajar. Los arcos llevan a los juegos. ¡Subí al Picacho por Lempiritas!',
+            text: 'WASD: caminar · Espacio: saltar · E: usar · Arrastrá para mirar. Pisá el mapa para viajar. Los arcos llevan a los juegos. ¡Subí al Picacho por Lempiritas!',
             icon: '🇭🇳',
           })
         }

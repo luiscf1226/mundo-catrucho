@@ -90,7 +90,8 @@ export async function launch(
   };
   process.on('exit', kill);
   let ws;
-  for (let i = 0; i < 80 && !ws; i++) {
+  // en GitHub, con el runner recién levantado, Chromium a veces tarda más de 16 s en abrir el puerto de depuración
+  for (let i = 0; i < 300 * LENTO && !ws; i++) {
     try {
       const j = await (await fetch(`http://127.0.0.1:${port}/json`)).json();
       const p = j.find((x) => x.type === 'page');
@@ -147,11 +148,28 @@ export async function launch(
       pending.set(i, res);
       ws.send(JSON.stringify({ id: i, method, params }));
     });
-  const ev = async (e) => {
+  const evaluar = async (e) => {
     const r = await send('Runtime.evaluate', { expression: e, awaitPromise: true, returnByValue: true });
     if (r.result?.exceptionDetails)
       throw new Error(`ev: ${r.result.exceptionDetails.exception?.description || r.result.exceptionDetails.text}`);
     return r.result?.result?.value;
+  };
+  // Un ev que recarga la página vuelve cuando ya cargó la nueva: sin GPU la recarga tarda y el siguiente waitFor
+  // veía la página vieja (el menú o window.__mc todavía estaban), y el ev de después corría a media recarga.
+  const ev = async (e) => {
+    if (!e.includes('location.reload()')) return evaluar(e);
+    await evaluar('window.__mcVieja = true');
+    const v = await evaluar(e).catch(() => undefined);
+    const s = Date.now();
+    while (
+      !(await evaluar(`!window.__mcVieja && !!window.__mc && !!document.querySelector('[data-testid]')`).catch(
+        () => false,
+      ))
+    ) {
+      if (Date.now() - s > 60000 * LENTO) throw new Error('tiempo agotado esperando la página recargada');
+      await sleep(100);
+    }
+    return v;
   };
   await send('Runtime.enable');
   await send('Page.enable');

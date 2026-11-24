@@ -12,6 +12,7 @@ import { type Guia, partida, rng, setHud } from './api';
 import { BotAvatar, frasesDe, newState, useBurst, useFinisher } from './corte/common';
 import { LOOK } from './ruta/estilos';
 import { ESTILOS_RUTA, type Estilo, generar, limiteDe, type Pieza, TH, yAt } from './ruta/gen';
+import { fija, PaisajeRuta } from './ruta/paisaje';
 
 export const guia: Guia = {
   goal: 'Corré y saltá hasta la meta antes de que se acabe el tiempo. Si te caés, volvés al último punto de control.',
@@ -28,7 +29,18 @@ export const guia: Guia = {
   metas: (p) => [`Llegar a la meta en ${limiteDe(p)} s`, 'Con 30% del tiempo sobrando', 'Con 55% del tiempo sobrando'],
 };
 
-function Plat({ q, look, onSink }: { q: Pieza; look: (typeof LOOK)[Estilo]; onSink?: (c: unknown) => void }) {
+function Plat({
+  q,
+  look,
+  onSink,
+  hd = false,
+}: {
+  q: Pieza;
+  look: (typeof LOOK)[Estilo];
+  onSink?: (c: unknown) => void;
+  /** con paisaje HD: las piezas fijas las dibuja PaisajeRuta; aquí solo quedan los neones de salida, control y meta */
+  hd?: boolean;
+}) {
   const mov = q.tipo === 'mov' || q.tipo === 'movz',
     sink = q.tipo === 'sink',
     size: V3 = [q.w, TH, q.len];
@@ -76,11 +88,14 @@ function Plat({ q, look, onSink }: { q: Pieza; look: (typeof LOOK)[Estilo]; onSi
               : sink
                 ? '#d9513c'
                 : look.cap;
+  const soloMarca = hd && fija(q),
+    especial = q.tipo === 'cp' || q.tipo === 'goal' || q.tipo === 'start';
   return (
     <group ref={g}>
-      <Block pos={[q.x, q.y - TH / 2, q.z]} size={size} color={m[1]} mat={m[0]} solid={false} />
+      {!soloMarca && <Block pos={[q.x, q.y - TH / 2, q.z]} size={size} color={m[1]} mat={m[0]} solid={false} />}
       {q.tipo !== 'beam' &&
         q.tipo !== 'step' &&
+        (!soloMarca || especial) &&
         [-1, 1].map((sd) => (
           <Block
             key={sd}
@@ -106,10 +121,16 @@ function Plat({ q, look, onSink }: { q: Pieza; look: (typeof LOOK)[Estilo]; onSi
   );
 }
 
+/** Capturas: `#go,ruta=cueva` muestra ese estilo aunque el juego del catálogo traiga otro (no cambia el juego). */
+const estiloVista = () =>
+  typeof location === 'undefined' ? undefined : (location.hash.match(/ruta=(\w+)/)?.[1] as Estilo | undefined);
+
 export function Ruta() {
   const P_ = useMemo(partida, []),
-    est: Estilo = ESTILOS_RUTA.includes(P_.tema.estilo) ? P_.tema.estilo : 'cerro',
+    pedido = estiloVista() ?? P_.tema.estilo,
+    est: Estilo = ESTILOS_RUTA.includes(pedido) ? pedido : 'cerro',
     L = LOOK[est];
+  const hd = !!art.fused;
   const G = useMemo(() => generar(P_), [P_]),
     TL = limiteDe(P_),
     meta: string = P_.tema.meta ?? '¡META!',
@@ -277,26 +298,31 @@ export function Ruta() {
     <>
       <art.SkyRig time={L.time} indoor={L.indoor} shadowRadius={40} fogFar={L.fog} />
       <Spawn pos={[0, 0.1, 0]} yaw={0} />
-      <mesh position={[0, floorY, -G.length / 2]} rotation-x={-Math.PI / 2}>
-        <planeGeometry args={[300, G.length + 220]} />
-        <primitive object={art.material(L.floor[1], L.floor[0])} attach="material" />
-      </mesh>
+      {hd ? (
+        <PaisajeRuta plats={G.plats} L={L} est={est} floorY={floorY} largo={G.length} />
+      ) : (
+        <mesh position={[0, floorY, -G.length / 2]} rotation-x={-Math.PI / 2}>
+          <planeGeometry args={[300, G.length + 220]} />
+          <primitive object={art.material(L.floor[1], L.floor[0])} attach="material" />
+        </mesh>
+      )}
       {G.plats.map((q) => (
-        <Plat key={q.id} q={q} look={L} />
+        <Plat key={q.id} q={q} look={L} hd={hd} />
       ))}
-      {props.map((q, i) => {
-        const C = (P as any)[q.k];
-        return C ? (
-          <C
-            key={i}
-            pos={[q.x, floorY + (q.k === 'Macaw' ? 14 : 0), q.z]}
-            scale={q.s}
-            rot={q.r}
-            solid={false}
-            {...(q.k === 'House' ? { w: 8, d: 8, floors: 2 } : {})}
-          />
-        ) : null;
-      })}
+      {!hd &&
+        props.map((q, i) => {
+          const C = (P as any)[q.k];
+          return C ? (
+            <C
+              key={i}
+              pos={[q.x, floorY + (q.k === 'Macaw' ? 14 : 0), q.z]}
+              scale={q.s}
+              rot={q.r}
+              solid={false}
+              {...(q.k === 'House' ? { w: 8, d: 8, floors: 2 } : {})}
+            />
+          ) : null;
+        })}
       {gemEls.map(({ q, i }) => (
         <GemSpin key={i} q={q} i={i} got={S} color={L.gem} forma={junta[1]} />
       ))}
