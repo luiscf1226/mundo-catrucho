@@ -388,7 +388,8 @@ Pruebas reales contra el Convex de desarrollo: `node tools/test-tienda-servidor.
 - El nombre también lo manda la cuenta: `entrar` lo devuelve y `profile.nombreServidor` guarda el último confirmado;
   el juego solo manda su nombre si el jugador lo cambió en ese dispositivo.
 - Ajustes → «Tu cuenta» (solo con Convex): `cuenta`, `cuenta-nombre`, `cuenta-crear`, `cuenta-codigo` (`ABCD-EFGH`),
-  `cuenta-copiar`, `cuenta-codigo-input`, `cuenta-usar`, `cuenta-aviso` (`data-ok`). Con Clerk, `cuenta-entrar`.
+  `cuenta-copiar`, `cuenta-codigo-input`, `cuenta-usar` (pregunta de quién es la cuenta), `cuenta-confirmar`,
+  `cuenta-confirmar-nombre`, `cuenta-si`, `cuenta-cancelar`, `cuenta-aviso` (`data-ok`). Con Clerk, `cuenta-entrar`.
 - Store: `crearCodigoDispositivo()` y `usarCodigoDispositivo(codigo)`; al usarlo, lo de ese dispositivo (Convex y
   navegador) se junta con la cuenta del código y se vuelve a leer todo (`sincronizar`).
 - Clerk solo existe si la compilación trae `VITE_CLERK_PUBLISHABLE_KEY` y `VITE_CONVEX_URL` (`__CLERK__`).

@@ -116,20 +116,28 @@ demás sigue llamando a `usuarioActual` / `asegurarUsuario`.
 
 - `cuentas:crearCodigoDispositivo`: 8 letras de `ALFABETO_CODIGO` (`ABCD-EFGH`), un solo uso, 10 min. Guarda solo
   su SHA-256 en `codigosDispositivo`; pedir otro borra el anterior.
+- `cuentas:verCodigoDispositivo { codigo }` (consulta): de quién es la cuenta del código (nombre y nivel). El juego
+  lo muestra y pide confirmar antes de entrar: entrar le da a esa cuenta todo lo del dispositivo.
 - `cuentas:usarCodigoDispositivo { codigo, local? }`: el invitado que llama entra a la cuenta del código (su secreto
   queda en `vinculos`; nunca viaja el secreto de la otra). Lo que tenía en Convex se junta con `fusionar` y lo del
-  navegador (`local`) sube sin premios, como `subirAvanceLocal`. Motivos: `codigo`, `vencido`, `propio`, `espera`
-  (10 fallos cada 10 min, como los códigos de amigo) y `con-cuenta` (con token de Clerk no hace falta).
+  navegador (`local`) sube sin premios, como `subirAvanceLocal`. El código se revisa antes de crear nada (probar
+  códigos no llena tablas; un dispositivo sin cuenta solo queda vinculado). Motivos: `codigo`, `vencido`, `propio`,
+  `espera` (10 fallos cada 10 min si ya tenés cuenta), `tope` (esa cuenta ya absorbió `FUSIONES_POR_DIA` = 2 hoy) y
+  `con-cuenta` (con token de Clerk, o si el invitado de este dispositivo ya es una cuenta de Clerk).
 - `fusionar` usa `fusionarCuentas` de `packages/reglas`: nada se pierde (monedas, ropa, etapas, estrellas, marcas,
   visitas, recuerdos, turismo, logros, misiones de hoy, amistades y bloqueos) y no se paga dos veces la bienvenida,
   la misma visita o recuerdo, el mismo logro, la misma misión del mismo día ni monedas sueltas sobre el tope del día;
-  los premios por nivel se ajustan al nivel de la XP sumada y una prenda comprada en las dos se devuelve. Lo que subió
-  del navegador sin premio (`visitas.visitaLocal`, `visitas.recuerdoLocal`, `logros.sinPago`) no cuenta como cobrado.
-  La cuenta que se junta se borra; sus llaves pasan a la que queda. Es una transacción: pasa entera o no pasa.
+  los premios por nivel se ajustan al nivel de la XP sumada y una prenda comprada en las dos se devuelve. Si lo
+  repetido ya se gastó, se devuelven prendas que solo tenía la otra (las más caras primero) hasta cubrirlo. Los logros
+  que solo cumple la suma quedan marcados sin pagar. Lo que subió del navegador sin premio (`visitas.visitaLocal`,
+  `visitas.recuerdoLocal`, `logros.sinPago`) no cuenta como cobrado. La cuenta que se junta se borra; sus llaves pasan
+  a la que queda. Es una transacción: pasa entera o no pasa. Una cuenta absorbe como mucho `FUSIONES_POR_DIA` por día
+  (`contadores.fusiones`): los topes del día son por cuenta y así no se multiplican juntando invitados.
 - `cuentas:miCuenta` (consulta): nombre, si tiene cuenta de Clerk, cuántos dispositivos y si hay un código vigente.
 - `cuentas:vincularCuenta` (Clerk): sin token responde `sin-cuenta`. La primera vez la cuenta de Clerk se une al
-  invitado de ese dispositivo; desde otro dispositivo, su invitado se junta con la cuenta (y su secreto ya no entra:
-  al salir de Clerk vuelve a ser un invitado nuevo). Repetirla no hace nada.
+  invitado de ese dispositivo; desde otro dispositivo, su invitado se junta con la cuenta. Una cuenta que ya es de
+  Clerk nunca se adopta ni se junta con otra (otra llave en el mismo dispositivo arranca su propia cuenta), y al salir
+  de Clerk el juego cambia el secreto del dispositivo y queda como invitado nuevo. Repetirla no hace nada.
 - `auth.config.ts` lee `CLERK_JWT_ISSUER_DOMAIN`; sin ella no hay proveedores y Convex publica igual. Pasos en
   `docs/ENTORNOS.md` («Cuentas con Clerk»).
 
@@ -139,7 +147,11 @@ npx convex run --identity '{"tokenIdentifier":"https://x.clerk.accounts.dev|user
 ```
 
 Tablas nuevas: `vinculos` y `codigosDispositivo`. Campos nuevos opcionales: `visitas.visitaLocal`,
-`visitas.recuerdoLocal` y `logros.sinPago`.
+`visitas.recuerdoLocal`, `logros.sinPago` y `contadores.fusiones`; índice nuevo `reportes.por_a`.
+`progreso:olvidarInvitado` acepta `{ token }` para borrar una cuenta de Clerk de prueba.
+
+Confianza aceptada: un dispositivo sin cuenta puede probar códigos sin límite propio (8 letras de 32: 2⁴⁰ códigos que
+viven 10 min). El bono de viaje no se tiene en cuenta al juntar porque hoy no se paga.
 
 ## Pase de sala en vivo (MC-18)
 
