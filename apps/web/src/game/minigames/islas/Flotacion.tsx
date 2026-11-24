@@ -52,7 +52,9 @@ function foto(m: Sesion) {
     s.meta = 3.5 + Math.round(s.azar() * 8) / 2;
     s.aviso = `¡Toma horizontal y estable! Siguiente: ${s.meta.toFixed(1)} m.`;
   } else {
+    // disparar a la loca no sirve: una foto movida gasta rollo
     s.movidas++;
+    m.sumar(-5);
     s.espera = 0.6;
     s.aviso = bien ? 'Casi: quedate quieto un ratito más.' : `Foto movida. La toma es a ${s.meta.toFixed(1)} m.`;
   }
