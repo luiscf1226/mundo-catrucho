@@ -383,6 +383,18 @@ Con la variable, `core/servidor.ts` habla con Convex y el perfil local solo refl
 Pruebas reales contra el Convex de desarrollo: `node tools/test-tienda-servidor.mjs` y
 `node tools/test-progreso-servidor.mjs` (necesitan `.env.local`; dejan capturas en `capturas/mc-13/` y `capturas/mc-17/`).
 
+## Cuentas y otro dispositivo (MC-07, MC-08, MC-09)
+
+- El nombre también lo manda la cuenta: `entrar` lo devuelve y `profile.nombreServidor` guarda el último confirmado;
+  el juego solo manda su nombre si el jugador lo cambió en ese dispositivo.
+- Ajustes → «Tu cuenta» (solo con Convex): `cuenta`, `cuenta-nombre`, `cuenta-crear`, `cuenta-codigo` (`ABCD-EFGH`),
+  `cuenta-copiar`, `cuenta-codigo-input`, `cuenta-usar` (pregunta de quién es la cuenta), `cuenta-confirmar`,
+  `cuenta-confirmar-nombre`, `cuenta-si`, `cuenta-cancelar`, `cuenta-aviso` (`data-ok`). Con Clerk, `cuenta-entrar`.
+- Store: `crearCodigoDispositivo()` y `usarCodigoDispositivo(codigo)`; al usarlo, lo de ese dispositivo (Convex y
+  navegador) se junta con la cuenta del código y se vuelve a leer todo (`sincronizar`).
+- Clerk solo existe si la compilación trae `VITE_CLERK_PUBLISHABLE_KEY` y `VITE_CONVEX_URL` (`__CLERK__`).
+- Prueba con dos navegadores: `node tools/test-cuentas.mjs` (necesita `.env.local`; capturas en `capturas/cuentas/`).
+
 ## Salas en vivo (MC-18 a MC-21)
 
 Sin `VITE_SALAS_URL` y `VITE_CONVEX_URL` el juego usa `LocalNet` y no hace ninguna petición. Con las dos:

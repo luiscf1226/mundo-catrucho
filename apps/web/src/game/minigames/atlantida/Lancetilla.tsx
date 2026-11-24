@@ -35,7 +35,7 @@ const ESPECIES: Especie[] = [
     fruto: 'bola',
     colorFruto: '#e5989b',
     semilla: 'redonda',
-    dice: 'liso · semilla redonda',
+    dice: 'rugoso · semilla redonda',
   },
   {
     nombre: 'Mangostán',

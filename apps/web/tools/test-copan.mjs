@@ -1,8 +1,12 @@
+// MC-45 · Copán: 12 puestos con victoria, 7 lugares y 3 locuras caminando, mando y toque en los ocho motores, oro en
+// todas las etapas dentro de los TOPES (no jugar y machacar F pierden) y capturas en capturas/mc-45/.
+// Uso: node tools/test-copan.mjs <archivo.html>
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { locuraCaminando, lugaresTuristicos } from './explorar.mjs';
 import { run } from './harness.mjs';
+import { etapasConOro, motoresHonestos } from './motores-depto.mjs';
 
 const file = process.argv[2] ?? 'apps/web/dist/mundo-catrucho-hd.html';
 const puntos = JSON.parse(readFileSync(new URL('../src/game/dept/zones/copan-puntos.json', import.meta.url)));
@@ -79,6 +83,8 @@ const ok = await run('copan', file, { hash: '#test', width: 1280, height: 800 },
   await t.press('f');
   await t.waitFor('window.__mcTest.motor.estado().stats.errores>0');
   console.log('PASA mando en ocho motores; manos inválidas y ficha sin ambas caras rechazada');
+  // --- cada juego con oro en todas sus etapas y dentro de los TOPES; no jugar y machacar F pierden
+  await motoresHonestos(t, await etapasConOro(t, { depto: 'copan', juegos }));
   assert.equal(t.errors.length, 0, t.errors.join('\n'));
 });
 const tactil = await run('copan-tactil', file, { hash: '#test', touch: true, width: 900, height: 700 }, async (t) => {
