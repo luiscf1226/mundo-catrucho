@@ -2,6 +2,8 @@
 
 import type { ReactNode } from 'react';
 import { Ball, Block, Cyl, Label } from '../../kit';
+import { Objeto } from '../kit/objetos';
+import { hayPaisaje } from '../kit/Paisaje';
 
 const S = { solid: false } as const;
 const G = ({
@@ -25,6 +27,7 @@ export function Forma({ f, c, nombre }: { f: string; c?: string; nombre?: string
   const L = (d: string) => c ?? d;
   switch (f) {
     case 'pez':
+      if (hayPaisaje()) return <Objeto k="pez" c={L('#b9c6cf')} />;
       return (
         <G>
           <G s={[1.6, 0.85, 0.6]}>
@@ -221,6 +224,20 @@ export function Forma({ f, c, nombre }: { f: string; c?: string; nombre?: string
 
 /** Recipiente que el jugador lleva sobre la cabeza (centro en el origen, aro de atrapar ~0.8 m). */
 export function Recipiente({ con }: { con: string }) {
+  if (hayPaisaje())
+    switch (con) {
+      case 'balde':
+        return <Objeto k="balde" pos={[0, -0.25, 0]} scale={[2.1, 1.45, 2.1]} />;
+      case 'sombrero':
+        return <Objeto k="sombrero" pos={[0, -0.05, 0]} scale={2} c2="#c0392b" />;
+      case 'huacal':
+        return <Objeto k="caja" pos={[0, -0.15, 0]} scale={[1.5, 1.15, 2.25]} c="#b98856" />;
+      case 'red':
+      case 'saco':
+        break;
+      default:
+        return <Objeto k="canasta" pos={[0, -0.22, 0]} scale={[1.8, 1.35, 1.8]} c="#c9954a" />;
+    }
   switch (con) {
     case 'balde':
       return (

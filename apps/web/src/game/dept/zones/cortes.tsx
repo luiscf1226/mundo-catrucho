@@ -13,6 +13,63 @@ const garza = (): Pc[] => [
   bl(0, 1.8, 0.46, 0.1, 'plastic', '#ffffff', { n: 6 }),
   bx(0, 1.79, 0.66, 0.04, 0.04, 0.28, 'plastic', '#ffb703', { solid: false }),
 ];
+/** Bananera del valle de Sula, al este, fuera de lo jugable: guineo en hileras con el racimo embolsado, el cable vía
+ *  sobre sus arcos de tubo con racimos colgando y la empacadora con su pila de lavado junto al lago. */
+function bananera(Z: ZB) {
+  const CX = 64.4,
+    TUBO = '#8f969c';
+  Z.plantacion(
+    'bananera',
+    { minX: 52, maxX: 78, minZ: 1.5, maxZ: 46 },
+    {
+      dx: 2.7,
+      dz: 2.5,
+      smin: 1.15,
+      smax: 1.45,
+      colors: ['#4a8a40', '#55963f', '#3f8a45'],
+      calle: 7,
+      ok: (x) => Math.abs(x - CX) > 1.4,
+    },
+  );
+  const sin = { solid: false };
+  // cable vía: arcos de tubo cada 3 m y el cable arriba
+  for (let z = -1; z <= 46; z += 3)
+    Z.add(
+      cy(CX - 0.8, 1.25, z, 0.045, 2.5, 'metal', TUBO, { n: 6, solid: false }),
+      cy(CX + 0.8, 1.25, z, 0.045, 2.5, 'metal', TUBO, { n: 6, solid: false }),
+      bx(CX, 2.47, z, 1.7, 0.08, 0.08, 'metal', TUBO, sin),
+    );
+  Z.add(bx(CX, 2.38, 22.5, 0.035, 0.035, 47, 'metal', '#3a3d40', sin));
+  // racimos embolsados que van por el cable hacia la empacadora (el «tren» de racimos)
+  for (const z of [3, 4.2, 5.4, 6.6, 7.8, 9, 21, 22.2, 23.4]) {
+    Z.add(
+      bx(CX, 2.2, z, 0.03, 0.34, 0.03, 'metal', '#3a3d40', sin),
+      cy(CX, 1.95, z, 0.06, 0.16, 'wood', '#7a8a4a', { n: 6, solid: false }),
+      cy(CX, 1.42, z, 0.2, 0.92, 'plastic', '#3d78d8', { n: 9, rt: 0.8, solid: false }),
+    );
+  }
+  // empacadora: galera de lámina sobre postes, pila de lavado y cajas de cartón
+  const E = -3.6;
+  for (const x of [-4.4, 0, 4.4])
+    for (const z of [-2.6, 2.6]) Z.add(cy(CX + x, 1.6, E + z, 0.1, 3.2, 'metal', TUBO, { n: 8 }));
+  Z.add(
+    bx(CX, 3.28, E, 9.8, 0.08, 6.4, 'metal', '#a7b0b6', { e: [0.06, 0, 0], solid: false }),
+    bx(CX - 1.2, 0.42, E + 0.4, 5.6, 0.84, 1.8, 'concrete', '#b9b4a8'),
+    bx(CX - 1.2, 0.8, E + 0.4, 5.2, 0.04, 1.4, 'water', '#6aa7b8', sin),
+    bx(CX + 3, 0.45, E - 1.2, 1.6, 0.9, 1.2, 'wood', '#9a7448'),
+  );
+  for (let i = 0; i < 9; i++)
+    Z.add(
+      bx(CX + 2.4 + (i % 3) * 0.55, 0.16 + Math.floor(i / 3) * 0.3, E + 1.4, 0.5, 0.28, 0.4, 'cloth', '#c9a46a', sin),
+    );
+  // rótulo hacia el oeste, donde está la gente
+  Z.add(
+    bx(CX - 6, 1.4, E + 2.6, 0.12, 2.8, 0.12, 'wood', '#5a3d26'),
+    bx(CX - 6, 2.55, E + 2.6, 0.08, 0.7, 2.6, 'wood', '#f2e8cf', sin),
+  );
+  Z.plaque('Finca bananera', CX - 6.05, 2.55, E + 2.6, -PI / 2, 0.36, '#2f6b3a');
+}
+
 /** Cortés: el Lago de Yojoa con su muelle, lanchas, comedores de pescado frito, garzas y una torre para ver aves. */
 export function lago(d: Department): ZoneSpec {
   const zs = (x: number) => 3 * Math.sin(x * 0.07),
@@ -127,6 +184,7 @@ export function lago(d: Department): ZoneSpec {
   Z.veg('tree', 44, land, { sep: 5.5 });
   Z.veg('bush', 26, land, { sep: 3 });
   Z.veg('jungle', 10, (x, z) => land(x, z) && Math.abs(x) > 30, { sep: 8 });
+  bananera(Z);
   Z.add(
     place(mont(100, 80, '#3f7a6a'), -80, 0, -230),
     place(mont(120, 100, '#35705f'), 70, 0, -270),

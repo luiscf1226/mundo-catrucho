@@ -93,6 +93,29 @@ export function catedral(d: Department): ZoneSpec {
       ),
     ),
   );
+  // el reloj: doce marcas (las de las horas en punto más largas), aro y cornisa encima
+  Z.add(
+    ...Array.from({ length: 12 }, (_, i) => {
+      const a = (i / 12) * PI * 2,
+        big = i % 3 === 0;
+      return bx(
+        -13 + Math.sin(a) * 1.3,
+        13.5 + Math.cos(a) * 1.3,
+        -9.28,
+        big ? 0.1 : 0.06,
+        big ? 0.32 : 0.2,
+        0.04,
+        'metal',
+        '#1d1d1f',
+        {
+          e: [0, 0, -a],
+          solid: false,
+        },
+      );
+    }),
+    cy(-13, 13.5, -9.5, 2.05, 0.1, 'stucco', T, { e: [PI / 2, 0, 0], n: 24, solid: false }),
+    bx(-13, 15.75, -9.4, 4.6, 0.22, 0.4, 'stucco', T, { solid: false }),
+  );
   Z.plaque('Reloj de la catedral', -13, 11.1, -9.44, 0, 0.5)
     .plaque('Catedral de Comayagua', 0, 5.3, -11.62, 0, 0.55, '#7a4a2b')
     .plaque('Subida al reloj ↑', -17.6, 1.7, -8.6, 0, 0.34);

@@ -37,10 +37,14 @@ void main() {
   float t = floor( clamp( ( vY + 40.0 ) / 128.0, 0.0, 1.0 ) * 65535.0 );
   gl_FragColor = vec4( floor( t / 256.0 ) / 255.0, mod( t, 256.0 ) / 255.0, uGrass, 1.0 );
 }`;
-function capture(gl: THREE.WebGLRenderer, scene: THREE.Scene): Cover | null {
+/** rectángulo [x0, x1, z0, z1] del piso */
+export type Rect = [number, number, number, number];
+function capture(gl: THREE.WebGLRenderer, scene: THREE.Scene, area?: Rect, holes?: Rect[]): Cover | null {
   const lim = phys.limit;
-  if (!lim) return null;
-  const [x0, x1, z0, z1] = 'r' in lim ? [-lim.r, lim.r, -lim.r, lim.r] : [lim.minX, lim.maxX, lim.minZ, lim.maxZ],
+  if (!lim && !area) return null;
+  const [x0, x1, z0, z1] =
+      area ??
+      (!lim ? [0, 0, 0, 0] : 'r' in lim ? [-lim.r, lim.r, -lim.r, lim.r] : [lim.minX, lim.maxX, lim.minZ, lim.maxZ]),
     L = Math.min(340, Math.max(x1 - x0, z1 - z0) + 24),
     cx = (x0 + x1) / 2,
     cz = (z0 + z1) / 2;
@@ -135,6 +139,15 @@ function capture(gl: THREE.WebGLRenderer, scene: THREE.Scene): Cover | null {
     const a = hBuf[i * 4 + 3];
     hm[i * 2] = a ? ((hBuf[i * 4] * 256 + hBuf[i * 4 + 1]) / 65535) * 128 - 40 : -100;
     ok[i] = a && hBuf[i * 4 + 2] > 128 ? 1 : 0;
+  }
+  // huecos: donde se juega no crece zacate (texel (i, j): x = bx + i·px, z = bz − j·px)
+  if (holes?.length) {
+    const bx = cx - L / 2,
+      bz = cz + L / 2;
+    for (const [h0, h1, k0, k1] of holes)
+      for (let j = Math.max(0, Math.floor((bz - k1) / px)); j <= Math.min(N - 1, Math.ceil((bz - k0) / px)); j++)
+        for (let i = Math.max(0, Math.floor((h0 - bx) / px)); i <= Math.min(N - 1, Math.ceil((h1 - bx) / px)); i++)
+          ok[j * N + i] = 0;
   }
   const rad = Math.max(1, Math.round(0.45 / px));
   for (let j = 0; j < N; j++)
@@ -271,8 +284,9 @@ function tuftGeometry(sp: number, R: number) {
   return g;
 }
 
-/** Zacate cerca de la cámara (media y alta). */
-export function GroundCover() {
+/** Zacate cerca de la cámara (media y alta). `area` es el piso que se fotografía (si falta, el límite del jugador);
+ *  en los `holes` no crece. */
+export function GroundCover({ area, holes }: { area?: Rect; holes?: Rect[] } = {}) {
   const q = texCalidad(),
     { gl, scene } = useThree(),
     [cover, setCover] = useState<Cover | null>(null);
@@ -286,7 +300,7 @@ export function GroundCover() {
     a = requestAnimationFrame(() => {
       a = requestAnimationFrame(() => {
         a = requestAnimationFrame(() => {
-          made = capture(gl, scene);
+          made = capture(gl, scene, area, holes);
           // para pruebas: cuánto del piso quedó con zacate
           const mc = (window as unknown as { __mc?: Record<string, unknown> }).__mc;
           if (mc && made) {

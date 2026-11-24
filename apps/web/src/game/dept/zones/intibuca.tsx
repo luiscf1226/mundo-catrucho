@@ -1,6 +1,6 @@
 import type { Department } from '../../../core/types';
 import { P } from '../../kit';
-import { bl, bx, cliff, cy, inR, PI, place } from '../lib';
+import { bl, bx, cliff, conFlora, cy, inR, PI, place } from '../lib';
 import { baranda, basket, casa, mont, puesto, stairs } from '../parts';
 import { ZB, type ZoneSpec } from '../zone';
 import { IntibucaDescubrimientos } from './IntibucaDescubrimientos';
@@ -98,9 +98,19 @@ export function mercado(d: Department): ZoneSpec {
     bx(0, 11.3, -24.5, 0.16, 1.2, 0.16, 'stone', '#3a3a3a', { solid: false }),
     bx(0, 11.5, -24.5, 0.7, 0.16, 0.16, 'stone', '#3a3a3a', { solid: false }),
     bx(-4.6, 4.3, -23.6, 1.5, 0.9, 1.5, 'stone', '#b8b2a4'),
-    bl(-4.6, 5.1, -23.6, 0.7, 'leaf', '#2f6b3a', { n: 7 }),
+    ...conFlora([bl(-4.6, 5.1, -23.6, 0.7, 'leaf', '#2f6b3a', { n: 7 })], {
+      k: 'izote',
+      p: [-4.6, 4.75, -23.6],
+      s: 0.8,
+      seed: 2,
+    }),
     bx(4.6, 4.3, -23.6, 1.5, 0.9, 1.5, 'stone', '#b8b2a4'),
-    bl(4.6, 5.1, -23.6, 0.7, 'leaf', '#2f6b3a', { n: 7 }),
+    ...conFlora([bl(4.6, 5.1, -23.6, 0.7, 'leaf', '#2f6b3a', { n: 7 })], {
+      k: 'izote',
+      p: [4.6, 4.75, -23.6],
+      s: 0.8,
+      seed: 2,
+    }),
     ...[-1.4, -1.1, 1.1, 1.4].map((x) => cy(x, 4, -23.8, 0.05, 0.32, 'neon', '#ffe9a0', { n: 5, solid: false })),
     bx(-7.4, 2.6, -24.6, 2.4, 5.2, 2, 'stone', '#9a958a'),
     bx(7.6, 2.2, -24.4, 2.6, 4.4, 2.2, 'stone', '#9a958a'),

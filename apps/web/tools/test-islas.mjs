@@ -4,6 +4,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { locuraCaminando, lugaresTuristicos } from './explorar.mjs';
 import { run } from './harness.mjs';
 
 const file = process.argv[2] ?? 'apps/web/dist/mundo-catrucho-hd.html';
@@ -65,14 +66,12 @@ const ok = await run('islas', file, { hash: '#test', width: 1280, height: 800 },
   console.log('PASA 12 puestos abren su juego');
   // --- 7 lugares y 3 locuras se descubren caminando
   assert.equal(puntos.length, 10);
-  for (let i = 0; i < puntos.length; i++) {
+  assert.equal(await lugaresTuristicos(t, 'islas'), 7);
+  for (let i = 7; i < puntos.length; i++) {
     const p = puntos[i];
-    const esperado = i < 7 ? contenido.turismo[i].nombre : contenido.locuras[i - 7].nombre;
-    assert.equal(p.nombre, esperado);
-    await t.ev(`window.__mc.player.teleport(${p.x},2,${p.z + 3.2},0)`);
-    await t.holdUntil('w', `${S}.dialog?.title===${JSON.stringify(p.nombre)}`);
-    assert.equal(await t.ev(`${S}.dialog.text`), p.texto);
-    if (!sinGpu && [0, 6, 7, 8, 9].includes(i)) await t.shot(`${capturas}/descubrimiento-${i + 1}.png`);
+    assert.equal(p.nombre, contenido.locuras[i - 7].nombre);
+    await locuraCaminando(t, { x: p.x, y: 2, z: p.z, atras: 3.2, nombre: p.nombre, texto: p.texto });
+    if (!sinGpu) await t.shot(`${capturas}/descubrimiento-${i + 1}.png`);
     await t.click('dialog-close');
     if (!sinGpu && i >= 7) {
       await t.ev(`window.__mc.player.fixedCam={pos:[${p.x + 3},${4.5},${p.z + 6}],target:[${p.x},1.2,${p.z}],fov:50}`);

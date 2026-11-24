@@ -1,5 +1,7 @@
 import type { Department } from '../../../core/types';
 import { P } from '../../kit';
+import { detalleFino } from '../casas';
+import { estelaMaya } from '../famosos';
 import { bl, bx, cy, distToPath, inR, type Pc, PI, place } from '../lib';
 import { mont, stairs } from '../parts';
 import { ZB, type ZoneSpec } from '../zone';
@@ -7,17 +9,8 @@ import { CopanDescubrimientos } from './CopanDescubrimientos';
 
 const C = '#b5ab95',
   CD = '#8f866f';
-const estela = (): Pc[] => [
-  bx(0, 1.7, 0, 0.95, 3.4, 0.6, 'stone', C),
-  bx(0, 3.5, 0, 1.15, 0.25, 0.75, 'stone', CD, { solid: false }),
-  bx(0, 2.55, 0.31, 0.5, 0.5, 0.06, 'stone', CD, { solid: false }),
-  bx(0, 3.05, 0.31, 0.8, 0.3, 0.06, 'stone', CD, { solid: false }),
-  bx(0, 1.55, 0.31, 0.6, 0.9, 0.06, 'stone', CD, { solid: false }),
-  bx(-0.34, 2, 0.31, 0.12, 0.5, 0.06, 'stone', CD, { solid: false }),
-  bx(0.34, 2, 0.31, 0.12, 0.5, 0.06, 'stone', CD, { solid: false }),
-  bx(0, 0.7, 0.31, 0.75, 0.3, 0.06, 'stone', CD, { solid: false }),
-  cy(0, 0.28, 1.5, 0.75, 0.56, 'stone', C, { n: 8 }),
-];
+/** Estela con retrato tallado (famosos.estelaMaya: el cuerpo sólido es el mismo de antes) y su altar. */
+const estela = (): Pc[] => [...estelaMaya(3.4), cy(0, 0.28, 1.5, 0.75, 0.56, 'stone', C, { n: 8 })];
 /** Copán: la Gran Plaza con estelas, la pirámide de la Escalinata Jeroglífica (se observa desde el sendero), el Juego de Pelota y guacamayas. */
 export function ruinas(d: Department): ZoneSpec {
   const Z = new ZB(d, () => 0);
@@ -52,6 +45,48 @@ export function ruinas(d: Department): ZoneSpec {
     bx(0, 11.9, -19.6, 3.4, 1.2, 1, 'stone', C, { solid: false }),
     bx(0, 12.7, -19.6, 2, 0.5, 0.8, 'stone', CD, { solid: false }),
   );
+  // la Escalinata Jeroglífica: glifos en cada contrahuella, figuras sentadas en el eje, alfardas y la lona que la
+  // protege (todo decorado: la escalera sólida es la de arriba)
+  {
+    const fino = detalleFino(),
+      n = 24,
+      rise = 0.35,
+      run = 0.4,
+      z0 = -5.4,
+      k = fino ? 5 : 2;
+    for (let i = 0; i < n; i++)
+      for (let g = 0; g < k; g++) {
+        const w = 4.6 / k,
+          x = -2.3 + w * (g + 0.5),
+          y = rise * i + rise / 2,
+          z = z0 - run * i + 0.02;
+        Z.add(bx(x, y, z, w - 0.08, rise - 0.1, 0.03, 'stone', (i + g) % 3 ? CD : '#9c9078', { solid: false }));
+        if (fino && (i + g) % 2) Z.add(bl(x, y, z + 0.02, 0.08, 'stone', '#7c725f', { s: [1.2, 1, 0.4], n: 6 }));
+      }
+    for (const i of [5, 11, 17]) {
+      const y = rise * (i + 1),
+        z = z0 - run * (i + 0.6);
+      Z.add(
+        bx(0, y + 0.35, z, 0.8, 0.7, 0.5, 'stone', C, { solid: false }),
+        bl(0, y + 0.95, z + 0.05, 0.28, 'stone', C, { n: 8 }),
+        bx(0, y + 1.3, z, 0.7, 0.28, 0.45, 'stone', CD, { solid: false }),
+      );
+    }
+    const ang = Math.atan2(rise, run),
+      top = n * rise,
+      len = Math.hypot(top, n * run),
+      zc = z0 - (n * run) / 2,
+      ty = top + 2.4,
+      tilt = ang * 0.3;
+    for (const sx of [-1, 1])
+      Z.add(bx(sx * 2.75, top / 2 + 0.25, zc, 0.5, 0.5, len, 'stone', CD, { e: [ang, 0, 0], solid: false }));
+    Z.add(bx(0, ty, zc, 8, 0.05, n * run + 2.4, 'cloth', '#d9d1bd', { e: [tilt, 0, 0], solid: false }));
+    for (const sx of [-1, 1])
+      for (const zz of [z0 + 1, zc, z0 - n * run - 0.4]) {
+        const hh = ty - (zz - zc) * Math.tan(tilt);
+        Z.add(cy(sx * 3.9, hh / 2, zz, 0.07, hh, 'metal', '#8a9096', { n: 6, solid: false }));
+      }
+  }
   Z.n(<P.Sign pos={[5, 0, -4.4]} rot={-0.3} text="Escalinata Jeroglífica" />);
   // estelas de la Gran Plaza
   (
@@ -90,6 +125,15 @@ export function ruinas(d: Department): ZoneSpec {
     bx(s * 8, 1.7, 0, 2.6, 3.4, 16, 'stone', C),
     bx(s * 8, 3.6, 0, 3, 0.4, 16.4, 'stone', CD, { solid: false }),
     ...[-7, 0, 7].map((z) => bl(s * 5.1, 1.9, z, 0.3, 'plastic', '#c0392b', { s: [1.5, 1, 1], n: 7 })),
+    // muro en talud de la cancha (donde rebotaba la pelota), cabezas de guacamaya talladas y los cuartos de arriba
+    bx(s * 5.75, 1.2, 0, 1.97, 0.12, 19.6, 'stone', '#c4b79a', { e: [0, 0, s * 0.53], solid: false }),
+    ...[-7, 0, 7].flatMap((z) => [
+      bl(s * 6.75, 2.05, z, 0.32, 'stone', '#a8987a', { s: [0.9, 1, 1.2], n: 8 }),
+      bx(s * 6.42, 2.0, z, 0.32, 0.12, 0.2, 'stone', '#8c7c60', { e: [0, 0, s * 0.5], solid: false }),
+    ]),
+    bx(s * 8, 4.5, 0, 2.2, 1.4, 7, 'stone', C, { solid: false }),
+    bx(s * 8, 5.3, 0, 2.5, 0.22, 7.3, 'stone', CD, { solid: false }),
+    ...[-2, 0, 2].map((z) => bx(s * 6.88, 4.4, z, 0.04, 1, 0.7, 'plastic', '#211d18', { solid: false })),
   ]);
   Z.put([...court, ...[-7, 0, 7].map((z) => cy(0, 0.03, z, 0.55, 0.06, 'stone', CD, { n: 10, solid: false }))], 27, 2);
   Z.label('Juego de Pelota', 27, 5.4, 2, 0.7).label('Gran Plaza de Copán', 0, 5.2, 12, 0.7);

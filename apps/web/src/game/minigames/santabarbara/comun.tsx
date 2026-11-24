@@ -3,7 +3,7 @@ import { input } from '../../../core/input';
 import { useGame } from '../../../core/store';
 import { Block, Label, Spawn } from '../../kit';
 import type { Guia, Partida } from '../api';
-import { useMesaMaterial } from '../kit/Ambiente';
+import { MesaJuego } from '../kit/Ambiente';
 
 export const limitar = (n: number) => Math.max(-1, Math.min(1, n));
 /** Cursor de dos ejes: `x` de izquierda a derecha y `y` de abajo (−1) a arriba (+1), con teclado, puntero o mando. */
@@ -59,11 +59,10 @@ export const entre = (azar: () => number, a: number, b: number) => a + Math.floo
 export const aviso = (texto: string, icono: string) => useGame.getState().toast(texto, icono);
 /** La mesa de trabajo: el jugador queda a un lado y la cámara mira la mesa desde arriba. */
 export function Mesa({ titulo, children }: { titulo: string; children: ReactNode }) {
-  const material = useMesaMaterial();
   return (
     <>
       <Spawn pos={[-6, 0, 3]} />
-      <Block pos={[-1, 0.35, 0]} size={[10, 0.7, 8]} {...material} solid={false} />
+      <MesaJuego pos={[-1, 0.35, 0]} size={[10, 0.7, 8]} />
       <Label pos={[-1, 0.8, 5]} text={titulo} h={0.45} />
       {children}
     </>

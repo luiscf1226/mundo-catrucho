@@ -13,6 +13,8 @@ import { art, Ball, Block, Cyl, Interactable, Label, P, Spawn, useMgTick, useTic
 import { finish, type Guia, type Partida, partida, rng, setHud, starsFor } from './api';
 import { BotView, conTema, Escenario, Fx, faceTo, fondoDe, fx, makeBots, useWanderers } from './atrapa/comun';
 import { Dona, nuevoPerro, Perro } from './cocina/personajes';
+import { Objeto } from './kit/objetos';
+import { hayPaisaje, MesaBase } from './kit/Paisaje';
 
 type Par = [string, string];
 const PASOS: Par[] = [
@@ -95,6 +97,7 @@ function Base({ sirve }: { sirve: string }) {
         </>
       );
     case 'olla':
+      if (hayPaisaje()) return <Objeto k="olla" scale={[2.4, 1.66, 2.4]} c="#8a4a2b" />;
       return (
         <>
           <Cyl pos={[0, 0.36, 0]} r={0.55} rTop={0.62} h={0.72} color="#5d4037" mat="metal" solid={false} />
@@ -107,6 +110,7 @@ function Base({ sirve }: { sirve: string }) {
     case 'calle':
       return <Block pos={[0, 0.025, 0]} size={[3.1, 0.05, 2.1]} color="#6e6e73" mat="asphalt" solid={false} />;
     default:
+      if (hayPaisaje()) return <Objeto k="plato" scale={[4.2, 2.2, 4.2]} />;
       return (
         <>
           <Cyl pos={[0, 0.03, 0]} r={0.62} h={0.06} color="#f7f7f7" solid={false} />
@@ -624,7 +628,18 @@ export function Cocina() {
       <Spawn pos={[2.4, 0, 3.3]} />
       <Fx />
       {/* piso del puesto, mostrador y toldo */}
-      <Block pos={[0, 0.03, -0.3]} size={[18, 0.06, 10.5]} mat="tile" color="#d9c9a0" solid={false} receive />
+      {hayPaisaje() ? (
+        <MesaBase
+          pos={[0, 0.03, -0.3]}
+          size={[18, 0.06, 10.5]}
+          mat="tile"
+          color="#d9c9a0"
+          fondo={fondo}
+          matas={false}
+        />
+      ) : (
+        <Block pos={[0, 0.03, -0.3]} size={[18, 0.06, 10.5]} mat="tile" color="#d9c9a0" solid={false} receive />
+      )}
       <Block pos={[0, 0.5, -4.5]} size={[16, 1, 0.9]} mat="wood" color="#b9773f" solid={false} />
       <Block pos={[0, 1.03, -4.5]} size={[16.3, 0.1, 1.15]} mat="wood" color="#e0aa68" solid={false} />
       {[-7.9, 7.9].map((x) => (
@@ -642,8 +657,14 @@ export function Cocina() {
       ))}
       <Label pos={[0, 5.4, -5.5]} text={`¡${plato}!`} h={0.8} fg="#ffe082" />
       {/* mesa de armado */}
-      <Block pos={[0, 0.45, 2.2]} size={[3.4, 0.9, 1.9]} mat="wood" color="#a8744a" solid={false} />
-      <Block pos={[0, 0.93, 2.2]} size={[3.5, 0.08, 2]} mat="wood" color="#e6c28b" solid={false} />
+      {hayPaisaje() ? (
+        <Objeto k="mesa" pos={[0, 0, 2.2]} medida={[3.5, 0.97, 2]} c="#c79a62" />
+      ) : (
+        <>
+          <Block pos={[0, 0.45, 2.2]} size={[3.4, 0.9, 1.9]} mat="wood" color="#a8744a" solid={false} />
+          <Block pos={[0, 0.93, 2.2]} size={[3.5, 0.08, 2]} mat="wood" color="#e6c28b" solid={false} />
+        </>
+      )}
       <Label pos={[0, 0.12, 3.4]} text="Mesa de armado" h={0.3} />
       <group position={[0, 0.98, 2.2]} scale={baseDe(sirve)}>
         <Base sirve={sirve} />
@@ -655,22 +676,40 @@ export function Cocina() {
       {/* recipientes */}
       {bins.map((b) => (
         <group key={b.k}>
-          <Block
-            pos={[b.pos[0], 0.45, b.pos[2]]}
-            size={[b.w, 0.9, 0.95]}
-            mat="wood"
-            color={b.extra ? '#4e8d86' : '#b98856'}
-            solid={false}
-          />
-          <Cyl
-            pos={[b.pos[0], 1.05, b.pos[2]]}
-            r={Math.min(0.5, b.w / 2 - 0.05)}
-            rTop={Math.min(0.56, b.w / 2)}
-            h={0.34}
-            mat="plastic"
-            color="#f3efe6"
-            solid={false}
-          />
+          {hayPaisaje() ? (
+            <>
+              <Objeto
+                k="mesa"
+                pos={[b.pos[0], 0, b.pos[2]]}
+                medida={[b.w, 0.9, 0.95]}
+                c={b.extra ? '#4e8d86' : '#b98856'}
+              />
+              <Objeto
+                k="pana"
+                pos={[b.pos[0], 0.9, b.pos[2]]}
+                scale={[Math.min(0.56, b.w / 2) / 0.45, 1.6, Math.min(0.56, b.w / 2) / 0.45]}
+              />
+            </>
+          ) : (
+            <>
+              <Block
+                pos={[b.pos[0], 0.45, b.pos[2]]}
+                size={[b.w, 0.9, 0.95]}
+                mat="wood"
+                color={b.extra ? '#4e8d86' : '#b98856'}
+                solid={false}
+              />
+              <Cyl
+                pos={[b.pos[0], 1.05, b.pos[2]]}
+                r={Math.min(0.5, b.w / 2 - 0.05)}
+                rTop={Math.min(0.56, b.w / 2)}
+                h={0.34}
+                mat="plastic"
+                color="#f3efe6"
+                solid={false}
+              />
+            </>
+          )}
           <Cyl
             pos={[b.pos[0], 1.2, b.pos[2]]}
             r={Math.min(0.44, b.w / 2 - 0.1)}
@@ -735,9 +774,15 @@ export function Cocina() {
         <group rotation-y={-0.9}>
           <Dona frase={fraseDona} />
         </group>
-        <Block pos={[1.5, 0.45, 0.5]} size={[1.8, 0.9, 1.4]} mat="stone" color="#8a7a66" solid={false} />
-        <Cyl pos={[1.5, 0.95, 0.5]} r={0.6} h={0.06} color="#26262b" mat="metal" solid={false} />
-        <Ball pos={[1.5, 0.55, 0.5]} r={0.22} color="#ff7a1a" mat="neon" cast={false} />
+        {hayPaisaje() ? (
+          <Objeto k="fogon" pos={[1.5, 0, 0.5]} />
+        ) : (
+          <>
+            <Block pos={[1.5, 0.45, 0.5]} size={[1.8, 0.9, 1.4]} mat="stone" color="#8a7a66" solid={false} />
+            <Cyl pos={[1.5, 0.95, 0.5]} r={0.6} h={0.06} color="#26262b" mat="metal" solid={false} />
+            <Ball pos={[1.5, 0.55, 0.5]} r={0.22} color="#ff7a1a" mat="neon" cast={false} />
+          </>
+        )}
         <Label pos={[1.5, 1.55, 0.5]} text="Comal" h={0.3} />
       </group>
       {/* perro aguacatero y sus migas */}

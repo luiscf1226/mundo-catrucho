@@ -9,7 +9,7 @@ import { Placed } from '../base';
 import type { ArtProps } from '../types';
 import { FloraMesh } from './flora';
 import { Builder, gBlob, gLathe, gRock, gSph, tint } from './geo';
-import { propMaterial } from './materials';
+import { propMaterial, SUMA_SIN_ALFA } from './materials';
 import { cached, haloTexture, Merged, solidBox, solidCyl } from './pk';
 import { rng } from './tex';
 
@@ -369,7 +369,7 @@ function haloMaterial(color: string, opacity = 0.7) {
       color,
       transparent: true,
       opacity,
-      blending: THREE.AdditiveBlending,
+      ...SUMA_SIN_ALFA,
       depthWrite: false,
     });
     haloMats.set(k, m);

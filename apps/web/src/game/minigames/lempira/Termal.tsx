@@ -2,6 +2,7 @@ import { input } from '../../../core/input';
 import { useGame } from '../../../core/store';
 import { art, Ball, Cyl, Label } from '../../kit';
 import { defineMotor, type Motor } from '../kit';
+import { Poza } from '../kit/poza';
 import { controles, cursor, duracion, Mesa, metas, mover } from './comun';
 
 type Estado = ReturnType<typeof cursor> & {
@@ -67,13 +68,13 @@ const motor = defineMotor({
     <Mesa titulo="La pausa también cuenta · Circuito virtual">
       {[0, 1, 2].map((i) => (
         <group key={i} position={[(i - 1) * 3, 0, 0]}>
-          <Cyl
+          <Poza
             pos={[0, 0.85, 0]}
             r={1.2}
             h={0.25}
             color={i === m.datos.poza ? '#7edbd6' : '#548c9b'}
-            mat="water"
-            solid={false}
+            hondo="#24484d"
+            seed={i + 1}
           />
           <Label pos={[0, 1.3, 0]} text={`Poza ${i + 1}`} h={0.3} />
         </group>

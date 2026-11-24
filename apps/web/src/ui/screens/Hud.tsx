@@ -1,6 +1,6 @@
 // HUD del mundo: monedas, nivel y XP, misiones del día, sala, botones redondos, aviso de interacción,
 // rótulo del lugar, avisos (toasts) y celebraciones. El contenedor no recibe clics: solo los controles.
-import { useEffect, useRef, useState } from 'react';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { audio } from '../../core/audio';
 import { ACHIEVEMENTS, deptById, MISSIONS, minigameById, xpForLevel } from '../../core/data';
 import { input } from '../../core/input';
@@ -12,6 +12,7 @@ import { ChatSala } from '../chat/ChatSala';
 import { Coin, Icon, type IconName, Star } from '../components/Icon';
 import { Bar, Confetti, IBtn } from '../components/kit';
 import { act, cx, fmt, fmtTime, g, roomLabel, useCountUp, useOverview, usePad, useTouch } from '../lib';
+import { Guia, useBaja, useGuia } from './Guia';
 
 const SIDE: [PanelId, IconName, string][] = [
   ['mapa', 'map', 'Mapa'],
@@ -21,9 +22,12 @@ const SIDE: [PanelId, IconName, string][] = [
   ['emotes', 'emote', 'Emotes'],
   ['amigos', 'users', 'Amigos'],
   ['memes', 'sparkle', 'Memes'],
-  ['recuerdos', 'map', 'Recuerdos'],
+  ['recuerdos', 'camera', 'Postales'],
   ['pausa', 'pause', 'Pausa'],
 ];
+
+/** Paneles que en celular acostado se abren desde Pausa (o con su botón táctil) en vez del HUD. */
+const EN_PAUSA: PanelId[] = ['emotes', 'amigos', 'memes', 'recuerdos'];
 
 function Wallet() {
   const p = useGame((s) => s.profile),
@@ -64,8 +68,34 @@ function Wallet() {
   );
 }
 
+/** Avisa una vez cuando una misión del día queda lista para cobrar (antes solo se veía un puntito rojo). */
+function useAvisoMisiones() {
+  useEffect(() => {
+    const listas = (d: ReturnType<typeof g>['profile']['daily']) =>
+      new Set(
+        d.missions
+          .filter((x) => !x.claimed && x.progress >= (MISSIONS.find((m) => m.id === x.id)?.count ?? 1))
+          .map((x) => x.id),
+      );
+    let antes = listas(g().profile.daily),
+      fecha = g().profile.daily.date;
+    return useGame.subscribe((s, p) => {
+      if (s.profile.daily === p.profile.daily) return;
+      const ahora = listas(s.profile.daily);
+      if (s.profile.daily.date !== fecha) antes = new Set();
+      for (const id of ahora)
+        if (!antes.has(id)) {
+          const m = MISSIONS.find((x) => x.id === id);
+          if (m) s.toast(`Misión lista: ${m.text}. Cobrala en Misiones`, '📋');
+        }
+      antes = ahora;
+      fecha = s.profile.daily.date;
+    });
+  }, []);
+}
+
 let trackerOpen: boolean | null = null;
-function Tracker() {
+function Tracker({ extra }: { extra?: ReactNode }) {
   const daily = useGame((s) => s.profile.daily),
     room = useGame((s) => s.profile.room);
   const [open, setOpen] = useState(
@@ -76,8 +106,8 @@ function Tracker() {
   ).length;
   const done = daily.missions.filter((d) => d.claimed).length;
   return (
-    <div className="pointer-events-auto flex flex-col items-start gap-1.5">
-      <div className="flex items-center gap-1.5">
+    <div className="pointer-events-auto flex max-w-full flex-col items-start gap-1.5">
+      <div className="flex max-w-full items-center gap-1.5">
         <button
           type="button"
           data-testid="hud-room"
@@ -107,6 +137,8 @@ function Tracker() {
           <Icon name="down" size={14} cls={cx('transition-transform', open && 'rotate-180')} />
         </button>
       </div>
+      {/* en pantalla baja no caben las dos: la lista abierta tapa a la guía hasta que se cierra */}
+      {!open && extra}
       {open && (
         <div
           data-testid="hud-missions"
@@ -394,17 +426,29 @@ export function Hud() {
     panel = useGame((s) => s.panel),
     playing = mg?.phase === 'playing',
     lobby = useGame((s) => s.scene.kind === 'lobby'),
-    overview = useOverview();
-  const side = SIDE.filter(([id]) => !mg || id === 'pausa' || id === 'emotes');
+    viaje = useGame((s) => s.scene.kind === 'viaje'),
+    overview = useOverview(),
+    baja = useBaja(),
+    touch = useTouch();
+  useGuia();
+  useAvisoMisiones();
+  // celular acostado: en una columna los botones bajaban hasta los táctiles y en fila tapaban la billetera. Quedan
+  // los de siempre en una fila; emotes tiene su botón táctil y amigos, memes y postales están en Pausa.
+  const acostado = baja && touch;
+  const side = SIDE.filter(([id]) => (mg ? id === 'pausa' || id === 'emotes' : !acostado || !EN_PAUSA.includes(id)));
   return (
     <div data-testid="hud" className="pad-safe pointer-events-none absolute inset-0 text-hudfg">
       <div className="flex items-start justify-between gap-2">
         <div className="flex min-w-0 flex-col items-start gap-1.5">
           <Wallet />
-          {!mg && !overview && <Tracker />}
+          {!mg && !overview && <Tracker extra={baja && !viaje ? <Guia compacta /> : null} />}
+          {!mg && !overview && !viaje && !baja && <Guia />}
         </div>
         <div
-          className={cx('pointer-events-auto flex flex-none gap-1.5', mg ? 'flex-row' : 'flex-col-reverse sm:flex-row')}
+          className={cx(
+            'pointer-events-auto flex flex-none',
+            mg ? 'flex-row gap-1.5' : acostado ? 'flex-row gap-1' : 'flex-col-reverse gap-1.5 sm:flex-row',
+          )}
         >
           {lobby && !mg && (
             <IBtn

@@ -4,8 +4,20 @@ import * as THREE from 'three';
 import { BOT_NAMES, SHOP } from '../../../core/data';
 import type { AvatarConfig, AvatarState, MinigameResult, V3 } from '../../../core/types';
 import { art, Block, Cyl, Ground, P, useTick } from '../../kit';
+import type { FloraItem, FloraKind } from '../../kit/art/types';
 import { COMPACT_QUALITY } from '../../quality';
 import { finish, type Partida, rng } from '../api';
+import { Cueva } from '../kit/cueva';
+import {
+  alturaTerreno,
+  type Cauce,
+  cerrosDe,
+  floraDe,
+  hayPaisaje,
+  NIVEL_CAUCE,
+  type Rect,
+  Terreno,
+} from '../kit/Paisaje';
 
 export type Fondo =
   | 'costa'
@@ -263,13 +275,58 @@ const PropOf = ({ it, solid = false }: { it: Item; solid?: boolean }) => {
     <C pos={[it[1], 0, it[2]]} scale={s} solid={solid} {...(it[0] === 'House' ? { w: 8, d: 8, floors: 2 } : {})} />
   );
 };
-/** Escenario de fondo: cielo, suelo, utilería lejana y (si el fondo es de agua) mar. `deck` pone una tarima de madera sobre el agua. */
-export function Escenario({ fondo, deck = true, extra }: { fondo: Fondo; deck?: boolean; extra?: ReactNode }) {
+/** utilería de la lista que en HD es vegetación del paquete de arte (una malla para todas) */
+const FLORA: Record<string, FloraKind> = { Tree: 'tree', Palm: 'palm', Pine: 'pine', Bush: 'bush', Flowers: 'flowers' };
+/** Escenario de fondo: cielo, suelo, utilería lejana y (si el fondo es de agua) mar. `deck` pone una tarima de madera
+ *  sobre el agua. En HD el suelo es terreno con relieve fuera del `claro` donde se juega, con cerros, monte y, si
+ *  viene `cauce`, un río que cruza a lo largo; `zacate` (huecos donde no crece) pone zacate cerca de la cámara. */
+export function Escenario({
+  fondo,
+  deck = true,
+  extra,
+  cauce,
+  claro = [-10, 10, -7, 7],
+  zacate,
+}: {
+  fondo: Fondo;
+  deck?: boolean;
+  extra?: ReactNode;
+  cauce?: Cauce;
+  claro?: Rect;
+  zacate?: Rect[];
+}) {
   const L = LOOKS[fondo] ?? LOOKS.valle;
+  const hd = hayPaisaje();
   const dist = useMemo(() => {
-    if (fondo !== 'montana' && fondo !== 'ruinas' && fondo !== 'selva') return null;
+    if (hd || (fondo !== 'montana' && fondo !== 'ruinas' && fondo !== 'selva')) return null;
     return Array.from({ length: 6 }, (_, i) => ({ x: -40 + i * 16 + (i % 2) * 5, h: 16 + ((i * 5) % 9) }));
-  }, [fondo]);
+  }, [fondo, hd]);
+  const paisaje = useMemo(() => {
+    if (!hd) return null;
+    const flora: FloraItem[] = [];
+    const props: Item[] = [];
+    for (const it of L.props) {
+      const k = FLORA[it[0]];
+      if (!k || !art.Flora) {
+        props.push(it);
+        continue;
+      }
+      if (cauce && Math.abs(it[1] - cauce.x) < cauce.w * 0.5 + 1.2) continue;
+      flora.push({
+        k,
+        p: [it[1], alturaTerreno(fondo, it[1], it[2], cauce) - 0.05, it[2]],
+        s: (it[3] ?? 1) * (k === 'tree' || k === 'pine' ? 1.1 : 1),
+        seed: Math.round(it[1] * 7 + it[2] * 3) & 255,
+        r: it[1] * 0.37,
+      });
+    }
+    return {
+      props,
+      flora: art.Flora ? [...flora, ...floraDe(fondo, claro, cauce)] : flora,
+      cerros: art.Hills ? cerrosDe(fondo) : [],
+    };
+  }, [fondo, hd, cauce?.x, cauce?.w, `${claro}`]); // eslint-disable-line react-hooks/exhaustive-deps
+  const urbano = fondo === 'pueblo' || fondo === 'ciudad' || fondo === 'mercado' || fondo === 'cueva';
   return (
     <>
       <art.SkyRig
@@ -278,16 +335,31 @@ export function Escenario({ fondo, deck = true, extra }: { fondo: Fondo; deck?: 
         shadowRadius={26}
         fogFar={L.indoor ? 60 : undefined}
       />
-      <Ground size={260} color={L.ground[0]} mat={L.ground[1]} />
+      {hd && !urbano ? (
+        <Terreno fondo={fondo} m={L.ground[1]} c={L.ground[0]} cauce={cauce} />
+      ) : (
+        <Ground size={260} color={L.ground[0]} mat={L.ground[1]} />
+      )}
       {L.water && (
         <>
-          <Ground size={[240, 160]} pos={[0, 0, -105]} y={0.03} color={L.far ?? '#3e9dc4'} mat="water" />
+          {hd ? (
+            <Ground size={[420, 240]} pos={[0, 0, -145]} y={0.03} color={L.far ?? '#3e9dc4'} mat="water" />
+          ) : (
+            <Ground size={[240, 160]} pos={[0, 0, -105]} y={0.03} color={L.far ?? '#3e9dc4'} mat="water" />
+          )}
           {deck && <Block pos={[0, -0.12, 1]} size={[18, 0.3, 10]} color="#a87a47" mat="wood" solid={false} />}
         </>
       )}
-      {L.props.map((it, i) => (
+      {hd && cauce && (
+        <Ground size={[cauce.w + 2.4, 60]} pos={[cauce.x, 0, -4]} y={NIVEL_CAUCE} color="#35605a" mat="water" />
+      )}
+      {(hd && fondo === 'cueva' ? [] : (paisaje?.props ?? L.props)).map((it, i) => (
         <PropOf key={i} it={it} />
       ))}
+      {hd && fondo === 'cueva' && <Cueva claro={claro} />}
+      {paisaje && art.Flora && paisaje.flora.length > 0 && <art.Flora items={paisaje.flora} />}
+      {paisaje && art.Hills && paisaje.cerros.length > 0 && <art.Hills hills={paisaje.cerros} />}
+      {hd && zacate && art.GroundCover && <art.GroundCover area={[-34, 34, -26, 18]} holes={zacate} />}
       {dist?.map((d, i) => (
         <Cyl
           key={i}
@@ -312,7 +384,7 @@ export function Escenario({ fondo, deck = true, extra }: { fondo: Fondo; deck?: 
             solid={false}
           />
         ))}
-      {fondo === 'cueva' && (
+      {fondo === 'cueva' && !hd && (
         <Block pos={[0, 14, -10]} size={[70, 2, 40]} color="#2a2622" mat="stone" solid={false} cast={false} />
       )}
       {extra}

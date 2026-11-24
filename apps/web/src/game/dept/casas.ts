@@ -67,6 +67,11 @@ export function reja(x: number, y: number, z: number, w: number, h: number, c: s
   return out;
 }
 
+/** Fuerza de la luz de un cuarto encendido (0.6–1.3), fija para cada ventana: unas con foco, otras con la tele. */
+const luzDe = (x: number, y: number, z: number) => {
+  const h = Math.sin(x * 12.9898 + y * 78.233 + z * 37.719) * 43758.5453;
+  return 0.6 + 0.7 * (h - Math.floor(h));
+};
 /** Ventana de celosía: marco de repello, alféizar, vidrio que refleja el cielo, interior que se enciende de noche
  *  y reja. (x, y) es el centro; z la cara de la pared. */
 export function ventana(
@@ -82,7 +87,7 @@ export function ventana(
     t = 0.09;
   const out: Pc[] = [
     // interior oscuro (de noche, luz cálida) y el vidrio encima
-    bx(x, y, z + 0.012, w, h, 0.02, 'plastic', INTERIOR, { solid: false, em: o.luz ? 1.5 : 0 }),
+    bx(x, y, z + 0.012, w, h, 0.02, 'plastic', INTERIOR, { solid: false, em: o.luz ? luzDe(x, y, z) : 0 }),
     bx(x, y, z + 0.035, w, h, 0.02, 'glass', VIDRIO, { solid: false }),
     // marco y alféizar
     bx(x, y + h / 2 + t / 2, z + 0.05, w + 2 * t, t, 0.1, 'concrete', m, { solid: false }),
@@ -439,9 +444,8 @@ export function casaHN(o: CasaHN): Pc[] {
 
 /** Edificio de ciudad (Tegucigalpa, San Pedro): pisos de 3 m con cornisa, ventanas con marco en las cuatro caras
  *  (algunas encendidas de noche), aires acondicionados colgando, local comercial abajo y techo con tanques. */
-export function edificioHN(w: number, h: number, d: number, col: string, seed = 1): Pc[] {
+export function edificioHN(w: number, h: number, d: number, col: string, seed = 1, fino = detalleFino()): Pc[] {
   const r = rng(seed * 17 + 3),
-    fino = detalleFino(),
     pisos = Math.max(1, Math.floor((h - 0.5) / 3)),
     out: Pc[] = [bx(0, h / 2, 0, w, h, d, 'concrete', col)];
   // cada cara: (largo, giro); las ventanas se arman en local con la cara en z = largo de la otra mitad

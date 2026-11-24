@@ -15,6 +15,8 @@ import { Label, Spawn, useMgTick, useTick } from '../kit';
 import { finish, type Guia, type Partida, partida, rng, setHud, starsFor } from './api';
 import { type BotS, BotView, conTema, Escenario, Fx, faceTo, fondoDe, fx, makeBots } from './atrapa/comun';
 import { Forma, Recipiente } from './atrapa/formas';
+import { hayPaisaje } from './kit/Paisaje';
+import { Poza as AguaPoza } from './kit/poza';
 
 type Cosa = [string, string, string?];
 const CAE: Cosa[] = [
@@ -30,12 +32,17 @@ const EVITA: Cosa[] = [
 ];
 const FX = { x: 8.6, z: 5.6 }; // media cancha
 const DURACION = (dif: number) => Math.round(70 + 20 * dif);
-const metas = (dif: number): [number, number, number] => [
+/** con cubeta y poza (sin las dos cubetas) cada tanda llena y limpia paga doble: las metas suben un 30 % */
+const conTandaDoble = (tema: Record<string, unknown>) => !!tema.poza && !Array.isArray(tema.cubetas);
+const metas = (dif: number, tema: Record<string, unknown> = {}): [number, number, number] => {
+  const k = conTandaDoble(tema) ? 1.3 : 1;
   // la última etapa trae más cosas y más rápido: la racha (×3) sube el puntaje de quien no las deja caer
-  Math.round((120 + 180 * dif) / 10) * 10,
-  Math.round((300 + 300 * dif) / 10) * 10,
-  Math.round((500 + 400 * dif) / 10) * 10,
-];
+  return [
+    Math.round((k * (120 + 180 * dif)) / 10) * 10,
+    Math.round((k * (300 + 300 * dif)) / 10) * 10,
+    Math.round((k * (500 + 400 * dif)) / 10) * 10,
+  ];
+};
 
 export const guia: Guia = {
   goal: 'Atrapá con tu recipiente lo que cae. La sombra en el suelo te dice dónde va a caer. Lo que no sirve te resta y te aturde.',
@@ -44,7 +51,7 @@ export const guia: Guia = {
     ['Shift', 'correr'],
   ],
   touch: [['Palanca', 'moverte debajo de lo que cae']],
-  metas: (p) => metas(p.dif).map((n) => `${n} pts`) as [string, string, string],
+  metas: (p) => metas(p.dif, p.tema).map((n) => `${n} pts`) as [string, string, string],
 };
 
 /** dónde se vacía la cubeta: una poza o dos cubetas grandes en las esquinas de adelante */
@@ -87,7 +94,7 @@ export function Atrapa() {
     tandas = !!P.tema.tandas,
     cupo = Math.max(2, Number(P.tema.cupo) || 6),
     turnoDura = 9 - 3 * P.dif;
-  const meta = useMemo(() => metas(P.dif), [P]),
+  const meta = useMemo(() => metas(P.dif, P.tema), [P]),
     dur = DURACION(P.dif);
   const rnd = useMemo(() => rng(P.seed), [P]);
   const [, draw] = useState(0);
@@ -626,10 +633,21 @@ export function Atrapa() {
 function Poza({ pos, texto, activa, nivel }: { pos: [number, number]; texto: string; activa: boolean; nivel: number }) {
   return (
     <group position={[pos[0], 0, pos[1]]}>
-      <mesh position={[0, 0.04, 0]} rotation-x={-Math.PI / 2}>
-        <circleGeometry args={[R_POZA, 24]} />
-        <meshBasicMaterial color={activa ? '#2e86ab' : '#7a8b99'} transparent opacity={0.75} />
-      </mesh>
+      {hayPaisaje() ? (
+        <AguaPoza
+          pos={[0, 0.03, 0]}
+          r={R_POZA}
+          h={0.06}
+          color={activa ? '#2e86ab' : '#7a8b99'}
+          hondo="#173a4a"
+          seed={3}
+        />
+      ) : (
+        <mesh position={[0, 0.04, 0]} rotation-x={-Math.PI / 2}>
+          <circleGeometry args={[R_POZA, 24]} />
+          <meshBasicMaterial color={activa ? '#2e86ab' : '#7a8b99'} transparent opacity={0.75} />
+        </mesh>
+      )}
       <mesh position={[0, 0.06, 0]} rotation-x={-Math.PI / 2}>
         <ringGeometry args={[R_POZA * (1 - Math.min(1, nivel) * 0.8), R_POZA, 24]} />
         <meshBasicMaterial color="#9be37a" transparent opacity={0.35} />

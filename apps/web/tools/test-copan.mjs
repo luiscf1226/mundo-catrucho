@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { locuraCaminando, lugaresTuristicos } from './explorar.mjs';
 import { run } from './harness.mjs';
 
 const file = process.argv[2] ?? 'apps/web/dist/mundo-catrucho-hd.html';
@@ -40,15 +41,16 @@ const ok = await run('copan', file, { hash: '#test', width: 1280, height: 800 },
   await t.waitFor("window.__mc.store.getState().scene.kind==='lobby'");
   await t.ev("window.__mc.store.getState().travel('copan')");
   await t.waitFor("window.__mcTest?.dept?.id==='copan'");
-  for (let i = 0; i < puntos.length; i++) {
+  const lugares = await lugaresTuristicos(t, 'copan');
+  // las locuras son los últimos puntos: abren su ficha al llegar caminando
+  for (let i = 7; i < puntos.length; i++) {
     const x = i < 5 ? -8 : 8,
       z = 36 - (i % 5) * 6;
-    await t.ev(`window.__mc.player.teleport(${x},0,${z + 3},0)`);
-    await t.holdUntil('w', `window.__mc.store.getState().dialog?.title===${JSON.stringify(puntos[i].nombre)}`);
-    assert.equal(await t.ev('window.__mc.store.getState().dialog.text'), puntos[i].texto);
+    await locuraCaminando(t, { x, z, nombre: puntos[i].nombre, texto: puntos[i].texto });
     await t.shot(`${shots}/descubrimiento-${i + 1}.png`);
     await t.click('dialog-close');
   }
+  assert.equal(lugares, 7);
   console.log('PASA 12 puestos y victorias, 7 lugares y 3 locuras caminando');
   async function abrir(id) {
     await t.ev(`window.__mc.store.getState().startMinigame('copan.${id}')`);

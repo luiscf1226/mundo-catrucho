@@ -12,6 +12,7 @@ import { art, Ground, Interactable, Label, Plate, Spawn, useTick } from '../kit'
 import { COMPACT_QUALITY } from '../quality';
 import { decorFor } from './decor';
 import { clampTo, type Layout, layoutOf, type StationLay } from './ext';
+import { famoso } from './famosos';
 import { Build, bl, bx, cy, mergePieces, type Pc, PI, place, rotXZ, type XZ } from './lib';
 import { BIO, type ZoneSpec } from './zone';
 
@@ -180,7 +181,12 @@ function piecesOf(lay: Layout, plans: StationPlan[], d: Department): Pc[] {
     // piso de la estación, decorado y rótulo de entrada
     out.push(cy(p.s.pos[0], 0.035, p.s.pos[1], 13.5, 0.05, 'concrete', '#e3d6b4', { n: 30, solid: false }));
     const [dx, dz] = rotXZ(0, -7.5, p.s.rot);
-    put(decorFor(p.s.lugar.kind, i * 97 + 13), p.s.pos[0] + dx, p.s.pos[1] + dz, p.s.rot);
+    put(
+      famoso(d.id, p.s.lugar.id, i * 97 + 13) ?? decorFor(p.s.lugar.kind, i * 97 + 13),
+      p.s.pos[0] + dx,
+      p.s.pos[1] + dz,
+      p.s.rot,
+    );
     put(
       [
         bx(-2, 1.75, 0, 0.26, 3.5, 0.26, 'wood', DW),
@@ -267,11 +273,13 @@ export function Lugares({ d, spec }: { d: Department; spec: ZoneSpec }) {
       minZ: Math.min(...rs.map((r) => r.minZ)),
       maxZ: Math.max(...rs.map((r) => r.maxZ)),
     };
-    if (location.hash.includes('test'))
+    if (location.hash.includes('test') || location.hash.includes('fotos'))
       ((window as any).__mcTest ??= {}).lugares = {
         c: lay.c,
         st: plans.map((p) => ({
           id: p.s.lugar.id,
+          pos: p.s.pos,
+          rot: p.s.rot,
           entry: p.entry,
           sign: p.sign,
           booths: p.booths.map((b) => ({ id: b.j.id, use: b.use })),

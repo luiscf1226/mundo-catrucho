@@ -372,7 +372,7 @@ function RobloxProject() {
           ) : (
             <div className="mc-card flex min-h-0 flex-1 flex-col items-center justify-center gap-2 p-6 text-center text-muted max-sm:portrait:hidden">
               <Icon name="code" size={40} />
-              <span className="text-sm font-bold">Elige un archivo para ver su código.</span>
+              <span className="text-sm font-bold">Elegí un archivo para ver su código.</span>
             </div>
           )}
         </div>
