@@ -78,12 +78,13 @@ export function Diagnostico() {
   return (
     <div
       data-testid="diagnostico-fps"
-      className="pointer-events-auto fixed left-1/2 top-[max(.25rem,env(safe-area-inset-top))] z-50 -translate-x-1/2 rounded-lg bg-black/75 px-2 py-1 font-mono text-[11px] leading-tight text-white"
+      className="pointer-events-none fixed left-[max(.25rem,env(safe-area-inset-left))] top-[56%] z-50 max-w-[62vw] rounded-lg bg-black/70 px-2 py-1 font-mono text-[10px] leading-tight text-white"
     >
       {vivo && (
         <div className={malo ? 'text-red-300' : 'text-green-300'}>
-          {vivo.fps.toFixed(0)} FPS · p95 {vivo.p95.toFixed(0)} ms · {vivo.lentos.toFixed(0)}% lentos · {vivo.llamadas}{' '}
-          llamadas · DPR {vivo.dpr.toFixed(2)}
+          {vivo.fps.toFixed(0)} FPS · p95 {vivo.p95.toFixed(0)} ms · {vivo.lentos.toFixed(0)}% lentos
+          <br />
+          {vivo.llamadas} llamadas · DPR {vivo.dpr.toFixed(2)}
         </div>
       )}
       <div className="flex items-center gap-2">
@@ -91,7 +92,7 @@ export function Diagnostico() {
         <button
           type="button"
           data-testid="diagnostico-medir"
-          className="rounded bg-white/20 px-1.5"
+          className="pointer-events-auto rounded bg-white/20 px-1.5"
           disabled={!!medicion?.falta}
           onClick={medir}
         >
@@ -99,7 +100,7 @@ export function Diagnostico() {
         </button>
       </div>
       {medicion?.texto && (
-        <div data-testid="diagnostico-resumen" className="max-w-[90vw] select-text whitespace-normal">
+        <div data-testid="diagnostico-resumen" className="pointer-events-auto select-text whitespace-normal">
           {medicion.texto}
         </div>
       )}

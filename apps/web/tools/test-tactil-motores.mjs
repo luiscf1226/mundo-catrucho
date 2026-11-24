@@ -61,6 +61,8 @@ const teclado = (texto) => TECLADO.find((r) => r.test(texto));
 function controlesDe(fila) {
   const k = fila.join(' ');
   const c = new Set();
+  // «🎯: nada: …» avisa que ese botón no hace falta
+  if (/^nada\b/i.test(fila[1] ?? '')) return ['nada'];
   if (/palanca/i.test(k)) c.add('palanca');
   if (/🎯|toque al picar/i.test(k)) c.add('fire');
   if (/(^|[^\p{L}])E($|[^\p{L}])/u.test(fila[0])) c.add('use');
@@ -76,7 +78,8 @@ const CONTAR = `(()=>{const i=window.__mc.input;if(i.__cuenta)return;const c={};
   const d=Object.getOwnPropertyDescriptors(i),n=(k)=>{if(!i.__mirando)c[k]=(c[k]||0)+1};
   for(const k of ['mx','mz'])Object.defineProperty(i,k,{configurable:true,get(){n(k);return d[k].get.call(i)}});
   for(const k of ['jx','jz','px','py','pointerDown','jump']){let v=i[k];Object.defineProperty(i,k,{configurable:true,get(){n(k);return v},set(x){v=x}})}
-  const take=i.take;i.take=function(e){n('lee:'+e);const r=take.call(this,e);if(r)n('usa:'+e);return r};})()`;
+  const take=i.take;i.take=function(e){n('lee:'+e);const r=take.call(this,e);if(r)n('usa:'+e);return r};
+  const press=i.press;i.press=function(e){c['toca:'+e]=(c['toca:'+e]||0)+1;return press.call(this,e)};})()`;
 
 const ok = await run(
   'tactil-motores',
@@ -223,9 +226,11 @@ const ok = await run(
         for (const b of ['fire', 'use', 'alt', 'jump']) {
           const p = await centro(b);
           await t.ev(`window.__mc.input.pressed.delete('${b}')`);
+          const antes = await mirar(`i.__cuenta['toca:${b}'] ?? 0`);
           await t.cdp('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ ...p, id: 1 }] });
-          const llego = await mirar(`i.pressed.has('${b}') || i.jump`);
           await cuadros(4);
+          // el toque llegó si el botón llamó a input.press; se gastó si el motor (u otro) lo tomó después
+          const llego = (await mirar(`i.__cuenta['toca:${b}'] ?? 0`)) > antes;
           usa[b] = llego && !(await mirar(`i.pressed.has('${b}')`));
           await t.cdp('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
           await cuadros(2);
