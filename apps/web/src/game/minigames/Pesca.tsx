@@ -12,6 +12,7 @@ import { art, Ball, Block, Cyl, Label, P, Spawn, useMgTick, useTick } from '../k
 import { finish, type Guia, type Partida, partida, rng, setHud, starsFor } from './api';
 import { type BotS, BotView, conTema, Fx, faceTo, fx, makeBots, useHold } from './atrapa/comun';
 import { Basura, Pez, Plat } from './pesca/pez';
+import { LagoYojoa } from './pesca/yojoa';
 
 type PezT = [string, number, string?];
 const PECES: PezT[] = [
@@ -173,6 +174,8 @@ export function Pesca() {
   const s = useRef({
     fase: 'idle' as Fase,
     t: dur,
+    /** tiempo de juego corrido (sin castigos): reloj de las pruebas */
+    reloj: 0,
     score: 0,
     racha: 0,
     n: 0,
@@ -281,6 +284,7 @@ export function Pesca() {
         state: () => ({
           fase: s.fase,
           t: s.t,
+          reloj: s.reloj,
           score: s.score,
           n: s.n,
           basura: s.basura,
@@ -319,6 +323,7 @@ export function Pesca() {
       edge = held && !s.prev;
     s.prev = held;
     s.t -= dt;
+    s.reloj += dt;
     s.frase -= dt;
     if (s.lock && !held) s.lock = false;
     if (s.frase <= 0) {
@@ -667,7 +672,12 @@ export function Pesca() {
   const rojo = s.fase === 'jala' && s.tension >= BAD;
   return (
     <>
-      <art.SkyRig time={ag.time} weather={ag.weather ?? 'despejado'} shadowRadius={22} />
+      <art.SkyRig
+        time={ag.time}
+        weather={ag.weather ?? 'despejado'}
+        shadowRadius={22}
+        fogFar={agua === 'lago' && art.fused ? 420 : undefined}
+      />
       <Spawn pos={[0, 0, pz]} />
       {fondo}
       <Fx />
@@ -776,12 +786,13 @@ export function Pesca() {
 
 // ------------------------------------------------------------ escenario
 function Fondo({ agua, ag, desde, pz }: { agua: string; ag: { c: string }; desde: string; pz: number }) {
-  const rio = agua === 'rio';
+  const rio = agua === 'rio',
+    lago = agua === 'lago' && !!art.fused; // el lago con orillas: el agua llega hasta donde empieza la tierra
   return (
     <>
       <Block
-        pos={[0, -0.5, -45]}
-        size={[rio ? 26 : 160, 0.1, 130]}
+        pos={[0, -0.5, lago ? -100 : -45]}
+        size={[rio ? 26 : lago ? 420 : 160, 0.1, lago ? 300 : 130]}
         mat="water"
         color={ag.c}
         solid={false}
@@ -809,7 +820,8 @@ function Fondo({ agua, ag, desde, pz }: { agua: string; ag: { c: string }; desde
             ))}
           </group>
         ))}
-      {agua === 'lago' && (
+      {agua === 'lago' && art.fused && <LagoYojoa />}
+      {agua === 'lago' && !art.fused && (
         <>
           <Block pos={[-5, 3, -62]} size={[80, 7, 8]} mat="grass" color="#4d7c59" solid={false} cast={false} />
           <Block pos={[22, 5.5, -70]} size={[56, 11, 8]} mat="grass" color="#6f9a6b" solid={false} cast={false} />

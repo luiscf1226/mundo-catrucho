@@ -186,7 +186,7 @@ function Escena({ motor: m }: { motor: Sesion }) {
         alto={2.7}
         fg="#ffe08a"
       />
-      {m.cuenta > 0 && <SobreJugador texto={`¡Preparáte! ${Math.ceil(m.cuenta)}`} alto={4.4} />}
+      {m.cuenta > 0 && <SobreJugador texto={`¡Preparate! ${Math.ceil(m.cuenta)}`} alto={4.4} />}
       <AvisoFlotante aviso={s.pop} alto={4.6} />
       <Flecha hacia={meta} color={meta === GUARIDA ? '#ffb703' : '#7cff6b'} />
     </>

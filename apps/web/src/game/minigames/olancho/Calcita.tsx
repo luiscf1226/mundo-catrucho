@@ -1,6 +1,7 @@
 import { input } from '../../../core/input';
-import { Ball, Block, Cyl, Label } from '../../kit';
+import { Ball, Block, Cyl, Label, Wall } from '../../kit';
 import { defineMotor, type Motor } from '../kit';
+import { hayPaisaje, MesaBase } from '../kit/Paisaje';
 import { controles, duracion, metas, mover, Taller } from './Taller';
 
 type Estado = {
@@ -89,7 +90,14 @@ const motor = defineMotor({
       <Taller nombre={m.parametros.nombre} aviso="Réplica virtual · El brillo se documenta">
         <Block pos={[-0.6, 1.06, 1]} size={[2, 0.12, 0.25]} color="#e2d9c6" mat="stone" />
         <Label pos={[0, 1.2, 1.7]} text="Hueso y depósito de calcita · réplica" h={0.22} />
-        <Block pos={[0, 0.5, 0]} size={[6, 1, 4]} color="#554c49" mat="stone" />
+        {hayPaisaje() ? (
+          <>
+            <MesaBase pos={[0, 0.5, 0]} size={[6, 1, 4]} mat="stone" color="#554c49" fondo="cueva" matas={false} />
+            <Wall pos={[0, 0.5, 0]} size={[6, 1, 4]} />
+          </>
+        ) : (
+          <Block pos={[0, 0.5, 0]} size={[6, 1, 4]} color="#554c49" mat="stone" />
+        )}
         {[-1, 0, 1].map((i) => (
           <Cyl
             key={i}

@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { locuraCaminando, lugaresTuristicos } from './explorar.mjs';
 import { run } from './harness.mjs';
 
 const file = process.argv[2] ?? 'apps/web/dist/mundo-catrucho-hd.html';
@@ -52,12 +53,12 @@ const ok = await run('lempira', file, { hash: '#test', width: 1280, height: 800 
   await t.waitFor(`${S}.scene.kind==='lobby'`);
   await t.ev(`delete window.__mcTest.dept;${S}.travel('lempira')`);
   await t.waitFor("window.__mcTest?.dept?.id==='lempira'");
-  for (let i = 0; i < puntos.length; i++) {
-    console.log('Explorá', i + 1);
+  assert.equal(await lugaresTuristicos(t, 'lempira'), 8);
+  // las tres locuras (los últimos puntos) abren su ficha al llegar caminando
+  for (let i = 8; i < puntos.length; i++) {
+    console.log('Locura', i - 7);
     const [x, z] = puntos[i].pos;
-    await t.ev(`window.__mc.player.teleport(${x},0,${z + 2.5},0)`);
-    await t.holdUntil('w', `${S}.dialog?.title===${JSON.stringify(puntos[i].nombre)}`);
-    assert.equal(await t.ev(`${S}.dialog.text`), puntos[i].texto);
+    await locuraCaminando(t, { x, z, atras: 2.5, nombre: puntos[i].nombre, texto: puntos[i].texto });
     await t.shot(`${shots}/descubrimiento-${i + 1}.png`);
     await t.click('dialog-close');
   }

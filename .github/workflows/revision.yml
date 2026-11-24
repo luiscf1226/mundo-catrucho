@@ -13,7 +13,8 @@ jobs:
   revision:
     name: check, test y capturas
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    # la revisión completa ya tarda ~46 min sin GPU (19 nov): margen para que no corte por tiempo
+    timeout-minutes: 80
     env:
       CHROME_BIN: google-chrome
       MC_GPU: "0"

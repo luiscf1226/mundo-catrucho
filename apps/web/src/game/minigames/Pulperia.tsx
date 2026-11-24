@@ -5,9 +5,10 @@ import { phys } from '../../core/phys';
 import { player } from '../../core/player';
 import { useGame } from '../../core/store';
 import type { AvatarState, V3 } from '../../core/types';
-import { art, Ball, Block, Cyl, Ground, Interactable, Label, Spawn, useMgTick } from '../kit';
+import { art, Ball, Block, Cyl, Ground, Interactable, Label, Spawn, useMgTick, Wall } from '../kit';
 import { finish, partida, rulesOf, setHud, starsFor } from './api';
 import { Boxes, type Piece } from './feria/inst';
+import { DecorPulperia } from './pulperia/decor';
 
 type Item = 'baleada' | 'fresco' | 'pan' | 'churros';
 const menu: Item[] = ['baleada', 'fresco', 'pan', 'churros'];
@@ -72,6 +73,7 @@ function Food({ item, pos = [0, 0, 0] }: { item: Item; pos?: V3 }) {
   );
 }
 export function Pulperia() {
+  const hd = !!art.fused;
   const avatar = useGame((s) => s.profile.avatar);
   const { dif } = useMemo(partida, []);
   const [, draw] = useState(0);
@@ -273,26 +275,43 @@ export function Pulperia() {
     <>
       <art.SkyRig indoor />
       <Spawn pos={[0, 0, 3]} />
-      <Ground size={[16, 15]} mat="tile" color={s.blackout ? '#586070' : '#d6d1b3'} />
-      <Block pos={[0, 2, -7]} size={[16, 4, 0.3]} mat="stucco" color="#3b9b91" />
-      <Block pos={[-7.5, 1, 0]} size={[0.3, 2, 14]} mat="brick" color="#e9bb88" />
-      <Block pos={[7.5, 1, 0]} size={[0.3, 2, 14]} mat="brick" color="#e9bb88" />
-      <Label pos={[-5.5, 3.5, -6.7]} text="Pulpería Doña Toña" h={0.6} />
-      <Label pos={[-5.5, 2.8, -6.7]} text="Hoy no se fía, mañana sí" h={0.4} />
-      <Block pos={[0, 0.7, -3.7]} size={[11, 1.4, 0.65]} mat="wood" color="#bd6c3f" />
-      {[-5.4, -4.2, -1.5, 1.5, 4.2, 5.4].map((x) => (
-        <Cyl key={x} pos={[x, 2.1, -3.7]} r={0.035} h={1.3} mat="metal" color="#444e59" solid={false} />
-      ))}
+      <Ground size={[16, 15]} mat="tile" color={s.blackout ? '#4f4a52' : hd ? '#cdb196' : '#d6d1b3'} />
+      {hd ? (
+        <>
+          {/* mismas colisiones de siempre; lo que se ve es el decorado fusionado */}
+          <Wall pos={[0, 2, -7]} size={[16, 4, 0.3]} />
+          <Wall pos={[-7.5, 1, 0]} size={[0.3, 2, 14]} />
+          <Wall pos={[7.5, 1, 0]} size={[0.3, 2, 14]} />
+          <Wall pos={[0, 0.7, -3.7]} size={[11, 1.4, 0.65]} />
+          <DecorPulperia />
+        </>
+      ) : (
+        <>
+          <Block pos={[0, 2, -7]} size={[16, 4, 0.3]} mat="stucco" color="#3b9b91" />
+          <Block pos={[-7.5, 1, 0]} size={[0.3, 2, 14]} mat="brick" color="#e9bb88" />
+          <Block pos={[7.5, 1, 0]} size={[0.3, 2, 14]} mat="brick" color="#e9bb88" />
+          <Label pos={[-5.5, 3.5, -6.7]} text="Pulpería Doña Toña" h={0.6} />
+          <Label pos={[-5.5, 2.8, -6.7]} text="Hoy no se fía, mañana sí" h={0.4} />
+          <Block pos={[0, 0.7, -3.7]} size={[11, 1.4, 0.65]} mat="wood" color="#bd6c3f" />
+          {[-5.4, -4.2, -1.5, 1.5, 4.2, 5.4].map((x) => (
+            <Cyl key={x} pos={[x, 2.1, -3.7]} r={0.035} h={1.3} mat="metal" color="#444e59" solid={false} />
+          ))}
+        </>
+      )}
       {menu.map((item) => {
         const g = goods[item];
         return (
           <group key={item}>
-            <Block
-              pos={[g.pos[0], 0.65, g.pos[2] - 0.7]}
-              size={[2, 1.3, 1]}
-              mat={item === 'fresco' ? 'metal' : 'wood'}
-              color={item === 'fresco' ? '#c6e9eb' : '#c88b4f'}
-            />
+            {hd ? (
+              <Wall pos={[g.pos[0], 0.65, g.pos[2] - 0.7]} size={[2, 1.3, 1]} />
+            ) : (
+              <Block
+                pos={[g.pos[0], 0.65, g.pos[2] - 0.7]}
+                size={[2, 1.3, 1]}
+                mat={item === 'fresco' ? 'metal' : 'wood'}
+                color={item === 'fresco' ? '#c6e9eb' : '#c88b4f'}
+              />
+            )}
             <Cyl pos={g.pos} r={0.8} h={0.035} mat="neon" color={g.color} solid={false} />
             <Label pos={[g.pos[0], 1.8, g.pos[2] - 0.1]} text={`${g.icon} ${g.name}`} h={0.5} />
             <Food item={item} pos={[g.pos[0], 1.4, g.pos[2] - 0.7]} />
@@ -314,17 +333,21 @@ export function Pulperia() {
           </group>
         );
       })}
-      <Block pos={[5, 1.9, -2.1]} size={[1.9, 1.8, 0.2]} mat="metal" color="#c6e9eb" solid={false} />
+      {!hd && <Block pos={[5, 1.9, -2.1]} size={[1.9, 1.8, 0.2]} mat="metal" color="#c6e9eb" solid={false} />}
       <Block
-        pos={[5, 1.9, -1.94]}
+        pos={[5, 1.9, hd ? -2.05 : -1.94]}
         size={[1.55, 1.35, 0.08]}
         mat="glass"
         color={s.blackout ? '#34454b' : '#66b6c9'}
         solid={false}
       />
       <Label pos={[5, 2.95, -2.1]} text={s.blackout ? 'SIN LUZ' : 'Refri · bien helado'} h={0.3} />
-      <Boxes mat="plastic" items={products} />
-      <Block pos={[-5.5, 1, -3.1]} size={[2.5, 0.12, 1.5]} mat="wood" color="#88522f" solid={false} />
+      {!hd && (
+        <>
+          <Boxes mat="plastic" items={products} />
+          <Block pos={[-5.5, 1, -3.1]} size={[2.5, 0.12, 1.5]} mat="wood" color="#88522f" solid={false} />
+        </>
+      )}
       {[0, 1, 2].map((slot) => (
         <group key={slot}>
           <Label
@@ -393,7 +416,8 @@ export function Pulperia() {
         </group>
       ))}
       <Label pos={[-5, 0.35, 1.5]} text="Esperá aquí · 1.5 s" h={0.32} />
-      <Cyl pos={[2, 0.5, 4.5]} r={0.45} h={1} mat="metal" color="#57696a" />
+      <Cyl pos={[2, 0.5, 4.5]} r={0.45} h={1} mat={hd ? 'plastic' : 'metal'} color={hd ? '#2f6f4f' : '#57696a'} />
+      {hd && <Cyl pos={[2, 1.02, 4.5]} r={0.49} h={0.06} mat="plastic" color="#245a3f" solid={false} />}
       <Label pos={[2, 1.5, 4.5]} text="Basurero" h={0.35} />
       <Interactable
         pos={[2, 0, 3.7]}

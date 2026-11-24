@@ -2,6 +2,7 @@ import { input } from '../../../core/input';
 import { Ball, Block, Cyl, Label, Plate } from '../../kit';
 import { rng } from '../api';
 import { defineMotor, type Motor } from '../kit';
+import { Poza as AguaPoza } from '../kit/poza';
 import { controles, cursor, duracion, Mesa, metas, mover, Puntero } from './comun';
 
 interface Poza {
@@ -144,12 +145,13 @@ const motor = defineMotor({
       <Mesa titulo={`${m.partida.juego?.name ?? 'Estanques de Marcovia'} · Oxígeno y sal de noche`}>
         {s.pozas.map((p, i) => (
           <group key={i} position={[(i ? 1 : -1) * 2.4, 0, -0.5]}>
-            <Block
+            <AguaPoza
               pos={[0, 0.78, 0]}
               size={[3.6, 0.12, 4]}
               color={estable(p) ? '#3f8fa6' : '#7a7f55'}
-              mat="water"
-              solid={false}
+              orilla="barro"
+              hondo="#2f3a2a"
+              seed={i + 3}
             />
             <Block pos={[-2, 0.8 + p.o2, 1.6]} size={[0.25, p.o2 * 2, 0.25]} color="#7ed6ff" mat="neon" solid={false} />
             <Block pos={[2, 0.8 + p.sal, 1.6]} size={[0.25, p.sal * 2, 0.25]} color="#f0e2a8" solid={false} />

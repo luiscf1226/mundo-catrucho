@@ -90,7 +90,7 @@ export function MainMenu() {
           <Logo cls="text-[clamp(2.6rem,13vw,4.6rem)] landscape:text-[clamp(2.4rem,7.2vw,6rem)] short:landscape:text-[clamp(1.9rem,11.5vh,3.4rem)]" />
           <p className="mc-tagline mt-3 flex items-center gap-2 short:mt-1">
             <FiveStars size={11} color={IS_HD ? '#7fe9ff' : '#fff'} />
-            <span>Explora Honduras, juega y gana Lempiritas</span>
+            <span>Explorá Honduras, jugá y ganá Lempiritas</span>
           </p>
         </div>
         <div className="min-h-0 flex-1" />

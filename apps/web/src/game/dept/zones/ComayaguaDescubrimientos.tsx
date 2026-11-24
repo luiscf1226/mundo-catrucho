@@ -117,7 +117,7 @@ function CuevaChismosa() {
 function Punto({ indice }: { indice: number }) {
   const p = puntos[indice];
   const loco = p.id.includes('locura');
-  useLocuraCerca(p.x, p.z);
+  useLocuraCerca(p.x, p.z, undefined, { title: p.nombre, text: p.texto });
 
   return (
     <group position={[p.x, 0, p.z]}>

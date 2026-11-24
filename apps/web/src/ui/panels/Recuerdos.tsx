@@ -8,7 +8,7 @@ import { Btn, Note, Panel } from '../components/kit';
 export function RecuerdosPanel() {
   const recuerdos = useGame((s) => s.profile.turismo);
   return (
-    <Panel id="recuerdos" title="Recuerdos" icon="map" size="lg">
+    <Panel id="recuerdos" title="Postales" icon="camera" size="lg">
       <Note>Caminá hasta los letreros dorados. Descubrí un lugar y completá su actividad para guardar una postal.</Note>
       {DEPARTMENTS.map((d) => {
         const lugares = TURISMO.filter((p) => p.dept === d.id),
@@ -75,7 +75,7 @@ function Actividad({ lugar }: { lugar: LugarTuristico }) {
     tipo === 'subir'
       ? ['Buscá apoyo firme', 'Subí por el sendero', 'Llegá al mirador']
       : tipo === 'probar'
-        ? ['Laváte las manos', 'Probá un bocadito', 'Contale al anfitrión qué te pareció']
+        ? ['Lavate las manos', 'Probá un bocadito', 'Contale al anfitrión qué te pareció']
         : ['Recibí la artesanía', 'Envolvela con cuidado', 'Entregala al anfitrión'];
   return (
     <div data-testid="turismo-actividad" data-tipo={tipo} className="flex flex-col gap-4">

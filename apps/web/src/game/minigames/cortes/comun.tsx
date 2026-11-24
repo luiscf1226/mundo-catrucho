@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
 import { input } from '../../../core/input';
-import { Block, Label, Spawn } from '../../kit';
+import { Label, Spawn } from '../../kit';
 import type { Guia } from '../api';
-import { useMesaMaterial } from '../kit/Ambiente';
+import { MesaJuego } from '../kit/Ambiente';
 
 export const limitar = (v: number, a = -1, b = 1) => Math.max(a, Math.min(b, v));
 export type Cursor = { x: number; y: number; px: number; py: number; auto: boolean };
@@ -21,11 +21,10 @@ export function mover(s: Cursor, dt: number) {
   s.auto = false;
 }
 export function Mesa({ titulo, texto, children }: { titulo: string; texto: string; children: ReactNode }) {
-  const material = useMesaMaterial();
   return (
     <>
       <Spawn pos={[-6, 0, 3]} />
-      <Block pos={[-1, 0.35, 0]} size={[10, 0.7, 9]} {...material} solid={false} />
+      <MesaJuego pos={[-1, 0.35, 0]} size={[10, 0.7, 9]} />
       <Label pos={[-1, 0.7, 5.4]} text={titulo} h={0.6} />
       <Label pos={[-1, 1.4, 4.5]} text={texto} h={0.3} />
       {children}

@@ -106,7 +106,7 @@ function BambuConSaludo({ x, z }: { x: number; z: number }) {
 function Punto({ indice, y }: { indice: number; y: number }) {
   const p = puntos[indice];
   const loco = p.id.includes('locura');
-  useLocuraCerca(p.x, p.z);
+  useLocuraCerca(p.x, p.z, undefined, { title: p.nombre, text: p.texto });
 
   return (
     <group position={[p.x, y, p.z]}>

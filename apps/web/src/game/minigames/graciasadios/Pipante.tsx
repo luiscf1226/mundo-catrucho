@@ -5,6 +5,8 @@ import { useGame } from '../../../core/store';
 import { Ball, Block, Cyl, Label } from '../../kit';
 import { rng } from '../api';
 import { defineMotor, type Motor } from '../kit';
+import { MEDIDA, Objeto } from '../kit/objetos';
+import { Poza } from '../kit/poza';
 import { controles, cursor, duracion, limitar, Mesa, metas, mover, variante } from './comun';
 
 type Remolino = { x: number; vel: number; giro: 1 | -1; popa: boolean };
@@ -169,8 +171,8 @@ const motor = defineMotor({
     const mx = X(s.meta[1]) - X(s.meta[0]);
     return (
       <Mesa titulo={loco ? 'Afluente del Patuca · carga corrida' : 'Confluencia del Patuca'}>
-        <Block pos={[-1, 0.76, 0]} size={[9.4, 0.06, 6.6]} color="#3d8f8a" mat="water" solid={false} />
-        <Block pos={[2.6, 0.77, -2.6]} size={[2.6, 0.06, 1.6]} rot={0.7} color="#5aa6a0" mat="water" solid={false} />
+        <Poza pos={[-1, 0.76, 0]} size={[9.4, 0.06, 6.6]} color="#3d8f8a" hondo="#173532" seed={4} />
+        <Poza pos={[2.6, 0.77, -2.6]} size={[2.6, 0.06, 1.6]} rot={0.7} color="#5aa6a0" seed={9} />
         {/* guía de la diagonal entre las dos boyas */}
         <Block
           pos={[(X(s.meta[0]) + X(s.meta[1])) / 2, 0.8, 0]}
@@ -194,13 +196,12 @@ const motor = defineMotor({
           />
         ))}
         <group>
-          <Block
-            pos={[(X(s.proa) + X(s.popa)) / 2, 0.92, 0]}
-            size={[0.42, 0.22, largo]}
+          <Objeto
+            k="cayuco"
+            pos={[(X(s.proa) + X(s.popa)) / 2, 0.81, 0]}
+            scale={[0.42 / MEDIDA.cayuco[0], 0.22 / MEDIDA.cayuco[1], largo / MEDIDA.cayuco[2]]}
             rot={giro}
-            color="#7f5539"
-            mat="wood"
-            solid={false}
+            c="#7f5539"
           />
           <Ball pos={[X(s.proa), 1.08, ZP]} r={0.16} color="#e63946" />
           <Ball pos={[X(s.popa), 1.08, ZS]} r={loco ? 0.2 : 0.16} color="#ffb703" />

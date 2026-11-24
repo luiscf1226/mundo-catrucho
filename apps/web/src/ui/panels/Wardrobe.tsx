@@ -295,7 +295,7 @@ export function CharacterPanel() {
   };
   const done = () => (p.created ? g().closePanel() : g().finishCreation());
   return (
-    <Panel id="personaje" title={p.created ? 'Tu personaje' : 'Crea tu personaje'} icon="user" size="xl" fill>
+    <Panel id="personaje" title={p.created ? 'Tu personaje' : 'Creá tu personaje'} icon="user" size="xl" fill>
       <div className="flex min-h-0 flex-1 flex-col gap-3 landscape:flex-row">
         {/* vista previa */}
         <div className="flex flex-none flex-col gap-2 portrait:h-[30vh] portrait:min-h-[11rem] landscape:w-[34%] landscape:min-w-[12rem] landscape:max-w-sm">
@@ -386,7 +386,7 @@ export function CharacterPanel() {
             />
             <div className="flex flex-wrap items-center justify-between gap-2">
               {cat === 'atuendo' ? (
-                <span className="mc-label">{p.created ? 'Tus atuendos' : 'Escoge tu atuendo inicial (gratis)'}</span>
+                <span className="mc-label">{p.created ? 'Tus atuendos' : 'Escogé tu atuendo inicial (gratis)'}</span>
               ) : (
                 <TradToggle on={trad} set={setTrad} n={all.filter((i) => i.trad && (owned(i) || p.created)).length} />
               )}
@@ -632,7 +632,7 @@ export function ShopPanel() {
                     <Coin size={16} />
                     <b data-testid="shop-missing">{short.missing}</b>
                   </span>{' '}
-                  para {nombre(shortItem)}. Gana más en los minijuegos.
+                  para {nombre(shortItem)}. Ganá más en los minijuegos.
                 </span>
               </span>
               <Btn id="shop-earn" tone="gold" size="sm" icon="gamepad" onClick={() => g().openPanel('mapa')}>

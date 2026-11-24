@@ -28,6 +28,7 @@ import {
   alongPath,
   Build,
   bx,
+  conFlora,
   Field,
   type Layer,
   type Pc,
@@ -39,23 +40,7 @@ import {
   Terrain,
   type XZ,
 } from './lib';
-import { VEG, type VegKind } from './parts';
-
-/** especie del paquete de arte para cada vegetación de zona (las rocas siguen siendo piezas) */
-const FLORA_OF: Partial<Record<VegKind, FloraKind>> = {
-  tree: 'tree',
-  pine: 'pine',
-  palm: 'palm',
-  oilpalm: 'oilpalm',
-  bush: 'bush',
-  jungle: 'jungle',
-  giant: 'giant',
-  dry: 'dry',
-  reed: 'reed',
-  fern: 'fern',
-  banana: 'banana',
-  cafe: 'cafe',
-};
+import { FLORA_OF, floraSeed, VEG, type VegKind } from './parts';
 
 export interface Bio {
   grass: string;
@@ -300,19 +285,51 @@ export class ZB {
       // con vegetación del paquete de arte: las piezas quedan solo como colisión (mismos troncos sólidos)
       if (art.Flora && fk && pc.length) {
         for (const q of pc) q.hide = true;
-        pc[0].flora = { k: fk, p: [x, y, z], s, c, seed: Math.floor(Math.abs(x * 7.31 + z * 3.17) * 10) };
+        pc[0].flora = { k: fk, p: [x, y, z], s, c, seed: floraSeed(x, z) };
       }
       this.pcs.push(...pc);
     }
     return pts;
   }
+  /** Plantación en hileras dentro de un rectángulo (fondo, fuera de lo jugable): quita la vegetación suelta que había
+   *  ahí, siembra a tresbolillo con un poco de desorden y deja calles cada `calle` hileras. Sin colisión. */
+  plantacion(
+    k: 'bananera' | 'oilpalm',
+    r: { minX: number; maxX: number; minZ: number; maxZ: number },
+    o: {
+      dx: number;
+      dz: number;
+      smin: number;
+      smax: number;
+      colors: string[];
+      calle?: number;
+      ok?: (x: number, z: number) => boolean;
+    },
+  ) {
+    const dentro = (x: number, z: number, m = 0) =>
+      x > r.minX - m && x < r.maxX + m && z > r.minZ - m && z < r.maxZ + m;
+    if (art.Flora) this.pcs = this.pcs.filter((q) => !(q.hide && !q.hill && dentro(q.p[0], q.p[2], 1.5)));
+    const veg: VegKind = k === 'bananera' ? 'banana' : 'oilpalm',
+      rr = rng(Math.round(r.minX * 31 + r.minZ * 17) >>> 0);
+    let fila = 0;
+    for (let z = r.minZ; z <= r.maxZ; z += o.dz, fila++) {
+      if (o.calle && fila % o.calle === o.calle - 1) continue;
+      for (let x = r.minX + (fila % 2 ? o.dx / 2 : 0); x <= r.maxX; x += o.dx) {
+        const px = x + (rr() - 0.5) * o.dx * 0.18,
+          pz = z + (rr() - 0.5) * o.dz * 0.18;
+        if (o.ok && !o.ok(px, pz)) continue;
+        const y = this.h(px, pz),
+          s = o.smin + rr() * (o.smax - o.smin),
+          c = o.colors[Math.floor(rr() * o.colors.length)],
+          pc = VEG[veg](px, y, pz, s, c, rr).map((q) => ({ ...q, solid: false }));
+        this.pcs.push(...conFlora(pc, { k, p: [px, y, pz], s, c, seed: Math.floor(rr() * 1000) }));
+      }
+    }
+    return this;
+  }
   /** piezas de una planta: con vegetación del paquete de arte se dibuja `item` y las piezas quedan solo como colisión */
   plant(pcs: Pc[], item: FloraItem) {
-    if (art.Flora && pcs.length) {
-      for (const q of pcs) q.hide = true;
-      pcs[0].flora = item;
-    }
-    this.pcs.push(...pcs);
+    this.pcs.push(...conFlora(pcs, item));
     return this;
   }
   /** parada de bus: aquí aparece el jugador. Deja el bus a su derecha y el rótulo de bienvenida al frente a la izquierda. */
@@ -426,6 +443,12 @@ export function ZoneScenery({ spec }: { spec: ZoneSpec }) {
       phys.limit = null;
     };
   }, [spec]);
+  // el agua de la zona sabe qué tan honda es (orilla con espuma, fondo a la vista, olas en mar abierto)
+  useLayoutEffect(() => {
+    const levels = spec.water.filter((w) => (w.mat ?? 'water') === 'water').map((w) => w.y);
+    if (!levels.length) return;
+    return art.shore?.(spec.f.data, spec.f.n, spec.f.cell, levels);
+  }, [spec]);
   return (
     <>
       <art.SkyRig time="auto" weather="auto" {...spec.sky} />
@@ -516,10 +539,9 @@ function lomas(spec: ZoneSpec): HillDef[] {
   return out;
 }
 
-/** Vegetación y cerros del paquete de arte (una malla cada uno) y el zacate cerca de la cámara. */
+/** Cerros del paquete de arte (una malla) y el zacate cerca de la cámara. La vegetación la dibuja <Build>. */
 function Greenery({ spec }: { spec: ZoneSpec }) {
   const pcs = spec.pcs,
-    flora = useMemo(() => pcs.flatMap((q): FloraItem[] => (q.flora ? [q.flora] : [])), [pcs]),
     hills = useMemo(
       () =>
         art.Hills
@@ -534,7 +556,6 @@ function Greenery({ spec }: { spec: ZoneSpec }) {
     );
   return (
     <>
-      {art.Flora && flora.length > 0 && <art.Flora items={flora} />}
       {art.Hills && hills.length > 0 && <art.Hills hills={hills} />}
       {art.GroundCover && <art.GroundCover />}
     </>

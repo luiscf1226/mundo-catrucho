@@ -7,7 +7,7 @@ function Punto({ indice }: { indice: number }) {
   const x = -40 + (indice % 6) * 15;
   const z = indice < 6 ? 9 : 24;
   const loco = indice >= 9;
-  useLocuraCerca(x, z);
+  useLocuraCerca(x, z, undefined, { title: p.nombre, text: p.texto });
 
   return (
     <group position={[x, 0, z]}>

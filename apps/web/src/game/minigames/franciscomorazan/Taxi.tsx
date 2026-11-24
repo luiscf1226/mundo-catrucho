@@ -134,7 +134,7 @@ function Escena({ motor: m }: { motor: Sesion }) {
       <Trafico carros={s.carros} />
       <LuzTaxi turbo={s.turbo > 0} />
       <AvisoFlotante aviso={s.pop} alto={5.8} />
-      {m.cuenta > 0 && <SobreJugador texto={`¡Preparáte! ${Math.ceil(m.cuenta)}`} alto={5.6} />}
+      {m.cuenta > 0 && <SobreJugador texto={`¡Preparate! ${Math.ceil(m.cuenta)}`} alto={5.6} />}
       <Flecha hacia={m.cuenta > 0 ? null : meta} color={s.fase === 'buscar' ? '#7cff6b' : l.color} />
       {s.fase === 'buscar' ? (
         <>

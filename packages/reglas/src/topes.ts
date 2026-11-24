@@ -397,8 +397,12 @@ export const TOPES: Record<string, TopeMotor> = {
     ganarPideMeta: true,
   },
   // motores propios: el reloj puede acortarse (golpes, errores), así que solo se acotan metas y puntos
+  // con cubeta y poza (Lluvia de Peces) la tanda llena y limpia paga doble: metas un 30 % más altas
   atrapa: {
-    metas: (d) => [r10(120 + 180 * d), r10(300 + 300 * d), r10(500 + 400 * d)],
+    metas: (d, tema) => {
+      const k = tema?.poza && !Array.isArray(tema.cubetas) ? 1.3 : 1;
+      return [r10(k * (120 + 180 * d)), r10(k * (300 + 300 * d)), r10(k * (500 + 400 * d))];
+    },
     puntosPorSegundo: 40,
     ganarPideMeta: true,
   },

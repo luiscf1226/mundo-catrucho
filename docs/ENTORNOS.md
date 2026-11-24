@@ -62,25 +62,26 @@ sola a la vez (`mundo-catrucho-web-preview`, la del último pull request).
 
 ## Proteger `main` (MC-64)
 
-`main` solo acepta cambios por pull request y con la revisión «check, test y capturas» en verde. Lo activa el dueño
-del repo una vez.
+`main` solo acepta cambios por pull request y con la revisión «check, test y capturas» en verde, también para los
+administradores (`enforce_admins`). Está activa desde el 19 nov, cuando Luis hizo **público** el repo.
 
-**Hoy no se puede:** el repo es privado y la cuenta usa el plan gratis de GitHub, que no permite proteger ramas ni
-reglas (rulesets) en repos privados (responde 403). Hay dos salidas, las decide Luis:
+Hasta ese día el repo era privado en el plan gratis de GitHub: no dejaba proteger ramas (403) y, del 17 al 19 nov,
+Actions no arrancaba ningún trabajo («recent account payments have failed or your spending limit needs to be
+increased»): se acabaron los minutos del mes. En repos públicos los minutos de Actions no se cobran.
 
-- Pasar la cuenta a **GitHub Pro** (de pago) y correr el script de abajo.
-- Hacer el repo **público** (gratis, pero el código queda a la vista).
-
-Mientras tanto la regla se cumple por costumbre: todo entra por pull request con la revisión en verde (`AGENTS.md`).
-Con Pro o repo público:
+Para revisar que siga activa (sale con 1 si falta algo), y si alguna vez hay que volver a aplicarla:
 
 ```bash
-gh auth login
+bash scripts/proteger-main.sh --verificar
 bash scripts/proteger-main.sh
 ```
 
 O a mano: Settings → Branches → Add rule → `main` → «Require a pull request before merging» y «Require status
 checks to pass» con `check, test y capturas`.
+
+**Ojo, repo público:** nada de secretos, llaves ni datos personales en el código, los commits, los issues ni los PR
+(regla 6 de `AGENTS.md`). Los pull requests desde forks no reciben secretos y el despliegue de vista previa no corre
+para ellos.
 
 ## Primera vez en producción (checklist)
 

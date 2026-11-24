@@ -3,7 +3,7 @@ import type { Group } from 'three';
 import { player } from '../../../core/player';
 import { useGame } from '../../../core/store';
 import { Ball, Block, Cyl, Interactable, Label, useTick } from '../../kit';
-import { reaccionLocura } from '../../reacciones';
+import { reaccionLocura, useLocuraCerca } from '../../reacciones';
 import puntos from './lempira-puntos.json';
 
 const juegos = [
@@ -28,6 +28,7 @@ function Punto({ indice: i, altura }: { indice: number; altura: number }) {
     viaje = useRef(-1),
     vista = useRef(false);
   pos[1] = altura;
+  useLocuraCerca(pos[0], pos[2], undefined, { title: p.nombre, text: p.texto });
   useTick((dt, t) => {
     if (vista.current && !useGame.getState().dialog) {
       player.fixedCam = null;
