@@ -28,6 +28,10 @@ export async function etapasConOro(t, { depto, juegos, shots }) {
   for (const j of juegos) {
     const id = `${depto}.${j[0]}`;
     for (let etapa = 0; etapa < Math.min(j[8], etapas); etapa++) {
+      // la prueba del departamento pudo haber ganado ya este juego: cada etapa arranca desde la que toca
+      await t.ev(
+        `window.__mc.store.setState(s=>({profile:{...s.profile,juegos:{...s.profile.juegos,'${id}':{etapa:${etapa},stars:[],best:0,label:'',veces:0}}}}))`,
+      );
       await abrir(t, id, j[2], etapa === 1 ? 'duo' : etapa > 1 ? 'abierto' : 'solo');
       assert.equal(await t.ev(`${M}.estado().etapa`), etapa, `${id} abre la etapa ${etapa + 1}`);
       const duracion = await t.ev(`${M}.estado().duracion`);

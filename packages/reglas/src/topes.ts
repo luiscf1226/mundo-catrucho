@@ -267,7 +267,8 @@ export const TOPES: Record<string, TopeMotor> = {
     duracionMin: ({ puntos }) => 120 - puntos / 10,
     puntosPorSegundo: 100,
   },
-  'copan.adoquin': copan,
+  // Copán: ritmo máximo medido jugando fino (test-copan) con margen; atol y guaras caben en los 20 del kit
+  'copan.adoquin': conRitmo(copan, 30),
   'copan.atol': copan,
   'lempira.barro': lempira,
   'lempira.opalo': conRitmo(lempira, 40),
@@ -320,12 +321,17 @@ export const TOPES: Record<string, TopeMotor> = {
   'colon.redjuvenil': conRitmo(colon, 40),
   'colon.plano': conRitmo(colon, 40),
   'colon.racimos': conRitmo(colon, 45),
-  'copan.cadera': copan,
-  'copan.estelas': copan,
-  'copan.estratigrafia': copan,
-  'copan.glifos': copan,
-  'copan.guaras': copan,
-  'copan.hojas': copan,
+  // +30 o +35 por rebote cada 0,45–0,9 s según la etapa: hasta 60 pts/s
+  'copan.cadera': conRitmo(copan, 75),
+  // +50 por patio con dos vistas cada ~1,4 s
+  'copan.estelas': conRitmo(copan, 50),
+  // +60 por fase de tres patios, un cruce cada 0,7 s
+  'copan.estratigrafia': conRitmo(copan, 40),
+  // +40 por bloque encajado cada 0,8 s (y un poco más con apoyo)
+  'copan.glifos': conRitmo(copan, 70),
+  'copan.guaras': conRitmo(copan, 25),
+  // +45 por ficha con las dos caras, una observación cada 0,8 s
+  'copan.hojas': conRitmo(copan, 40),
   'islas.absorcion': islas(110, 220, 330, 60, 85, 15),
   'islas.ballena': islas(80, 170, 260, 60, 75, 15),
   'islas.bonacca': islas(120, 260, 400, 80, 80, 15),
