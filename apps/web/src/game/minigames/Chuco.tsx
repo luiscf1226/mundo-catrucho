@@ -139,7 +139,14 @@ const motor = defineMotor({
     if (s.capas.length < 3) servir(m);
   },
   Escena: ({ motor: m }) => (
-    <Mesa titulo={m.parametros.nombre} texto="F apilá · A/D repartí peso · S incliná la salsa">
+    <Mesa
+      titulo={m.parametros.nombre}
+      texto={
+        m.parametros.loco
+          ? 'A/D apuntá al carril · F poné una tajada'
+          : 'F apilá · A/D repartí peso · S incliná la salsa'
+      }
+    >
       <Cyl pos={[-1, 0.85, 0]} r={3} h={0.12} mat="cloth" color="#fff0ca" solid={false} />
       {m.datos.capas.map((x, i) => (
         <group key={i} position={[-1 + x, 1.1 + i * 0.45, 0]}>

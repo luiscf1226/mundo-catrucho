@@ -14,7 +14,7 @@ type Estado = ReturnType<typeof cursor> & {
 type Sesion = Motor<{ margen: number; resistencia: number }, Estado>;
 const sabores = ['Coco', 'Fresa', 'Tamarindo'];
 /** cada bolsa viene pegada de un lado: hay que tirar más del lado pegado (izquierda menos derecha) */
-const SESGO = [0.36, -0.36, 0.2];
+const SESGO = [0.2, -0.36, 0.36];
 const colores = ['#f4e7cb', '#ef7da0', '#ba8661'];
 function tirar(m: Sesion, dt: number) {
   const s = m.datos;

@@ -199,9 +199,15 @@ const motor = defineMotor({
         <>
           {m.datos.depositos.map((d, i) => (
             <group key={i}>
-              <Block pos={[-2.2 + i * 4.4, 1.1, 4]} size={[1.6, 0.9, 0.9]} color="#8b9aa3" mat="stone" solid={false} />
               <Block
-                pos={[-2.2 + i * 4.4, 0.75 + Math.min(0.75, d / 260), 4]}
+                pos={[-2.2 + i * 4.4, 1.1, 3.1]}
+                size={[1.6, 0.9, 0.9]}
+                color="#8b9aa3"
+                mat="stone"
+                solid={false}
+              />
+              <Block
+                pos={[-2.2 + i * 4.4, 0.75 + Math.min(0.75, d / 260), 3.1]}
                 size={[1.4, Math.max(0.05, Math.min(1.5, d / 130)), 0.7]}
                 color="#47afd1"
                 mat="water"
@@ -209,8 +215,8 @@ const motor = defineMotor({
               />
             </group>
           ))}
-          <Block pos={[0, 0.85, 4]} size={[2.8, 0.18, 0.18]} color="#5d6b72" mat="metal" solid={false} />
-          <Label pos={[0, 1.4, 4.6]} text="Depósitos comunicados" h={0.24} />
+          <Block pos={[0, 0.85, 3.1]} size={[2.8, 0.18, 0.18]} color="#5d6b72" mat="metal" solid={false} />
+          <Label pos={[0, 1.9, 3.1]} text="Depósitos comunicados" h={0.24} />
         </>
       ) : (
         <Block pos={[0, 1.2, 4]} size={[6, 0.3, 0.5]} color="#47afd1" mat="water" solid={false} />
