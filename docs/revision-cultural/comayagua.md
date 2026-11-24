@@ -1,7 +1,7 @@
 # Revisión cultural asistida · Comayagua (MC-37)
 
-Revisión hecha por un agente contra el código y las fuentes del issue. La revisión por alguien del departamento
-sigue pendiente en #34.
+> Revisión hecha por un agente (Claude) el 24 de noviembre de 2026, antes de la revisión de una persona del departamento
+> (sigue en #34). Hoja que se recorrió: [hojas/comayagua.md](hojas/comayagua.md).
 
 Se revisó: catálogo (`catalogo/centro.json`: lugares, comidas, palabras, juegos y frases), puntos de la zona
 (`comayagua-puntos.json`: 7 lugares y 3 locuras), textos de los ocho motores (`minigames/comayagua/`) y la zona

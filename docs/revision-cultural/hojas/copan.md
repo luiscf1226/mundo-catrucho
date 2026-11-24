@@ -127,7 +127,7 @@ Lugares que el jugador visita dentro del departamento.
 
 Sorpresas escondidas en el mapa. El texto es el que lee el jugador.
 
-- [ ] **Escalinata Jeroglífica**: Quedáte en el sendero. Armá réplicas en el taller y cuidá la escalinata.
+- [ ] **Escalinata Jeroglífica**: Quedate en el sendero. Armá réplicas en el taller y cuidá la escalinata.
 - [ ] **Altar Q**: Mirá las cuatro caras de la reproducción. Dejá el altar en su sitio.
 - [ ] **Acrópolis**: Buscá las puertas en la maqueta. Elegí una época antes de cruzar.
 - [ ] **Guacamayas en Libertad**: Observá las guaras libres desde aquí. No les des comida ni las persigás.
@@ -181,30 +181,30 @@ ortografía; si algo está mal, anotá el archivo y la línea.
 
 | Línea | Texto |
 |---:|---|
-| 55 | Escalinata Jeroglífica |
-| 59 | Estela A |
-| 60 | Estela B |
-| 61 | Estela C |
-| 62 | Estela H |
-| 63 | Estela D |
-| 64 | Estela F |
-| 75 | Altar Q |
-| 85 | Acrópolis |
-| 95 | Juego de Pelota |
-| 95 | Gran Plaza de Copán |
-| 105 | Guías de Copán |
-| 138 | Cuidá el patrimonio: observá desde el sendero y usá las réplicas |
-| 141 | Ixchel |
-| 157 | Postal del valle |
-| 161 | Llevate una postal y dejá el patrimonio en su sitio. |
-| 165 | Cuaderno de práctica |
-| 169 | Dibujá lo que observás sin tocar los monumentos. |
-| 173 | Mapa de senderos |
-| 177 | Seguí los senderos para cuidar el sitio. |
-| 181 | Taza de recuerdo |
-| 185 | Disfrutá un atol virtual de Santa Rosa. |
-| 189 | Ficha de conservación |
-| 193 | Observá las aves sin perseguirlas ni alimentarlas. |
+| 90 | Escalinata Jeroglífica |
+| 94 | Estela A |
+| 95 | Estela B |
+| 96 | Estela C |
+| 97 | Estela H |
+| 98 | Estela D |
+| 99 | Estela F |
+| 110 | Altar Q |
+| 120 | Acrópolis |
+| 139 | Juego de Pelota |
+| 139 | Gran Plaza de Copán |
+| 149 | Guías de Copán |
+| 182 | Cuidá el patrimonio: observá desde el sendero y usá las réplicas |
+| 185 | Ixchel |
+| 201 | Postal del valle |
+| 205 | Llevate una postal y dejá el patrimonio en su sitio. |
+| 209 | Cuaderno de práctica |
+| 213 | Dibujá lo que observás sin tocar los monumentos. |
+| 217 | Mapa de senderos |
+| 221 | Seguí los senderos para cuidar el sitio. |
+| 225 | Taza de recuerdo |
+| 229 | Disfrutá un atol virtual de Santa Rosa. |
+| 233 | Ficha de conservación |
+| 237 | Observá las aves sin perseguirlas ni alimentarlas. |
 
 </details>
 

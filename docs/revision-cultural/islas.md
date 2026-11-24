@@ -1,7 +1,7 @@
 # Revisión cultural asistida · Islas de la Bahía (MC-42)
 
-Revisión hecha por un agente contra el código y las fuentes del issue. La revisión por alguien del departamento
-sigue pendiente en #34.
+> Revisión hecha por un agente (Claude) el 24 de noviembre de 2026, antes de la revisión de una persona del departamento
+> (sigue en #34). Hoja que se recorrió: [hojas/islas.md](hojas/islas.md).
 
 Se revisó: catálogo (`catalogo/norte.json`: lugares, comidas, palabras, juegos y frases), puntos de la zona
 (`islas-puntos.json`: 7 lugares y 3 locuras), textos de los ocho motores (`minigames/islas/`) y la zona
