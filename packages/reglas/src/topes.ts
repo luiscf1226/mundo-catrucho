@@ -350,8 +350,8 @@ export const TOPES: Record<string, TopeMotor> = {
   // cada viaje paga 10 + carga (67–93 pts) cada ~3,6 s: ~26 pts/s jugando fino
   'atlantida.vagon': conRitmo(islas(150, 400, 650, 100, 80, 15), 35),
   'atlantida.manati': islas(100, 220, 340, 60, 80, 15),
-  // 50 por unión buena (tres elecciones) + 20 por gaveta
-  'atlantida.lancetilla': conRitmo(islas(200, 450, 700, 100, 80, 15), 35),
+  // 50 por unión buena (tres elecciones) + 20 por gaveta: ~42 pts/s jugando fino
+  'atlantida.lancetilla': conRitmo(islas(200, 450, 700, 100, 80, 15), 50),
   'atlantida.canopy': islas(150, 320, 500, 80, 80, 15),
   'atlantida.carnaval': islas(120, 280, 440, 80, 80, 15),
   // Corte (Corte.tsx): reloj fijo 70–100 s, se gana con la primera meta; el combo (hasta ×5) dispara el puntaje

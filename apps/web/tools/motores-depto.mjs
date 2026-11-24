@@ -65,9 +65,10 @@ export async function etapasConOro(t, { depto, juegos, shots }) {
 
 /**
  * En cada motor: no jugar pierde, machacar F pierde y sin tema hay oro. Si el motor publica `stats.x` (cursor de
- * elección), A/D y el stick derecho lo mueven; los demás prueban sus controles en la prueba del departamento.
+ * elección), A/D y el stick derecho lo mueven; los demás, y los de `sinCursor` (su `x` es una posición, no una
+ * elección), prueban sus controles en la prueba del departamento.
  */
-export async function motoresHonestos(t, motores) {
+export async function motoresHonestos(t, motores, { sinCursor = [] } = {}) {
   for (const motor of motores) {
     await abrir(t, null, motor);
     await t.ev(`${M}.avanzar(123)`);
@@ -76,7 +77,7 @@ export async function motoresHonestos(t, motores) {
     await t.ev(`for(let i=0;i<${M}.estado().duracion*20+5;i++){window.__mc.input.press('fire');${M}.avanzar(0.05)}`);
     assert.equal(await t.ev(`${S}.mg.result.won`), false, `${motor}: machacar F pierde`);
     await abrir(t, null, motor);
-    const x0 = await t.ev(`${M}.estado().stats.x`);
+    const x0 = sinCursor.includes(motor) ? undefined : await t.ev(`${M}.estado().stats.x`);
     if (typeof x0 === 'number') {
       await t.holdUntil(x0 > 0 ? 'a' : 'd', `Math.abs(${M}.estado().stats.x-(${x0}))>0.05`);
       const x1 = await t.ev(`${M}.estado().stats.x`);

@@ -27,6 +27,8 @@ type Estado = {
   combo: boolean;
   brazo: number[];
   reversa: number;
+  /** segundos raspando la orilla: pegada a la piedra la balsa no entra a los remansos y cada rato se golpea */
+  roce: number;
   /** ya cumpliste el aviso de reversa que está en pantalla (paga una vez por aviso, no por palada) */
   reversaCumplida: boolean;
   bot: number;
@@ -138,6 +140,7 @@ const motor = defineMotor({
     combo: false,
     brazo: [0, 0, 0, 0],
     reversa: 0,
+    roce: 0,
     reversaCumplida: false,
     bot: 0,
     calma: false,
@@ -166,6 +169,15 @@ const motor = defineMotor({
     // la corriente principal jala al centro: para quedarte en la orilla hay que remar
     s.x += (Math.sin(s.h) * 3.4 + s.vx + jalon(s.x)) * dt;
     s.x = Math.max(X0 + 0.7, Math.min(X1 - 0.7, s.x));
+    // remar siempre del mismo lado deja la balsa raspando la orilla: no es remanso, es encallarse
+    const pegada = s.x <= X0 + 0.71 || s.x >= X1 - 0.71;
+    s.roce = pegada ? s.roce + dt : Math.max(0, s.roce - dt);
+    if (s.roce >= 1.2) {
+      s.roce = 0;
+      s.choques++;
+      m.sumar(-20);
+      s.aviso = 'Te pegaste a la orilla: la balsa raspa las piedras. −20';
+    }
     if (p.reversa) {
       s.reversa -= dt;
       if (s.reversa < -6) {
@@ -190,7 +202,10 @@ const motor = defineMotor({
       c.paso = true;
       if (c.tipo === 'remanso') {
         const [a, b] = c.lado === 0 ? IZQ : DER;
-        if (s.x >= a && s.x <= b) {
+        if (pegada) {
+          s.pasados++;
+          s.aviso = 'Pegada a la orilla no entrás al remanso: soltala un poco.';
+        } else if (s.x >= a && s.x <= b) {
           s.remansos++;
           m.sumar(50 + (s.combo ? 20 : 0));
           s.aviso = s.combo ? '¡Remanso con giro combinado!' : '¡Adentro del remanso!';
