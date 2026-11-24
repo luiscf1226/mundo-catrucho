@@ -85,7 +85,7 @@ const D = [
     'Yuscarán, pueblo minero',
     '#d4a373',
     '#ffe066',
-    'Danlí celebra cada agosto el Festival Nacional del Maíz.',
+    'Danlí celebra cada agosto el Festival Internacional del Maíz.',
     'Mazorca dorada',
   ],
   [
@@ -158,7 +158,7 @@ const D = [
     '#588157',
     '#dda15e',
     'El departamento lleva el nombre de Lempira, líder lenca que resistió la conquista en 1537. La moneda de Honduras también.',
-    'Penacho lenca',
+    'Penacho de Lempira',
   ],
   [
     'ocotepeque',
