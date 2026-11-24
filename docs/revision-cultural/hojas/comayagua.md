@@ -14,12 +14,12 @@
 
 ## Lugares
 
-- [ ] **Catedral de Comayagua** (iglesia): Su reloj es de los más antiguos de América y todavía da la hora.
+- [ ] **Catedral de Comayagua** (iglesia): Dicen que su reloj es de los más antiguos de América, y todavía da la hora.
 - [ ] **Centro colonial** (ciudad): La antigua capital de Honduras.
 - [ ] **Siguatepeque** (ciudad): Pinos, clima fresco y parada obligada en la carretera.
 - [ ] **Cuevas de Taulabé** (cueva): Estalactitas a la orilla de la carretera.
 - [ ] **Valle de Comayagua** (finca): Mangos, tomates y calor del bueno.
-- [ ] **Tenampúa** (ruinas): Fortaleza lenca en lo alto de un cerro.
+- [ ] **Tenampúa** (ruinas): Fortaleza prehispánica en lo alto de un cerro.
 
 ## Comidas
 
@@ -141,7 +141,7 @@ Lugares que el jugador visita dentro del departamento.
 Sorpresas escondidas en el mapa. El texto es el que lee el jugador.
 
 - [ ] **Alfombras de Semana Santa**: En Semana Santa, en Comayagua se hacen alfombras de aserrín teñido. Ayudá a poner el esténcil y tomale foto antes de que pase la procesión.
-- [ ] **La hora en la torre**: La catedral de Comayagua guarda un reloj histórico de origen árabe. Aquí ves una réplica del mecanismo: esperá la campanada y anotala.
+- [ ] **La hora en la torre**: La catedral de Comayagua guarda un reloj muy antiguo que, según la tradición, es de origen árabe. Aquí ves una réplica del mecanismo: esperá la campanada y anotala.
 - [ ] **Galería de Taulabé**: Las Cuevas de Taulabé están junto a la CA-5, en el kilómetro 140. Iluminá las formaciones con tu visor, sin tocarlas.
 - [ ] **Pasamanos de la cueva**: En Taulabé hay un tramo con gradas y pasamanos para visitantes. Seguilo y anotá las curvas en tu libreta.
 - [ ] **Dulces artesanales**: En Comayagua todavía se hacen dulces tradicionales a mano. Probá una porción y ayudá a envolver los dulces en el puesto.
@@ -149,7 +149,7 @@ Sorpresas escondidas en el mapa. El texto es el que lee el jugador.
 - [ ] **Pinares de Siguatepeque**: Siguatepeque es la ciudad de la zona montañosa de Comayagua, entre pinos. Desde esta parada compará el valle con la altura.
 - [ ] **Viento con pincel**: Este es un esténcil de práctica, lejos de la procesión. Una ráfaga traviesa le pintó bigotes al dibujo. ¡Qué viento más artista!
   - Por qué: Las alfombras de aserrín son una tradición de Semana Santa. Fuente: <https://visitacomayagua.com/descubre>
-- [ ] **Reloj con recreo**: La réplica del taller estira las agujas como brazos y pide recreo. Tranquilo: el reloj de la catedral ni se entera.
+- [ ] **Reloj con recreo**: La réplica del taller estira las agujas como brazos y pide recreo. Calma: el reloj de la catedral ni se entera.
   - Por qué: El reloj histórico de la catedral sigue siendo emblema de la ciudad. Fuente: <https://visitacomayagua.com/descubre>
 - [ ] **La cueva devuelve el chisme**: Saludaste a la cueva y el eco te devolvió el «¡hola!» tres veces, cada vez más grande. Puro eco: nadie más habló.
   - Por qué: Taulabé ofrece un recorrido por galerías subterráneas. Fuente: <https://sinit.hn/2024/10/22/cuevas-de-taulabe/>
@@ -193,12 +193,12 @@ ortografía; si algo está mal, anotá el archivo y la línea.
 
 | Línea | Texto |
 |---:|---|
-| 96 | Reloj de la catedral |
-| 97 | Catedral de Comayagua |
-| 98 | Subida al reloj ↑ |
-| 151 | Alfombras de aserrín |
-| 152 | Museo |
-| 191 | Don Beto |
+| 119 | Reloj de la catedral |
+| 120 | Catedral de Comayagua |
+| 121 | Subida al reloj ↑ |
+| 174 | Alfombras de aserrín |
+| 175 | Museo |
+| 214 | Don Beto |
 
 </details>
 
@@ -276,15 +276,15 @@ ortografía; si algo está mal, anotá el archivo y la línea.
 | 126 | Mouse / stick derecho |
 | 129 | Palanca / arrastrá |
 | 138 | Eco en la cueva |
-| 159 | Chasqueá hacia cada rumbo y mirá el retardo. |
-| 194 | Rumbo sin medir |
-| 200 | → galería |
-| 200 | → pared |
-| 244 | A/D apuntá · F chasquido · E dibujá la galería |
-| 318 | 💬💬 ¡hola! |
-| 318 | 💬 ¡hola! |
-| 349 | 0.9 s |
-| 350 | Retardo |
+| 160 | Chasqueá hacia cada rumbo y mirá el retardo. |
+| 195 | Rumbo sin medir |
+| 201 | → galería |
+| 201 | → pared |
+| 246 | A/D apuntá · F chasquido · E dibujá la galería |
+| 320 | 💬💬 ¡hola! |
+| 320 | 💬 ¡hola! |
+| 351 | 0.9 s |
+| 352 | Retardo |
 
 </details>
 

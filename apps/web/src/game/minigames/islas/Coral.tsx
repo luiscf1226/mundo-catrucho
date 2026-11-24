@@ -82,7 +82,8 @@ function poner(m: Sesion, col: number, fila: number) {
 /** Qué tan bien le va a un juvenil en esa celda: 1 perfecto, 0.4 regular, 0 mal; null si está hacinado. */
 function ajuste(m: Sesion, especie: number, col: number, fila: number) {
   const e = ESPECIES[especie];
-  const ocupados = vecinos(m, col, fila).filter(Boolean).length;
+  // se hacinan los juveniles; una colonia adulta al lado no le quita espacio, le da sombra (otra generación)
+  const ocupados = vecinos(m, col, fila).filter((v) => v && !v.adulta).length;
   if (ocupados >= 2) return null;
   const dl = Math.abs(luz(m, col, fila) - e.luz);
   const nutre = m.datos.corriente[fila] >= e.corriente;

@@ -203,37 +203,39 @@ ortografía; si algo está mal, anotá el archivo y la línea.
 | 59 | Baleadas |
 | 60 | Pan de coco |
 | 79 | Hotel El Malecón |
-| 107 | Pico Bonito ⛰ |
-| 123 | El mar está muy hondo por ahí |
-| 126 | Carla |
+| 113 | Pico Bonito ⛰ |
+| 129 | El mar está muy hondo por ahí |
+| 132 | Carla |
 
 </details>
 
-<details><summary><code>apps/web/src/game/minigames/atlantida/Balsa.tsx</code> · 21 textos</summary>
+<details><summary><code>apps/web/src/game/minigames/atlantida/Balsa.tsx</code> · 23 textos</summary>
 
 | Línea | Texto |
 |---:|---|
-| 67 | Ese remo está quebrado: usá los otros tres. |
-| 81 | Fuerzas iguales: no giraste y la corriente te sacó de la línea. |
-| 88 | ¡Giro combinado! Adelante de un lado, atrás del otro. |
-| 93 | ¡Reversa, como pidió la balsa! +15 |
-| 104 | Elegí remero y da paladas para meter la balsa en los remansos verdes sin pegarle a las rocas. |
-| 106 | WASD / mouse |
-| 106 | elegir remero (A/D lado, W/S proa o popa) |
-| 107 | F / clic / RT |
-| 108 | E / X |
-| 108 | palada atrás |
-| 111 | Palanca / arrastrá |
-| 122 | Remadas del Cangrejal |
-| 151 | Meté la balsa en los remansos verdes de las orillas. |
-| 196 | ¡Remanso con giro combinado! |
-| 196 | ¡Adentro del remanso! |
-| 199 | Se te pasó el remanso. |
-| 205 | ¡Pegaste en la roca! |
-| 261 | Elegí remero · F adelante · E atrás |
-| 298 | Remanso |
-| 342 | ✓ ¡Así mero! |
-| 342 | 💬 ¡Reversa! |
+| 69 | Ese remo está quebrado: usá los otros tres. |
+| 83 | Fuerzas iguales: no giraste y la corriente te sacó de la línea. |
+| 90 | ¡Giro combinado! Adelante de un lado, atrás del otro. |
+| 95 | ¡Reversa, como pidió la balsa! +15 |
+| 106 | Elegí remero y da paladas para meter la balsa en los remansos verdes sin pegarle a las rocas. |
+| 108 | WASD / mouse |
+| 108 | elegir remero (A/D lado, W/S proa o popa) |
+| 109 | F / clic / RT |
+| 110 | E / X |
+| 110 | palada atrás |
+| 113 | Palanca / arrastrá |
+| 124 | Remadas del Cangrejal |
+| 154 | Meté la balsa en los remansos verdes de las orillas. |
+| 179 | Te pegaste a la orilla: la balsa raspa las piedras. −20 |
+| 207 | Pegada a la orilla no entrás al remanso: soltala un poco. |
+| 211 | ¡Remanso con giro combinado! |
+| 211 | ¡Adentro del remanso! |
+| 214 | Se te pasó el remanso. |
+| 220 | ¡Pegaste en la roca! |
+| 276 | Elegí remero · F adelante · E atrás |
+| 313 | Remanso |
+| 357 | ✓ ¡Así mero! |
+| 357 | 💬 ¡Reversa! |
 
 </details>
 
@@ -301,7 +303,7 @@ ortografía; si algo está mal, anotá el archivo y la línea.
 | 24 | Sapindáceas |
 | 29 | con pelitos · semilla larga |
 | 32 | Lichi |
-| 38 | liso · semilla redonda |
+| 38 | rugoso · semilla redonda |
 | 41 | Mangostán |
 | 42 | Clusiáceas |
 | 47 | morado · semilla plana |

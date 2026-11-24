@@ -16,9 +16,9 @@
 
 - [ ] **Roatán** (isla): La isla más grande, rodeada de arrecife.
 - [ ] **West Bay** (playa): Arena blanca y agua transparente.
-- [ ] **Utila** (isla): Uno de los mejores lugares del mundo para ver al tiburón ballena.
+- [ ] **Utila** (isla): Famosa por los encuentros con el tiburón ballena, aunque nadie los garantiza.
 - [ ] **Guanaja** (isla): La isla de los pinos; Bonacca es un pueblo sobre el agua.
-- [ ] **Arrecife Mesoamericano** (playa): El segundo arrecife de coral más grande del mundo.
+- [ ] **Arrecife Mesoamericano** (playa): La segunda barrera de coral más grande del mundo.
 - [ ] **Punta Gorda** (pueblo): El primer pueblo garífuna de Honduras, de 1797.
 - [ ] **Coxen Hole** (puerto): Aquí atracan los cruceros.
 
@@ -27,7 +27,7 @@
 - [ ] **Arroz con frijoles y coco** (Coxen Hole): Rice and beans, la base de todo plato isleño.
 - [ ] **Johnny cake** (Coxen Hole): Pan isleño para el viaje en lancha.
 - [ ] **Cangrejo azul** (Punta Gorda): Sale con las primeras lluvias.
-- [ ] **Pan de coco isleño** (Roatán): Más dulce que el de tierra firme.
+- [ ] **Pan de coco isleño** (Roatán): Hecho en casa, con coco rallado.
 
 ## Palabras
 
@@ -255,10 +255,10 @@ ortografía; si algo está mal, anotá el archivo y la línea.
 | 159 | F / clic / RT |
 | 162 | Palanca / arrastrá |
 | 173 | Distancia en Utila |
-| 194 | Esperá las dos sombras para calcular su rumbo. |
-| 232 | ¡Cambió de rumbo! Mirá la sombra nueva. |
-| 307 | Utila · grupo de buceo |
-| 391 | Tu grupo |
+| 195 | Esperá las dos sombras para calcular su rumbo. |
+| 233 | ¡Cambió de rumbo! Mirá la sombra nueva. |
+| 322 | Utila · grupo de buceo |
+| 406 | Tu grupo |
 
 </details>
 
@@ -311,20 +311,20 @@ ortografía; si algo está mal, anotá el archivo y la línea.
 
 | Línea | Texto |
 |---:|---|
-| 93 | Ese tono es el agua, no el coral. El rojo se queda arriba. |
-| 97 | Ese color no sale de estas fotos. |
-| 105 | Compará las dos fotos del mismo coral y elegí su color real: el que pierde rojo al bajar. |
-| 107 | A / D |
-| 108 | Mouse / stick derecho |
-| 109 | F / clic / RT |
-| 112 | Palanca / arrastrá |
-| 121 | Color con profundidad |
-| 138 | La foto honda se ve más azul: el coral no cambió, cambió la luz. |
-| 155 | Se acabó el aire de esa toma. Otra foto. |
-| 191 | Dos fotos, un coral · F elige su color real |
-| 193 | Jardín submarino · carta de color |
-| 215 | ¿color real? |
-| 221 | Carta cromática |
+| 94 | Ese tono es el agua, no el coral. El rojo se queda arriba. |
+| 98 | Ese color no sale de estas fotos. |
+| 106 | Compará las dos fotos del mismo coral y elegí su color real: el que pierde rojo al bajar. |
+| 108 | A / D |
+| 109 | Mouse / stick derecho |
+| 110 | F / clic / RT |
+| 113 | Palanca / arrastrá |
+| 122 | Color con profundidad |
+| 139 | La foto honda se ve más azul: el coral no cambió, cambió la luz. |
+| 156 | Se acabó el aire de esa toma. Otra foto. |
+| 192 | Dos fotos, un coral · F elige su color real |
+| 194 | Jardín submarino · carta de color |
+| 216 | ¿color real? |
+| 222 | Carta cromática |
 
 </details>
 
@@ -339,20 +339,20 @@ ortografía; si algo está mal, anotá el archivo y la línea.
 | 69 | Ese módulo ya está ocupado. |
 | 73 | Sin módulos: esperá que una colonia llegue a adulta. |
 | 80 | Juvenil sembrado. Mirá si le llega su luz y su corriente. |
-| 98 | Sembrá juveniles donde les llegue su luz y su corriente, sin amontonarlos. Cada adulta te devuelve módulos. |
-| 100 | WASD / flechas |
-| 100 | elegir módulo |
-| 101 | Mouse / stick derecho |
-| 101 | apuntar módulo |
-| 102 | F / clic / RT |
-| 105 | Palanca / arrastrá |
-| 115 | Arrecife por generaciones |
-| 139 | Fila de atrás: sol. Fila de adelante: sombra. Las flechas son corriente. |
-| 182 | Hay juveniles a codazos: no crecen así. |
-| 231 | Atrás hay sol, adelante sombra · F siembra el juvenil |
-| 233 | Vivero de coral (simulación) |
-| 277 | ¡un metro, porfa! |
-| 310 | ☀ sol |
+| 99 | Sembrá juveniles donde les llegue su luz y su corriente, sin amontonarlos. Cada adulta te devuelve módulos. |
+| 101 | WASD / flechas |
+| 101 | elegir módulo |
+| 102 | Mouse / stick derecho |
+| 102 | apuntar módulo |
+| 103 | F / clic / RT |
+| 106 | Palanca / arrastrá |
+| 116 | Arrecife por generaciones |
+| 140 | Fila de atrás: sol. Fila de adelante: sombra. Las flechas son corriente. |
+| 183 | Hay juveniles a codazos: no crecen así. |
+| 232 | Atrás hay sol, adelante sombra · F siembra el juvenil |
+| 234 | Vivero de coral (simulación) |
+| 278 | ¡un metro, porfa! |
+| 311 | ☀ sol |
 
 </details>
 
@@ -389,23 +389,23 @@ ortografía; si algo está mal, anotá el archivo y la línea.
 
 | Línea | Texto |
 |---:|---|
-| 57 | Casi: quedate quieto un ratito más. |
-| 65 | Con poquito aire en el chaleco y respiración pareja, quedate quieto a la profundidad pedida y tomá la foto. |
-| 67 | W / S |
-| 68 | D / A |
-| 69 | Mouse / stick derecho |
-| 69 | chaleco (↑↓) y respiración (←→) |
-| 70 | F / clic / RT |
-| 73 | Palanca / arrastrá |
-| 73 | chaleco y respiración |
-| 81 | Trimado de buceo |
-| 107 | Bajá despacio hasta la marca y quedate quieto. |
-| 141 | Subiste muy rápido: toma cancelada. Soltá aire del chaleco. |
-| 146 | Tocaste el fondo: el coral no se pisa. Toma cancelada. |
-| 151 | 0.05 ? 'bajando' : s.w |
-| 187 | W/S chaleco · A/D respiración · F foto estable |
-| 188 | West Bay · práctica de flotación |
-| 234 | fondo · no tocar |
+| 59 | Casi: quedate quieto un ratito más. |
+| 67 | Con poquito aire en el chaleco y respiración pareja, quedate quieto a la profundidad pedida y tomá la foto. |
+| 69 | W / S |
+| 70 | D / A |
+| 71 | Mouse / stick derecho |
+| 71 | chaleco (↑↓) y respiración (←→) |
+| 72 | F / clic / RT |
+| 75 | Palanca / arrastrá |
+| 75 | chaleco y respiración |
+| 83 | Trimado de buceo |
+| 110 | Bajá despacio hasta la marca y quedate quieto. |
+| 144 | Subiste muy rápido: toma cancelada. Soltá aire del chaleco. |
+| 149 | Tocaste el fondo: el coral no se pisa. Toma cancelada. |
+| 154 | 0.05 ? 'bajando' : s.w |
+| 191 | W/S chaleco · A/D respiración · F foto estable |
+| 192 | West Bay · práctica de flotación |
+| 238 | fondo · no tocar |
 
 </details>
 
