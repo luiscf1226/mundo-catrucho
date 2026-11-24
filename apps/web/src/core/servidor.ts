@@ -35,6 +35,8 @@ export interface ResumenFusion {
   monedas: number;
   descuento: number;
   reembolso: number;
+  /** prendas de este dispositivo devueltas porque se pagaron con premios repetidos */
+  devueltas: number;
   prendas: number;
   juegos: number;
   visitas: number;
@@ -182,7 +184,7 @@ const fn = {
   usarCodigo: makeFunctionReference<
     'mutation',
     Quien & { codigo: string; local?: AvanceLocal },
-    Respuesta<{ nombre: string; resumen: ResumenFusion; perfil: PerfilServidor } & Avance>
+    Respuesta<{ nombre: string; resumen: ResumenFusion | null; perfil: PerfilServidor } & Avance>
   >('cuentas:usarCodigoDispositivo'),
   vincular: makeFunctionReference<'mutation', Quien, Respuesta<{ nueva: boolean; resumen: ResumenFusion | null }>>(
     'cuentas:vincularCuenta',
@@ -193,6 +195,9 @@ const consultas = {
   porJuego: makeFunctionReference<'query', Quien & { juegoId: string }, Clasificacion>('clasificacion:porJuego'),
   porDepto: makeFunctionReference<'query', Quien & { deptId: string }, Clasificacion>('clasificacion:porDepto'),
   miCuenta: makeFunctionReference<'query', Quien, MiCuenta | null>('cuentas:miCuenta'),
+  verCodigo: makeFunctionReference<'query', Quien & { codigo: string }, Respuesta<{ nombre: string; nivel: number }>>(
+    'cuentas:verCodigoDispositivo',
+  ),
 };
 
 let memoria = '';
@@ -227,6 +232,17 @@ async function conToken(c: ConvexHttpClient) {
   const t = await autenticacion.token().catch(() => null);
   if (t) c.setAuth(t);
   else c.clearAuth();
+}
+
+/** Al salir de una cuenta de Clerk: este dispositivo pasa a ser un invitado nuevo (no se queda en esa cuenta). */
+export function nuevoSecretoInvitado() {
+  memoria = '';
+  try {
+    localStorage.removeItem(LLAVE);
+  } catch {
+    /* sin almacenamiento */
+  }
+  return secretoInvitado();
 }
 
 const SIN_CONEXION: Fallo = { ok: false, motivo: 'sin-conexion' };
@@ -340,6 +356,8 @@ export const servidor = {
   /** MC-07: une la cuenta de Clerk con el invitado de este dispositivo */
   vincular: async () => conFallo(await llamar(fn.vincular, {})),
   miCuenta: () => consultar(consultas.miCuenta, {}),
+  /** De quién es la cuenta del código, para confirmarlo antes de entrar */
+  verCodigo: async (codigo: string) => conFallo(await consultar(consultas.verCodigo, { codigo })),
   /** null si no hubo respuesta; con respuesta `null` el invitado todavía no existe */
   estado: () => consultar(consultas.estado, {}),
   porJuego: (juegoId: string) => consultar(consultas.porJuego, { juegoId }),

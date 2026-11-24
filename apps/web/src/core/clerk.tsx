@@ -5,8 +5,8 @@
 import { esUY } from '@clerk/localizations/es-UY';
 import { ClerkProvider, SignInButton, UserButton, useAuth } from '@clerk/react';
 import { ConvexProviderWithClerk } from 'convex/react-clerk';
-import type { ReactNode } from 'react';
-import { autenticacion, servidor } from './servidor';
+import { type ReactNode, useEffect, useRef } from 'react';
+import { autenticacion, nuevoSecretoInvitado, servidor } from './servidor';
 import { useGame } from './store';
 
 type BuscarToken = (o: { forceRefreshToken: boolean }) => Promise<string | null | undefined>;
@@ -29,19 +29,38 @@ const puente = {
       if (t) void alEntrar();
     });
   },
+  // también se llama cuando el proveedor se reinicia, no solo al salir: aquí solo se deja de mandar el token
   clearAuth() {
-    if (!autenticacion.token) return;
     autenticacion.token = null;
-    // al salir, el juego vuelve a ser el invitado de este dispositivo
-    void useGame.getState().sincronizar();
   },
 };
+
+/**
+ * Al salir de la cuenta (estaba dentro y ya no), este dispositivo no se queda en ella: pasa a ser un invitado nuevo
+ * con su avance local en blanco (computadoras compartidas).
+ */
+function AlSalir() {
+  const { isLoaded, isSignedIn } = useAuth(),
+    dentro = useRef<boolean | null>(null);
+  useEffect(() => {
+    if (!isLoaded) return;
+    if (dentro.current && !isSignedIn) {
+      autenticacion.token = null;
+      nuevoSecretoInvitado();
+      useGame.getState().resetProgress();
+      useGame.getState().toast('Saliste de tu cuenta', '👋');
+    }
+    dentro.current = !!isSignedIn;
+  }, [isLoaded, isSignedIn]);
+  return null;
+}
 
 export function ConClerk({ children }: { children: ReactNode }) {
   return (
     <ClerkProvider publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY} localization={esUY}>
       {/* el puente solo implementa lo que usa la autenticación (setAuth / clearAuth) */}
       <ConvexProviderWithClerk client={puente as never} useAuth={useAuth}>
+        <AlSalir />
         {children}
       </ConvexProviderWithClerk>
     </ClerkProvider>

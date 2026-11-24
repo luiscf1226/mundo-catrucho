@@ -37,7 +37,7 @@ import {
   sesion,
   terminar,
 } from './avance';
-import { quien, usuarioActual, usuarioDe } from './identidad';
+import { quien, usuarioActual, usuarioDe, usuarioPorToken } from './identidad';
 import { juegosDelCatalogo } from './partidas';
 import type schema from './schema';
 
@@ -363,9 +363,14 @@ export const subirAvanceLocal = mutation({
  * para no llenar la clasificación de desarrollo.
  */
 export const olvidarInvitado = internalMutation({
-  args: quien,
+  // `token`: una cuenta sin invitado (la llave de Clerk de una prueba)
+  args: { invitado: v.optional(v.string()), token: v.optional(v.string()) },
   handler: async (ctx, args) => {
-    const usuario = await usuarioDe(ctx, args);
+    const usuario = args.token
+      ? await usuarioPorToken(ctx, args.token)
+      : args.invitado
+        ? await usuarioDe(ctx, { invitado: args.invitado })
+        : null;
     if (!usuario) return 0;
     const id = usuario._id;
     const viajesCompartidos = await ctx.db.query('viajesCompartidos').collect();

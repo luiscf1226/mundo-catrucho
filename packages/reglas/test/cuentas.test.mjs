@@ -6,6 +6,8 @@ import {
   ALFABETO_CODIGO,
   CODIGO_DISPOSITIVO,
   codigoDispositivoDe,
+  decidirFusion,
+  FUSIONES_POR_DIA,
   fusionarCuentas,
   ganarXp,
   LOGROS,
@@ -163,9 +165,23 @@ test('una prenda comprada en las dos se devuelve; las monedas sueltas del mismo 
   assert.deepEqual(otroDia.sueltas, { fecha: '2026-11-24', hoy: 10 });
 });
 
-test('el saldo nunca queda negativo y juntar cuentas vacías no fabrica monedas', () => {
+test('lo comprado con premios repetidos se devuelve; el saldo nunca queda negativo', () => {
   const f = fusionarCuentas(cuenta({ monedas: 0 }), cuenta({ monedas: 0, logros: [] }));
   assert.equal(f.monedas, 0);
+  // la otra gastó su bienvenida y premios repetidos en ropa: se devuelve la más cara hasta cubrir lo que debe
+  const repetidas = ['olancho', 'copan', 'lempira'];
+  const g = fusionarCuentas(
+    cuenta({ monedas: 0, visitas: repetidas, recuerdos: repetidas }),
+    cuenta({ monedas: 0, visitas: repetidas, recuerdos: repetidas, comprados: ['at_lenca', 'cara_pecas'] }),
+  );
+  const debe = MONEDAS_INICIALES + 3 * (PREMIO_PRIMERA_VISITA.monedas + PREMIO_RECUERDO.monedas);
+  assert.deepEqual(g.devueltas, ['at_lenca']);
+  assert.deepEqual(g.comprados, ['cara_pecas']);
+  assert.equal(g.monedas, 260 - debe);
+  // si la que queda tiene con qué, paga ella y no se devuelve nada
+  const h = fusionarCuentas(cuenta({ monedas: 1000 }), cuenta({ monedas: 0, comprados: ['at_lenca'] }));
+  assert.deepEqual(h.devueltas, []);
+  assert.equal(h.monedas, 1000 - MONEDAS_INICIALES);
   // diez cuentas nuevas juntadas una por una no suman nada
   let queda = cuenta();
   for (let i = 0; i < 10; i++) {
@@ -173,4 +189,14 @@ test('el saldo nunca queda negativo y juntar cuentas vacías no fabrica monedas'
     queda = cuenta({ monedas: f2.monedas, logros: f2.logros });
   }
   assert.equal(queda.monedas, MONEDAS_INICIALES + coins('primer_paso'));
+});
+
+test('una cuenta absorbe como mucho FUSIONES_POR_DIA cuentas por día', () => {
+  let e;
+  for (let i = 0; i < FUSIONES_POR_DIA; i++) {
+    e = decidirFusion(e, '2026-11-24');
+    assert(e);
+  }
+  assert.equal(decidirFusion(e, '2026-11-24'), null);
+  assert.deepEqual(decidirFusion(e, '2026-11-25'), { fecha: '2026-11-25', n: 1 });
 });

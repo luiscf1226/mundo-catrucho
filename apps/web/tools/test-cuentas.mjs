@@ -16,7 +16,7 @@ import { join } from 'node:path';
 import { parseEnv } from 'node:util';
 import { ConvexHttpClient } from 'convex/browser';
 import { makeFunctionReference as ref } from 'convex/server';
-import { fusionarCuentas, LOGROS, PREMIOS } from '../../../packages/reglas/src/index.ts';
+import { FUSIONES_POR_DIA, fusionarCuentas, LOGROS, PREMIOS } from '../../../packages/reglas/src/index.ts';
 import { raiz } from '../../../scripts/catalogo.mjs';
 import { launch } from './harness.mjs';
 
@@ -83,8 +83,11 @@ const secretoA = nuevo(),
   secretoB = nuevo(),
   secretoC = nuevo(),
   secretoD = nuevo(),
+  secretoE = nuevo(),
   intruso = nuevo();
 const olvidar = [secretoA, secretoC, intruso];
+/** cuentas de Clerk simuladas que no tienen invitado propio */
+const llaves = [];
 const sufijo = randomBytes(2).toString('hex');
 const PULPERIA = { motor: 'pulperia', juegoId: 'franciscomorazan.pulperia' };
 const pestanas = [];
@@ -165,6 +168,13 @@ try {
   await tB.waitFor(`!!document.querySelector('[data-testid=cuenta-codigo-input]')`);
   await setInput(tB, 'cuenta-codigo-input', codigo.toLowerCase());
   await tB.click('cuenta-usar');
+  // antes de entrar se muestra de quién es la cuenta
+  await tB.waitFor(`!!document.querySelector('[data-testid=cuenta-confirmar]')`, 15000, 'confirmación');
+  assert.equal(await tB.text('cuenta-confirmar-nombre'), `CuentaA-${sufijo}`);
+  await tB.ev(`document.querySelector('[data-testid=cuenta-confirmar]').scrollIntoView({block:'center'})`);
+  await tB.sleep(300);
+  await tB.shot(join(capturas, '02-confirmar.png'));
+  await tB.click('cuenta-si');
   await tB.waitFor(
     `document.querySelector('[data-testid=cuenta-aviso]')?.dataset.ok === 'true'`,
     20000,
@@ -172,16 +182,14 @@ try {
   );
   await tB.ev(`document.querySelector('[data-testid=cuenta]').scrollIntoView({block:'center'})`);
   await tB.sleep(400);
-  await tB.shot(join(capturas, '02-otro-dispositivo-entro.png'));
+  await tB.shot(join(capturas, '03-otro-dispositivo-entro.png'));
 
   const pA = await q(fn.perfil, { invitado: secretoA }),
     pB = await q(fn.perfil, { invitado: secretoB });
   assert.deepEqual(pB, pA, 'los dos secretos entran a la misma cuenta');
-  // el saldo es el de la fusión (más los logros que la suma ya cumple, que se pagan una vez)
+  // el saldo es exactamente el de la fusión: los logros que solo cumple la suma quedan marcados sin pagar
   const despues = await cuenta(secretoA);
-  const logrosNuevos = despues.logros.filter((l) => !esperado.logros.includes(l));
-  const pagados = logrosNuevos.reduce((s, l) => s + coins(l), 0);
-  assert.equal(pA.monedas, esperado.monedas + pagados, `saldo: ${pA.monedas} vs ${esperado.monedas} + ${pagados}`);
+  assert.equal(pA.monedas, esperado.monedas, `saldo: ${pA.monedas} vs ${esperado.monedas}`);
   assert.equal(pA.nivel, esperado.nivel);
   // nada se pierde: ropa de los dos, etapas y marcas, visitas del servidor y del navegador de B
   assert.deepEqual([...pA.comprados].sort(), ['cara_lentes', 'cara_pecas']);
@@ -218,6 +226,29 @@ try {
   const propio = await m(fn.crearCodigo, { invitado: secretoA });
   assert.equal((await m(fn.usarCodigo, { invitado: secretoB, codigo: propio.codigo })).motivo, 'propio');
   assert.equal((await m(fn.usarCodigo, { invitado: intruso, codigo: 'ABCD-EFG' })).motivo, 'codigo');
+  assert.equal(await q(fn.miCuenta, { invitado: intruso }), null, 'probar códigos no crea cuentas');
+  // un dispositivo sin nada entra sin fusión; una cuenta absorbe como mucho FUSIONES_POR_DIA cuentas por día
+  const vacio = await m(fn.usarCodigo, {
+    invitado: secretoE,
+    codigo: (await m(fn.crearCodigo, { invitado: secretoA })).codigo,
+  });
+  assert(vacio.ok && vacio.resumen === null, `vacío: ${vacio.motivo}`);
+  for (let i = 1; i < FUSIONES_POR_DIA; i++) {
+    const otroTel = nuevo();
+    olvidar.push(otroTel);
+    await m(fn.entrar, { invitado: otroTel, nombre: 'Otro', creado: true });
+    const r = await m(fn.usarCodigo, {
+      invitado: otroTel,
+      codigo: (await m(fn.crearCodigo, { invitado: secretoA })).codigo,
+    });
+    assert(r.ok, `fusión ${i + 1}: ${r.motivo}`);
+  }
+  await m(fn.entrar, { invitado: intruso, nombre: 'Intruso', creado: true });
+  const tope = await m(fn.usarCodigo, {
+    invitado: intruso,
+    codigo: (await m(fn.crearCodigo, { invitado: secretoA })).codigo,
+  });
+  assert.equal(tope.motivo, 'tope');
 
   // 6. un cambio de ropa en B se ve en A (el perfil sale de Convex al iniciar, no del navegador)
   await tB.ev(`${S}.closePanel()`);
@@ -239,7 +270,7 @@ try {
   for (const id of ['cara_lentes', 'cara_pecas']) assert(await st(tA, `s.profile.owned.includes('${id}')`), id);
   await tA.ev(`${S}.openPanel('ajustes')`);
   await tA.sleep(600);
-  await tA.shot(join(capturas, '03-mismo-perfil-en-a.png'));
+  await tA.shot(join(capturas, '04-mismo-perfil-en-a.png'));
 
   // 7. Clerk sin llaves: `--identity` simula el token. La primera vez la cuenta se une al invitado C; desde otro
   //    dispositivo (invitado D con su avance) se junta con la misma cuenta, una sola vez.
@@ -271,6 +302,22 @@ try {
     JSON.stringify({ invitado: secretoD, codigo: c2.codigo }),
   ]);
   assert.equal(conCodigo.motivo, 'con-cuenta');
+  // y sin token, un dispositivo cuyo invitado ya es una cuenta de Clerk tampoco se junta por código
+  assert.equal((await m(fn.usarCodigo, { invitado: secretoC, codigo: c2.codigo })).motivo, 'con-cuenta');
+  // otra cuenta de Clerk en ese mismo dispositivo no adopta ni absorbe la primera: arranca la suya
+  const otraLlave = `https://prueba.clerk.accounts.dev|user_${sufijo}_2`;
+  llaves.push(otraLlave);
+  const k2 = convexRun([
+    '--identity',
+    JSON.stringify({ tokenIdentifier: otraLlave, subject: `user_${sufijo}_2` }),
+    'cuentas:vincularCuenta',
+    JSON.stringify({ invitado: secretoC }),
+  ]);
+  assert.deepEqual(k2, { ok: true, nueva: true, resumen: null });
+  assert.equal(
+    convexRun(['--identity', identidad, 'cuentas:miCuenta', JSON.stringify({ invitado: secretoC })]).conCuenta,
+    true,
+  );
   ok = true;
 } catch (e) {
   console.log(`FALLA cuentas: ${e.stack ?? e.message}`);
@@ -287,9 +334,9 @@ try {
     await t.close();
   }
   rmSync(out, { recursive: true, force: true });
-  for (const invitado of olvidar)
+  for (const args of [...olvidar.map((invitado) => ({ invitado })), ...llaves.map((token) => ({ token }))])
     try {
-      execFileSync('npx', ['convex', 'run', 'progreso:olvidarInvitado', JSON.stringify({ invitado })], {
+      execFileSync('npx', ['convex', 'run', 'progreso:olvidarInvitado', JSON.stringify(args)], {
         cwd: raiz,
         stdio: 'ignore',
       });

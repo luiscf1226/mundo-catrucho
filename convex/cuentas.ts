@@ -11,6 +11,8 @@ import {
   CODIGO_DISPOSITIVO,
   type CuentaFusion,
   codigoDispositivoDe,
+  decidirFusion,
+  fechaHonduras,
   fusionarCuentas,
   MONEDAS_INICIALES,
   mostrarCodigoDispositivo,
@@ -28,14 +30,16 @@ import {
   queryGeneric,
 } from 'convex/server';
 import { type GenericId, v } from 'convex/values';
-import { asegurarContadores, revisarLogros, sesion, terminar } from './avance';
+import { asegurarContadores, contadoresDe, revisarLogros, type Sesion, sesion, terminar } from './avance';
 import {
   asegurarUsuario,
   compradosDe,
+  crearCuenta,
   quien,
   tokenCuenta,
   tokenDe,
   usuarioActual,
+  usuarioDe,
   usuarioPorToken,
   vista,
 } from './identidad';
@@ -128,19 +132,29 @@ async function moverSocial(ctx: Escritura, de: IdUsuario, a: IdUsuario) {
       .withIndex('por_b', (q) => q.eq('b', u))
       .collect()),
   ];
-  const otrosDeA = new Set((await amistadesDe(a)).map((x) => (x.a === a ? x.b : x.a)));
+  const borrarAmistad = async (id: GenericId<'amistades'>) => {
+    for (const d of await ctx.db
+      .query('directos')
+      .withIndex('por_amistad', (q) => q.eq('amistad', id))
+      .collect())
+      await ctx.db.delete(d._id);
+    await ctx.db.delete(id);
+  };
+  const deA = new Map((await amistadesDe(a)).map((x) => [x.a === a ? x.b : x.a, x] as const));
   for (const am of await amistadesDe(de)) {
-    const otro = am.a === de ? am.b : am.a;
-    if (otro === a || otrosDeA.has(otro)) {
-      for (const d of await ctx.db
-        .query('directos')
-        .withIndex('por_amistad', (q) => q.eq('amistad', am._id))
-        .collect())
-        await ctx.db.delete(d._id);
-      await ctx.db.delete(am._id);
+    const otro = am.a === de ? am.b : am.a,
+      ya = deA.get(otro);
+    if (otro === a) {
+      await borrarAmistad(am._id);
       continue;
     }
-    otrosDeA.add(otro);
+    // si las dos tenían algo con la misma persona, queda la amistad aceptada (con sus mensajes)
+    if (ya && !(ya.estado === 'pedida' && am.estado === 'aceptada')) {
+      await borrarAmistad(am._id);
+      continue;
+    }
+    if (ya) await borrarAmistad(ya._id);
+    deA.set(otro, am);
     await ctx.db.patch(am._id, am.a === de ? { a } : { b: a });
   }
   const bloqueosDeA = await ctx.db
@@ -178,7 +192,7 @@ async function moverSocial(ctx: Escritura, de: IdUsuario, a: IdUsuario) {
     await ctx.db.patch(r._id, { de: a });
   for (const r of await ctx.db
     .query('reportes')
-    .filter((q) => q.eq(q.field('a'), de))
+    .withIndex('por_a', (q) => q.eq('a', de))
     .collect())
     await ctx.db.patch(r._id, { a });
 }
@@ -186,7 +200,7 @@ async function moverSocial(ctx: Escritura, de: IdUsuario, a: IdUsuario) {
 /**
  * Junta la cuenta `origen` en `destino` y borra `origen`. Saldo, nivel y XP salen de `fusionarCuentas`; visitas,
  * recuerdos, logros, ropa, etapas, estrellas, marcas y misiones de hoy se juntan sin repetir; las llaves de
- * `origen` (y con `vincularOrigen`, la suya propia) pasan a `destino`.
+ * `origen` (y con `vincularOrigen`, la suya propia) pasan a `destino`. Quien llama revisa antes `reservarFusion`.
  */
 export async function fusionar(
   ctx: Escritura,
@@ -235,7 +249,8 @@ export async function fusionar(
     }
   }
   for (const io of o.inventario) {
-    if (d.inventario.some((x) => x.itemId === io.itemId)) await ctx.db.delete(io._id);
+    if (f.devueltas.includes(io.itemId) || d.inventario.some((x) => x.itemId === io.itemId))
+      await ctx.db.delete(io._id);
     else await ctx.db.patch(io._id, { usuarioId: destino });
   }
   for (const jo of o.juegos) {
@@ -328,7 +343,29 @@ export async function fusionar(
   if (ud.esInvitado && !uo.esInvitado) await ctx.db.patch(destino, { esInvitado: false });
   if (o.perfil) await ctx.db.delete(o.perfil._id);
   await ctx.db.delete(origen);
+  // los logros que solo cumple la suma de las dos se marcan sin pagar: ninguna de las dos los ganó sola
+  const s: Sesion = {
+    ctx,
+    usuarioId: destino,
+    perfilId: d.perfil._id,
+    avatar: d.perfil.avatar,
+    saldo: { monedas: f.monedas, xp: f.xp, nivel: f.nivel },
+    subidas: 0,
+    logros: [],
+    misiones: null,
+    ahora: Date.now(),
+  };
+  await revisarLogros(s, { pagarlos: false });
   return f.resumen;
+}
+
+/** Cuenta una fusión más para `destino` hoy; false si ya absorbió `FUSIONES_POR_DIA` cuentas. */
+async function reservarFusion(ctx: Escritura, destino: IdUsuario) {
+  const c = await asegurarContadores(ctx, destino),
+    r = decidirFusion(c.fusiones, fechaHonduras(Date.now()));
+  if (!r) return false;
+  await ctx.db.patch(c._id, { fusiones: r });
+  return true;
 }
 
 // ------------------------------------------------------------------ código para otro dispositivo (MC-09)
@@ -358,41 +395,74 @@ export const crearCodigoDispositivo = mutation({
   },
 });
 
+/** Busca un código vigente (sin escribir nada). */
+async function filaDeCodigo(ctx: Lectura, entrada: string) {
+  const codigo = normalizarCodigoDispositivo(entrada);
+  if (!codigo) return { motivo: 'codigo' as const };
+  const hash = await hashCodigo(codigo);
+  const fila = await ctx.db
+    .query('codigosDispositivo')
+    .withIndex('por_hash', (q) => q.eq('hash', hash))
+    .first();
+  if (!fila) return { motivo: 'codigo' as const };
+  const cuenta = await ctx.db.get(fila.usuarioId);
+  if (fila.vence <= Date.now() || !cuenta) return { motivo: 'vencido' as const, fila };
+  return { fila, cuenta };
+}
+
+/** Antes de entrar con un código: de quién es la cuenta (para confirmarlo). No cambia nada. */
+export const verCodigoDispositivo = query({
+  args: { ...quien, codigo: v.string() },
+  handler: async (ctx, args) => {
+    const r = await filaDeCodigo(ctx, args.codigo);
+    if (!('cuenta' in r) || !r.cuenta) return { ok: false as const, motivo: r.motivo };
+    const yo = await usuarioDe(ctx, args);
+    if (yo?._id === r.cuenta._id) return { ok: false as const, motivo: 'propio' };
+    const perfil = await ctx.db
+      .query('perfiles')
+      .withIndex('por_usuario', (q) => q.eq('usuarioId', r.cuenta._id))
+      .unique();
+    return { ok: true as const, nombre: r.cuenta.nombre, nivel: perfil?.nivel ?? 1 };
+  },
+});
+
 /**
  * Este dispositivo entra a la cuenta del código. Lo que tenía en Convex se junta con esa cuenta (`fusionar`, sin
  * premios repetidos) y lo que trae el navegador sube sin premios, como `subirAvanceLocal`. Motivos: `codigo`,
- * `vencido`, `propio` (ya es tu cuenta), `espera` (demasiados intentos), `con-cuenta` (con Clerk se usa la cuenta).
+ * `vencido`, `propio` (ya es tu cuenta), `espera` (demasiados intentos), `tope` (esa cuenta ya juntó
+ * `FUSIONES_POR_DIA` hoy) y `con-cuenta` (con Clerk se usa la cuenta, y una cuenta de Clerk no se junta por código).
+ * El código se revisa antes de crear nada: probar códigos no llena tablas.
  */
 export const usarCodigoDispositivo = mutation({
   args: { ...quien, codigo: v.string(), local: v.optional(v.object(avanceLocal)) },
   handler: async (ctx, args) => {
     if (await tokenCuenta(ctx)) return { ok: false as const, motivo: 'con-cuenta' };
-    const codigo = normalizarCodigoDispositivo(args.codigo);
-    if (!codigo) return { ok: false as const, motivo: 'codigo' };
-    const { usuario } = await asegurarUsuario(ctx, { invitado: args.invitado });
+    const yo = await usuarioDe(ctx, { invitado: args.invitado });
+    if (yo && !yo.esInvitado) return { ok: false as const, motivo: 'con-cuenta' };
     const ahora = Date.now(),
-      c = await asegurarContadores(ctx, usuario._id);
-    if (!puedeProbarCodigo(c.fallosCodigo, ahora)) return { ok: false as const, motivo: 'espera' };
-    const hash = await hashCodigo(codigo);
-    const fila = await ctx.db
-      .query('codigosDispositivo')
-      .withIndex('por_hash', (q) => q.eq('hash', hash))
-      .first();
-    if (!fila || fila.vence <= ahora || !(await ctx.db.get(fila.usuarioId))) {
-      await ctx.db.patch(c._id, { fallosCodigo: sumarFalloCodigo(c.fallosCodigo, ahora) });
-      if (fila) await ctx.db.delete(fila._id);
-      return { ok: false as const, motivo: fila ? ('vencido' as const) : ('codigo' as const) };
+      c = yo ? await contadoresDe(ctx, yo._id) : null;
+    if (c && !puedeProbarCodigo(c.fallosCodigo, ahora)) return { ok: false as const, motivo: 'espera' };
+    const r = await filaDeCodigo(ctx, args.codigo);
+    if (!('cuenta' in r) || !r.cuenta) {
+      if (c) await ctx.db.patch(c._id, { fallosCodigo: sumarFalloCodigo(c.fallosCodigo, ahora) });
+      if (r.fila) await ctx.db.delete(r.fila._id);
+      return { ok: false as const, motivo: r.motivo };
     }
-    if (fila.usuarioId === usuario._id) return { ok: false as const, motivo: 'propio' };
-    await ctx.db.delete(fila._id);
-    const resumen = await fusionar(ctx, usuario._id, fila.usuarioId, { vincularOrigen: true });
+    const destino = r.cuenta._id;
+    if (yo?._id === destino) return { ok: false as const, motivo: 'propio' };
+    let resumen = null;
+    if (yo) {
+      if (!(await reservarFusion(ctx, destino))) return { ok: false as const, motivo: 'tope' };
+      await ctx.db.delete(r.fila._id);
+      resumen = await fusionar(ctx, yo._id, destino, { vincularOrigen: true });
+    } else {
+      await ctx.db.delete(r.fila._id);
+      await ctx.db.insert('vinculos', { token: await tokenDe(args), usuarioId: destino });
+    }
     // desde aquí el secreto de este dispositivo ya entra a la cuenta del código
     const s = await sesion(ctx, { invitado: args.invitado });
-    const avance = await terminar(s);
-    if (args.local && avanceLocalCabe(args.local)) {
-      await guardarAvanceLocal(ctx, s.usuarioId, args.local);
-      await revisarLogros(s, { pagarlos: false });
-    }
+    if (args.local && avanceLocalCabe(args.local)) await guardarAvanceLocal(ctx, s.usuarioId, args.local);
+    const avance = await terminar(s, { pagarlos: false });
     const cuenta = await ctx.db.get(s.usuarioId),
       perfil = await ctx.db.get(s.perfilId);
     if (!cuenta || !perfil) throw new Error('Sin perfil.');
@@ -434,19 +504,26 @@ export const miCuenta = query({
 /**
  * Une la llave de una cuenta (el `tokenIdentifier` de Clerk) con el invitado de este dispositivo. Si la llave
  * todavía no tiene cuenta, el invitado pasa a ser esa cuenta; si ya la tenía (entró en otro dispositivo), el invitado
- * se junta con ella sin premios repetidos y su secreto ya no entra a la cuenta (al salir de Clerk vuelve a ser un
- * invitado nuevo). Se puede repetir: la segunda vez no hace nada.
+ * se junta con ella sin premios repetidos y su secreto ya no entra a la cuenta. Una cuenta que ya es de Clerk nunca se
+ * adopta ni se junta con otra: si el invitado de este dispositivo es de otra cuenta de Clerk, la llave nueva arranca
+ * su propia cuenta. Al salir de Clerk el juego cambia el secreto del dispositivo (`core/clerk.tsx`). Repetirla no hace
+ * nada.
  */
 export async function vincularLlave(ctx: Escritura, llave: string, args: { invitado: string }) {
   const dueno = await usuarioPorToken(ctx, llave);
   const invitado = await usuarioPorToken(ctx, await tokenDe(args));
   if (!dueno) {
-    const cuenta = invitado ?? (await asegurarUsuario(ctx, args)).usuario;
-    await ctx.db.insert('vinculos', { token: llave, usuarioId: cuenta._id });
-    await ctx.db.patch(cuenta._id, { esInvitado: false });
-    return { ok: true as const, nueva: !invitado, resumen: null };
+    if (invitado?.esInvitado) {
+      await ctx.db.insert('vinculos', { token: llave, usuarioId: invitado._id });
+      await ctx.db.patch(invitado._id, { esInvitado: false });
+      return { ok: true as const, nueva: false, resumen: null };
+    }
+    await crearCuenta(ctx, { token: llave, esInvitado: false });
+    return { ok: true as const, nueva: true, resumen: null };
   }
-  if (!invitado || invitado._id === dueno._id) return { ok: true as const, nueva: false, resumen: null };
+  if (!invitado || invitado._id === dueno._id || !invitado.esInvitado)
+    return { ok: true as const, nueva: false, resumen: null };
+  if (!(await reservarFusion(ctx, dueno._id))) return { ok: false as const, motivo: 'tope' };
   const resumen = await fusionar(ctx, invitado._id, dueno._id, { vincularOrigen: false });
   return { ok: true as const, nueva: false, resumen };
 }

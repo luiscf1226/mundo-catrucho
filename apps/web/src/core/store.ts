@@ -314,7 +314,9 @@ export interface Game {
    * MC-08, MC-09: este dispositivo entra a la cuenta del código. Lo que tenía (en Convex y en el navegador) se junta
    * con esa cuenta sin repetir premios; después se vuelve a leer todo del servidor.
    */
-  usarCodigoDispositivo(codigo: string): Promise<{ ok: true; resumen: ResumenFusion } | { ok: false; motivo: string }>;
+  usarCodigoDispositivo(
+    codigo: string,
+  ): Promise<{ ok: true; resumen: ResumenFusion | null } | { ok: false; motivo: string }>;
 }
 
 type Compra = 'ok' | 'ya' | 'caro' | 'no';

@@ -174,7 +174,8 @@ export default defineSchema({
     estado: v.optional(v.union(v.literal('nuevo'), v.literal('visto'))),
   })
     .index('por_de', ['de'])
-    .index('por_estado', ['estado']),
+    .index('por_estado', ['estado'])
+    .index('por_a', ['a']),
   // MC-22: bloqueos. Un bloqueado no ve tus mensajes ni vos los suyos, y no te puede invitar ni pedir amistad.
   bloqueos: defineTable({ de: v.id('usuarios'), a: v.id('usuarios') })
     .index('por_de', ['de', 'a'])
@@ -208,6 +209,8 @@ export default defineSchema({
     migrado: v.boolean(),
     /** códigos de amigo fallidos en la ventana actual (contra adivinar códigos) */
     fallosCodigo: v.optional(v.object({ desde: v.number(), n: v.number() })),
+    /** MC-08: cuentas que absorbió hoy (tope `FUSIONES_POR_DIA`) */
+    fusiones: v.optional(v.object({ fecha: v.string(), n: v.number() })),
   }).index('por_usuario', ['usuarioId']),
   // MC-07, MC-09: otras llaves que entran a la misma cuenta. `token` es el hash del secreto de invitado de otro
   // dispositivo (`invitado:<sha256>`) o el `tokenIdentifier` de Clerk. Nunca se guarda el secreto.

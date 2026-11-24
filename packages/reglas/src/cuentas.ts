@@ -29,6 +29,21 @@ export function normalizarCodigoDispositivo(c: unknown): string | null {
 /** Para leerlo en voz alta o copiarlo: `ABCD-EFGH`. */
 export const mostrarCodigoDispositivo = (c: string) => `${c.slice(0, 4)}-${c.slice(4)}`;
 
+/**
+ * Cuentas que una cuenta puede absorber por día de Honduras. Los topes del día (monedas sueltas, misiones, ritmo de
+ * partidas) son por cuenta: sin este límite, muchos invitados juntados en una multiplicarían esos topes.
+ */
+export const FUSIONES_POR_DIA = 2;
+export interface EstadoFusiones {
+  fecha: string;
+  n: number;
+}
+/** ¿Puede absorber otra cuenta hoy? Devuelve el estado nuevo si sí. */
+export function decidirFusion(prev: EstadoFusiones | undefined, fecha: string): EstadoFusiones | null {
+  const n = prev && prev.fecha === fecha ? prev.n : 0;
+  return n < FUSIONES_POR_DIA ? { fecha, n: n + 1 } : null;
+}
+
 // ------------------------------------------------------------------ fusión de cuentas
 export interface JuegoCuenta {
   juegoId: string;
@@ -63,6 +78,8 @@ export interface Fusion {
   recuerdos: string[];
   logros: string[];
   comprados: string[];
+  /** prendas de la otra cuenta que se devuelven (a su precio) porque se pagaron con premios repetidos */
+  devueltas: string[];
   juegos: JuegoCuenta[];
   sueltas: { fecha: string; hoy: number } | null;
   /** lo que trae la otra cuenta y lo que se descuenta por premios repetidos (para mostrarlo) */
@@ -71,6 +88,7 @@ export interface Fusion {
     monedas: number;
     descuento: number;
     reembolso: number;
+    devueltas: number;
     prendas: number;
     juegos: number;
     visitas: number;
@@ -101,7 +119,9 @@ const mejorJuego = (a: JuegoCuenta | undefined, b: JuegoCuenta): JuegoCuenta => 
  * bienvenida de la otra, la primera visita y el recuerdo de un mismo departamento, el mismo logro, la misma misión
  * del mismo día y las monedas sueltas que pasen del tope del día. La XP se suma y el nivel sale de la suma; los
  * premios por subir de nivel se ajustan a ese nivel. Una prenda comprada en las dos se devuelve (se pagó dos veces).
- * El saldo nunca queda negativo.
+ * Si lo repetido ya se gastó y el saldo quedaría negativo, se devuelven prendas que solo tenía la otra (las más caras
+ * primero) hasta cubrirlo: lo comprado con premios repetidos no se queda gratis. Solo si no hay qué devolver (se gastó
+ * en pasajes o comida) el saldo queda en 0.
  */
 export function fusionarCuentas(queda: CuentaFusion, otra: CuentaFusion): Fusion {
   const enAmbas = <T>(a: readonly T[], b: readonly T[]) => [...new Set(b)].filter((x) => a.includes(x));
@@ -140,11 +160,21 @@ export function fusionarCuentas(queda: CuentaFusion, otra: CuentaFusion): Fusion
   const ajusteNiveles = (nuevo.nivel - 1 - (queda.nivel - 1) - (otra.nivel - 1)) * PREMIOS.levelUp.coins;
 
   const trae = otra.monedas - descuento + reembolso + ajusteNiveles;
-  const saldo = Math.max(0, queda.monedas + trae);
+  let saldo = queda.monedas + trae;
+  const devueltas: string[] = [];
+  const devolvibles = [...new Set(otra.comprados)]
+    .filter((id) => !queda.comprados.includes(id))
+    .sort((a, b) => (articuloPorId(b)?.price ?? 0) - (articuloPorId(a)?.price ?? 0));
+  for (const id of devolvibles) {
+    if (saldo >= 0) break;
+    devueltas.push(id);
+    saldo += articuloPorId(id)?.price ?? 0;
+  }
+  saldo = Math.max(0, saldo);
 
   const juegos = new Map(queda.juegos.map((j) => [j.juegoId, j] as const));
   for (const j of otra.juegos) juegos.set(j.juegoId, mejorJuego(juegos.get(j.juegoId), j));
-  const comprados = union(queda.comprados, otra.comprados);
+  const comprados = union(queda.comprados, otra.comprados).filter((id) => !devueltas.includes(id));
   const visitas = union(queda.visitas, otra.visitas);
   return {
     monedas: saldo,
@@ -154,12 +184,14 @@ export function fusionarCuentas(queda: CuentaFusion, otra: CuentaFusion): Fusion
     recuerdos: union(queda.recuerdos, otra.recuerdos),
     logros: union(queda.logros, otra.logros),
     comprados,
+    devueltas,
     juegos: [...juegos.values()],
     sueltas,
     resumen: {
       monedas: saldo - queda.monedas,
       descuento,
       reembolso,
+      devueltas: devueltas.length,
       prendas: comprados.length - queda.comprados.length,
       juegos: otra.juegos.length,
       visitas: visitas.length - queda.visitas.length,

@@ -3,7 +3,7 @@
 import { CODIGO_DISPOSITIVO } from '@mundo-catrucho/reglas';
 import { lazy, Suspense, useState } from 'react';
 import { audio } from '../../core/audio';
-import type { ResumenFusion } from '../../core/servidor';
+import { type ResumenFusion, servidor } from '../../core/servidor';
 import { useGame } from '../../core/store';
 import { Icon } from '../components/Icon';
 import { Btn } from '../components/kit';
@@ -17,17 +17,23 @@ const MOTIVO: Record<string, string> = {
   vencido: 'Ese código ya venció. Pedí uno nuevo en el otro dispositivo.',
   propio: 'Ese código es de esta misma cuenta: ya estás aquí.',
   espera: 'Demasiados intentos. Esperá unos minutos.',
-  'con-cuenta': 'Ya entraste con tu cuenta: no hace falta código.',
+  'con-cuenta': 'Este dispositivo es de una cuenta con correo: entrá con ella, no hace falta código.',
+  tope: 'Esa cuenta ya juntó dos dispositivos hoy. Probá mañana.',
   'sin-conexion': 'Sin conexión. Probá otra vez.',
 };
 const motivo = (m: string) => MOTIVO[m] ?? 'No se pudo. Probá otra vez.';
 
-function textoResumen(r: ResumenFusion) {
+function textoResumen(r: ResumenFusion | null) {
+  if (!r) return 'este dispositivo no tenía nada guardado';
   const partes = [`${r.monedas >= 0 ? '+' : ''}${r.monedas} Lempiritas`];
   if (r.prendas) partes.push(`${r.prendas} ${r.prendas === 1 ? 'prenda' : 'prendas'}`);
   if (r.juegos) partes.push(`${r.juegos} ${r.juegos === 1 ? 'juego' : 'juegos'}`);
   if (r.visitas) partes.push(`${r.visitas} ${r.visitas === 1 ? 'departamento' : 'departamentos'}`);
-  return partes.join(', ');
+  const texto = `se juntó ${partes.join(', ')}`;
+  // lo comprado con premios que ya tenía la cuenta (la bienvenida, la misma visita…) se devuelve
+  return r.devueltas
+    ? `${texto} (se ${r.devueltas === 1 ? 'devolvió 1 prenda pagada' : `devolvieron ${r.devueltas} prendas pagadas`} con premios repetidos)`
+    : texto;
 }
 
 export function TuCuenta() {
@@ -37,6 +43,7 @@ export function TuCuenta() {
     [copiado, setCopiado] = useState(false),
     [entrada, setEntrada] = useState(''),
     [usando, setUsando] = useState(false),
+    [confirmar, setConfirmar] = useState<{ nombre: string; nivel: number } | null>(null),
     [aviso, setAviso] = useState<{ ok: boolean; texto: string } | null>(null);
 
   const crear = async () => {
@@ -49,8 +56,18 @@ export function TuCuenta() {
       setCopiado(false);
     } else setAviso({ ok: false, texto: motivo(r.motivo) });
   };
-  const usar = async () => {
+  /** Primero se muestra de quién es la cuenta: entrar le da a esa cuenta todo lo de este dispositivo. */
+  const revisar = async () => {
     audio.init();
+    setUsando(true);
+    setAviso(null);
+    const r = await servidor.verCodigo(entrada);
+    setUsando(false);
+    if (r.ok) setConfirmar({ nombre: r.nombre, nivel: r.nivel });
+    else setAviso({ ok: false, texto: motivo(r.motivo) });
+  };
+  const usar = async () => {
+    setConfirmar(null);
     setUsando(true);
     setAviso(null);
     const r = await g().usarCodigoDispositivo(entrada);
@@ -61,7 +78,7 @@ export function TuCuenta() {
     }
     setEntrada('');
     setCodigo(null);
-    const texto = `Listo: ya jugás como ${g().profile.name}. Se juntó lo de este dispositivo: ${textoResumen(r.resumen)}.`;
+    const texto = `Listo: ya jugás como ${g().profile.name}; ${textoResumen(r.resumen)}.`;
     setAviso({ ok: true, texto });
     g().toast('Ya estás en tu cuenta', '🔗');
   };
@@ -118,7 +135,7 @@ export function TuCuenta() {
         className="flex items-end gap-2"
         onSubmit={(e) => {
           e.preventDefault();
-          if (entrada.length === CODIGO_DISPOSITIVO.largo && !usando) void usar();
+          if (entrada.length === CODIGO_DISPOSITIVO.largo && !usando) void revisar();
         }}
       >
         <label className="min-w-0 flex-1">
@@ -127,14 +144,15 @@ export function TuCuenta() {
             data-testid="cuenta-codigo-input"
             className="mc-input mc-num uppercase tracking-[.2em]"
             value={entrada}
-            onChange={(e) =>
+            onChange={(e) => {
+              setConfirmar(null);
               setEntrada(
                 e.target.value
                   .toUpperCase()
                   .replace(/[^A-Z0-9]/g, '')
                   .slice(0, CODIGO_DISPOSITIVO.largo),
-              )
-            }
+              );
+            }}
             placeholder="ABCD-EFGH"
             autoComplete="off"
             autoCapitalize="characters"
@@ -147,12 +165,26 @@ export function TuCuenta() {
           tone="primary"
           size="sm"
           icon="check"
-          disabled={entrada.length !== CODIGO_DISPOSITIVO.largo || usando}
-          onClick={() => void usar()}
+          disabled={entrada.length !== CODIGO_DISPOSITIVO.largo || usando || !!confirmar}
+          onClick={() => void revisar()}
         >
-          {usando ? 'Entrando…' : 'Entrar'}
+          {usando ? 'Un toque…' : 'Entrar'}
         </Btn>
       </form>
+      {confirmar && (
+        <div className="mc-card mc-danger flex flex-wrap items-center gap-2 px-3 py-2" data-testid="cuenta-confirmar">
+          <span className="min-w-0 flex-1 basis-56 text-sm font-extrabold leading-tight" role="alert">
+            Vas a entrar a la cuenta de <b data-testid="cuenta-confirmar-nombre">{confirmar.nombre}</b> (nivel{' '}
+            {confirmar.nivel}). Todo lo de este dispositivo pasa a esa cuenta. Hacelo solo si es tuya.
+          </span>
+          <Btn id="cuenta-cancelar" tone="neutral" size="sm" onClick={() => setConfirmar(null)}>
+            Cancelar
+          </Btn>
+          <Btn id="cuenta-si" tone="primary" size="sm" icon="check" onClick={() => void usar()}>
+            Sí, es mía
+          </Btn>
+        </div>
+      )}
       <span className="text-xs font-bold text-muted">
         Este dispositivo entra a esa cuenta y lo que tenés aquí se junta con ella, sin perder nada.
       </span>

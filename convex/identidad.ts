@@ -67,6 +67,34 @@ export async function usuarioActual(ctx: Lectura, args: { invitado: string }) {
   return perfil ? { usuario, perfil } : null;
 }
 
+/** Crea una cuenta nueva con su perfil inicial (100 Lempiritas y el avatar de entrada). */
+export async function crearCuenta(
+  ctx: Escritura,
+  {
+    token,
+    esInvitado,
+    nombre,
+    avatar,
+  }: { token: string; esInvitado: boolean; nombre?: string; avatar?: Record<string, unknown> },
+  existente?: GenericId<'usuarios'>,
+) {
+  const usuarioId =
+    existente ??
+    (await ctx.db.insert('usuarios', { nombre: nombreLimpio(nombre), esInvitado, tokenIdentifier: token }));
+  const perfilId = await ctx.db.insert('perfiles', {
+    usuarioId,
+    avatar: { ...AVATAR_INICIAL, ...limpiarAvatar(avatar ?? {}, []) },
+    monedas: MONEDAS_INICIALES,
+    xp: 0,
+    nivel: 1,
+    modo: 'solo',
+  });
+  const usuario = await ctx.db.get(usuarioId),
+    perfil = await ctx.db.get(perfilId);
+  if (!usuario || !perfil) throw new Error('No se pudo crear el perfil.');
+  return { usuario, perfil };
+}
+
 /** Como `usuarioActual`, pero crea al invitado (con su perfil inicial) la primera vez. */
 export async function asegurarUsuario(
   ctx: Escritura,
@@ -83,25 +111,11 @@ export async function asegurarUsuario(
     return actual;
   }
   const existente = await usuarioDe(ctx, args);
-  const usuarioId =
-    existente?._id ??
-    (await ctx.db.insert('usuarios', {
-      nombre: nombreLimpio(args.nombre),
-      esInvitado: true,
-      tokenIdentifier: await tokenDe(args),
-    }));
-  const perfilId = await ctx.db.insert('perfiles', {
-    usuarioId,
-    avatar: { ...AVATAR_INICIAL, ...limpiarAvatar(args.avatar ?? {}, []) },
-    monedas: MONEDAS_INICIALES,
-    xp: 0,
-    nivel: 1,
-    modo: 'solo',
-  });
-  const usuario = existente ?? (await ctx.db.get(usuarioId)),
-    perfil = await ctx.db.get(perfilId);
-  if (!usuario || !perfil) throw new Error('No se pudo crear el perfil.');
-  return { usuario, perfil };
+  return crearCuenta(
+    ctx,
+    { token: await tokenDe(args), esInvitado: true, nombre: args.nombre, avatar: args.avatar },
+    existente?._id,
+  );
 }
 
 /** Lo que compró el jugador (sin lo gratis ni las piezas de atuendos: eso lo deriva `poseidos`). */
