@@ -13,13 +13,15 @@ type Estado = ReturnType<typeof cursor> & {
 };
 type Sesion = Motor<{ margen: number; resistencia: number }, Estado>;
 const sabores = ['Coco', 'Fresa', 'Tamarindo'];
+/** cada bolsa viene pegada de un lado: hay que tirar más del lado pegado (izquierda menos derecha) */
+const SESGO = [0.2, -0.36, 0.36];
 const colores = ['#f4e7cb', '#ef7da0', '#ba8661'];
 function tirar(m: Sesion, dt: number) {
   const s = m.datos;
   if (s.espera > 0) return;
   const izq = (s.x + 1) / 2,
     der = (s.y + 1) / 2;
-  s.tension = Math.abs(izq - der);
+  s.tension = Math.abs(izq - der - SESGO[s.pedido]);
   if (s.tension > m.parametros.margen) {
     s.rotas++;
     m.sumar(-25);
@@ -40,7 +42,7 @@ const motor = defineMotor({
   id: 'cortes.topo',
   modos: { duo: { tipo: 'apoyo' }, abierto: { tipo: 'ambiente', bots: 3 } },
   guia: {
-    goal: 'Separá el sabor pedido con dos tirones parejos. A/D regula el sello izquierdo; W/S el derecho. F sostenido no hace falta: pulsá para tirar un segundo.',
+    goal: 'Separá el sabor pedido. Cada bolsa viene pegada de un lado: tirá más de ese lado (A/D izquierdo, W/S derecho) y pulsá F. Si el tirón no compensa lo pegado, se rompe la vecina.',
     ...controles,
   },
   etapa: (p) => ({ margen: 0.3 - p.dif * 0.16, resistencia: 1.4 + p.dif }),
@@ -56,7 +58,7 @@ const motor = defineMotor({
     m.objetivo = `Pedido ${sabores[s.pedido]} · Regulá ambos tirones y pulsá F`;
     m.lineas = [
       `Izq ${Math.round((s.x + 1) * 50)}% · Der ${Math.round((s.y + 1) * 50)}% · Sello ${Math.round(s.sello * 100)}%`,
-      `Asimetría máxima ${Math.round(m.parametros.margen * 100)}% · Entregas ${s.entregas} · Rotas ${s.rotas}`,
+      `Pegada ${SESGO[s.pedido] > 0 ? 'a la izquierda' : 'a la derecha'}: ${Math.round(Math.abs(SESGO[s.pedido]) * 100)}% más de ese lado (±${Math.round(m.parametros.margen * 100)}%) · Entregas ${s.entregas} · Rotas ${s.rotas}`,
     ];
     m.stats = { entregas: s.entregas, rotas: s.rotas, sello: s.sello, tension: s.tension };
   },
@@ -64,12 +66,14 @@ const motor = defineMotor({
     if (actor === 'compa') {
       // el compa solo ayuda cuando tu tirón va parejo; nunca rompe el sello ni te resta puntos
       const t = m.datos;
-      if (t.espera <= 0 && Math.abs((t.x + 1) / 2 - (t.y + 1) / 2) <= m.parametros.margen) tirar(m, dt * 0.2);
+      if (t.espera <= 0 && Math.abs((t.x + 1) / 2 - (t.y + 1) / 2 - SESGO[t.pedido]) <= m.parametros.margen)
+        tirar(m, dt * 0.2);
       return;
     }
     const s = m.datos;
     s.auto = true;
-    s.x = s.y = 0.6;
+    s.x = 0.3 + SESGO[s.pedido];
+    s.y = 0.3 - SESGO[s.pedido];
     tirar(m, dt);
   },
   Escena: ({ motor: m }) => (

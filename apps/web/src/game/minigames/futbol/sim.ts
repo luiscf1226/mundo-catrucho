@@ -92,6 +92,10 @@ export const DEF = {
   gkCover: [0.3, 0.3],
   kickoffFreeze: 1.3,
   goalPause: 2.8,
+  /** «El gol del lunes»: tu compañero de campo está expulsado (se queda fuera de la cancha) */
+  expulsado: false as boolean,
+  /** tiros contados: 0 = sin límite; si no, cuántos remates te quedan */
+  tiros: 0,
 };
 export type Params = typeof DEF;
 
@@ -116,6 +120,7 @@ export class Match {
   private stuckX = 0;
   private stuckZ = 0;
   /** la pelota pasó de los límites alguna vez (no debería): lo revisa la prueba */ escaped = 0;
+  /** remates usados (solo cuentan cuando `P.tiros` pone un límite) */ tirosUsados = 0;
 
   constructor(duration: number, seed = 1, params: Partial<Params> = {}) {
     this.P = { ...DEF, ...params };
@@ -169,7 +174,7 @@ export class Match {
     };
     const h = this.humanSpot();
     set(0, h[0], h[1]);
-    set(1, 4.5, 5.5);
+    set(1, this.P.expulsado ? this.P.hw + 3 : 4.5, 5.5);
     set(2, 0, hl - 0.9);
     const j = () => (this.rnd() - 0.5) * 1.6; // un poco de variación para que cada saque sea distinto
     if (team === 1) {
@@ -179,8 +184,10 @@ export class Match {
       set(3, 1.5 + j(), -4.5 + j());
       set(4, -4.5 + j(), -7 + j());
     }
-    this.ents[1].x += j();
-    this.ents[1].z += j();
+    if (!this.P.expulsado) {
+      this.ents[1].x += j();
+      this.ents[1].z += j();
+    }
     set(5, 0, -hl + 0.9);
     this.ball = { p: [0, r, 0], v: [0, 0, 0], lastTeam: -1, lastId: -1, noTouchId: -1, noTouchT: 0, shotAge: 9 };
     this.state = 'kickoff';
@@ -239,7 +246,7 @@ export class Match {
     if (!this.aiOff) {
       this.pickChasers();
       for (const e of this.ents) {
-        if (e.role === 'out') this.thinkOut(e, dt);
+        if (e.role === 'out' && !(this.P.expulsado && e.id === 1)) this.thinkOut(e, dt);
         else if (e.role === 'gk') this.thinkGk(e, dt);
       }
       this.separate();
@@ -283,6 +290,25 @@ export class Match {
     if (d > P.kickRange || b.p[1] > 1.5) {
       this.events.push({ type: 'whiff', by: 0 });
       return;
+    }
+    // sin compañero no hay a quién pasarle: Q despeja hacia adelante
+    if (pass && P.expulsado) {
+      b.v = [-Math.sin(h.yaw) * P.passMax, 3.5, -Math.cos(h.yaw) * P.passMax];
+      b.lastTeam = 0;
+      b.lastId = 0;
+      b.noTouchId = 0;
+      b.noTouchT = 0.28;
+      b.shotAge = 9;
+      me.kickCd = 0.3;
+      this.events.push({ type: 'kick', by: 0, team: 0 });
+      return;
+    }
+    if (!pass && P.tiros > 0) {
+      if (this.tirosUsados >= P.tiros) {
+        this.events.push({ type: 'whiff', by: 0 });
+        return;
+      }
+      this.tirosUsados++;
     }
     let dx = -Math.sin(h.yaw),
       dz = -Math.cos(h.yaw);
@@ -567,7 +593,7 @@ export class Match {
         b.noTouchT = 0.35;
       } else if (toward <= 1.5 || sp <= 4) {
         e.saveCd = 0.9;
-        const m = this.ents[e.team === 0 ? 1 : 3 + Math.floor(this.rnd() * 2)];
+        const m = this.ents[e.team === 0 ? (this.P.expulsado ? 0 : 1) : 3 + Math.floor(this.rnd() * 2)];
         this.aiKick(e, m.x + (this.rnd() - 0.5) * 3, m.z + a * 2, 13 + this.rnd() * 3, 5 + this.rnd() * 2, 0.12);
       }
     }

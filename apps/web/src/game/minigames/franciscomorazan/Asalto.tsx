@@ -360,7 +360,7 @@ const motor = defineMotor({
       return;
     }
     // jugador automático de prueba: corre (con la misma lentitud por carga) a la bolsa más cercana o a la guarida
-    const cerca = s.chepos.some((c) => c.persigue > 0 && lejos(c.x, c.z) < 6);
+    const cerca = s.chepos.some((c) => c.persigue > 0 && lejos(c.x, c.z) < 9);
     const masCerca = Math.min(...s.bolsas.map((b) => lejos(b.x, b.z)));
     const volver = s.lleva >= 2 || (s.lleva > 0 && (cerca || masCerca > lejos(GUARIDA[0], GUARIDA[1]) + 10));
     let tx = GUARIDA[0],
@@ -380,12 +380,20 @@ const motor = defineMotor({
       dz = tz - player.pos[2];
     const d = Math.hypot(dx, dz),
       paso = Math.min(d, player.sprint * (1 - s.lleva * 0.09) * dt);
-    // se aparta de los chepos que vienen cerca
+    // se aparta de los chepos que vienen cerca y de las patrullas (como haría quien juega mirando la calle)
     for (const c of s.chepos) {
       const e = lejos(c.x, c.z);
-      if (c.persigue > 0 && e < 7 && e > 0.01) {
-        dx += ((player.pos[0] - c.x) / e) * d * 0.8;
-        dz += ((player.pos[2] - c.z) / e) * d * 0.8;
+      if ((c.persigue > 0 ? e < 8 : e < m.parametros.vista + 1.5) && e > 0.01) {
+        dx += ((player.pos[0] - c.x) / e) * d * (c.persigue > 0 ? 0.9 : 0.5);
+        dz += ((player.pos[2] - c.z) / e) * d * (c.persigue > 0 ? 0.9 : 0.5);
+      }
+    }
+    for (const c of s.patrullas) {
+      const [x, z] = dondeCarro(c),
+        e = lejos(x, z);
+      if (e < 6 && e > 0.01) {
+        dx += ((player.pos[0] - x) / e) * d * 1.2;
+        dz += ((player.pos[2] - z) / e) * d * 1.2;
       }
     }
     const n = Math.hypot(dx, dz);

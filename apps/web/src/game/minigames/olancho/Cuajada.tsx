@@ -37,10 +37,10 @@ const motor = defineMotor({
   crear: (): Estado => ({ peso: 0, drenaje: 0, canales: 1, buenas: 0, malas: 0, aviso: 'Poné el primer peso' }),
   actualizar(m, dt) {
     const s = m.datos;
-    s.drenaje += (dt * s.peso * 0.07 * s.canales) / (1 + m.parametros.dif * 0.6);
+    s.drenaje += (dt * s.peso * 0.08 * s.canales) / (1 + m.parametros.dif * 0.15);
     if (input.take('fire')) pesar(m);
     if (s.drenaje >= 1) {
-      m.sumar(s.canales >= 0.9 ? 40 : -20);
+      m.sumar(s.canales >= 0.9 ? 60 : -20);
       if (s.canales >= 0.9) s.buenas++;
       else s.malas++;
       s.aviso = s.canales >= 0.9 ? 'Textura pareja, prepará otra' : 'Humedad atrapada, probá otra';
