@@ -63,6 +63,9 @@ llaves por índice en listas fijas. Código nuevo: sin `any` ni `!` si se puede 
    Segunda excepción: si se compila con `VITE_SALAS_URL` **y** `VITE_CONVEX_URL`, el juego pide a Convex un pase
    (`salas:pase`), pregunta a la sala qué tramo tiene espacio y se conecta por WebSocket (MC-18 a MC-21). Sin las dos
    variables sigue `LocalNet`, sin red. Las pruebas permiten esa sala con la opción `red` del arnés.
+   Tercera excepción (MC-07): si se compila con `VITE_CLERK_PUBLISHABLE_KEY` **y** `VITE_CONVEX_URL`, el juego carga
+   Clerk (su script y sus pantallas para entrar con Google o correo) y manda el token a Convex. Sin las dos variables
+   `core/clerk.tsx` ni siquiera entra a la compilación (`__CLERK__` en `vite.config.ts`) y no hay red de Clerk.
 2. **Cada motor de juego existe en un solo departamento.** `node docs/generador/validar-contenido.mjs` lo revisa.
 3. **Marcas, clubes y la Selección van con apodos**, nunca con logotipos ni nombres oficiales.
 4. **Rendimiento:** menos de ~350 llamadas de dibujo por escena y una sola luz con sombras.

@@ -21,10 +21,9 @@ npx convex run partidas:validar '{"motor":"cortes.chuco","puntos":320,"estrellas
 
 ## Tienda y partidas (MC-13, MC-14)
 
-Identidad de invitado mientras no exista Clerk (MC-07): el juego genera un secreto de 32 bytes, lo guarda en
-`localStorage` y lo manda como `invitado` en cada llamada. Convex guarda solo `invitado:<sha256>` en
-`usuarios.tokenIdentifier`. Todo pasa por `usuarioActual` / `asegurarUsuario` de `identidad.ts`; con Clerk solo
-cambia `tokenDe`.
+Identidad de invitado: el juego genera un secreto de 32 bytes, lo guarda en `localStorage` y lo manda como
+`invitado` en cada llamada. Convex guarda solo `invitado:<sha256>` en `usuarios.tokenIdentifier`. Todo pasa por
+`usuarioActual` / `asegurarUsuario` de `identidad.ts`; otros dispositivos y Clerk entran por `vinculos` (más abajo).
 
 - `tienda:entrar`, `tienda:miPerfil`: crea o lee al invitado (100 Lempiritas, avatar inicial) y devuelve
   `{ monedas, xp, nivel, avatar, comprados }`.
@@ -107,6 +106,40 @@ La lógica pura vive en `packages/reglas` (`tienda.ts`, `partidas.ts`) y se prue
 npx convex run tienda:entrar '{"invitado":"<64 hex>"}'
 node apps/web/tools/test-tienda-servidor.mjs   # de punta a punta contra el entorno de desarrollo
 ```
+
+## Cuentas, otro dispositivo y Clerk (MC-07, MC-08, MC-09)
+
+Una cuenta tiene su llave propia (`usuarios.tokenIdentifier`, el hash del invitado que la creó) y puede tener más en
+`vinculos`: el invitado de otro dispositivo que usó un código, o el `tokenIdentifier` de Clerk. `usuarioDe` (en
+`identidad.ts`) busca primero la cuenta de Clerk si viene un token y está vinculada; si no, el invitado. Todo lo
+demás sigue llamando a `usuarioActual` / `asegurarUsuario`.
+
+- `cuentas:crearCodigoDispositivo`: 8 letras de `ALFABETO_CODIGO` (`ABCD-EFGH`), un solo uso, 10 min. Guarda solo
+  su SHA-256 en `codigosDispositivo`; pedir otro borra el anterior.
+- `cuentas:usarCodigoDispositivo { codigo, local? }`: el invitado que llama entra a la cuenta del código (su secreto
+  queda en `vinculos`; nunca viaja el secreto de la otra). Lo que tenía en Convex se junta con `fusionar` y lo del
+  navegador (`local`) sube sin premios, como `subirAvanceLocal`. Motivos: `codigo`, `vencido`, `propio`, `espera`
+  (10 fallos cada 10 min, como los códigos de amigo) y `con-cuenta` (con token de Clerk no hace falta).
+- `fusionar` usa `fusionarCuentas` de `packages/reglas`: nada se pierde (monedas, ropa, etapas, estrellas, marcas,
+  visitas, recuerdos, turismo, logros, misiones de hoy, amistades y bloqueos) y no se paga dos veces la bienvenida,
+  la misma visita o recuerdo, el mismo logro, la misma misión del mismo día ni monedas sueltas sobre el tope del día;
+  los premios por nivel se ajustan al nivel de la XP sumada y una prenda comprada en las dos se devuelve. Lo que subió
+  del navegador sin premio (`visitas.visitaLocal`, `visitas.recuerdoLocal`, `logros.sinPago`) no cuenta como cobrado.
+  La cuenta que se junta se borra; sus llaves pasan a la que queda. Es una transacción: pasa entera o no pasa.
+- `cuentas:miCuenta` (consulta): nombre, si tiene cuenta de Clerk, cuántos dispositivos y si hay un código vigente.
+- `cuentas:vincularCuenta` (Clerk): sin token responde `sin-cuenta`. La primera vez la cuenta de Clerk se une al
+  invitado de ese dispositivo; desde otro dispositivo, su invitado se junta con la cuenta (y su secreto ya no entra:
+  al salir de Clerk vuelve a ser un invitado nuevo). Repetirla no hace nada.
+- `auth.config.ts` lee `CLERK_JWT_ISSUER_DOMAIN`; sin ella no hay proveedores y Convex publica igual. Pasos en
+  `docs/ENTORNOS.md` («Cuentas con Clerk»).
+
+```bash
+node apps/web/tools/test-cuentas.mjs   # dos navegadores contra el Convex de .env.local; capturas en capturas/cuentas/
+npx convex run --identity '{"tokenIdentifier":"https://x.clerk.accounts.dev|user_1"}' cuentas:vincularCuenta '{"invitado":"<64 hex>"}'
+```
+
+Tablas nuevas: `vinculos` y `codigosDispositivo`. Campos nuevos opcionales: `visitas.visitaLocal`,
+`visitas.recuerdoLocal` y `logros.sinPago`.
 
 ## Pase de sala en vivo (MC-18)
 

@@ -45,7 +45,8 @@ node apps/web/tools/test-produccion.mjs        # capturas en capturas/produccion
 | `SALA_SECRETO` (vista previa) | Variables por defecto de vista previa en Convex **y** GitHub (entorno `preview`) | Panel de Convex → Settings → Environment variables → Preview · `gh secret set SALA_SECRETO --env preview` |
 | `PANEL_LLAVE` | Convex de cada entorno | `npx convex env set PANEL_LLAVE …` |
 | `CLOUDFLARE_API_TOKEN` | GitHub, secreto del repo (sirve para los dos entornos) | Cloudflare → My Profile → API Tokens, plantilla «Edit Cloudflare Workers» |
-| `CLERK_SECRET_KEY` | Clerk / Convex cuando llegue MC-07 | Panel de Clerk |
+| `CLERK_JWT_ISSUER_DOMAIN` | Convex de cada entorno (no es secreta) | `npx convex env set CLERK_JWT_ISSUER_DOMAIN …` (ver «Cuentas con Clerk») |
+| `VITE_CLERK_PUBLISHABLE_KEY` | Variable de GitHub por entorno y `.env.local` (no es secreta) | `gh variable set VITE_CLERK_PUBLISHABLE_KEY --env …` |
 
 Variables de GitHub (no secretas), por entorno: `VITE_CONVEX_URL` (`https://….convex.cloud`; solo hace falta si no
 hay `CONVEX_DEPLOY_KEY`), `CONVEX_SITE_URL` (`https://….convex.site`; en vista previa dejala vacía: hay un Convex por rama pero una sola sala
@@ -81,6 +82,42 @@ bash scripts/proteger-main.sh
 
 O a mano: Settings → Branches → Add rule → `main` → «Require a pull request before merging» y «Require status
 checks to pass» con `check, test y capturas`.
+
+## Cuentas con Clerk (MC-07)
+
+El código ya está: `convex/auth.config.ts` (integración oficial Convex + Clerk), `apps/web/src/core/clerk.tsx` y
+`cuentas:vincularCuenta`. Queda **apagado** mientras falten las llaves: sin `CLERK_JWT_ISSUER_DOMAIN` Convex no
+acepta tokens (y publica igual), y sin `VITE_CLERK_PUBLISHABLE_KEY` el juego no compila ni carga nada de Clerk.
+Mientras tanto se juega como invitado y se sigue en otro dispositivo con un código (Ajustes → «Tu cuenta»).
+
+Lo que tiene que hacer Luis (una vez por instancia de Clerk: desarrollo y producción):
+
+1. En https://dashboard.clerk.com → **Create application**, nombre «Mundo Catrucho», con **Email** y **Google**
+   como formas de entrar. Eso crea la instancia de desarrollo (`pk_test_…`).
+2. **Configure → JWT templates → New template → Convex**. Dejá el nombre `convex` (el juego lo pide así) y guardá.
+   Copiá el **Issuer** de la plantilla (`https://<algo>.clerk.accounts.dev`).
+3. Convex de desarrollo y vista previa:
+   ```bash
+   npx convex env set CLERK_JWT_ISSUER_DOMAIN https://<algo>.clerk.accounts.dev
+   ```
+   Para la vista previa, ponela también en el panel de Convex → Settings → Environment variables → Preview.
+4. Juego: **API keys** de Clerk → *Publishable key*. En tu `.env.local`: `VITE_CLERK_PUBLISHABLE_KEY=pk_test_…`
+   (junto con `VITE_CONVEX_URL`), y en GitHub: `gh variable set VITE_CLERK_PUBLISHABLE_KEY --env preview --body pk_test_…`.
+   En Clerk → **Domains / Allowed origins** agregá `http://localhost:5173` y la dirección de la vista previa.
+5. Producción: en Clerk, **Deploy to production** (pide un dominio propio con sus registros DNS; `workers.dev` no
+   sirve). Repetí la plantilla `convex` en la instancia de producción y luego:
+   ```bash
+   npx convex env set CLERK_JWT_ISSUER_DOMAIN https://clerk.<tu-dominio> --prod
+   gh variable set VITE_CLERK_PUBLISHABLE_KEY --env production --body pk_live_…
+   ```
+6. Publicá Convex (`npx convex deploy`) y el juego (push a `main` o Actions → Despliegue).
+
+Cómo se ve: en Ajustes → «Tu cuenta» aparece **Entrar con Google o correo**. Al entrar, `vincularCuenta` une la cuenta
+de Clerk con el invitado de ese dispositivo; si la cuenta ya existía (otro dispositivo), el avance del invitado se
+junta con ella una sola vez, sin repetir premios (`fusionarCuentas` de `packages/reglas`). Al salir, el juego vuelve a
+ser el invitado del dispositivo. `CLERK_SECRET_KEY` no hace falta.
+
+Probar sin llaves: `node apps/web/tools/test-cuentas.mjs` simula el token con `npx convex run --identity`.
 
 ## Primera vez en producción (checklist)
 
