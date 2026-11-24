@@ -11,6 +11,7 @@ import { BannerEventos } from '../../game/eventos/Banner';
 import { ChatSala } from '../chat/ChatSala';
 import { Coin, Icon, type IconName, Star } from '../components/Icon';
 import { Bar, Confetti, IBtn } from '../components/kit';
+import { paraDedos } from '../dedos';
 import { act, cx, fmt, fmtTime, g, roomLabel, useCountUp, useOverview, usePad, useTouch } from '../lib';
 
 const SIDE: [PanelId, IconName, string][] = [
@@ -199,7 +200,9 @@ function LocationBanner() {
 
 function MgHud() {
   const hud = useGame((s) => s.mgHud),
-    low = hud.timer !== undefined && hud.timer <= 10;
+    low = hud.timer !== undefined && hud.timer <= 10,
+    // en el celular las pistas con teclas («A/D elegí · F confirmá») se leen con los controles táctiles
+    pista = useTouch() ? paraDedos : (t: string) => t;
   return (
     <div
       data-testid="mg-hud"
@@ -223,11 +226,13 @@ function MgHud() {
         )}
       </div>
       {hud.objective && (
-        <div className="max-w-[70vw] text-[13px] font-bold leading-tight sm:max-w-md sm:text-sm">{hud.objective}</div>
+        <div className="max-w-[70vw] text-[13px] font-bold leading-tight sm:max-w-md sm:text-sm">
+          {pista(hud.objective)}
+        </div>
       )}
       {hud.lines?.map((l, i) => (
         <div key={i} className="max-w-[70vw] text-xs leading-tight text-muted sm:max-w-md">
-          {l}
+          {pista(l)}
         </div>
       ))}
     </div>

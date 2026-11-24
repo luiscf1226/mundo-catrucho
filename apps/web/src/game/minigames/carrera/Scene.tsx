@@ -193,7 +193,9 @@ export function CarreraScene({ limite }: { limite?: number }) {
     if (Math.abs(p[2] + 82) < 2 || Math.abs(p[2] + 219) < 2) r.boost = 1.3;
     r.boost = Math.max(0, r.boost - dt);
     const oil = Math.abs(p[2] + 32) < 2.3 && p[0] > 0.8 && p[1] < 0.2;
-    player.speedMul = oil ? 0.42 : r.boost > 0 ? 1.3 : input.run ? 1 : 0.5;
+    // correr: Shift, o la palanca táctil / el stick a fondo (como en PlayerController); si no, va a media marcha
+    const corre = input.run || Math.hypot(input.jx + input.gx, input.jz + input.gz) > 0.92;
+    player.speedMul = oil ? 0.42 : r.boost > 0 ? 1.3 : corre ? 1 : 0.5;
     rivals.forEach((b, i) => {
       const target = Math.max(0.75, Math.min(1.3, 1 + (b.z - p[2]) * 0.007));
       b.z = Math.max(-239, b.z - dt * (3.7 + i * 0.38) * target);
