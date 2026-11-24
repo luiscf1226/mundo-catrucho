@@ -68,7 +68,9 @@ function controlesDe(fila) {
   if (/(^|[^\p{L}])E($|[^\p{L}])/u.test(fila[0])) c.add('use');
   if (/(^|[^\p{L}])Q($|[^\p{L}])/u.test(fila[0])) c.add('alt');
   if (/salt|⬆|⤴|brinc/i.test(fila[0])) c.add('jump');
-  if (/arrastr|desliz|tocá la pantalla|mantené la pantalla|\/ tocá/i.test(fila[0])) c.add('pantalla');
+  // arrastrar para girar la cámara es del juego entero (PlayerController), no del motor
+  if (/arrastr/i.test(fila[0]) && /cámara/i.test(fila[1] ?? '')) c.add('camara');
+  else if (/arrastr|desliz|tocá la pantalla|mantené la pantalla|\/ tocá/i.test(fila[0])) c.add('pantalla');
   if (/quiet/i.test(fila[0])) c.add('nada');
   return [...c];
 }
@@ -220,8 +222,15 @@ const ok = await run(
         const palancaUi = await mirar('Math.abs(i.jx)+Math.abs(i.jz)');
         await t.cdp('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
         assert.ok(palancaUi > 0.5, 'La palanca no responde al dedo');
+        // E por cercanía: el motor pone puntos para usar con E (Exploradores, Feria, Pulpería…)
+        const cercanos = await t.ev(
+          `[...(window.__mc.interactions?.values?.() ?? window.__mc.interactions ?? [])].filter(x=>!x.enabled||x.enabled()).length`,
+        );
+        fila.cercanos = cercanos;
+        const giro0 = await t.ev('window.__mc.player.camYaw');
         await t.drag(W * 0.45, H * 0.4, W * 0.6, H * 0.45, 8);
         await cuadros(3);
+        const giro = Math.abs((await t.ev('window.__mc.player.camYaw')) - giro0) > 0.01;
         const usa = {};
         for (const b of ['fire', 'use', 'alt', 'jump']) {
           const p = await centro(b);
@@ -273,10 +282,11 @@ const ok = await run(
         const señal = {
           palanca: (c.mx ?? 0) + (c.mz ?? 0) + (c.jx ?? 0) + (c.jz ?? 0) > 0,
           fire: usa.fire || (c['usa:fire'] ?? 0) > 0,
-          use: usa.use || (c['lee:use'] ?? 0) > 0,
+          use: usa.use || (c['lee:use'] ?? 0) > 0 || cercanos > 0,
           alt: usa.alt || (c['lee:alt'] ?? 0) > 0,
           jump: (c['lee:jump'] ?? 0) + (c.jump ?? 0) > 0,
           pantalla: (c.px ?? 0) + (c.py ?? 0) + (c.pointerDown ?? 0) > 0 || (c['usa:fire'] ?? 0) > 0,
+          camara: giro,
           nada: true,
         };
         fila.lee = Object.entries(señal)
