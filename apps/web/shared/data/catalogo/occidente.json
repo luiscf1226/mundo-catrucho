@@ -370,7 +370,7 @@
     "tipos": "👒☕🔥🎣",
     "lugares": [
       ["sb", "Santa Bárbara", "ciudad", "Tierra de junco y café."],
-      ["bogran", "Castillo Bográn", "fuerte", "Ruinas de la casa de campo de un presidente."],
+      ["bogran", "Castillo Bográn", "fuerte", "Ruinas de una antigua casa de la familia Bográn."],
       ["trinidad", "Trinidad", "pueblo", "Aquí queman las chimeneas gigantes."],
       ["yojoasb", "Orilla del Lago de Yojoa", "lago", "El lado tranquilo del lago."],
       ["maroncho", "Montaña de Santa Bárbara", "montana", "La segunda montaña más alta del país."],
@@ -412,13 +412,13 @@
       "esperanza",
       "La Esperanza",
       "ciudad",
-      "La ciudad más alta y más fría de Honduras."
+      "La ciudad más alta de Honduras, y de las más frías."
     ],
     [
       "gruta",
       "La Gruta",
       "iglesia",
-      "Capilla tallada en la roca, mirando la ciudad."
+      "Capilla dentro de una cueva del cerro, mirando la ciudad."
     ],
     [
       "mercado",
@@ -507,12 +507,12 @@
       "esperanza",
       "🍄",
       "Corré un circuito con puestos de abrigo intermedios.",
-      "El frío ya salió y vos ni te amarrás.",
+      "El frío ya salió y vos todavía sin chumpa.",
       {
         "fondo": "montana",
         "variante": "carrera-entre-dos-plazas",
         "frases": [
-          "El frío ya salió y vos ni te amarrás."
+          "El frío ya salió y vos todavía sin chumpa."
         ]
       },
       5
@@ -524,12 +524,12 @@
       "esperanza",
       "🍄",
       "Elegí entre carril soleado largo y carril frío corto con una reserva térmica limitada.",
-      "El frío ya salió y vos ni te amarrás.",
+      "El frío ya salió y vos todavía sin chumpa.",
       {
         "fondo": "montana",
         "variante": "el-frio-va-ganando",
         "frases": [
-          "El frío ya salió y vos ni te amarrás."
+          "El frío ya salió y vos todavía sin chumpa."
         ]
       },
       4

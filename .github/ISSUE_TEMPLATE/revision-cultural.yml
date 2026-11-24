@@ -1,0 +1,116 @@
+name: Revisión cultural
+description: Una persona del departamento revisa sus juegos, turismo y locuras antes de publicarlos (MC-34).
+title: "Revisión cultural de <departamento>"
+labels: ["revisión cultural", "departamento"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Gracias por revisar tu departamento. Antes de llenar esto leé
+        [cómo se revisa](https://github.com/luiscf1226/mundo-catrucho/blob/main/docs/revision-cultural/README.md)
+        y abrí la hoja de tu departamento en `docs/revision-cultural/hojas/`.
+        El repositorio es público: no pongás tu nombre completo, teléfono, correo ni datos de otras personas.
+  - type: dropdown
+    id: departamento
+    attributes:
+      label: Departamento
+      description: Cambiá también el título del issue.
+      options:
+        - Atlántida
+        - Choluteca
+        - Colón
+        - Comayagua
+        - Copán
+        - Cortés
+        - El Paraíso
+        - Francisco Morazán
+        - Gracias a Dios
+        - Intibucá
+        - Islas de la Bahía
+        - La Paz
+        - Lempira
+        - Ocotepeque
+        - Olancho
+        - Santa Bárbara
+        - Valle
+        - Yoro
+    validations:
+      required: true
+  - type: input
+    id: de-donde
+    attributes:
+      label: ¿De qué municipio o comunidad sos?
+      description: Solo el municipio o la comunidad, para saber desde dónde se revisó.
+      placeholder: "Danlí"
+    validations:
+      required: true
+  - type: checkboxes
+    id: partes
+    attributes:
+      label: Qué revisaste
+      description: Marcá las partes de la hoja que recorriste completas.
+      options:
+        - label: Lo general (cabecera, lugar emblema, dato del mapa, coleccionable)
+        - label: Lugares
+        - label: Comidas
+        - label: Palabras
+        - label: Juegos
+        - label: Motores propios
+        - label: Turismo
+        - label: Locuras
+        - label: Memes y frases
+        - label: La cabecera (pulpería y sitios)
+        - label: Rótulos y textos en pantalla
+        - label: Jugué un rato el departamento en el juego publicado
+  - type: textarea
+    id: lista
+    attributes:
+      label: Casillas por juego, lugar y locura
+      description: |
+        Copiá aquí las secciones de la hoja con tus casillas marcadas (`- [x]` lo que está bien, `- [ ]` lo que no
+        revisaste). Lo que esté mal dejalo sin marcar y explicalo abajo.
+      placeholder: |
+        ## Juegos
+        - [x] 🐚 **Curiles entre raíces** · San Lorenzo
+        - [ ] 🚲 **Bicitaxi de Amapala** · Amapala
+        ## Turismo
+        - [x] **Ciudad de isla** (Amapala, sitio)
+        ## Locuras
+        - [x] **El punche mira de lado**
+    validations:
+      required: true
+  - type: textarea
+    id: correcciones
+    attributes:
+      label: Correcciones
+      description: Una por cosa. Qué dice, qué debería decir y por qué. Si sabés de dónde sale el dato, poné el enlace.
+      value: |
+        1. **Dónde:** (juego, lugar, locura, rótulo…)
+           **Dice:**
+           **Debería decir:** (o «quitarlo»)
+           **Por qué:**
+    validations:
+      required: true
+  - type: textarea
+    id: preguntas
+    attributes:
+      label: Respuestas a las preguntas del informe asistido
+      description: El informe `docs/revision-cultural/<departamento>.md` termina con preguntas numeradas. Contestalas con su número.
+      placeholder: |
+        1. Sí, en Amapala hay bicitaxis, pero ahora hay más mototaxis.
+        2. …
+  - type: textarea
+    id: falta
+    attributes:
+      label: Lo que falta (opcional)
+      description: Lugares, comidas, costumbres o palabras de tu departamento que te gustaría ver en el juego.
+  - type: dropdown
+    id: veredicto
+    attributes:
+      label: ¿Se puede publicar?
+      options:
+        - Sí, así como está
+        - Sí, con las correcciones de arriba
+        - No, hasta que se corrija lo de arriba
+    validations:
+      required: true
