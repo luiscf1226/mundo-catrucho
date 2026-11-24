@@ -17,6 +17,7 @@ también van en español.
 | `packages/reglas/` | Reglas compartidas (`@mundo-catrucho/reglas`): premios, niveles, topes para validar resultados y límites de la sala. Las usan el juego, Convex y la sala. |
 | `.github/` | Revisión automática (`workflows/revision.yml`), despliegue por entorno (`workflows/despliegue.yml`) y plantillas de pull request e issues. |
 | `docs/ENTORNOS.md` | Desarrollo, vista previa y producción: dónde vive cada llave, host del juego y protección de `main`. Variables en `.env.example`. |
+| `docs/revision-cultural/` | Revisión cultural (MC-34): cómo la hace una persona de cada departamento, hojas (`node docs/generador/hojas-revision.mjs`) e informes. |
 | `docs/` | Plan, olas (`OLAS.md`), tickets (`TICKETS.md`) y el generador que los produce. |
 
 ## Comandos (siempre desde la raíz)
