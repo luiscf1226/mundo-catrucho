@@ -51,16 +51,20 @@ export default defineSchema({
     deptId: v.string(),
     recuerdo: v.boolean(),
     turismo: v.optional(v.array(v.object({ id: v.string(), completa: v.boolean() }))),
+    /** MC-08: la visita (o el recuerdo) subió del navegador y no pagó; al juntar cuentas no cuenta como cobrada */
+    visitaLocal: v.optional(v.boolean()),
+    recuerdoLocal: v.optional(v.boolean()),
   }).index('por_usuario', ['usuarioId', 'deptId']),
   misionesDia: defineTable({
     usuarioId: v.id('usuarios'),
     fecha: v.string(),
     misiones: v.array(v.object({ id: v.string(), progreso: v.number(), cobrada: v.boolean() })),
   }).index('por_usuario_fecha', ['usuarioId', 'fecha']),
-  logros: defineTable({ usuarioId: v.id('usuarios'), logroId: v.string() }).index('por_usuario', [
-    'usuarioId',
-    'logroId',
-  ]),
+  // `sinPago`: se marcó al subir avance del navegador, sin pagar (MC-08)
+  logros: defineTable({ usuarioId: v.id('usuarios'), logroId: v.string(), sinPago: v.optional(v.boolean()) }).index(
+    'por_usuario',
+    ['usuarioId', 'logroId'],
+  ),
   // una partida se abre antes de jugar; la cierra `partidas:cerrarPartida` (y más adelante el recibo firmado de la sala)
   partidas: defineTable({
     juegoId: v.string(),
@@ -205,6 +209,15 @@ export default defineSchema({
     /** códigos de amigo fallidos en la ventana actual (contra adivinar códigos) */
     fallosCodigo: v.optional(v.object({ desde: v.number(), n: v.number() })),
   }).index('por_usuario', ['usuarioId']),
+  // MC-07, MC-09: otras llaves que entran a la misma cuenta. `token` es el hash del secreto de invitado de otro
+  // dispositivo (`invitado:<sha256>`) o el `tokenIdentifier` de Clerk. Nunca se guarda el secreto.
+  vinculos: defineTable({ token: v.string(), usuarioId: v.id('usuarios') })
+    .index('por_token', ['token'])
+    .index('por_usuario', ['usuarioId']),
+  // MC-09: código para seguir en otro dispositivo (8 letras, un solo uso, vence a los 10 min). Solo su hash.
+  codigosDispositivo: defineTable({ hash: v.string(), usuarioId: v.id('usuarios'), vence: v.number() })
+    .index('por_hash', ['hash'])
+    .index('por_usuario', ['usuarioId']),
   // las misiones de cada día de Honduras; las reparte el cron de las 06:00 UTC
   misionesGlobales: defineTable({ fecha: v.string(), ids: v.array(v.string()) }).index('por_fecha', ['fecha']),
   // un viaje por carretera: se cobra el pasaje al salir y el bono al llegar, con la hora del servidor

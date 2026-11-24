@@ -182,7 +182,7 @@ export async function revisarLogros(
 ) {
   const ya = await logrosDe(s.ctx, s.usuarioId);
   for (const l of logrosNuevos({ ya, estado: await estadoLogros(s), partida })) {
-    await s.ctx.db.insert('logros', { usuarioId: s.usuarioId, logroId: l.id });
+    await s.ctx.db.insert('logros', { usuarioId: s.usuarioId, logroId: l.id, ...(pagarlos ? {} : { sinPago: true }) });
     if (!pagarlos) continue;
     pagar(s, { monedas: l.coins, xp: 0 });
     s.logros.push({ id: l.id, monedas: l.coins });

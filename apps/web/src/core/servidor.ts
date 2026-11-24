@@ -1,8 +1,9 @@
 // Cliente de Convex para la tienda, las partidas (MC-13, MC-14) y el avance: visitas, recuerdos, misiones, logros,
 // viajes y clasificación (MC-15, MC-16, MC-17). Solo existe si la compilación trae
 // VITE_CONVEX_URL; sin ella `SERVIDOR` es false y el juego no hace ninguna petición.
-// Identidad de invitado hasta que lleguen las cuentas (MC-07): un secreto aleatorio en localStorage; Convex
-// guarda solo su hash.
+// Identidad: un secreto de invitado aleatorio en localStorage (Convex guarda solo su hash). Otro dispositivo entra a
+// la misma cuenta con un código (MC-09) y, si la compilación trae Clerk (MC-07, `core/clerk.tsx`), cada llamada
+// lleva también el token de la cuenta.
 import { ConvexHttpClient } from 'convex/browser';
 import {
   type FunctionArgs,
@@ -26,7 +27,30 @@ export interface PerfilServidor {
   nivel: number;
   avatar: AvatarConfig;
   comprados: string[];
+  /** nombre guardado en la cuenta (solo lo trae `entrar`) */
+  nombre?: string;
 }
+/** Lo que trajo la otra cuenta al juntarse con esta (MC-08). */
+export interface ResumenFusion {
+  monedas: number;
+  descuento: number;
+  reembolso: number;
+  prendas: number;
+  juegos: number;
+  visitas: number;
+}
+export interface MiCuenta {
+  nombre: string;
+  conCuenta: boolean;
+  dispositivos: number;
+  codigoVence: number | null;
+}
+type AvanceLocal = {
+  turismo?: RecuerdoTuristico[];
+  visitados: string[];
+  recuerdos: string[];
+  juegos: { juegoId: string; etapa?: number; stars?: number[]; veces?: number }[];
+};
 type Quien = { invitado: string };
 export interface Saldo {
   monedas: number;
@@ -149,19 +173,26 @@ const fn = {
   ),
   subirAvance: makeFunctionReference<
     'mutation',
-    Quien & {
-      turismo?: RecuerdoTuristico[];
-      visitados: string[];
-      recuerdos: string[];
-      juegos: { juegoId: string; etapa?: number; stars?: number[]; veces?: number }[];
-    },
+    Quien & AvanceLocal,
     Respuesta<{ visitas: number; recuerdos: number; juegos: number }>
   >('progreso:subirAvanceLocal'),
+  crearCodigo: makeFunctionReference<'mutation', Quien, Respuesta<{ codigo: string; vence: number }>>(
+    'cuentas:crearCodigoDispositivo',
+  ),
+  usarCodigo: makeFunctionReference<
+    'mutation',
+    Quien & { codigo: string; local?: AvanceLocal },
+    Respuesta<{ nombre: string; resumen: ResumenFusion; perfil: PerfilServidor } & Avance>
+  >('cuentas:usarCodigoDispositivo'),
+  vincular: makeFunctionReference<'mutation', Quien, Respuesta<{ nueva: boolean; resumen: ResumenFusion | null }>>(
+    'cuentas:vincularCuenta',
+  ),
 };
 const consultas = {
   estado: makeFunctionReference<'query', Quien, EstadoServidor | null>('progreso:estado'),
   porJuego: makeFunctionReference<'query', Quien & { juegoId: string }, Clasificacion>('clasificacion:porJuego'),
   porDepto: makeFunctionReference<'query', Quien & { deptId: string }, Clasificacion>('clasificacion:porDepto'),
+  miCuenta: makeFunctionReference<'query', Quien, MiCuenta | null>('cuentas:miCuenta'),
 };
 
 let memoria = '';
@@ -184,6 +215,18 @@ export function secretoInvitado() {
     /* sin almacenamiento */
   }
   return memoria;
+}
+
+/**
+ * Token de la cuenta de Clerk (MC-07). Lo pone `core/clerk.tsx` solo si la compilación trae
+ * VITE_CLERK_PUBLISHABLE_KEY; sin eso es null y las llamadas van solo con el secreto de invitado.
+ */
+export const autenticacion: { token: (() => Promise<string | null>) | null } = { token: null };
+async function conToken(c: ConvexHttpClient) {
+  if (!autenticacion.token) return;
+  const t = await autenticacion.token().catch(() => null);
+  if (t) c.setAuth(t);
+  else c.clearAuth();
 }
 
 const SIN_CONEXION: Fallo = { ok: false, motivo: 'sin-conexion' };
@@ -218,6 +261,7 @@ function llamar<F extends Ref>(ref: F, args: Omit<FunctionArgs<F>, 'invitado'>):
   const turno = cola.then(async () => {
     let timer: ReturnType<typeof setTimeout> | undefined;
     try {
+      await conToken(c);
       const r = await Promise.race([
         c.mutation(ref as FunctionReference<'mutation'>, { ...args, invitado: secretoInvitado() }, { skipQueue: true }),
         new Promise<null>((resolve) => {
@@ -247,6 +291,7 @@ async function consultar<F extends RefConsulta>(
   cliente ??= new ConvexHttpClient(URL_CONVEX, { logger: false });
   let timer: ReturnType<typeof setTimeout> | undefined;
   try {
+    await conToken(cliente);
     return await Promise.race([
       cliente.query(ref as FunctionReference<'query'>, { ...args, invitado: secretoInvitado() }),
       new Promise<null>((resolve) => {
@@ -263,8 +308,8 @@ async function consultar<F extends RefConsulta>(
 export const servidor = {
   turismo: async (lugarId: string, completa: boolean) => conFallo(await llamar(fn.turismo, { lugarId, completa })),
   /** null si no hubo respuesta */
-  entrar: (nombre: string, avatar: AvatarConfig, creado: boolean) =>
-    llamar(fn.entrar, { nombre, avatar: avatarTexto(avatar), creado }),
+  entrar: (nombre: string | undefined, avatar: AvatarConfig, creado: boolean) =>
+    llamar(fn.entrar, { ...(nombre === undefined ? {} : { nombre }), avatar: avatarTexto(avatar), creado }),
   comprar: async (itemId: string) => conFallo(await llamar(fn.comprar, { itemId, equipar: true })),
   equipar: async (itemId: string) => conFallo(await llamar(fn.equipar, { itemId })),
   vestir: async (avatar: Partial<AvatarConfig>) => conFallo(await llamar(fn.vestir, { avatar: avatarTexto(avatar) })),
@@ -287,8 +332,14 @@ export const servidor = {
   salir: async (v: { veh: string; de: string; a: string }) => conFallo(await llamar(fn.salir, v)),
   llegar: async (v: { viajeId: string; bono: number }) => conFallo(await llamar(fn.llegar, v)),
   gastar: async (monto: number, concepto: string) => conFallo(await llamar(fn.gastar, { monto, concepto })),
-  subirAvance: async (a: FunctionArgs<typeof fn.subirAvance> extends infer A ? Omit<A, 'invitado'> : never) =>
-    conFallo(await llamar(fn.subirAvance, a)),
+  subirAvance: async (a: AvanceLocal) => conFallo(await llamar(fn.subirAvance, a)),
+  /** MC-09: código de 8 letras para seguir en otro dispositivo */
+  crearCodigo: async () => conFallo(await llamar(fn.crearCodigo, {})),
+  /** MC-08, MC-09: este dispositivo entra a la cuenta del código; lo suyo se junta con ella */
+  usarCodigo: async (codigo: string, local: AvanceLocal) => conFallo(await llamar(fn.usarCodigo, { codigo, local })),
+  /** MC-07: une la cuenta de Clerk con el invitado de este dispositivo */
+  vincular: async () => conFallo(await llamar(fn.vincular, {})),
+  miCuenta: () => consultar(consultas.miCuenta, {}),
   /** null si no hubo respuesta; con respuesta `null` el invitado todavía no existe */
   estado: () => consultar(consultas.estado, {}),
   porJuego: (juegoId: string) => consultar(consultas.porJuego, { juegoId }),

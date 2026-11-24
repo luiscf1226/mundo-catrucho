@@ -8,7 +8,7 @@ import {
   queryGeneric,
 } from 'convex/server';
 import { type GenericId, v } from 'convex/values';
-import { tokenDe } from './identidad';
+import { usuarioDe } from './identidad';
 import type schema from './schema';
 
 type Modelo = DataModelFromSchemaDefinition<typeof schema>;
@@ -21,11 +21,7 @@ const REVISAR_DEPTO = 400;
 
 async function yoDe(ctx: GenericQueryCtx<Modelo>, invitado: string | undefined) {
   if (!invitado || !/^[0-9a-f]{64}$/.test(invitado)) return null;
-  const token = await tokenDe({ invitado });
-  const u = await ctx.db
-    .query('usuarios')
-    .withIndex('por_token', (q) => q.eq('tokenIdentifier', token))
-    .unique();
+  const u = await usuarioDe(ctx, { invitado });
   return u?._id ?? null;
 }
 type Marca = { usuarioId: GenericId<'usuarios'>; juegoId: string; puntos: number; etapa: number };

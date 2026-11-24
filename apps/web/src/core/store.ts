@@ -35,7 +35,15 @@ import {
 import { scoreLabel } from './leaderboard';
 import { memeById } from './memes';
 import { player } from './player';
-import { type Avance, alVencer, type EstadoServidor, type PerfilServidor, SERVIDOR, servidor } from './servidor';
+import {
+  type Avance,
+  alVencer,
+  type EstadoServidor,
+  type PerfilServidor,
+  type ResumenFusion,
+  SERVIDOR,
+  servidor,
+} from './servidor';
 import type { AvatarConfig, MinigameId, MinigameResult, Modo, PanelId, Rewards, Scene, V3, Vehiculo } from './types';
 
 const SAVE_KEY = 'mundo-catrucho-v1';
@@ -80,6 +88,8 @@ export interface RankRow {
 export interface Profile {
   turismo: RecuerdoTuristico[];
   name: string;
+  /** con Convex: el último nombre que confirmó la cuenta. Si `name` es otro, el jugador lo cambió aquí y se manda */
+  nombreServidor?: string;
   created: boolean;
   avatar: AvatarConfig;
   coins: number;
@@ -200,6 +210,18 @@ function load(): Profile {
     return base;
   }
 }
+/** El avance guardado en este navegador, como lo recibe Convex (MC-08): no lleva monedas ni ropa. */
+const avanceLocalDe = (p: Profile) => ({
+  turismo: p.turismo,
+  visitados: p.visited,
+  recuerdos: p.collected,
+  juegos: Object.entries(p.juegos).map(([juegoId, g]) => ({
+    juegoId,
+    etapa: g.etapa,
+    stars: g.stars.map((x) => x ?? 0),
+    veces: g.veces,
+  })),
+});
 function save(p: Profile) {
   try {
     localStorage.setItem(SAVE_KEY, JSON.stringify(p));
@@ -277,6 +299,13 @@ export interface Game {
   resetProgress(): void;
   /** Con Convex: entra como invitado y trae saldo, nivel, lo comprado y lo puesto. Sin Convex no hace nada. */
   sincronizar(): Promise<boolean>;
+  /** MC-09: código para seguir en otro dispositivo (8 letras, vence en 10 min). */
+  crearCodigoDispositivo(): Promise<{ ok: true; codigo: string; vence: number } | { ok: false; motivo: string }>;
+  /**
+   * MC-08, MC-09: este dispositivo entra a la cuenta del código. Lo que tenía (en Convex y en el navegador) se junta
+   * con esa cuenta sin repetir premios; después se vuelve a leer todo del servidor.
+   */
+  usarCodigoDispositivo(codigo: string): Promise<{ ok: true; resumen: ResumenFusion } | { ok: false; motivo: string }>;
 }
 
 type Compra = 'ok' | 'ya' | 'caro' | 'no';
@@ -399,6 +428,7 @@ export const useGame = create<Game>((set, get) => {
   /** Copia al perfil local lo que respondió Convex. El avatar no se pisa mientras haya cambios en camino. */
   const aplicar = (sv: PerfilServidor) =>
     commit((p) => {
+      if (sv.nombre) p.name = p.nombreServidor = sv.nombre;
       p.coins = sv.monedas;
       p.xp = sv.xp;
       p.level = sv.nivel;
@@ -1055,31 +1085,39 @@ export const useGame = create<Game>((set, get) => {
     },
     sincronizar: async () => {
       if (!SERVIDOR) return false;
+      // el nombre de la cuenta manda; solo se manda el de aquí si el jugador lo cambió en este dispositivo
       const p = get().profile,
-        sv = await servidor.entrar(p.name, p.avatar, p.created);
+        sv = await servidor.entrar(p.name !== p.nombreServidor ? p.name : undefined, p.avatar, p.created);
       if (!sv) return false;
       aplicar(sv);
       avisarLogros(sv.logros);
       let e = await servidor.estado();
       // la primera vez, el avance guardado en el navegador sube sin premios (MC-08)
       if (e && !e.migrado) {
-        const local = get().profile;
-        await servidor.subirAvance({
-          turismo: local.turismo,
-          visitados: local.visited,
-          recuerdos: local.collected,
-          juegos: Object.entries(local.juegos).map(([juegoId, g]) => ({
-            juegoId,
-            etapa: g.etapa,
-            stars: g.stars.map((x) => x ?? 0),
-            veces: g.veces,
-          })),
-        });
+        await servidor.subirAvance(avanceLocalDe(get().profile));
         e = await servidor.estado();
       }
       // si el avance local no se pudo subir, no se pisa: se intenta otra vez la próxima vez
       if (e?.migrado) aplicarEstado(e);
       return true;
+    },
+    crearCodigoDispositivo: async () => {
+      if (!SERVIDOR) return { ok: false, motivo: 'sin-servidor' };
+      const r = await servidor.crearCodigo();
+      return r.ok ? { ok: true, codigo: r.codigo, vence: r.vence } : { ok: false, motivo: r.motivo };
+    },
+    usarCodigoDispositivo: async (codigo) => {
+      if (!SERVIDOR) return { ok: false, motivo: 'sin-servidor' };
+      const r = await servidor.usarCodigo(codigo, avanceLocalDe(get().profile));
+      if (!r.ok) return { ok: false, motivo: r.motivo };
+      commit((p) => {
+        p.name = p.nombreServidor = r.nombre;
+        p.created = true;
+      });
+      aplicar(r.perfil);
+      aplicarAvance(r);
+      await get().sincronizar();
+      return { ok: true, resumen: r.resumen };
     },
   };
 });
