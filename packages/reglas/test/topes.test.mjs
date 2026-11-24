@@ -133,7 +133,8 @@ test('kit: «ganó» tiene que cuadrar con la primera meta', () => {
 });
 
 test('Copán e Islas: un puntaje imposible para el reloj real no pasa', () => {
-  falla({ motor: 'copan.cadera', puntos: 5000, estrellas: 3, duracion: 76, etapa: 0, gano: true }, 'no caben');
+  // la pelota admite 75 pts/s sobre 75 s (jugando fino se llega a ~4500); 7000 no cabe
+  falla({ motor: 'copan.cadera', puntos: 7000, estrellas: 3, duracion: 76, etapa: 0, gano: true }, 'no caben');
   falla({ motor: 'islas.coral', puntos: 400, estrellas: 3, duracion: 30, etapa: 0, gano: true }, 'no se puede');
 });
 
