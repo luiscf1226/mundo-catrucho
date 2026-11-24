@@ -321,6 +321,8 @@ medición de MC-56; solo comprueban que el contador `#fps`, los toques y el HUD 
 | yoro.almohadilla | OK | Palanca / arrastrá: mover el cursor · 🎯: confirmar | palanca, fire, pantalla | Derrota, 0 |
 | yoro.coyol | OK | Palanca / arrastrá: mover el cursor · 🎯: confirmar · E: sacar del fuego | palanca, fire, use, pantalla | Derrota, 0 |
 
+Los 7 motores que cambió el cierre de las olas 5 y 6 (#119) se volvieron a correr después de traer `main`.
+
 ## Segunda ronda (ola 11): materiales que se recompilaban cada cuadro
 
 **Causa.** three.js dibuja un material `transparent` con `side: DoubleSide` en dos pasadas
