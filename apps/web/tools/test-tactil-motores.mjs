@@ -158,8 +158,12 @@ const ok = await run(
       await t.waitFor("!!document.querySelector('[data-testid=mg-result]')", 15000);
     };
     await t.waitFor('!!window.__mc.input && !!window.__mc.gl');
-    await t.ev(CONTAR);
+    // marca de la carga: si la página se recarga (o el proceso de la pestaña se cae) se nota y se vuelve a contar
+    const marcar = () => t.ev('window.__mcMarca = 1');
+    await marcar();
     for (const id of seleccion) {
+      await t.waitFor('!!window.__mc?.input && !!window.__mc.gl', 30000, 'juego cargado');
+      await t.ev(CONTAR);
       if (rows.some((r) => r.motor === id && r.estado === 'OK')) continue;
       const fila = { motor: id };
       try {
@@ -292,6 +296,14 @@ const ok = await run(
         Object.assign(fila, { estado: 'issue', detalle: e.message });
         await t.shot(`${out}/${id}-falla.png`).catch(() => {});
         await t.ev(`${S}.mg && ${S}.exitMinigame?.()`).catch(() => {});
+      }
+      if (!(await t.ev('window.__mcMarca === 1').catch(() => false))) {
+        Object.assign(fila, {
+          estado: 'issue',
+          detalle: `La página se recargó durante el motor (${fila.detalle ?? ''})`,
+        });
+        await t.waitFor('!!window.__mc?.store', 30000, 'juego recargado');
+        await marcar();
       }
       rows.push(fila);
       console.log(`${id}: ${JSON.stringify(fila)}`);

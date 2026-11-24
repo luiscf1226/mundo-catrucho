@@ -1,6 +1,6 @@
 import { Block, Cyl, Label, P } from '../../kit';
 import { defineMotor, type Motor } from '../kit';
-import { controles, cursor, duracion, Mesa, metas, mover, Taza } from './comun';
+import { cursor, duracion, Mesa, metas, mover, Taza } from './comun';
 
 type Estado = ReturnType<typeof cursor> & { taza: number; golpes: number; tramos: number; reloj: number };
 type Parametros = { margen: number; velocidad: number };
@@ -33,7 +33,12 @@ const motor = defineMotor({
   fondo: 'pueblo',
   guia: {
     goal: 'Elegí diagonales de rueda para que la taza no salte. A/D ajusta delante, W/S atrás; evitá impactos al mismo tiempo.',
-    ...controles,
+    // cada 2 s pasa un adoquín solo: aquí no hay nada que confirmar
+    keys: [
+      ['WASD / mouse', 'elegir las dos diagonales'],
+      ['Mando: stick derecho', 'elegir las diagonales'],
+    ],
+    touch: [['Palanca / arrastrá', 'elegir las diagonales; cada 2 s pasa un adoquín']],
   },
   etapa: (p) => ({ margen: 0.3 - p.dif * 0.17, velocidad: 1 + p.dif }),
   metas,

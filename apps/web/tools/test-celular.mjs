@@ -30,14 +30,27 @@ const ok = await run('celular', file, { width: 412, height: 915, touch: true, ha
   );
   console.log(`EMULACIÓN 412×915 DPR 2.6 CPU ×${cpu}; GPU:`, gpu);
   assert.ok(!/swiftshader|llvmpipe/i.test(gpu), 'Se requiere GPU real');
-  for (const [nombre, accion] of [
+  // [nombre, cómo llegar, dónde pararse (x, z, giro)]. Las de la ola de realismo: Yojoa, Talgua, la ciudad (Tegucigalpa),
+  // la lluvia de Yoro, el viaje en rapidito y el estadio (fútbol). MC_ESCENAS=a,b mide solo esas.
+  const ESCENAS = [
     ['lobby', `${S}.goLobby()`],
     ...['olancho', 'franciscomorazan', 'cortes'].map((id) => [id, `${S}.travel('${id}')`]),
     ...['futbol', 'ritmo', 'corte', 'cortes.gruas'].map((id) => [id, `${S}.startMinigame('${id}')`]),
-  ]) {
+    ['yojoa', `${S}.travel('cortes')`, [0, -22, 0]],
+    ['talgua', `${S}.travel('olancho')`, [0, 2, 0]],
+    ['ciudad', `${S}.travel('franciscomorazan')`, [-3, 78, 0]],
+    ['lluvia', `${S}.travel('yoro')`, [1, 80, 0]],
+    ['rapidito', `${S}.startViaje('rapidito','copan')`],
+  ].filter(([n]) => !process.env.MC_ESCENAS || process.env.MC_ESCENAS.split(',').includes(n));
+  for (const [nombre, accion, lugar] of ESCENAS) {
+    await t.ev(`${S}.mg && ${S}.exitMinigame()`);
     await t.ev(accion);
     if (await t.exists('mg-start')) await t.click('mg-start');
-    await t.waitFor(`!document.querySelector('[data-testid=scene-loading]') && !!window.__mc.gl`);
+    await t.waitFor(`!document.querySelector('[data-testid=scene-loading]') && !!window.__mc.gl`, 30000);
+    await t.sleep(1500);
+    if (lugar) await t.ev(`window.__mc.player.teleport(${lugar[0]}, 0.5, ${lugar[1]}, ${lugar[2]})`);
+    // la lluvia entra de a poco: se espera a que llueva de verdad
+    if (nombre === 'lluvia') await t.waitFor(`window.__mc.env?.weather === 'lluvia'`, 30000);
     await t.sleep(2500);
     if (await t.exists('mg-start')) await t.click('mg-start');
     for (let repeticion = 0; repeticion < 5; repeticion++) {
