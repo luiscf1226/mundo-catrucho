@@ -38,7 +38,7 @@ de oír.
 | `ciudad-datos.ts` · Iglesia de Yoro | Aquí se reza para que siga la lluvia de peces de cada junio. El padre Subirana pidió ese milagro, dicen. | La iglesia de la cabecera. Cuenta la leyenda que el padre Subirana rezó por la gente pobre y que de ahí vino la lluvia de peces. | No hay fuente de que en la iglesia se rece para que siga la lluvia. «Cada junio» contradice el resto del juego, que dice de mayo a julio. Lo de Subirana queda dicho como leyenda y contado con respeto. |
 | `ciudad-datos.ts` · Parque Central de Yoro | …con su kiosko y vendedoras… | …con su kiosco y vendedoras… | Ortografía: la RAE registra «quiosco» y «kiosco». En el mismo archivo, otros tres sitios de otros departamentos dicen «kiosko» y no se tocaron. |
 | `memes.json` · Lluvia de peces, «qué es» | Tras los primeros aguaceros fuertes de mayo o junio aparecen peces en el suelo en Yoro; hay festival desde 1998. | Tras los primeros aguaceros fuertes de mayo o junio, en Yoro cuentan que aparecen peces en el suelo; hay festival desde 1998. | Se dice como algo que cuentan los vecinos, no como hecho comprobado. |
-| `zones/yoro.tsx` · rótulo de El Pantano | El Pantano: aquí llueven peces | El Pantano: dicen que llueven peces | Se suaviza con «dicen». El rótulo tiene un ancho máximo, así que el texto sale un poco más pequeño. |
+| `zones/yoro.tsx` · rótulo de El Pantano | El Pantano: aquí llueven peces | El Pantano: ¿lluvia de peces? | Lo daba como hecho. Con la pregunta queda como relato y cabe en el letrero («dicen que llueven peces» se salía de los bordes). |
 
 Ninguna prueba de `apps/web/tools/` usa los textos cambiados. No se cambió ningún nombre de juego, lugar ni locura.
 

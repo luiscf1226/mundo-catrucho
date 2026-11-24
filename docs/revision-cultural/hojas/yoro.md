@@ -175,7 +175,7 @@ ortografía; si algo está mal, anotá el archivo y la línea.
 | 46 | Mercadito |
 | 56 | Festival de la Lluvia de Peces |
 | 57 | Comedor |
-| 75 | El Pantano: dicen que llueven peces |
+| 75 | El Pantano: ¿lluvia de peces? |
 | 126 | Doña Rosa |
 
 </details>
