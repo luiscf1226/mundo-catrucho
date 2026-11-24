@@ -69,9 +69,10 @@ Hasta ese día el repo era privado en el plan gratis de GitHub: no dejaba proteg
 Actions no arrancaba ningún trabajo («recent account payments have failed or your spending limit needs to be
 increased»): se acabaron los minutos del mes. En repos públicos los minutos de Actions no se cobran.
 
-Si alguna vez hay que volver a aplicarla:
+Para revisar que siga activa (sale con 1 si falta algo), y si alguna vez hay que volver a aplicarla:
 
 ```bash
+bash scripts/proteger-main.sh --verificar
 bash scripts/proteger-main.sh
 ```
 
