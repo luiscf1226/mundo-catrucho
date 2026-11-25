@@ -1102,9 +1102,17 @@ export const useGame = create<Game>((set, get) => {
       if (!SERVIDOR) return false;
       // el nombre de la cuenta manda; solo se manda el de aquí si el jugador lo cambió en este dispositivo
       const p = get().profile,
+        antes = p.name,
         sv = await servidor.entrar(p.name !== p.nombreServidor ? p.name : undefined, p.avatar, p.created);
       if (!sv) return false;
-      aplicar(sv);
+      // si el jugador se cambió el nombre mientras esperábamos, no se lo pisa el de la cuenta: se manda la próxima vez
+      if (get().profile.name !== antes) {
+        const { nombre, ...resto } = sv;
+        aplicar(resto);
+        commit((q) => {
+          if (nombre) q.nombreServidor = nombre;
+        });
+      } else aplicar(sv);
       avisarLogros(sv.logros);
       let e = await servidor.estado();
       // la primera vez, el avance guardado en el navegador sube sin premios (MC-08)
