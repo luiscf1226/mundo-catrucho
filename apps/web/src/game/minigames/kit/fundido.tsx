@@ -51,14 +51,28 @@ export interface Rotulo {
 const FILA = 112,
   ANCHO = 1024;
 function atlas(items: Rotulo[]) {
+  // los rótulos iguales (el mismo letrero repetido en cada copia del tramo) comparten fila: el lienzo queda varias
+  // veces más chico y se pinta y se sube a la GPU mucho más rápido
+  const filaDe = new Map<string, number>(),
+    filas: { it: Rotulo; w: number }[] = [],
+    deItem = items.map((it) => {
+      const w = Math.min(ANCHO, Math.round(FILA * (it.w / it.h))),
+        k = `${it.text}|${it.fg}|${it.bg}|${it.letra}|${w}`;
+      let f = filaDe.get(k);
+      if (f === undefined) {
+        f = filas.length;
+        filaDe.set(k, f);
+        filas.push({ it, w });
+      }
+      return f;
+    });
   const cv = document.createElement('canvas');
   cv.width = ANCHO;
-  cv.height = THREE.MathUtils.ceilPowerOfTwo(Math.max(FILA, items.length * FILA));
+  cv.height = THREE.MathUtils.ceilPowerOfTwo(Math.max(FILA, filas.length * FILA));
   const c = cv.getContext('2d');
-  const uvs: [number, number, number, number][] = [];
-  items.forEach((it, i) => {
-    const y = i * FILA,
-      w = Math.min(ANCHO, Math.round(FILA * (it.w / it.h)));
+  const uvFila: [number, number, number, number][] = [];
+  filas.forEach(({ it, w }, i) => {
+    const y = i * FILA;
     if (c) {
       c.fillStyle = it.bg ?? '#f3ead2';
       c.fillRect(0, y, w, FILA);
@@ -89,8 +103,9 @@ function atlas(items: Rotulo[]) {
       c.fillText(it.text, 0, 0);
       c.restore();
     }
-    uvs.push([0, 1 - (y + FILA) / cv.height, w / ANCHO, 1 - y / cv.height]);
+    uvFila.push([0, 1 - (y + FILA) / cv.height, w / ANCHO, 1 - y / cv.height]);
   });
+  const uvs = deItem.map((f) => uvFila[f]);
   const tex = new THREE.CanvasTexture(cv);
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.anisotropy = 4;
@@ -98,6 +113,19 @@ function atlas(items: Rotulo[]) {
 }
 /** Muchos rótulos pintados en una malla (una llamada de dibujo); los ilumina la escena como pintura de pared. */
 export function Rotulos({ items }: { items: Rotulo[] }) {
+  // El material vive lo que vive el componente: si se soltara con cada texto nuevo (los letreros del viaje cambian
+  // con el tramo), three.js liberaría su programa y lo volvería a compilar, y eso traba un cuadro (~200 ms con CPU ×4).
+  const mat = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        roughness: 0.92,
+        metalness: 0,
+        polygonOffset: true,
+        polygonOffsetFactor: -2,
+      }),
+    [],
+  );
+  useEffect(() => () => mat.dispose(), [mat]);
   const hecho = useMemo(() => {
     if (!items.length || typeof document === 'undefined') return null;
     const { tex, uvs } = atlas(items),
@@ -136,23 +164,17 @@ export function Rotulos({ items }: { items: Rotulo[] }) {
     geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
     geo.setIndex(idx);
     geo.computeBoundingSphere();
-    const mat = new THREE.MeshStandardMaterial({
-      map: tex,
-      roughness: 0.92,
-      metalness: 0,
-      polygonOffset: true,
-      polygonOffsetFactor: -2,
-    });
-    return { geo, mat, tex };
+    return { geo, tex };
   }, [items]);
+  // cambiar de un mapa a otro no cambia el programa (solo si pasara de tener mapa a no tenerlo)
+  if (hecho && mat.map !== hecho.tex) mat.map = hecho.tex;
   useEffect(
     () => () => {
       hecho?.geo.dispose();
-      hecho?.mat.dispose();
       hecho?.tex.dispose();
     },
     [hecho],
   );
   if (!hecho) return null;
-  return <mesh geometry={hecho.geo} material={hecho.mat} receiveShadow />;
+  return <mesh geometry={hecho.geo} material={mat} receiveShadow />;
 }

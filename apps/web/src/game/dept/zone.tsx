@@ -41,6 +41,7 @@ import {
   type XZ,
 } from './lib';
 import { FLORA_OF, floraSeed, VEG, type VegKind } from './parts';
+import { Quieto } from './quieto';
 
 export interface Bio {
   grass: string;
@@ -475,30 +476,37 @@ export function ZoneScenery({ spec }: { spec: ZoneSpec }) {
       ) : (
         <Ground size={900} mat={spec.far.mat} color={spec.far.color} y={spec.far.y} />
       )}
-      {spec.layers.map((l, i) => (
-        <Terrain key={i} f={spec.f} {...l} />
-      ))}
+      {/* terreno, agua, piezas y placas no se mueven: matrices congeladas (MC-56) */}
+      <Quieto>
+        {spec.layers.map((l, i) => (
+          <Terrain key={i} f={spec.f} {...l} />
+        ))}
+      </Quieto>
       <Greenery spec={spec} />
-      {spec.water.map((w, i) => (
-        <Ground key={i} mat={w.mat ?? 'water'} color={w.color} y={w.y} size={w.size ?? 900} pos={w.pos} />
-      ))}
-      <Build pieces={spec.pcs} />
+      <Quieto>
+        {spec.water.map((w, i) => (
+          <Ground key={i} mat={w.mat ?? 'water'} color={w.color} y={w.y} size={w.size ?? 900} pos={w.pos} />
+        ))}
+        <Build pieces={spec.pcs} />
+      </Quieto>
       {spec.nodes}
-      {spec.plaques.map((p, i) =>
-        p.label ? (
-          <Label key={i} pos={p.pos} text={p.text} h={p.h ?? 0.6} />
-        ) : (
-          <Plate
-            key={i}
-            pos={p.pos}
-            text={p.text}
-            h={p.h ?? 0.42}
-            rot={p.rot}
-            bg={p.bg ?? '#3a2a1a'}
-            fg={p.fg ?? '#ffffff'}
-          />
-        ),
-      )}
+      <Quieto>
+        {spec.plaques.map((p, i) =>
+          p.label ? (
+            <Label key={i} pos={p.pos} text={p.text} h={p.h ?? 0.6} />
+          ) : (
+            <Plate
+              key={i}
+              pos={p.pos}
+              text={p.text}
+              h={p.h ?? 0.42}
+              rot={p.rot}
+              bg={p.bg ?? '#3a2a1a'}
+              fg={p.fg ?? '#ffffff'}
+            />
+          ),
+        )}
+      </Quieto>
       {spec.bad && <SoftBound bad={spec.bad} msg={spec.badMsg} icon={spec.badIcon} />}
     </>
   );

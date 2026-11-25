@@ -5,13 +5,13 @@
 // Todo va en un tramo de TRAMO metros que se repite COPIAS veces; el grupo corre con `distancia % TRAMO`, así que
 // el tramo de adelante es igual al de atrás y no hay saltos. Cada tramo es una malla fusionada (una llamada), el monte
 // otra y los rótulos otra. Decorado sin colisión: el manejo no usa la física de la escena.
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import type { V3 } from '../../../core/types';
 import { casaHN, detalleFino, edificioHN, PASTEL } from '../../dept/casas';
-import { bx, cy, type Pc, PI, place, rk, rng } from '../../dept/lib';
+import { bx, cy, mergePieces, type Pc, PI, place, rk, rng } from '../../dept/lib';
 import { art } from '../../kit';
 import type { FloraItem, FloraKind } from '../../kit/art/types';
-import { Fundido, type Rotulo, Rotulos } from '../../minigames/kit/fundido';
+import { Fundido, Mallas, type Rotulo, Rotulos } from '../../minigames/kit/fundido';
 
 export const TRAMO = 96;
 export const COPIAS = 3;
@@ -446,21 +446,31 @@ export function Orilla({
     const fino = detalleFino(),
       L = hacer(fino),
       lejos = fino ? hacer(false) : L;
-    // una malla por tramo: la cámara y la sombra se saltan los tramos que no ven
-    const pcs: Pc[][] = [],
-      flora: FloraItem[] = [],
+    // cajas lisas: el bisel de 7 cm no se ve desde la cámara (a 10 m o más) y costaba ~300 triángulos por caja.
+    // Cada copia es la misma malla corrida en z: se fusiona una vez (fusionar las tres trababa ~200 ms con CPU ×4 al
+    // cambiar de paisaje) y cada copia la dibuja en su grupo; la cámara y la sombra se siguen saltando las que no ven.
+    const liso = (pcs: Pc[]) =>
+        mergePieces(
+          pcs.map((q) => ({ ...q, liso: true })),
+          true,
+        ),
+      cerca = liso(L.pcs),
+      grupos = Array.from({ length: COPIAS }, (_, k) => (k === COPIAS - 1 && lejos !== L ? liso(lejos.pcs) : cerca));
+    const flora: FloraItem[] = [],
       rot: Rotulo[] = [];
     for (let k = 0; k < COPIAS; k++) {
       const dz = Z0 - k * TRAMO;
-      // cajas lisas: el bisel de 7 cm no se ve desde la cámara (a 10 m o más) y costaba ~300 triángulos por caja
-      pcs.push(
-        (k === COPIAS - 1 ? lejos : L).pcs.map((q) => ({ ...q, liso: true, p: [q.p[0], q.p[1], q.p[2] + dz] as V3 })),
-      );
       for (const f of L.flora) flora.push({ ...f, p: [f.p[0], f.p[1], f.p[2] + dz] });
       for (const t of L.rot) rot.push({ ...t, p: [t.p[0], t.p[1], t.p[2] + dz] });
     }
-    return { pcs, flora, rot };
+    return { grupos, flora, rot };
   }, [city, monte, biome, coastal]);
+  useEffect(
+    () => () => {
+      for (const g of new Set(hecho.grupos.flat())) g.geo.dispose();
+    },
+    [hecho],
+  );
   // letreros verdes (texto del viaje): rótulo de dos postes a la izquierda en cada tramo
   const verdes = useMemo(() => {
     const pcs: Pc[] = [],
@@ -523,14 +533,17 @@ export function Orilla({
     }
     return { pcs, rot };
   }, [city, letreros[0], letreros[1]]); // eslint-disable-line react-hooks/exhaustive-deps
-  const todos = useMemo(() => [...hecho.rot, ...verdes.rot], [hecho, verdes]);
   return (
     <>
-      {hecho.pcs.map((p, k) => (
-        <Fundido key={k} pcs={p} sombra={k < COPIAS - 1} />
+      {hecho.grupos.map((g, k) => (
+        <group key={k} position-z={Z0 - k * TRAMO}>
+          <Mallas grupos={g} sombra={k < COPIAS - 1} />
+        </group>
       ))}
       <Fundido pcs={verdes.pcs} />
-      <Rotulos items={todos} />
+      {/* aparte: los letreros verdes cambian con cada tramo y así no se repinta el atlas de toda la orilla */}
+      <Rotulos items={hecho.rot} />
+      <Rotulos items={verdes.rot} />
       {art.Flora && hecho.flora.length > 0 && <art.Flora items={hecho.flora} />}
     </>
   );

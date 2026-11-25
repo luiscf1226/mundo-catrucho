@@ -122,6 +122,9 @@ export function GameCanvas() {
         camera={{ fov: 60, near: 0.1, far: 700, position: [0, 6, 10] }}
         gl={{ antialias: quality !== 'baja', powerPreference: 'high-performance' }}
         onCreated={({ gl, scene }) => {
+          // MC-56: la raíz nunca se mueve. Con su matriz automática obligaba a recalcular la de cada objeto en cada
+          // cuadro; así lo que va en <Quieto> (dept/quieto.tsx) se salta ese cálculo y lo que se mueve sigue igual.
+          scene.matrixAutoUpdate = false;
           (window as any).__mc.gl = gl;
           (window as any).__mc.scene = scene;
         }}

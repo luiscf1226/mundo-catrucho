@@ -193,25 +193,51 @@ const M4 = new THREE.Matrix4(),
   E = new THREE.Euler(),
   V = new THREE.Vector3(),
   S = new THREE.Vector3();
+// Plantillas de tamaño 1 ya sin índice: cada pieza copia la suya y la escala, en vez de construir y desindexar una
+// geometría nueva (con cientos de piezas por tramo eso era lo que más costaba al fusionar).
+const PLANTILLA = new Map<string, THREE.BufferGeometry>();
+function plantilla(k: string, hacer: () => THREE.BufferGeometry) {
+  let g = PLANTILLA.get(k);
+  if (!g) {
+    g = hacer();
+    if (g.index) g = g.toNonIndexed();
+    PLANTILLA.set(k, g);
+  }
+  return g.clone();
+}
 function geoOf(q: Pc): THREE.BufferGeometry {
   let g: THREE.BufferGeometry;
   S.set(1, 1, 1);
   if (q.g === 'box') {
     const tiny = q.liso || Math.max(q.s[0], q.s[1], q.s[2]) < 0.7 || Math.min(q.s[0], q.s[1], q.s[2]) < 0.13;
-    g = ((!tiny && art.boxGeometry?.(q.s[0], q.s[1], q.s[2])) || new THREE.BoxGeometry(q.s[0], q.s[1], q.s[2])).clone();
-  } else if (q.g === 'cyl') g = new THREE.CylinderGeometry(q.s[0] * (q.rt ?? 1), q.s[0], q.s[1], q.n ?? 10);
-  else if (q.g === 'rock') {
+    const r = !tiny && art.boxGeometry?.(q.s[0], q.s[1], q.s[2]);
+    if (r) g = r.clone();
+    // con una medida en cero la escala no se puede invertir (normales en cero): esa caja se hace a su medida
+    else if (!q.s[0] || !q.s[1] || !q.s[2]) g = new THREE.BoxGeometry(q.s[0], q.s[1], q.s[2]);
+    else {
+      S.set(q.s[0], q.s[1], q.s[2]);
+      g = plantilla('box', () => new THREE.BoxGeometry(1, 1, 1));
+    }
+  } else if (q.g === 'cyl') {
+    const rt = q.rt ?? 1,
+      n = q.n ?? 10;
+    if (!q.s[0] || !q.s[1]) g = new THREE.CylinderGeometry(q.s[0] * rt, q.s[0], q.s[1], n);
+    else {
+      S.set(q.s[0], q.s[1], q.s[0]);
+      g = plantilla(`cyl|${rt}|${n}`, () => new THREE.CylinderGeometry(rt, 1, 1, n));
+    }
+  } else if (q.g === 'rock') {
     // roca con forma del paquete de arte (si no tiene, una bola facetada); s = radios
     const rg = art.rockGeometry?.(Math.round(q.p[0] * 13 + q.p[2] * 7));
-    g = rg ? rg.clone() : new THREE.IcosahedronGeometry(1, 1);
     S.set(q.s[0], q.s[1], q.s[2]);
+    g = rg ? rg.clone() : plantilla('ico', () => new THREE.IcosahedronGeometry(1, 1));
   } else if (q.g === 'ball') {
-    g = new THREE.SphereGeometry(1, q.n ?? 10, Math.max(5, Math.round((q.n ?? 10) * 0.7)));
+    const n = q.n ?? 10;
     S.set(q.s[0], q.s[1], q.s[2]);
+    g = plantilla(`ball|${n}`, () => new THREE.SphereGeometry(1, n, Math.max(5, Math.round(n * 0.7))));
   } else {
-    g = new THREE.CylinderGeometry(0, 1, 1, 4);
-    g.rotateY(PI / 4);
     S.set(q.s[0] / Math.SQRT2, q.s[1], q.s[2] / Math.SQRT2);
+    g = plantilla('pir', () => new THREE.CylinderGeometry(0, 1, 1, 4).rotateY(PI / 4));
   }
   if (g.index) {
     const ni = g.toNonIndexed();
