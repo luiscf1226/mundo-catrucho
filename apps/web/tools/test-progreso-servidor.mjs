@@ -1,6 +1,7 @@
 // MC-15, MC-16 y MC-17 de punta a punta contra el Convex de desarrollo: etapas, visitas y marcas al cerrar la
 // partida, misiones del día, logros, clasificación con jugadores de verdad y el avance local que sube sin premios.
-// Sin .env.local imprime SALTA. No la corras contra producción. Borra a sus invitados al terminar.
+// Sin .env.local imprime SALTA. No la corras contra producción. Borra a sus invitados al terminar. Tarda ~3 min:
+// el juego de Yoro es del kit y el servidor no acepta partidas más cortas que su reloj (75 s).
 //   node apps/web/tools/test-progreso-servidor.mjs        (deja capturas en capturas/mc-17/)
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
@@ -11,6 +12,7 @@ import { join } from 'node:path';
 import { parseEnv } from 'node:util';
 import { ConvexHttpClient } from 'convex/browser';
 import { makeFunctionReference as ref } from 'convex/server';
+import { difDe, TOPES } from '../../../packages/reglas/src/topes.ts';
 import { raiz } from '../../../scripts/catalogo.mjs';
 import { run } from './harness.mjs';
 
@@ -29,6 +31,10 @@ const { achievements: LOGROS, missions: MISIONES } = datos('progress.json');
 const R = datos('rewards.json');
 const coins = (id) => LOGROS.find((l) => l.id === id).coins;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+// el juego de Yoro de la prueba: motor del kit, que siempre dura su reloj completo (el servidor no acepta menos)
+const JUEGO = 'yoro.tres-pruebas-del-54',
+  MOTOR = 'yoro.acuerdos';
+const RELOJ = TOPES[MOTOR].reloj(difDe(0, 5));
 
 const fn = {
   entrar: ref('tienda:entrar'),
@@ -174,37 +180,45 @@ try {
     assert.equal(inc.ok, false);
     assert.equal(inc.motivo, 'incompleta');
     // una etapa todavía bloqueada no se abre
-    assert.deepEqual(
-      await m(fn.abrir, { invitado: secretoA, motor: 'yoro.acuerdos', juegoId: 'yoro.tres-pruebas-del-54', etapa: 1 }),
-      {
-        ok: false,
-        motivo: 'etapa bloqueada',
-      },
-    );
+    assert.deepEqual(await m(fn.abrir, { invitado: secretoA, motor: MOTOR, juegoId: JUEGO, etapa: 1 }), {
+      ok: false,
+      motivo: 'etapa bloqueada',
+    });
 
     // 2. cerrar una partida guarda etapa, estrellas, visita y marca, y da «Primera victoria» una vez
+    // el bot juega la partida entera; la partida se abre en la intro y el servidor mide desde ahí
     await t.sleep(1100);
-    await t.ev(`${S}.startJuego('yoro.tres-pruebas-del-54')`);
+    const inicio = Date.now();
+    await t.ev(`${S}.startJuego('${JUEGO}')`);
     await t.waitFor(`${S}.mg?.phase === 'intro'`);
     await t.ev(`${S}.beginMinigame()`);
-    await t.sleep(9500);
-    await t.ev(`${S}.finishMinigame({ won: true, stars: 1, score: 300, label: '300 pts' })`);
-    await t.waitFor(`${S}.mg?.pago === 'pagado'`, 20000, 'pago del servidor');
+    await t.waitFor('!!window.__mcTest?.motor', 20000, 'motor del kit');
+    await t.ev('window.__mcTest.motor.jugarBot()');
+    await t.sleep(Math.max(0, RELOJ * 1000 + 500 - (Date.now() - inicio)));
+    // sin GPU el reloj del juego se atrasa: lo que le falte se simula con las mismas reglas
+    await t.ev(`(() => {
+      const m = window.__mcTest.motor, e = m.estado();
+      if (!e.terminado) m.avanzar(e.cuenta + e.duracion - e.tiempo + 0.1);
+    })()`);
+    await t.waitFor(`${S}.mg?.pago === 'pagado'`, 30000, 'pago del servidor');
+    const jugada = await st('s.mg.result');
+    assert.equal(jugada.won, true, `el bot gana: ${JSON.stringify(jugada)}`);
+    assert(jugada.score > 160, `el bot pasa los 160 pts: ${jugada.score}`);
     assert.deepEqual(await st('s.mg.rewards.newAchievements'), ['primera_victoria']);
     assert.equal(await st('s.mg.avance'), true);
-    assert.equal(await st(`s.profile.juegos['yoro.tres-pruebas-del-54'].etapa`), 1);
+    assert.equal(await st(`s.profile.juegos['${JUEGO}'].etapa`), 1);
     await t.waitFor(`!!document.querySelector('[data-testid=mg-ach-primera_victoria]')`);
     await t.sleep(2500); // que terminen de contar los premios
     await t.shot(join(capturas, '01-logro-del-servidor.png'));
     const e2 = await q(fn.estado, { invitado: secretoA });
     assert.deepEqual(
-      e2.juegos.find((j) => j.juegoId === 'yoro.tres-pruebas-del-54'),
-      { juegoId: 'yoro.tres-pruebas-del-54', etapa: 1, estrellas: [1], mejor: 300, veces: 1 },
+      e2.juegos.find((j) => j.juegoId === JUEGO),
+      { juegoId: JUEGO, etapa: 1, estrellas: [jugada.stars], mejor: jugada.score, veces: 1 },
     );
-    assert(e2.visitas.includes('graciasadios'), 'la partida cuenta como visita');
-    const premioGanar = R.minigame.win.coins + R.minigame.perStar.coins,
+    assert(e2.visitas.includes('yoro'), 'la partida cuenta como visita');
+    const premioGanar = R.minigame.win.coins + jugada.stars * R.minigame.perStar.coins,
       primeraVisita = R.world.firstVisit.coins;
-    const xpGanada = R.minigame.win.xp + R.minigame.perStar.xp + R.world.firstVisit.xp,
+    const xpGanada = R.minigame.win.xp + jugada.stars * R.minigame.perStar.xp + R.world.firstVisit.xp,
       subio = xpGanada >= R.level.base ? R.levelUp.coins : 0;
     const p2 = await q(fn.perfil, { invitado: secretoA });
     assert.equal(p2.monedas, p1.monedas + premioGanar + primeraVisita + coins('primera_victoria') + subio);
@@ -214,22 +228,8 @@ try {
     await t.ev(`${S}.exitMinigame()`);
     await m(fn.entrar, { invitado: secretoB, nombre: `${nombreB}!!<>` });
     const [rA, rB] = await Promise.all([
-      partida(secretoA, {
-        motor: 'yoro.acuerdos',
-        juegoId: 'yoro.tres-pruebas-del-54',
-        seg: 9,
-        puntos: 290,
-        estrellas: 1,
-        gano: true,
-      }),
-      partida(secretoB, {
-        motor: 'yoro.acuerdos',
-        juegoId: 'yoro.tres-pruebas-del-54',
-        seg: 9,
-        puntos: 260,
-        estrellas: 1,
-        gano: true,
-      }),
+      partida(secretoA, { motor: MOTOR, juegoId: JUEGO, seg: RELOJ, puntos: 150, estrellas: 1, gano: true }),
+      partida(secretoB, { motor: MOTOR, juegoId: JUEGO, seg: RELOJ, puntos: 130, estrellas: 1, gano: true }),
     ]);
     assert(rA.ok && rB.ok);
     assert.deepEqual(rA.logros, [], 'el logro se da una sola vez');
@@ -238,22 +238,22 @@ try {
       ['primera_victoria'],
     );
     assert.equal((await q(fn.estado, { invitado: secretoA })).logros.filter((l) => l === 'primera_victoria').length, 1);
-    // la marca guarda la mejor: 290 no baja los 300
-    const tabla = await q(fn.porJuego, { juegoId: 'yoro.tres-pruebas-del-54', invitado: secretoA });
+    // la marca guarda la mejor: 150 no baja lo que hizo el bot
+    const tabla = await q(fn.porJuego, { juegoId: JUEGO, invitado: secretoA });
     const iA = tabla.filas.findIndex((f) => f.nombre === nombreA),
       iB = tabla.filas.findIndex((f) => f.nombre === nombreB);
     assert(iA >= 0 && iB > iA, `A antes que B: ${JSON.stringify(tabla.filas)}`);
-    assert.equal(tabla.filas[iA].puntos, 300);
+    assert.equal(tabla.filas[iA].puntos, jugada.score);
     assert.equal(tabla.filas[iA].tu, true);
     assert.equal(tabla.filas[iB].nombre, nombreB, 'nombre limpio');
 
     // 4. la pantalla de clasificación muestra a los dos, en orden, con datos del servidor
-    await t.ev(`${S}.travel('graciasadios')`);
+    await t.ev(`${S}.travel('yoro')`);
     await t.ev(`${S}.openPanel('clasificacion')`);
     await t.waitFor(`!!document.querySelector('[data-testid=lb-juego]')`);
     await t.ev(`(() => {
       const el = document.querySelector('[data-testid=lb-juego]');
-      Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(el, 'yoro.tres-pruebas-del-54');
+      Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(el, '${JUEGO}');
       el.dispatchEvent(new Event('change', { bubbles: true }));
     })()`);
     await t.waitFor(
@@ -280,7 +280,7 @@ try {
       'tabla por departamento',
     );
     await t.shot(join(capturas, '03-clasificacion-por-departamento.png'));
-    const depto = await q(fn.porDepto, { deptId: 'graciasadios' });
+    const depto = await q(fn.porDepto, { deptId: 'yoro' });
     assert.equal(depto.filas.filter((f) => f.nombre === nombreA).length, 1, 'una fila por jugador');
     await t.ev(`${S}.closePanel()`);
 
