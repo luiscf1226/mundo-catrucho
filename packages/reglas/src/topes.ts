@@ -206,9 +206,13 @@ const montaMetas = (d: number): Metas => {
 };
 
 export const TOPES: Record<string, TopeMotor> = {
-  'cortes.garitas': kit(
-    (d) => [80 + r(d * 80), 240, 400],
-    (d) => 75 + d * 20,
+  // cada ronda de cuatro garitas bien orientadas da 80 pts en ~1,7 s
+  'cortes.garitas': conRitmo(
+    kit(
+      (d) => [80 + r(d * 80), 240, 400],
+      (d) => 75 + d * 20,
+    ),
+    50,
   ),
   'cortes.topo': kit(
     (d) => [120 + r(d * 80), 320, 520],
@@ -226,19 +230,35 @@ export const TOPES: Record<string, TopeMotor> = {
     (d) => [100 + r(d * 100), 300, 500],
     (d) => 70 + d * 20,
   ),
-  'cortes.cortina': kit(
-    (d) => [100 + r(d * 80), 280, 450],
-    (d) => 70 + d * 20,
+  // cruce de 35 pts más 15 por rescatar el sombrero
+  'cortes.cortina': conRitmo(
+    kit(
+      (d) => [100 + r(d * 80), 280, 450],
+      (d) => 70 + d * 20,
+    ),
+    35,
   ),
-  'cortes.cusuco': kit(
-    (d) => [120 + r(d * 60), 300, 480],
-    (d) => 75 + d * 20,
+  // una pasarela de 60 pts cada ~3 s con inspecciones rápidas
+  'cortes.cusuco': conRitmo(
+    kit(
+      (d) => [120 + r(d * 60), 300, 480],
+      (d) => 75 + d * 20,
+    ),
+    30,
   ),
   'franciscomorazan.rosquilla': kit(lineal(80, 180, 280, 80), (d) => 70 + d * 20),
   'franciscomorazan.repartidor': kit(lineal(80, 160, 260, 50), () => 75),
   'franciscomorazan.niebla': kit(lineal(100, 220, 340, 60), () => 75),
-  'franciscomorazan.artesania': kit(lineal(100, 200, 350, 100), () => 75),
-  'franciscomorazan.baleada': kit(lineal(100, 220, 340, 80), () => 70),
+  // tres piezas apoyadas (50 pts) con prueba de vibración de 1–2 s
+  'franciscomorazan.artesania': conRitmo(
+    kit(lineal(100, 200, 350, 100), () => 75),
+    30,
+  ),
+  // una baleada bien cerrada (35 pts) cada 0,8 s de preparación
+  'franciscomorazan.baleada': conRitmo(
+    kit(lineal(100, 220, 340, 80), () => 70),
+    50,
+  ),
   'franciscomorazan.taxi': kit(
     (d) => [100 + r(d * 60), 220 + r(d * 80), 340 + r(d * 100)],
     (d) => 75 + r(d * 15),
@@ -252,7 +272,8 @@ export const TOPES: Record<string, TopeMotor> = {
   'olancho.calcita': taller,
   'olancho.cuajada': taller,
   'olancho.postura': taller,
-  'olancho.tablas': taller,
+  // una tabla útil (40 pts) cada ~1,7 s si se traza derecho
+  'olancho.tablas': conRitmo(taller, 30),
   'intibuca.telar': conRitmo(intibuca, 32),
   'intibuca.hongos': conRitmo(intibuca, 28),
   'intibuca.callejero': conRitmo(intibuca, 46),

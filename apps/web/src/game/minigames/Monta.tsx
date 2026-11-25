@@ -75,6 +75,8 @@ export function Monta() {
     return f;
   })();
   const nombre: string = P_.tema.nombre ?? NOMBRE[mk];
+  /** «El toro se cree resorte»: giros laterales más fuertes, recuperación limitada y el toro se comprime antes de saltar */
+  const resorte = P_.tema.variante === 'el-toro-se-cree-resorte';
   const R = useMemo(() => rng(P_.seed), [P_]),
     dur = durOf(P_),
     dif = P_.dif;
@@ -118,6 +120,9 @@ export function Monta() {
     hits: 0,
     over: false,
     tel: { dir: 0, big: false, until: 0 },
+    /** recuperación disponible para compensar (solo en el modo resorte) */
+    rec: 1,
+    boings: 0,
   });
   const compa = useMemo(() => ({ s: newState('idle') as AvatarState, t: 0 }), []);
   const bots = useMemo(
@@ -158,6 +163,7 @@ export function Monta() {
       monta: {
         st: S.current,
         dur,
+        resorte,
         warp: (s: number) => {
           S.current.t += s;
         },
@@ -199,6 +205,12 @@ export function Monta() {
         s.tel = { dir: e.dir, big: e.big, until: e.t };
         s.ei++;
         if (e.big) audio.sfx('horn');
+        if (e.big && resorte) {
+          // sonido de juguete: el resorte se suelta
+          audio.tone(520, 0.09, { type: 'triangle', gain: 0.12 });
+          audio.tone(1040, 0.14, { type: 'triangle', gain: 0.1, at: 0.08 });
+          s.boings++;
+        }
       }
       for (const e of s.ev) {
         if (e.fired || e.t > t) continue;
@@ -215,7 +227,7 @@ export function Monta() {
             fx.emit(0, 0.5 + alto, 0, '#d9bb86', 14, 4, 3);
           }
         } else {
-          const k = s.help > 0 ? 0.45 : 1;
+          const k = (s.help > 0 ? 0.45 : 1) * (resorte ? 1.25 : 1);
           s.V += e.dir * e.mag * (1.4 + 0.2 * dif) * k;
           audio.sfx('hit');
           fx.emit(0, 0.2 + alto, 0.3, agua ? '#dff3ff' : '#d9bb86', 8, 3, 2.2);
@@ -242,7 +254,12 @@ export function Monta() {
         }
       }
       // dinámica de la aguja
-      const ctl = input.mx;
+      let ctl = input.mx;
+      if (resorte) {
+        // compensar gasta recuperación; sin ella la fuerza baja a la mitad hasta que se recargue
+        s.rec = clamp(s.rec - Math.abs(ctl) * dt * 0.3 + dt * 0.14, 0, 1);
+        ctl *= 0.5 + 0.5 * s.rec;
+      }
       s.V += (s.L * (0.8 + 0.3 * dif) + Math.sin(t * 1.3) * 0.25 + Math.sin(t * 2.9 + 1) * 0.15 - ctl * 7.5) * dt;
       s.V *= Math.max(0, 1 - 1.5 * dt);
       s.L += s.V * dt;
@@ -281,7 +298,9 @@ export function Monta() {
         objective: `Aguantá ${Math.ceil(dur - t)} s · estilo ${m2} pts para 2⭐`,
         lines: [
           `${nombre} · aguja ${Math.abs(s.L) < 0.35 ? '✅ al centro' : Math.abs(s.L) < 0.8 ? '⚠️ ladeándose' : '🔴 ¡te caés!'}`,
-          'A / D inclinarte · Espacio brincar',
+          resorte
+            ? `Recuperación ${Math.round(s.rec * 100)}% · A / D sin pasarte · Espacio brincar`
+            : 'A / D inclinarte · Espacio brincar',
         ],
       });
       if (t >= dur) finishRide(true);
@@ -307,6 +326,9 @@ export function Monta() {
     if (m) {
       m.position.set(0, alto + bob + jy, 0);
       m.rotation.set(pitch, 0, roll);
+      // el toro de caricatura se comprime como resorte justo antes del brinco grande
+      const apriete = resorte && tel > 0 && e.big ? 1 - 0.28 * tel : 1;
+      m.scale.set(1 / Math.sqrt(apriete), apriete, 1 / Math.sqrt(apriete));
       m.updateWorldMatrix(true, true);
       tmp.set(0, seat.y, mk === 'tabla' ? 0 : 0.0);
       m.localToWorld(tmp);

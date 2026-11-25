@@ -759,6 +759,11 @@ canvas {
   transition: width 0.5s var(--mc-ease);
   min-width: 0;
 }
+/* barra que se actualiza seguido (progreso del viaje, 8 veces por segundo): animar el ancho pedía layout en cada
+   cuadro; sin transición salta de a poco y el celular se ahorra ese trabajo (MC-56) */
+.mc-bar.is-vivo > i {
+  transition: none;
+}
 [data-variant="roblox"] .mc-bar {
   background: #c9d9ec;
   border: 2.5px solid var(--mc-ink);

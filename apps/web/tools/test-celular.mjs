@@ -30,14 +30,28 @@ const ok = await run('celular', file, { width: 412, height: 915, touch: true, ha
   );
   console.log(`EMULACIÓN 412×915 DPR 2.6 CPU ×${cpu}; GPU:`, gpu);
   assert.ok(!/swiftshader|llvmpipe/i.test(gpu), 'Se requiere GPU real');
-  for (const [nombre, accion] of [
+  // [nombre, cómo llegar, dónde pararse (x, z, giro)]. Las de la ola de realismo: el estadio (fútbol), Yojoa (pesca en el
+  // lago), la cueva de Talgua (Calcita), Tegucigalpa, la misma calle con lluvia y el viaje en rapidito.
+  // MC_ESCENAS=a,b mide solo esas.
+  const ESCENAS = [
     ['lobby', `${S}.goLobby()`],
     ...['olancho', 'franciscomorazan', 'cortes'].map((id) => [id, `${S}.travel('${id}')`]),
     ...['futbol', 'ritmo', 'corte', 'cortes.gruas'].map((id) => [id, `${S}.startMinigame('${id}')`]),
-  ]) {
+    ['yojoa', `${S}.startJuego('cortes.pesca-en-yojoa')`],
+    ['talgua', `${S}.startMinigame('olancho.calcita')`],
+    ['ciudad', `${S}.travel('franciscomorazan')`, [-3, 78, 0]],
+    ['lluvia', `location.hash = '#go,ciclo=rapido,clima=lluvia'`, [-3, 78, 0]],
+    ['rapidito', `location.hash = '#go,clima=despejado'; ${S}.startViaje('rapidito','copan')`],
+  ].filter(([n]) => !process.env.MC_ESCENAS || process.env.MC_ESCENAS.split(',').includes(n));
+  for (const [nombre, accion, lugar] of ESCENAS) {
+    await t.ev(`${S}.mg && ${S}.exitMinigame()`);
     await t.ev(accion);
     if (await t.exists('mg-start')) await t.click('mg-start');
-    await t.waitFor(`!document.querySelector('[data-testid=scene-loading]') && !!window.__mc.gl`);
+    await t.waitFor(`!document.querySelector('[data-testid=scene-loading]') && !!window.__mc.gl`, 30000);
+    await t.sleep(1500);
+    if (lugar) await t.ev(`window.__mc.player.teleport(${lugar[0]}, 0.5, ${lugar[1]}, ${lugar[2]})`);
+    // la lluvia entra de a poco: se espera a que llueva de verdad
+    if (nombre === 'lluvia') await t.waitFor('window.__mc.clima?.rain > 0.9 && window.__mc.clima.wet > 0.9', 120000);
     await t.sleep(2500);
     if (await t.exists('mg-start')) await t.click('mg-start');
     for (let repeticion = 0; repeticion < 5; repeticion++) {
@@ -59,7 +73,7 @@ const ok = await run('celular', file, { width: 412, height: 915, touch: true, ha
         );
       assert.ok(muestra.rendered >= muestra.frames - 2, 'Se dibujan cuadros durante la medición');
       assert.ok(muestra.calls < 350, `Presupuesto de dibujo: ${muestra.calls}`);
-      if (nombre.includes('.') || ['futbol', 'ritmo', 'corte'].includes(nombre))
+      if (nombre.includes('.') || ['futbol', 'ritmo', 'corte', 'yojoa', 'talgua'].includes(nombre))
         assert.equal(await t.ev(`${S}.mg?.phase`), 'playing', 'Motor activo durante la medición');
       rows.push({ nombre, repeticion, ...muestra });
       console.log(`${etiqueta} ${nombre} ${repeticion}: ${JSON.stringify(muestra)}`);

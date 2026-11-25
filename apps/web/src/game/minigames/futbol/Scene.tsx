@@ -17,8 +17,8 @@ import { Estadio, type EstadioDef } from '../kit/estadio';
 import { Alrededores } from '../kit/Paisaje';
 import { DEF, type Ev, Match, type Params } from './sim';
 
-const TEAM_A = 'Catrachos',
-  TEAM_B = 'Barrio Abajo';
+const EQUIPO_A = 'Catrachos',
+  EQUIPO_B = 'Barrio Abajo';
 const { hw: HW, hl: HL, gw: GW, gh: GH, gd: GD, r: BR } = DEF;
 const kit = (
   skin: number,
@@ -397,12 +397,45 @@ const rivalesDe = (dif: number): Partial<Params> => ({
   gkReact: [DEF.gkReact[0], 0.3 - 0.1 * dif],
 });
 
+/** nombre de un equipo del tema (`["Leones", "#f4f4f4"]`) o el de siempre */
+const nombreDe = (v: unknown, def: string) =>
+  Array.isArray(v) && typeof v[0] === 'string' ? v[0] : typeof v === 'string' ? v : def;
+/** remates que tenés en «El gol del lunes» */
+const TIROS_LUNES = 12;
+
+/** el marcador fantasma del lunes se abre como paraguas sobre tu arco (no tapa el juego: flota arriba) */
+function MarcadorLunes() {
+  const g = useRef<THREE.Group>(null);
+  useFrame(({ clock }) => {
+    const k = 0.55 + 0.45 * Math.abs(Math.sin(clock.elapsedTime * 0.9));
+    if (g.current) g.current.scale.set(k, 1, k);
+  });
+  return (
+    <group position={[0, 5.4, HL - 0.6]}>
+      <group ref={g}>
+        <Cyl pos={[0, 0, 0]} r={0.05} rTop={2.6} h={0.9} color="#c9d6ff" mat="cloth" solid={false} />
+      </group>
+      <Block pos={[0, -1.4, 0]} size={[0.06, 2, 0.06]} color="#8a93a6" mat="metal" solid={false} />
+      <Label pos={[0, 1.1, 0]} text="👻 LUNES 1-0" h={0.5} />
+    </group>
+  );
+}
+
 export function FutbolScene() {
   const rules = rulesOf('futbol');
-  const match = useMemo(
-    () => new Match(rules.duration, (Math.random() * 2 ** 31) | 0, rivalesDe(partida().dif)),
-    [], // eslint-disable-line react-hooks/exhaustive-deps
-  );
+  const P0 = useMemo(partida, []);
+  const TEAM_A = nombreDe(P0.tema.equipo, EQUIPO_A),
+    TEAM_B = nombreDe(P0.tema.rival, EQUIPO_B);
+  /** «El gol del lunes»: arrancás ganando 1-0 con un jugador menos y remates contados */
+  const lunes = P0.tema.variante === 'el-gol-del-lunes';
+  const match = useMemo(() => {
+    const m = new Match(rules.duration, (Math.random() * 2 ** 31) | 0, {
+      ...rivalesDe(P0.dif),
+      ...(lunes ? { expulsado: true, tiros: TIROS_LUNES } : {}),
+    });
+    if (lunes) m.score = [1, 0];
+    return m;
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const states = useMemo(() => match.ents.map(() => ({ anim: 'idle', speed: 0 }) as AvatarState), [match]);
   const groups = useRef<(THREE.Group | null)[]>([]);
   const ball = useRef<THREE.Group>(null),
@@ -465,8 +498,13 @@ export function FutbolScene() {
     setHud({
       timer: Math.ceil(m.clock),
       score: `${m.score[0]} - ${m.score[1]}`,
-      objective: `${TEAM_A} vs ${TEAM_B}`,
+      objective: lunes ? `Defendé la ventaja · ${TEAM_A} con uno menos` : `${TEAM_A} vs ${TEAM_B}`,
       lines: [
+        ...(lunes
+          ? [
+              `Remates: ${Math.max(0, TIROS_LUNES - m.tirosUsados)} de ${TIROS_LUNES} · Q despeja (no hay a quién pasar)`,
+            ]
+          : []),
         near < m.P.kickRange
           ? '¡Dale! · 🎯 / F: tiro · Q: pase'
           : `Pelota: ${Math.round(near)} m ${m.ball.p[2] < b.pos[2] ? '↑' : '↓'} ${m.ball.p[0] < b.pos[0] ? '←' : '→'} · 🎯 / F: tiro · Q: pase`,
@@ -534,6 +572,7 @@ export function FutbolScene() {
       {art.fused && <Alrededores fondo="valle" llano={[-30, 30, -34, 30]} />}
       <Barrio />
       <Fans cheer={cheer} />
+      {lunes && <MarcadorLunes />}
 
       {match.ents.map(
         (e, i) =>

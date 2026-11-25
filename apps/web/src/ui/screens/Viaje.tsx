@@ -20,7 +20,7 @@ export function ViajeHud() {
         <b className="text-lg">
           {OPCIONES.find((t) => t.id === scene.veh)?.icon} Rumbo a {deptById(scene.to)?.name ?? scene.to}
         </b>
-        <Bar id="viaje-progress" value={v.progress} max={1} />
+        <Bar id="viaje-progress" value={v.progress} max={1} cls="is-vivo" />
         <span className="text-sm">
           {Math.round(v.progress * 100)} % · {v.speed} km/h · {v.hits} choques
         </span>

@@ -36,6 +36,7 @@
         "Localizá peces y mantené la tensión durante la recogida.",
         "La bota no entra en el menú del lago.",
         {
+          "variante": "pesca-en-yojoa",
           "agua": "lago",
           "desde": "lancha",
           "peces": [
@@ -50,7 +51,7 @@
               "#5b7f4a"
             ],
             [
-              "Bass",
+              "Lobina",
               55,
               "#3c5a3a"
             ]
@@ -71,6 +72,7 @@
         "Resolvé una jornada con capturas incidentales que debés soltar antes de seguir sumando.",
         "La bota no entra en el menú del lago.",
         {
+          "variante": "la-bota-no-es-pescado",
           "agua": "lago",
           "desde": "lancha",
           "peces": [
@@ -85,7 +87,7 @@
               "#5b7f4a"
             ],
             [
-              "Bass",
+              "Lobina",
               55,
               "#3c5a3a"
             ]
@@ -106,6 +108,7 @@
         "Construí una torre que aguante tres inclinaciones.",
         "Si chorrea de más, ya te tocó limpiar.",
         {
+          "variante": "pollo-chuco-en-equilibrio",
           "nombre": "Pollo chuco en equilibrio",
           "frases": [
             "Si chorrea de más, ya te tocó limpiar."
@@ -123,6 +126,7 @@
         "Desviá un río absurdo de salsa con tajadas para salvar un plato ya servido mientras un pollo de espuma navega en una tapa de aderezo.",
         "Si chorrea de más, ya te tocó limpiar.",
         {
+          "variante": "se-vino-el-aderezo",
           "nombre": "¡Se vino el aderezo!",
           "frases": [
             "Si chorrea de más, ya te tocó limpiar."
@@ -140,6 +144,7 @@
         "Despachá cargas por barco y hora de zarpe.",
         "El barco no espera a que encontrés el contenedor.",
         {
+          "variante": "gruas-de-puerto-cortes",
           "nombre": "Grúas de Puerto Cortés",
           "frases": [
             "El barco no espera a que encontrés el contenedor."
@@ -157,6 +162,7 @@
         "Descargá una bodega invertida con contenedores que se expanden al abrirse y estornudan confeti cuando les toca pasar por la grúa.",
         "El barco no espera a que encontrés el contenedor.",
         {
+          "variante": "el-contenedor-trae-confeti",
           "nombre": "El contenedor trae confeti",
           "frases": [
             "El barco no espera a que encontrés el contenedor."
@@ -174,6 +180,7 @@
         "Avanzá cuando coincidan dos ventanas del agua.",
         "El guía dijo tranquilo… y vos ya estás empapado.",
         {
+          "variante": "detras-de-la-catarata",
           "nombre": "Detrás de la catarata",
           "frases": [
             "El guía dijo tranquilo… y vos ya estás empapado."
@@ -191,6 +198,7 @@
         "Rescatá un sombrero ficticio que viaja entre refugios sin abandonar la cuerda de guía.",
         "El guía dijo tranquilo… y vos ya estás empapado.",
         {
+          "variante": "la-catarata-se-rie-primero",
           "nombre": "La catarata se ríe primero",
           "frases": [
             "El guía dijo tranquilo… y vos ya estás empapado."
@@ -208,6 +216,7 @@
         "Orientá conos de visión desde garitas en un plano de la fortaleza.",
         "La esquina que no miraste sigue ahí.",
         {
+          "variante": "los-ojos-de-la-fortaleza",
           "nombre": "Los ojos de la fortaleza",
           "frases": [
             "La esquina que no miraste sigue ahí."
@@ -225,6 +234,7 @@
         "Elegí cuándo guardar impulsos de esfuerzo en una barra cuya capacidad disminuye al ascender.",
         "El rótulo se miraba más cerca desde abajo.",
         {
+          "variante": "aire-para-el-merendon",
           "nombre": "Aire para el Merendón",
           "frases": [
             "El rótulo se miraba más cerca desde abajo."
@@ -242,6 +252,7 @@
         "Inspeccioná una red de raíces y seleccioná apoyos desde una pasarela virtual.",
         "Una raíz mala le cambia el viaje a todas.",
         {
+          "variante": "la-rama-sostiene-a-todas",
           "nombre": "La rama sostiene a todas",
           "frases": [
             "Una raíz mala le cambia el viaje a todas."
@@ -259,6 +270,7 @@
         "Tirá de sellos congelados con dos cursores para separar bolsas adheridas.",
         "Lo pediste de un sabor; no lo llevés de dos por accidente.",
         {
+          "variante": "topogigio-pegado",
           "nombre": "Topogigio pegado",
           "frases": [
             "Lo pediste de un sabor; no lo llevés de dos por accidente."
