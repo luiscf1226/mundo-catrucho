@@ -20,8 +20,9 @@ export function Viaje({ veh, to }: { veh: Vehiculo; to: string }) {
   const from = scene.kind === 'viaje' ? scene.from : 'franciscomorazan';
   const ruta = useMemo(() => rutaParaVehiculo(veh, from, to), [veh, from, to]);
   const clima = useCamino((s) => s.activa?.accion);
-  const linea = useViaje((s) => s.linea);
-  const medio = (useViaje.getState().ruta === ruta ? linea?.tramo?.medio : null) ?? ruta?.tramos[0]?.medio;
+  // solo el tramo: la línea cambia 8 veces por segundo y volvía a dibujar toda la escena del camino con React
+  const tramoActual = useViaje((s) => s.linea?.tramo ?? null);
+  const medio = (useViaje.getState().ruta === ruta ? tramoActual?.medio : null) ?? ruta?.tramos[0]?.medio;
   const activo = medio === 'carretera' && ['ferry', 'lancha', 'avioneta'].includes(veh) ? 'taxi' : veh;
   const via =
     medio === 'avioneta'
@@ -74,8 +75,8 @@ export function Viaje({ veh, to }: { veh: Vehiculo; to: string }) {
         )
       }
       destination={dept?.name ?? to}
-      biome={linea?.tramo?.paisaje ?? dept?.biome}
-      tramo={linea?.tramo ?? undefined}
+      biome={tramoActual?.paisaje ?? dept?.biome}
+      tramo={tramoActual ?? undefined}
       onStep={(s, dt) => {
         enviarAuto(s);
         clock.current += dt;

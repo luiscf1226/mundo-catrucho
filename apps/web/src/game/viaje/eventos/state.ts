@@ -79,5 +79,8 @@ export function pasoCamino(s: DriveState, dt: number, veh: string) {
   s.speed = Math.min(s.speed, Math.max(limite, s.speed - 22 * dt));
   s.distance -= (antes - s.speed) * dt;
   if (activa.accion === 'comprar') s.x += (5.8 - s.x) * Math.min(1, dt * 2);
-  if (Math.abs(camino.velocidad - s.speed) > 0.1) useCamino.setState({ velocidad: s.speed });
+  // no cada cuadro: solo al pararse o arrancar (lo que mira la parada) o con un cambio de más de 1 m/s
+  const parado = s.speed < 0.1;
+  if (parado !== camino.velocidad < 0.1 || Math.abs(camino.velocidad - s.speed) > 1)
+    useCamino.setState({ velocidad: s.speed });
 }

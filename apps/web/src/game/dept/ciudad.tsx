@@ -24,6 +24,7 @@ import { CIUDADES, type SitioReal, type TipoSitio } from './ciudad-datos';
 import { type Layout, layoutOf } from './ext';
 import { Build, bl, bx, conFlora, cy, type Pc, PI, place, py, rng, rotXZ, type XZ } from './lib';
 import { lugarDelMuro } from './muro';
+import { Quieto } from './quieto';
 import type { ZoneSpec } from './zone';
 
 // paleta corta: cada (material, color) es una llamada de dibujo
@@ -1483,8 +1484,9 @@ export function Ciudad({ d, spec }: { d: Department; spec: ZoneSpec }) {
   }, [plan, d]);
   if (!plan) return null;
   const g = useGame.getState;
+  // todo lo de la ciudad es fijo (las lámparas solo se prenden y se apagan): matrices congeladas
   return (
-    <>
+    <Quieto>
       <Build pieces={plan.pcs} />
       {plan.rotulos.map((q, i) => (
         <Plate key={`r${i}`} pos={q.pos} rot={q.rot} h={0.34} text={q.text} bg={q.bg} fg={q.fg} />
@@ -1522,6 +1524,6 @@ export function Ciudad({ d, spec }: { d: Department; spec: ZoneSpec }) {
           </group>
         );
       })}
-    </>
+    </Quieto>
   );
 }

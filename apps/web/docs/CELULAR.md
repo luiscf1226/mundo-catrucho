@@ -1,16 +1,15 @@
 # Celular: MC-56 y MC-04
 
-## Estado al cierre (24 nov)
+## Estado al cierre (25 nov)
 
 - **MC-04 · motores con los dedos:** los 148 motores del registro se juegan hasta el resultado solo con los
   controles táctiles, en un celular emulado. Además se jugaron tres motores en Chrome de un emulador
   Android (ver «Android de verdad»). Los fallos que encontró la prueba quedaron arreglados (ver «Lo que se arregló»).
-- **MC-56 · 30 FPS:** en emulación de gama media (412×915, DPR 2,6, CPU ×4, GPU real) pasan 10 de 13 escenas
-  en la corrida completa, pero casi todas justo en el límite: la ola de realismo se comió el margen (ver «Tercera
-  ronda»). Ciudad y lluvia están en el borde (fallan o pasan según la corrida). El viaje en rapidito fallaba por la
-  barra de progreso y quedó arreglado salvo un pico. **Falta medirlo en un celular físico de gama media**: no hay uno en
-  la máquina de trabajo y el emulador Android dibuja por software (SwiftShader), así que sus FPS no sirven
-  como medición. Los pasos para medirlo en tu celular están abajo.
+- **MC-56 · 30 FPS:** en emulación de gama media (412×915, DPR 2,6, CPU ×4, GPU real) **pasan las 13 escenas en
+  dos corridas completas seguidas**, con el candado exclusivo de la GPU (ver «Cuarta ronda»). Ciudad y lluvia
+  van a 60 FPS con p95 de 16,8 ms, y el rapidito ya no se traba al cambiar de tramo. **Falta medirlo en un celular
+  físico de gama media**: no hay uno en la máquina de trabajo, y el emulador Android dibuja por software
+  (SwiftShader), así que sus FPS no sirven como medición. Los pasos para medirlo en tu celular están abajo.
 
 ## Medilo en tu celular (Luis)
 
@@ -53,6 +52,122 @@ muestras de 4 s; el criterio es p95 ≤34 ms y ≤5 % de cuadros de más de 34 m
 Escenas (13): lobby, Olancho, Francisco Morazán y Cortés (llegada), Fútbol (el estadio), Ritmo, Corte, Grúas,
 **Yojoa** (Pesca en Yojoa, con el lago), **Talgua** (Calcita, en la cueva), **ciudad** (Tegucigalpa, calle
 del centro), **lluvia** (la misma calle con lluvia y piso mojado, `#clima=lluvia`) y **rapidito** (viaje a Copán).
+
+### Cuarta ronda (cierre, 25 nov): menos costo por cuadro y sin trabas en el viaje
+
+CPU ×4, GPU AMD Radeon 860M Graphics, **candado exclusivo** de la GPU (`flock -x`) y calidad baja automática
+(DPR 0,75, sin sombras ni antialiasing). Mediana de cinco muestras de 4 s; «peor» es la peor muestra. Las dos
+corridas van seguidas con el mismo HTML.
+
+Corrida 1 (`cierre-1`, carga 2,1 → 1,8 sobre 16 hilos):
+
+| Escena | FPS | p95 ms (mediana / peor) | peor % >34 ms | ms de tarea | llamadas | pasa |
+|---|---|---|---|---|---|---|
+| lobby | 60,0 | 16,8 / 16,8 | 0,0 | 5,5 | 97 | sí |
+| olancho | 60,0 | 16,8 / 16,8 | 0,8 | 5,8 | 58 | sí |
+| franciscomorazan | 60,0 | 16,8 / 16,8 | 0,0 | 6,5 | 67 | sí |
+| cortes | 60,0 | 16,7 / 16,7 | 0,4 | 6,6 | 58 | sí |
+| futbol | 60,0 | 16,7 / 16,8 | 0,4 | 5,2 | 33 | sí |
+| ritmo | 60,0 | 16,8 / 16,8 | 0,4 | 5,0 | 40 | sí |
+| corte | 60,0 | 16,8 / 16,8 | 0,4 | 5,0 | 25 | sí |
+| cortes.gruas | 60,0 | 16,8 / 16,8 | 0,4 | 5,3 | 30 | sí |
+| yojoa | 60,0 | 16,7 / 16,8 | 0,4 | 3,5 | 16 | sí |
+| talgua | 60,0 | 16,7 / 16,8 | 0,4 | 5,5 | 21 | sí |
+| ciudad | 60,0 | 16,7 / 16,8 | 0,0 | 7,0 | 110 | sí |
+| lluvia | 60,0 | 16,8 / 16,8 | 0,0 | 6,9 | 110 | sí |
+| rapidito | 60,0 | 16,7 / 16,8 | 0,9 | 5,2 | 31 | sí |
+
+Corrida 2 (`cierre-2`, carga 1,8 → 2,1):
+
+| Escena | FPS | p95 ms (mediana / peor) | peor % >34 ms | ms de tarea | llamadas | pasa |
+|---|---|---|---|---|---|---|
+| lobby | 60,0 | 16,7 / 16,8 | 0,4 | 5,5 | 97 | sí |
+| olancho | 60,0 | 16,8 / 16,8 | 0,0 | 5,2 | 58 | sí |
+| franciscomorazan | 60,0 | 16,7 / 16,8 | 0,0 | 6,1 | 67 | sí |
+| cortes | 60,0 | 16,8 / 16,8 | 0,4 | 6,0 | 58 | sí |
+| futbol | 60,0 | 16,7 / 16,8 | 0,4 | 5,0 | 36 | sí |
+| ritmo | 60,0 | 16,7 / 16,8 | 0,4 | 5,1 | 40 | sí |
+| corte | 60,0 | 16,7 / 16,8 | 0,0 | 5,3 | 25 | sí |
+| cortes.gruas | 60,0 | 16,8 / 16,8 | 0,4 | 5,6 | 30 | sí |
+| yojoa | 60,0 | 16,7 / 16,8 | 0,4 | 3,5 | 16 | sí |
+| talgua | 60,0 | 16,7 / 16,8 | 0,4 | 5,1 | 21 | sí |
+| ciudad | 60,0 | 16,8 / 16,8 | 0,0 | 6,7 | 110 | sí |
+| lluvia | 60,0 | 16,8 / 16,8 | 0,0 | 6,7 | 110 | sí |
+| rapidito | 59,8 | 16,8 / 16,8 | 0,9 | 5,6 | 32 | sí |
+
+**Pasan las 13 escenas en las dos corridas.** Para comparar, el HTML de `main` antes de este cambio, en las mismas
+condiciones (`antes-cierre`, carga 1,3 → 2,0):
+
+| Escena | FPS | p95 ms (mediana / peor) | peor % >34 ms | ms de tarea | llamadas | pasa |
+|---|---|---|---|---|---|---|
+| lobby | 60,0 | 16,8 / 16,8 | 0,0 | 5,2 | 97 | sí |
+| olancho | 60,0 | 16,7 / 16,8 | 0,0 | 5,7 | 58 | sí |
+| franciscomorazan | 60,0 | 16,8 / 16,8 | 0,0 | 6,5 | 67 | sí |
+| cortes | 60,0 | 16,8 / 16,8 | 0,4 | 6,8 | 58 | sí |
+| futbol | 60,0 | 16,7 / 16,7 | 0,4 | 5,1 | 36 | sí |
+| ritmo | 60,0 | 16,8 / 16,8 | 0,4 | 5,2 | 40 | sí |
+| corte | 60,0 | 16,8 / 16,8 | 0,4 | 5,3 | 25 | sí |
+| cortes.gruas | 60,0 | 16,7 / 16,8 | 0,4 | 5,4 | 30 | sí |
+| yojoa | 60,0 | 16,8 / 16,8 | 0,4 | 3,6 | 16 | sí |
+| talgua | 60,0 | 16,7 / 16,8 | 0,4 | 5,1 | 21 | sí |
+| ciudad | 60,0 | 16,8 / 16,8 | 0,4 | 7,4 | 110 | sí |
+| lluvia | 60,0 | 16,8 / 16,8 | 0,0 | 7,8 | 110 | sí |
+| rapidito | 60,0 | 16,8 / 16,8 | 0,4 | 6,2 | 28 | sí |
+
+Con la máquina tranquila y la GPU para ella sola, también pasa `main`: el borde de la tercera ronda venía sobre
+todo de la carga (3,8 a 9,5) y de otras pruebas usando la GPU al mismo tiempo. Este cambio baja el tiempo de tarea
+por cuadro de ciudad (7,4 → 6,7–7,0 ms), lluvia (7,8 → 6,7–6,9) y rapidito (6,2 → 5,2–5,6), y sobre todo quita
+el pico del cambio de tramo en el viaje. Ese pico es el que más se nota en un teléfono, porque no se esconde
+detrás de un procesador rápido.
+
+**Rapidito: la causa del pico.** Se perfiló el viaje registrando, cuadro a cuadro, objetos, programas de shader,
+texturas y geometrías. El cuadro lento (217 a 233 ms con CPU ×4) cae siempre a los ~10,7 s del viaje, cuando cambia
+el tramo y su paisaje. Ahí pasaban tres cosas:
+
+1. `Rotulos` (`minigames/kit/fundido.tsx`) creaba un material nuevo cada vez que cambiaba el texto de un letrero.
+   Al soltar el viejo, three.js liberaba su programa y lo volvía a compilar en el cuadro siguiente. Ahora el
+   material vive lo que vive el componente y solo se cambia la textura.
+2. El atlas de los rótulos de la orilla medía 1024×4096 (unos 21 MB con mipmaps), porque cada rótulo se repetía en
+   cada copia del tramo, y se repintaba entero al cambiar el letrero verde. Ahora las filas iguales se comparten
+   (1024×1024) y los letreros verdes van en su propio atlas (1024×256).
+3. La orilla (`viaje/escenas/Orilla.tsx`) fusionaba tres veces las mismas piezas, una por copia del tramo, solo
+   corridas en z: `mergePieces` gastaba ~190 ms. Ahora se fusiona una vez y cada copia dibuja la misma geometría
+   dentro de un grupo corrido; las llamadas de dibujo son las mismas. Además, `geoOf` (`dept/lib.tsx`) copia
+   plantillas de tamaño 1 ya sin índice en vez de construir y desindexar una geometría de three.js por pieza
+   (misma geometría: diferencia máxima de 4 µm en posiciones y 7·10⁻⁸ en normales, comprobada con 2000 piezas).
+
+Resultado: el cambio de tramo pasó de 217–233 ms a 50–83 ms con CPU ×4, y ya no se compila ningún programa.
+También se quitaron dos `setState` que corrían sin parar: `Viaje` se suscribía a toda la línea del viaje (8 veces por
+segundo volvía a dibujar con React la escena entera del camino) y ahora solo al tramo; y el evento del camino
+guardaba la velocidad en cada cuadro mientras frenaba, y ahora solo al pararse, al arrancar o con un cambio de
+más de 1 m/s.
+
+**Calle de Tegucigalpa (ciudad y lluvia).** Con la GPU sola gasta ~6 a 7 ms de tarea por cuadro con CPU ×4. Se midió
+cuánto pesa cada cosa apagándola en caliente (tres muestras de 3 s): congelar todas las matrices ahorra ~0,5 ms,
+quitar los carteles ~0,8 ms, los sprites ~0,6 ms y los avatares ~0,7 ms. No hay un culpable grande. Se dejó lo
+barato y sin cambio visual:
+
+- `<Quieto>` (`dept/quieto.tsx`) calcula una vez las matrices de lo que no se mueve y apaga su recálculo. Va en
+  toda la ciudad (`dept/ciudad.tsx`: piezas, carteles, árboles, bancas, lámparas, que solo se prenden y se apagan)
+  y en el terreno, el agua, las piezas y las placas de la zona (`dept/zone.tsx`). El cielo, la grama, los `nodes`
+  de cada zona, la gente y las monedas siguen fuera, porque se mueven.
+- La raíz de la escena ya no tiene matriz automática (`GameCanvas`, una línea): con ella encendida, three.js
+  recalculaba la matriz de **todos** los objetos en cada cuadro aunque estuvieran congelados. Nada mueve la raíz.
+
+**Sombras de lo estático.** En calidad baja (la del celular) no hay sombras. En media y alta la sombra sigue al
+jugador (la cámara de la luz se mueve con él), así que no se puede congelar sin cambiar cómo se ve; no se tocó.
+
+**Lo que queda.**
+
+- En la primera corrida completa (antes de `cierre-1`, con este mismo código) ciudad y lluvia tuvieron cada una
+  un cuadro suelto de ~2 s. Fue tiempo del hilo principal esperando una llamada síncrona a la GPU. No se repitió en
+  las dos corridas de la tabla, ni en 45 s de calle sola, ni después de recorrer las 11 escenas anteriores (con
+  recolección de basura de 113 a 39 MB, sin trabas). Parece otra cosa usando la GPU de la máquina compartida.
+- Algunos eventos del camino (al azar, cambian con cada viaje) estrenan un material: la primera vez se compila su
+  programa (~150 a 200 ms con CPU ×4, un cuadro). La lluvia del camino vuelve a montar el cielo entero. Es un cuadro
+  por evento y no rompe el criterio; se podría precompilar al empezar el viaje.
+
+Capturas antes y después, a la misma hora (`#hora=10`), sin HUD y en calidad baja: `capturas/mc-56/fotos/`.
 
 ### Tercera ronda (cierre, 24 nov): la ola de realismo pesa
 
@@ -452,6 +567,12 @@ cuánto mejora el tiempo total de cuadro.
 | `src/game/minigames/{copan/Adoquin,olancho/Arreo,Merendon}.tsx` | Cierre: guías táctiles que dicen lo que el motor usa. |
 | `src/game/minigames/olancho/Tablas.tsx` | Cierre: rótulos con 🎯 en el celular. |
 | `package.json` | Cierre: `web:test` corre la muestra táctil. |
+| `src/game/minigames/kit/fundido.tsx` | Cuarta ronda: `Rotulos` conserva su material y el atlas comparte las filas iguales. |
+| `src/game/viaje/escenas/Orilla.tsx` | Cuarta ronda: una fusión por tramo para las tres copias; letreros verdes en su propio atlas. |
+| `src/game/dept/lib.tsx` | Cuarta ronda: `geoOf` con plantillas de tamaño 1 ya sin índice. |
+| `src/game/viaje/Viaje.tsx`, `src/game/viaje/eventos/state.ts` | Cuarta ronda: sin `setState` por cuadro en el viaje. |
+| `src/game/dept/quieto.tsx`, `src/game/dept/ciudad.tsx`, `src/game/dept/zone.tsx` | Cuarta ronda: matrices congeladas en lo que no se mueve. |
+| `src/game/GameCanvas.tsx` | Cuarta ronda: la raíz de la escena sin matriz automática. |
 
 Las rutas de esta tabla son relativas a `apps/web`. Fue necesario tocar `GameCanvas`
 y el arnés para medir la resolución de producción y aplicar la calidad automática.
